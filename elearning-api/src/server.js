@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const adminRoutes = require('./routes/admin.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const seedProduction = require('../prisma/seed-prod');
 
 const app = express();
 
@@ -35,6 +36,9 @@ app.use((err, req, res, next) => {
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
+  // Run production seed to ensure admin and base data exists
+  await seedProduction();
 });
+
