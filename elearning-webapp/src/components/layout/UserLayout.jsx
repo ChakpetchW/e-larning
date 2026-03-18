@@ -1,0 +1,135 @@
+import React, { useState, useEffect } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Home, BookOpen, Gift, User, BookMarked, LogOut } from 'lucide-react';
+import { userAPI } from '../../utils/api';
+import './UserLayout.css';
+
+const UserLayout = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [points, setPoints] = useState(0);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const u = JSON.parse(localStorage.getItem('user'));
+        if (u) setUser(u);
+        const res = await userAPI.getPoints();
+        setPoints(res.data.balance || 0);
+      } catch (err) {
+        console.error("Failed to fetch user points");
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  return (
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-gray-50">
+      
+      {/* Desktop Sidebar (Hidden on mobile) */}
+      <aside className="hidden md:flex w-64 flex-col bg-white border-r border-gray-200 h-full z-20">
+        <div className="p-6 flex items-center gap-3 border-b border-gray-100 shrink-0">
+          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm">
+            <BookMarked size={20} strokeWidth={2.5}/>
+          </div>
+          <h1 className="text-xl font-bold tracking-tight text-gray-900">LMS Connect</h1>
+        </div>
+        
+        <div className="p-4 border-b border-gray-100 shrink-0">
+          <div className="points-pill w-full flex justify-center !py-2.5">
+            <Gift size={16} strokeWidth={3} />
+            <span className="text-sm">{points.toLocaleString()} Pts</span>
+          </div>
+          <div className="mt-3 text-center">
+            <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">ผู้ใช้งาน</p>
+            <p className="font-bold text-sm text-gray-800 truncate">{user?.name || 'Loading...'}</p>
+          </div>
+        </div>
+
+        <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto no-scrollbar">
+          <NavLink to="/user/home" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-colors ${isActive ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+            <Home size={20} /> <span>หน้าแรก</span>
+          </NavLink>
+          
+          <NavLink to="/user/courses" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-colors ${isActive ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+            <BookOpen size={20} /> <span>คอร์สเรียน</span>
+          </NavLink>
+          
+          <NavLink to="/user/rewards" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-colors ${isActive ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+            <Gift size={20} /> <span>ของรางวัล</span>
+          </NavLink>
+          
+          <NavLink to="/user/profile" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-colors ${isActive ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+            <User size={20} /> <span>โปรไฟล์</span>
+          </NavLink>
+        </nav>
+        
+        <div className="p-4 border-t border-gray-100 shrink-0">
+          <button onClick={handleLogout} className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-red-500 hover:bg-red-50 w-full transition-colors border border-transparent hover:border-red-100">
+            <LogOut size={18} /> <span>ออกจากระบบ</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+        {/* Top Header (Mobile Only) */}
+        <header className="user-header md:hidden">
+          <div className="header-content">
+            <div className="flex items-center gap-2 max-w-[60%]">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-sm shrink-0">
+                <BookMarked size={18} strokeWidth={2.5}/>
+              </div>
+              <div className="flex flex-col overflow-hidden">
+                <h1 className="text-lg font-bold tracking-tight text-gray-900 leading-none truncate">LMS Connect</h1>
+                <span className="text-[10px] text-gray-500 font-medium truncate">สวัสดี, {user?.name?.split(' ')[0] || '-'}</span>
+              </div>
+            </div>
+            <div className="points-pill shrink-0">
+              <Gift size={12} strokeWidth={3} />
+              <span>{points.toLocaleString()} Pts</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content Area */}
+        <main className="user-main flex-1 animate-fade-in no-scrollbar md:!max-w-none md:!p-8 md:!pb-8 bg-gray-50 pb-[80px]">
+          <Outlet />
+        </main>
+
+        {/* Bottom Navigation (Mobile Only) */}
+        <nav className="bottom-nav md:hidden">
+          <div className="nav-items-container">
+            <NavLink to="/user/home" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
+              <div className="nav-icon-wrapper"><Home size={22} /></div>
+              <span>หน้าแรก</span>
+            </NavLink>
+            
+            <NavLink to="/user/courses" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
+              <div className="nav-icon-wrapper"><BookOpen size={22} /></div>
+              <span>คอร์สเรียน</span>
+            </NavLink>
+            
+            <NavLink to="/user/rewards" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
+              <div className="nav-icon-wrapper"><Gift size={22} /></div>
+              <span>ของรางวัล</span>
+            </NavLink>
+            
+            <NavLink to="/user/profile" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
+              <div className="nav-icon-wrapper"><User size={22} /></div>
+              <span>โปรไฟล์</span>
+            </NavLink>
+          </div>
+        </nav>
+      </div>
+    </div>
+  );
+};
+
+export default UserLayout;

@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String  @id @default(uuid())
+  name          String
+  email         String  @unique
+  password      String
+  role          String  @default("user") // "user" | "admin"
+  department    String?
+  pointsBalance Int     @default(0)
+
+  status    String   @default("ACTIVE") // "ACTIVE" | "INACTIVE"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  enrollments  UserCourse[]
+  progress     UserLessonProgress[]
+  pointsLedger PointsLedger[]
+  redeems      RedeemRequest[]
+  QuizAttempt  QuizAttempt[]
+}
+
+model Course {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  categoryId  String?
+  points      Int      @default(0)
+  status      String   @default("DRAFT") // "DRAFT" | "PUBLISHED"
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  lessons     Lesson[]
+  enrollments UserCourse[]
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  courses Course[]
+}
+
+model Lesson {
+  id         String   @id @default(uuid())
+  courseId   String
+  title      String
+  type       String // "video" | "pdf" | "article"
+  contentUrl String?
+  content    String? // New field for rich text content
+  duration   String?
+  points     Int      @default(0)
+  order      Int      @default(0)
+  passScore  Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  course       Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress     UserLessonProgress[]
+  questions    Question[]
+  quizAttempts QuizAttempt[]
+}
+
+model Question {
+  id       String @id @default(uuid())
+  lessonId String
+  text     String
+  order    Int    @default(0)
+  points   Int    @default(1)
+
+  lesson  Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  choices Choice[]
+}
+
+model Choice {
+  id         String  @id @default(uuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id        String   @id @default(uuid())
+  lessonId  String
+  userId    String
+  score     Int      @default(0)
+  status    String   @default("PASSED") // "PASSED" | "FAILED"
+  createdAt DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserCourse {
+  id              String    @id @default(uuid())
+  userId          String
+  courseId        String
+  status          String    @default("IN_PROGRESS") // "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED"
+  progressPercent Float     @default(0)
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model UserLessonProgress {
+  id          String    @id @default(uuid())
+  userId      String
+  lessonId    String
+  progress    Float     @default(0) // 0-100
+  lastSeenAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model PointsLedger {
+  id         String   @id @default(uuid())
+  userId     String
+  sourceType String // "course" | "reward_adjust" | "redeem"
+  sourceId   String? // ID of course or redeem request
+  points     Int // positive for earn, negative for spend
+  note       String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Reward {
+  id         String   @id @default(uuid())
+  name       String
+  pointsCost Int
+  stock      Int      @default(0)
+  status     String   @default("ACTIVE") // "ACTIVE" | "INACTIVE"
+  image      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  redeems RedeemRequest[]
+}
+
+model RedeemRequest {
+  id          String   @id @default(uuid())
+  userId      String
+  rewardId    String
+  pointsCost  Int
+  status      String   @default("PENDING") // "PENDING" | "APPROVED" | "FULFILLED" | "REJECTED" | "CANCELLED"
+  adminNote   String?
+  requestedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  reward Reward @relation(fields: [rewardId], references: [id])
+}

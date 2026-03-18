@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #4F46E5;
+  --color-primary-hover: #4338CA;
+  --color-primary-light: #EEF2FF;
+  
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  
+  --color-background: #F8FAFC;
+  --color-surface: #FFFFFF;
+  
+  --font-sans: 'Kanit', sans-serif;
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--color-background);
+    color: #111827;
+    font-family: var(--font-sans);
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 gap-2 shadow-sm;
+  }
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-md;
+  }
+  .btn-outline {
+    @apply border border-gray-200 bg-white text-gray-700 hover:bg-gray-50;
+  }
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300;
+  }
+  .card:hover {
+    @apply shadow-md border-gray-200/60 -translate-y-0.5;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider leading-none;
+  }
+}
+
+/* Specific Layout Adjustments */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.safe-area-pb {
+  padding-bottom: 90px;
+}
+
+/* Custom UI Elements that are hard to do purely with utilities */
+.points-pill {
+  background-color: #FEF3C7;
+  color: #D97706;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  gap: 4px;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

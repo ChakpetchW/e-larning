@@ -1,0 +1,1 @@
+<IfModule mod_rewrite.c>`n  RewriteEngine On`n  RewriteBase /elearning/`n  RewriteRule ^index\.html$ - [L]`n  RewriteCond %{REQUEST_FILENAME} !-f`n  RewriteCond %{REQUEST_FILENAME} !-d`n  RewriteRule . /elearning/index.html [L]`n</IfModule>

@@ -1,0 +1,99 @@
+.user-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--color-background);
+  overflow: hidden;
+}
+
+.user-header {
+  background-color: var(--color-surface);
+  height: 60px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-primary);
+}
+
+.user-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  padding-bottom: 80px; /* Space for bottom nav */
+  max-width: 600px; /* Mobile width container even on desktop */
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--color-surface);
+  height: 65px;
+  border-top: 1px solid var(--color-border);
+  z-index: 20;
+}
+
+.nav-items-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+  width: 25%;
+  height: 100%;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.nav-item span {
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  color: var(--color-primary-hover);
+}
+
+.nav-item.active {
+  color: var(--color-primary);
+}
+
+.nav-item.active svg {
+  stroke-width: 2.5px;
+  filter: drop-shadow(0 2px 4px rgba(79, 70, 229, 0.3));
+}
+
+.nav-item.active span {
+  font-weight: 700;
+}
+
+/* Desktop override to look like an app wrapper */
