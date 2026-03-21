@@ -1,10 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "elearning-api/src/server.js": {
-      "runtime": "vercel-node@latest"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
