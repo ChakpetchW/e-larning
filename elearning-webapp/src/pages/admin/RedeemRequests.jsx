@@ -87,7 +87,7 @@ const RedeemRequests = () => {
                   <td className="p-4 text-sm">{req.user?.name || req.userId}</td>
                   <td className="p-4 text-sm font-medium">{req.reward?.name}</td>
                   <td className="p-4 text-sm text-right font-bold text-warning">{req.reward?.pointsCost}</td>
-                  <td className="p-4 text-sm text-muted">{new Date(req.createdAt).toLocaleString('th-TH')}</td>
+                  <td className="p-4 text-sm text-muted">{new Date(req.requestedAt || req.createdAt).toLocaleString('th-TH')}</td>
                   <td className="p-4">
                     {req.status === 'PENDING' && <span className="badge badge-warning text-[10px]"><Clock size={12} className="mr-1"/> รอดำเนินการ</span>}
                     {req.status === 'APPROVED' && <span className="badge badge-primary text-[10px]">อนุมัติแล้ว</span>}
