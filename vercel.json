@@ -17,7 +17,12 @@
       "destination": "elearning-api/src/server.js"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
+      "destination": "/elearning-webapp/$1",
+      "check": true
+    },
+    {
+      "source": "/(.*)",
       "destination": "/elearning-webapp/index.html"
     }
   ]
