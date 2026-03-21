@@ -88,7 +88,7 @@ const UserLayout = () => {
               </div>
               <div className="flex flex-col overflow-hidden">
                 <h1 className="text-lg font-bold tracking-tight text-gray-900 leading-none truncate">LMS Connect</h1>
-                <span className="text-[10px] text-gray-500 font-medium truncate">สวัสดี, {user?.name?.split(' ')[0] || '-'}</span>
+                <span className="text-[10px] text-gray-500 font-medium truncate">สวัสดีคุณ {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}</span>
               </div>
             </div>
             <div className="points-pill shrink-0">

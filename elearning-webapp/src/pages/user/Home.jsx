@@ -81,7 +81,7 @@ const Home = () => {
       {/* Header Section */}
       <div>
         <h2 className="text-2xl font-bold mb-1 flex items-center gap-2">
-          สวัสดีคุณ {user?.name?.split(' ')[0] || 'ผู้ใช้งาน'} <span className="text-2xl">👋</span>
+          สวัสดีคุณ {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'} <span className="text-2xl">👋</span>
         </h2>
         <p className="text-sm text-gray-500 font-medium">พร้อมที่จะเรียนรู้สิ่งใหม่ๆ หรือยัง?</p>
         
