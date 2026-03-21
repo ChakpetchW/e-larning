@@ -30,8 +30,12 @@ app.use('/api/upload', uploadRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!', error: err.message });
+  console.error('SERVER ERROR:', err);
+  res.status(500).json({ 
+    message: 'Internal Server Error', 
+    error: err.message,
+    path: req.path
+  });
 });
 
 // Start Server (Only when not running as a Vercel function)
