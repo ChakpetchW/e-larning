@@ -8,7 +8,10 @@ async function main() {
   const courses = await prisma.course.findMany({
     include: { category: true }
   });
-  console.log("Courses:", JSON.stringify(courses, null, 2));
+  console.log("Courses count:", courses.length);
+
+  const users = await prisma.user.findMany();
+  console.log("Users:", JSON.stringify(users.map(u => ({ email: u.email, id: u.id, role: u.role })), null, 2));
 }
 
 main().finally(() => prisma.$disconnect());

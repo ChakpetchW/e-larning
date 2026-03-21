@@ -10,6 +10,7 @@ router.get('/dashboard', adminController.getDashboardStats);
 router.get('/users', adminController.getUsers);
 router.post('/users', adminController.createUser);
 router.put('/users/:id', adminController.updateUser);
+router.delete('/users/:id', adminController.deleteUser);
 
 router.get('/courses', adminController.getAdminCourses);
 router.post('/courses', adminController.createCourse);

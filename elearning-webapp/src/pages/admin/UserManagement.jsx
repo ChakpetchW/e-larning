@@ -171,9 +171,10 @@ const UserManagement = () => {
                     <span className="bg-primary-light text-primary font-bold px-2 py-1 rounded-full">{user._count?.enrollments || 0}</span>
                   </td>
                   <td className="p-4 text-sm text-right font-bold text-warning">{user.pointsBalance || 0}</td>
-                  <td className="p-4 text-right flex justify-end gap-2">
+                  <td className="p-4 text-right flex justify-end gap-3">
                     <button className="text-primary text-sm font-medium hover:underline">ดูประวัติ</button>
                     <button onClick={() => openEdit(user)} className="text-gray-600 text-sm font-medium hover:underline">แก้ไข</button>
+                    <button onClick={() => handleDelete(user.id, user.name)} className="text-red-500 text-sm font-medium hover:underline">ลบ</button>
                   </td>
                 </tr>
               ))}

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Search, Edit, Trash2, MoreVertical, FileText, Video, Layers, X, ChevronRight, Play, Upload, Image as ImageIcon } from 'lucide-react';
 import { adminAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 
-const API_BASE = 'http://localhost:5000';
-
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -44,7 +42,7 @@ const CourseManagement = () => {
     setUploading(true);
     try {
       const res = await adminAPI.uploadFile(file);
-      setCourseForm({ ...courseForm, image: res.data.url });
+      setCourseForm({ ...courseForm, image: res.data.fileUrl });
     } catch (error) {
       console.error('Upload error:', error);
       alert('อัปโหลดรูปไม่สำเร็จ');
@@ -60,7 +58,7 @@ const CourseManagement = () => {
     setUploading(true);
     try {
       const res = await adminAPI.uploadFile(file);
-      setLessonForm({ ...lessonForm, contentUrl: res.data.url });
+      setLessonForm({ ...lessonForm, contentUrl: res.data.fileUrl });
     } catch (error) {
       console.error('Upload error:', error);
       alert('อัปโหลดเอกสารไม่สำเร็จ');
