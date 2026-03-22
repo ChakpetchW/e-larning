@@ -55,7 +55,7 @@ const Home = () => {
       onClick={() => navigate(`/user/courses/${course.id}`)}
       className="card min-w-[260px] md:min-w-0 md:w-full snap-center md:snap-none flex-shrink-0 md:flex-shrink cursor-pointer group flex flex-col justify-between"
     >
-      <div className="relative h-40 md:h-48 overflow-hidden">
+      <div className="relative aspect-video md:aspect-[16/10] overflow-hidden">
         <img src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute top-2 left-2 points-pill shadow-sm bg-white/90 backdrop-blur-sm !text-warning border border-orange-100">
           <span className="opacity-60 text-[10px]">⭐</span>{course.points} Pts
@@ -152,7 +152,7 @@ const Home = () => {
             </button>
           </div>
           
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 overflow-x-auto md:overflow-visible pb-6 md:pb-2 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
+          <div className="flex items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 overflow-x-auto md:overflow-visible pb-6 md:pb-2 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
             {category.courses.map(course => <CourseCard key={course.id} course={course} />)}
           </div>
         </section>
@@ -164,7 +164,7 @@ const Home = () => {
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-bold text-gray-900">คอร์สแนะนำสำหรับคุณ</h3>
           </div>
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 overflow-x-auto md:overflow-visible pb-6 md:pb-2 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
+          <div className="flex items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 overflow-x-auto md:overflow-visible pb-6 md:pb-2 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
             {uncategorized.map(course => <CourseCard key={course.id} course={course} />)}
           </div>
         </section>

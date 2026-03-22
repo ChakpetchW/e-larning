@@ -76,14 +76,14 @@ const CompletedCourses = () => {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-2 mb-6">
+        <div className="flex flex-col items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-2 mb-6">
           {filtered.map(course => (
             <div 
               key={course.id} 
               onClick={() => navigate(`/user/courses/${course.id}`)}
               className="card flex md:flex-col overflow-hidden cursor-pointer hover:border-success/50 transition-all border border-gray-100 group bg-white h-full"
             >
-              <div className="relative w-28 sm:w-36 md:w-full md:h-48 overflow-hidden shrink-0">
+              <div className="relative w-28 sm:w-36 md:w-full aspect-video md:aspect-auto md:h-48 overflow-hidden shrink-0">
                  <img src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                  <div className="absolute inset-0 bg-success/20 group-hover:bg-success/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <CheckCircle className="text-white" size={32} strokeWidth={3} />
