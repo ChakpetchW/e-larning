@@ -70,49 +70,58 @@ const Home = () => {
   const CourseCard = ({ course }) => (
     <div 
       onClick={() => navigate(`/user/courses/${course.id}`)}
-      className="group flex flex-col bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 transition-all duration-500 cursor-pointer w-[280px] md:w-full snap-center md:snap-none shrink-0"
+      className="group flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer w-[280px] md:w-full snap-center md:snap-none shrink-0"
     >
-      <div className="relative w-full aspect-[16/10] bg-slate-50 overflow-hidden">
+      {/* Image Section */}
+      <div className="relative w-full aspect-[16/9] bg-gray-100 overflow-hidden border-b border-gray-100">
         <img 
            src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE} 
            alt={course.title} 
-           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center z-10">
-           <div className="w-16 h-16 bg-white/95 rounded-full shadow-2xl flex items-center justify-center transform scale-50 group-hover:scale-100 transition-all duration-500">
-             <PlayCircle size={32} className="text-primary" />
+        <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+           <div className="w-14 h-14 bg-white/95 rounded-full shadow-lg flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300">
+             <PlayCircle size={28} className="text-primary translate-x-0.5" />
            </div>
         </div>
         {course.isEnrolled && (
-          <div className="absolute top-4 right-4 z-20">
-            <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest backdrop-blur-md border ${course.enrollmentStatus === 'COMPLETED' ? 'bg-emerald-500/90 text-white border-emerald-400' : 'bg-primary/90 text-white border-primary-light'}`}>
-              {course.enrollmentStatus === 'COMPLETED' ? 'Completed' : 'Enrolled'}
+          <div className="absolute top-2 right-2 z-20">
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${course.enrollmentStatus === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' : 'bg-primary/10 text-primary'}`}>
+              {course.enrollmentStatus === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน'}
             </span>
           </div>
         )}
       </div>
       
-      <div className="p-7 flex flex-col flex-1">
-        <div className="flex justify-between items-center mb-4">
-           <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{course.category?.name || 'Knowledge'}</span>
-           <div className="flex items-center gap-1.5 text-slate-400 text-[11px] font-bold">
-              <Clock size={12} strokeWidth={2.5} />
-              <span>{course.lessons?.reduce((acc, l) => acc + (parseInt(l.duration)||0), 0) || '2'} ชม.</span>
+      {/* Content Section */}
+      <div className="p-5 flex flex-col flex-1">
+        <div className="flex justify-between items-start mb-2">
+           <span className="text-[11px] font-bold text-gray-500 tracking-wider uppercase">{course.category?.name || 'Uncategorized'}</span>
+        </div>
+        <h3 className="text-[1.05rem] font-bold text-slate-900 leading-snug line-clamp-2 mb-2 group-hover:text-primary transition-colors min-h-[44px]">{course.title}</h3>
+        
+        {/* Meta details */}
+        <div className="flex items-center gap-3 mt-auto mb-4">
+           <div className="flex items-center gap-1">
+              <Star size={14} className="fill-amber-400 text-amber-400" />
+              <span className="text-sm font-bold text-slate-800">{course.rating || '4.8'}</span>
+              <span className="text-xs text-gray-400 font-medium">({course.reviewCount || '124'})</span>
+           </div>
+           <div className="flex items-center gap-1.5 text-gray-500 text-[13px] font-medium border-l border-gray-200 pl-3">
+              <Clock size={14} className="text-gray-400" />
+              <span>{course.lessons?.reduce((acc, l) => acc + (parseInt(l.duration)||0), 0) || course.totalDuration || '2 ชม.'}</span>
            </div>
         </div>
-        
-        <h3 className="text-lg font-black text-slate-900 leading-tight line-clamp-2 min-h-[52px] mb-6 group-hover:text-primary transition-colors tracking-tight">{course.title}</h3>
-        
-        <div className="pt-5 border-t border-slate-50 flex justify-between items-center">
-           <div className="flex flex-col">
-              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Price / Reward</p>
-              <span className="text-lg font-black text-slate-900 tracking-tighter">
-                {course.points > 0 ? `${course.points.toLocaleString()} Pts` : 'Free Access'}
-              </span>
+
+        {/* Footer Price / Points */}
+        <div className="pt-3.5 border-t border-gray-100 flex justify-between items-center mt-auto">
+           <div className="flex items-center gap-1.5 overflow-hidden">
+              <div className="w-5 h-5 rounded-full bg-slate-200 flex-shrink-0"></div>
+              <span className="text-[11px] font-medium text-gray-500 truncate">ผู้สอน: {course.instructorName || 'ทีมงานวิทยากร'}</span>
            </div>
-           <div className="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-primary group-hover:text-white transition-all flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover:border-primary">
-              <ChevronRight size={18} strokeWidth={3} />
-           </div>
+           <span className="text-[1.1rem] font-black text-primary">
+              {course.points > 0 ? `${course.points.toLocaleString()} พ้อยท์` : 'ฟรีเรียน'}
+           </span>
         </div>
       </div>
     </div>
@@ -246,10 +255,10 @@ const Home = () => {
               <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{categories.length} Topics</p>
            </div>
            
-           <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar -mx-2 px-2">
+           <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2 flex-nowrap items-center">
               <button 
                 onClick={() => navigate('/user/courses')}
-                className="px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-slate-200 active:scale-95 transition-all whitespace-nowrap"
+                className="shrink-0 px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-slate-200 active:scale-95 transition-all whitespace-nowrap min-w-fit"
               >
                 All Courses
               </button>
@@ -257,7 +266,7 @@ const Home = () => {
                 <button 
                   key={cat.id} 
                   onClick={() => navigate(`/user/courses?category=${encodeURIComponent(cat.name)}`)}
-                  className="px-6 py-3.5 bg-white text-slate-600 border border-slate-200 rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest hover:border-primary hover:text-primary active:scale-95 transition-all shadow-sm whitespace-nowrap"
+                  className="shrink-0 px-6 py-3.5 bg-white text-slate-600 border border-slate-200 rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest hover:border-primary hover:text-primary active:scale-95 transition-all shadow-sm whitespace-nowrap min-w-fit"
                 >
                   {cat.name}
                 </button>
@@ -279,8 +288,9 @@ const Home = () => {
       </div>
 
       {/* Categorized Courses */}
-      {categorizedCourses.map(category => (
-        <section key={category.id} className="mt-4">
+      <div className="space-y-12 md:space-y-20 mt-12 md:mt-16">
+        {categorizedCourses.map(category => (
+          <section key={category.id}>
           <div className="flex justify-between items-end mb-6 pl-2">
             <h3 className="text-2xl md:text-[1.75rem] font-black text-slate-900 tracking-tight">{category.name}</h3>
             <button 
@@ -296,6 +306,7 @@ const Home = () => {
           </div>
         </section>
       ))}
+      </div>
 
       {/* Uncategorized Fallback */}
       {uncategorized.length > 0 && (

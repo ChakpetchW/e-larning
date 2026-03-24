@@ -146,7 +146,7 @@ const CourseList = () => {
                 {/* Play overlay for hover */}
                 <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
                    <div className="w-14 h-14 bg-white/95 rounded-full shadow-lg flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300">
-                     <PlayCircle size={28} className="text-primary ml-1" />
+                     <PlayCircle size={28} className="text-primary translate-x-0.5" />
                    </div>
                 </div>
               </div>
@@ -180,10 +180,10 @@ const CourseList = () => {
                 <div className="pt-3.5 border-t border-gray-100 flex justify-between items-center mt-auto">
                    <div className="flex items-center gap-1.5 overflow-hidden">
                       <div className="w-5 h-5 rounded-full bg-slate-200 flex-shrink-0"></div>
-                      <span className="text-[11px] font-medium text-gray-500 truncate">ผู้สอน: ทีมงานวิทยากร</span>
+                      <span className="text-[11px] font-medium text-gray-500 truncate">ผู้สอน: {course.instructorName || 'ทีมงานวิทยากร'}</span>
                    </div>
                    <span className="text-[1.1rem] font-black text-primary">
-                      {course.points > 0 ? `${course.points} พ้อยท์` : 'ฟรีเรียน'}
+                      {course.points > 0 ? `${course.points.toLocaleString()} พ้อยท์` : 'ฟรีเรียน'}
                    </span>
                 </div>
               </div>
