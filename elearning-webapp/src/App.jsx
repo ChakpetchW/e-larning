@@ -25,6 +25,7 @@ import AdminUsers from './pages/admin/UserManagement';
 import AdminRewards from './pages/admin/RewardsManagement';
 import AdminRedeems from './pages/admin/RedeemRequests';
 import AdminReports from './pages/admin/Reports';
+import SystemSettings from './pages/admin/SystemSettings';
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -69,6 +70,7 @@ function App() {
           <Route path="rewards" element={<AdminRewards />} />
           <Route path="redeems" element={<AdminRedeems />} />
           <Route path="reports" element={<AdminReports />} />
+          <Route path="settings" element={<SystemSettings />} />
         </Route>
       </Route>
 

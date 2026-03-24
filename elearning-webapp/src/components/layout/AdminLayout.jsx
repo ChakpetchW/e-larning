@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Book, Users, Target, FileText, Gift, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Book, Users, Target, FileText, Gift, Menu, X, LogOut, Settings } from 'lucide-react';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
@@ -22,6 +22,7 @@ const AdminLayout = () => {
     { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
     { path: '/admin/redeems', icon: <Target size={20} />, label: 'รายการ Redeem' },
     { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงาน' },
+    { path: '/admin/settings', icon: <Settings size={20} />, label: 'ตั้งค่าระบบ' },
   ];
 
   return (

@@ -77,7 +77,8 @@ export const userAPI = {
     return api.post('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-  }
+  },
+  getSettings: () => api.get('/settings')
 };
 
 // Admin Endpoints
@@ -122,7 +123,11 @@ export const adminAPI = {
     return api.post('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-  }
+  },
+
+  // System Settings
+  getSettings: () => api.get('/settings'),
+  updateSetting: (key, value) => api.patch(`/settings/${key}`, { value })
 };
 
 export default api;

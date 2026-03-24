@@ -187,3 +187,9 @@ model RedeemRequest {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
 }
+
+model SystemSetting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}

@@ -1,0 +1,128 @@
+import React, { useState, useEffect } from 'react';
+import { adminAPI } from '../../utils/api';
+import { Save, Settings, Target, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+const SystemSettings = () => {
+  const [settings, setSettings] = useState({
+    weekly_goal: '1'
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await adminAPI.getSettings();
+        setSettings(res.data);
+      } catch (err) {
+        console.error("Failed to fetch settings", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSave = async (key, value) => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      await adminAPI.updateSetting(key, value);
+      setSettings(prev => ({ ...prev, [key]: value }));
+      setMessage({ type: 'success', text: 'บันทึกการตั้งค่าเรียบร้อยแล้ว' });
+    } catch (err) {
+      console.error("Failed to save setting", err);
+      setMessage({ type: 'error', text: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล' });
+    } finally {
+      setSaving(false);
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto animate-fade-in p-6">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/10">
+            <Settings size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">ตั้งค่าระบบ</h1>
+            <p className="text-slate-500 font-medium">จัดการเป้าหมายและค่ากำหนดต่างๆ ของแพลตฟอร์ม</p>
+          </div>
+        </div>
+      </div>
+
+      {message && (
+        <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 animate-slide-up border ${
+          message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'
+        }`}>
+          {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+          <span className="font-bold">{message.text}</span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Weekly Goal Setting */}
+        <div className="bg-white p-8 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-slate-100 group transition-all duration-500 hover:shadow-[0_30px_60px_rgba(0,0,0,0.05)] hover:-translate-y-1">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-primary">
+              <Target size={20} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-lg font-black text-slate-900">Weekly Goal</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">จำนวนคอร์สที่ต้องเรียนจบต่อสัปดาห์</label>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="number" 
+                  min="1"
+                  max="50"
+                  value={settings.weekly_goal || '1'} 
+                  onChange={(e) => setSettings(prev => ({ ...prev, weekly_goal: e.target.value }))}
+                  className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:border-primary focus:bg-white focus:outline-none font-black text-lg transition-all"
+                />
+                <button 
+                  onClick={() => handleSave('weekly_goal', settings.weekly_goal)}
+                  disabled={saving}
+                  className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-slate-200"
+                >
+                  <Save size={20} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-slate-50 rounded-2xl flex gap-3 text-slate-500">
+              <Info size={16} className="shrink-0 mt-0.5" />
+              <p className="text-xs font-medium leading-relaxed">
+                เป้าหมายนี้จะไปแสดงที่ Dashboard ของผู้ใช้ทุกคน เพื่อกระตุ้นให้ผู้เรียนบรรลุเป้าหมายตามที่กำหนดไว้
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Placeholder for future settings */}
+        <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-60 transition-all hover:opacity-100">
+           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-300 mb-4 shadow-sm">
+              <Settings size={22} />
+           </div>
+           <h4 className="font-black text-slate-400 text-sm">More Settings Coming Soon</h4>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SystemSettings;

@@ -9,6 +9,9 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [points, setPoints] = useState(0);
+  const [weeklyGoal, setWeeklyGoal] = useState(1);
+  const [pointsLoading, setPointsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,16 +19,21 @@ const Home = () => {
         const userData = JSON.parse(localStorage.getItem('user'));
         setUser(userData);
         
-        const [courseRes, catRes] = await Promise.all([
+        const [courseRes, catRes, pointsRes, settingsRes] = await Promise.all([
           userAPI.getCourses(),
-          userAPI.getCategories()
+          userAPI.getCategories(),
+          userAPI.getPoints(),
+          userAPI.getSettings()
         ]);
         setCourses(courseRes.data);
         setCategories(catRes.data);
+        setPoints(pointsRes.data.balance || 0);
+        setWeeklyGoal(parseInt(settingsRes.data.weekly_goal) || 1);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
+        setPointsLoading(false);
       }
     };
     fetchData();
@@ -148,7 +156,9 @@ const Home = () => {
                </div>
                <div>
                   <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">คะแนนสะสม</p>
-                  <p className="text-2xl md:text-3xl font-black text-primary tracking-tighter">{(courses.reduce((acc, c) => acc + (c.points || 0), 0)).toLocaleString()}</p>
+                  <p className="text-2xl md:text-3xl font-black text-primary tracking-tighter">
+                    {pointsLoading ? '...' : points.toLocaleString()}
+                  </p>
                </div>
             </div>
           </div>
@@ -208,20 +218,22 @@ const Home = () => {
         {/* Weekly Goal Bento */}
         <div className="card bg-white p-7 md:p-8 rounded-[2rem] md:rounded-[2.5rem] flex flex-col justify-between h-full shadow-[0_20px_40px_rgba(0,0,0,0.02)] ring-1 ring-slate-100 border-none group hover:ring-primary/20 transition-all duration-500">
           <div>
-            <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-6 shadow-xl transition-transform group-hover:scale-110 duration-500 ${completedThisWeekCount >= 1 ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-slate-900 text-white shadow-slate-200'}`}>
+            <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-6 shadow-xl transition-transform group-hover:scale-110 duration-500 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-slate-900 text-white shadow-slate-200'}`}>
               <Target size={24} strokeWidth={2.5} className="md:w-6.5 md:h-6.5"/>
             </div>
             <p className="text-[10px] text-slate-400 font-extrabold mb-1.5 uppercase tracking-widest">WEEKLY TARGET</p>
-            <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-3 tracking-tight">Complete 1 Course</h3>
+            <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-3 tracking-tight">Complete {weeklyGoal} {weeklyGoal > 1 ? 'Courses' : 'Course'}</h3>
           </div>
           <div className="mt-6 md:mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
              <div className="flex -space-x-1.5 md:-space-x-2">
-                {[1, 2, 3].map(i => <div key={i} className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white bg-slate-100 text-[8px] flex items-center justify-center font-bold text-slate-400">{i}</div>)}
+                {[...Array(Math.min(3, weeklyGoal))].map((_, i) => (
+                  <div key={i} className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white bg-slate-100 text-[8px] flex items-center justify-center font-bold text-slate-400">{i+1}</div>
+                ))}
              </div>
              <div className="flex items-center gap-3">
                 <span className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
-                <span className={`text-lg font-black px-3 md:px-4 py-1.5 rounded-xl ${completedThisWeekCount >= 1 ? 'text-emerald-600 bg-emerald-50' : 'text-slate-900 bg-slate-50'}`}>
-                  {completedThisWeekCount}/1
+                <span className={`text-lg font-black px-3 md:px-4 py-1.5 rounded-xl ${completedThisWeekCount >= weeklyGoal ? 'text-emerald-600 bg-emerald-50' : 'text-slate-900 bg-slate-50'}`}>
+                  {completedThisWeekCount}/{weeklyGoal}
                 </span>
              </div>
           </div>
