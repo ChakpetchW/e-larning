@@ -189,12 +189,14 @@ const Home = () => {
                 </button>
               </div>
             ) : (
-              <div className="card h-full min-h-[250px] md:min-h-[300px] glass-card border-none flex flex-col items-center justify-center text-center p-8 md:p-10">
-                <div className="w-14 h-14 md:w-16 md:h-16 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                  <Target size={24} className="text-slate-300 md:w-7 md:h-7" />
+              <div className="card h-full min-h-[180px] md:min-h-[300px] glass-card border-none flex flex-row md:flex-col items-center justify-center text-center p-6 md:p-10 bg-white/40 ring-1 ring-white/50">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-white/60 rounded-full flex items-center justify-center mr-4 md:mr-0 md:mb-6 shadow-sm">
+                  <Target size={22} className="text-slate-400 md:w-7 md:h-7" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-2 font-black">เริ่มบทเรียนใหม่</h3>
-                <p className="text-slate-400 text-sm font-medium leading-relaxed">ค้นหาคอร์สที่น่าสนใจและเริ่มเส้นทางการเรียนรู้ของคุณเลย!</p>
+                <div className="text-left md:text-center">
+                  <h3 className="text-base md:text-lg font-black text-slate-800 mb-1">เริ่มบทเรียนใหม่</h3>
+                  <p className="text-slate-500 text-[11px] md:text-sm font-medium leading-relaxed">ค้นหาคอร์สที่น่าสนใจและเริ่มพัฒนาทักษะได้เลย!</p>
+                </div>
               </div>
             )}
           </div>
@@ -226,15 +228,16 @@ const Home = () => {
         </div>
 
         {/* Categories Quick Filter Bar (Scrollable on mobile) */}
-        <div className="md:col-span-2 flex flex-col gap-4">
+        <div className="md:col-span-2 flex flex-col gap-5">
            <div className="flex items-center justify-between px-2">
               <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">Browse Categories</h3>
               <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{categories.length} Topics</p>
            </div>
-           <div className="flex flex-wrap gap-2 md:gap-3">
+           
+           <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar -mx-2 px-2">
               <button 
                 onClick={() => navigate('/user/courses')}
-                className="px-5 md:px-6 py-3.5 bg-slate-900 text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-xl shadow-slate-200 active:scale-95 transition-all"
+                className="px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-slate-200 active:scale-95 transition-all whitespace-nowrap"
               >
                 All Courses
               </button>
@@ -242,15 +245,16 @@ const Home = () => {
                 <button 
                   key={cat.id} 
                   onClick={() => navigate(`/user/courses?category=${encodeURIComponent(cat.name)}`)}
-                  className="px-5 md:px-6 py-3.5 bg-white text-slate-600 border border-slate-100 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest hover:border-primary hover:text-primary active:scale-95 transition-all shadow-sm"
+                  className="px-6 py-3.5 bg-white text-slate-600 border border-slate-200 rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest hover:border-primary hover:text-primary active:scale-95 transition-all shadow-sm whitespace-nowrap"
                 >
                   {cat.name}
                 </button>
               ))}
            </div>
+
            <div 
              onClick={() => navigate('/user/rewards')}
-             className="mt-2 md:mt-4 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-slate-900 text-white flex items-center justify-between overflow-hidden relative group cursor-pointer"
+             className="mt-1 md:mt-2 p-7 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-slate-900 text-white flex items-center justify-between overflow-hidden relative group cursor-pointer shadow-lg shadow-slate-200"
            >
               <div className="relative z-10">
                  <h4 className="text-lg md:text-xl font-black mb-1">Explore New Rewards</h4>
