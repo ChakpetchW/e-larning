@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, Clock, ChevronRight, Target } from 'lucide-react';
+import { PlayCircle, Clock, ChevronRight, Target, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 
