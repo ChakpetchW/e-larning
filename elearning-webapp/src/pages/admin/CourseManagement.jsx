@@ -114,6 +114,7 @@ const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [loading, setLoading] = useState(true);
 
   // Modal State - Course
@@ -380,7 +381,7 @@ const CourseManagement = () => {
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowCatModal(true)} className="btn btn-outline">
-            หมวดหมู่
+            เพิ่ม/แก้ไข หมวดหมู่
           </button>
           <button onClick={openAddCourse} className="btn btn-primary">
             <Plus size={18} /> สร้างคอร์สใหม่
@@ -885,10 +886,14 @@ const CourseManagement = () => {
             />
           </div>
           <div className="flex gap-2 text-sm">
-            <select className="border border-border rounded-md px-3 py-2 bg-white text-muted focus:outline-none">
+            <select 
+              className="border border-border rounded-md px-3 py-2 bg-white text-muted focus:outline-none cursor-pointer"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
               <option value="ALL">ทุกหมวดหมู่</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
           </div>
@@ -912,7 +917,13 @@ const CourseManagement = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {courses.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase())).map((course) => (
+                  {courses
+                    .filter(c => {
+                      const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
+                      const matchesCat = selectedCategory === 'ALL' || c.categoryId === selectedCategory;
+                      return matchesSearch && matchesCat;
+                    })
+                    .map((course) => (
                     <tr key={course.id} className="border-b border-border hover:bg-gray-50/50 transition-colors">
                       <td className="p-4 font-medium">{course.title}</td>
                       <td className="p-4 text-sm text-muted">{course.category?.name || 'Uncategorized'}</td>
