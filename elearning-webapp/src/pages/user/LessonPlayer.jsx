@@ -116,7 +116,7 @@ const LessonPlayer = () => {
         {/* Back Button Overlay - Floating Glass */}
         <div className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/user/courses/${courseId}`)}
             className="w-11 h-11 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95 shadow-xl"
           >
             <ArrowLeft size={22} strokeWidth={2.5} />
