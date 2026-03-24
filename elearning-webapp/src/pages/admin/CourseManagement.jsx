@@ -441,36 +441,53 @@ const CourseManagement = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Instructor */}
-                      <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">ข้อมูลผู้สอน</p>
-                        <input type="text" placeholder="ชื่อผู้สอน" className="form-input w-full bg-white text-sm" value={courseForm.instructorName} onChange={(e) => setCourseForm({ ...courseForm, instructorName: e.target.value })} />
-                        <input type="text" placeholder="ตำแหน่ง (Role)" className="form-input w-full bg-white text-sm" value={courseForm.instructorRole} onChange={(e) => setCourseForm({ ...courseForm, instructorRole: e.target.value })} />
-                        <textarea placeholder="ประวัติย่อ (Bio)" rows={2} className="form-input w-full bg-white text-sm" value={courseForm.instructorBio} onChange={(e) => setCourseForm({ ...courseForm, instructorBio: e.target.value })} />
+                      <div className="space-y-4 p-5 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-xs font-black text-slate-400 uppercase mb-2 flex items-center gap-2">
+                           ข้อมูลผู้สอน
+                        </p>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 block mb-1">ชื่อผู้สอน</label>
+                          <input type="text" placeholder="ชื่อ-นามสกุล" className="form-input w-full bg-white text-base py-2.5" value={courseForm.instructorName} onChange={(e) => setCourseForm({ ...courseForm, instructorName: e.target.value })} />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 block mb-1">ตำแหน่ง (Role)</label>
+                          <input type="text" placeholder="เช่น Enterprise Instructor" className="form-input w-full bg-white text-base py-2.5" value={courseForm.instructorRole} onChange={(e) => setCourseForm({ ...courseForm, instructorRole: e.target.value })} />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 block mb-1">ประวัติย่อ (Bio)</label>
+                          <textarea placeholder="แนะนำตัวผู้สอนสั้นๆ..." rows={3} className="form-input w-full bg-white text-base py-2.5" value={courseForm.instructorBio} onChange={(e) => setCourseForm({ ...courseForm, instructorBio: e.target.value })} />
+                        </div>
                       </div>
 
                       {/* Video & Stats */}
-                      <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">สื่อและสถิติ</p>
-                        <div className="flex items-center gap-2">
-                          <Video size={16} className="text-muted" />
-                          <input type="text" placeholder="Link วิดีโอตัวอย่าง (YouTube)" className="form-input flex-1 bg-white text-sm" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} />
+                      <div className="space-y-4 p-5 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-xs font-black text-slate-400 uppercase mb-2">สื่อและสถิติ</p>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 block mb-1">วิดีโอตัวอย่าง (YouTube URL)</label>
+                          <div className="flex items-center gap-2">
+                            <Video size={18} className="text-muted" />
+                            <input type="text" placeholder="https://youtube.com/..." className="form-input flex-1 bg-white text-base py-2.5" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} />
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock size={16} className="text-muted" />
-                          <input type="text" placeholder="ความยาวคอร์ส (e.g. 120 ชม.)" className="form-input flex-1 bg-white text-sm" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 block mb-1">ความยาวคอร์สรวม</label>
+                          <div className="flex items-center gap-2">
+                            <Clock size={18} className="text-muted" />
+                            <input type="text" placeholder="เช่น 15 ชั่วโมง" className="form-input flex-1 bg-white text-base py-2.5" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
+                          </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 gap-3 pt-2">
                            <div>
                              <label className="text-[10px] font-bold text-slate-400 uppercase">เรตติ้ง (0-5)</label>
-                             <input type="number" step="0.1" placeholder="4.8" className="form-input w-full bg-white text-sm" value={courseForm.rating} onChange={(e) => setCourseForm({ ...courseForm, rating: e.target.value })} />
+                             <input type="number" step="0.1" placeholder="4.8" className="form-input w-full bg-white text-base py-2" value={courseForm.rating} onChange={(e) => setCourseForm({ ...courseForm, rating: e.target.value })} />
                            </div>
                            <div>
                              <label className="text-[10px] font-bold text-slate-400 uppercase">รีวิว (คน)</label>
-                             <input type="number" placeholder="1240" className="form-input w-full bg-white text-sm" value={courseForm.reviewCount} onChange={(e) => setCourseForm({ ...courseForm, reviewCount: e.target.value })} />
+                             <input type="number" placeholder="1240" className="form-input w-full bg-white text-base py-2" value={courseForm.reviewCount} onChange={(e) => setCourseForm({ ...courseForm, reviewCount: e.target.value })} />
                            </div>
                            <div>
                              <label className="text-[10px] font-bold text-slate-400 uppercase">ผู้เรียน (คน)</label>
-                             <input type="number" placeholder="5000" className="form-input w-full bg-white text-sm" value={courseForm.studentCount} onChange={(e) => setCourseForm({ ...courseForm, studentCount: e.target.value })} />
+                             <input type="number" placeholder="5000" className="form-input w-full bg-white text-base py-2" value={courseForm.studentCount} onChange={(e) => setCourseForm({ ...courseForm, studentCount: e.target.value })} />
                            </div>
                         </div>
                       </div>
