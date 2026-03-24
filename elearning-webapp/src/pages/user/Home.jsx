@@ -55,13 +55,13 @@ const Home = () => {
       onClick={() => navigate(`/user/courses/${course.id}`)}
       className="card w-[280px] md:w-full snap-center md:snap-none flex-shrink-0 md:flex-shrink cursor-pointer group flex flex-col items-stretch overflow-hidden h-auto border border-gray-100/50"
     >
-      <div className="relative w-full h-[180px] sm:h-[200px] md:h-[220px] overflow-hidden rounded-t-2xl flex-shrink-0">
+      <div className="relative w-full h-[180px] sm:h-[200px] md:h-[220px] shrink-0">
         <img 
           src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE} 
           alt={course.title} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 max-w-full" 
         />
-        <div className="absolute top-2 left-2 points-pill shadow-sm bg-white/90 backdrop-blur-sm !text-warning border border-orange-100">
+        <div className="absolute top-3 left-3 points-pill shadow-sm glass !text-warning border border-orange-100/50">
           <span className="opacity-60 text-[10px]">⭐</span>{course.points} Pts
         </div>
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -113,9 +113,9 @@ const Home = () => {
             <div className="absolute top-0 left-0 w-1 h-full bg-primary"></div>
             
             <div className="flex flex-col sm:flex-row gap-0 sm:gap-4 p-1">
-              <div className="w-full sm:w-1/3 md:w-1/4 aspect-video sm:aspect-square md:aspect-video relative rounded-t-lg sm:rounded-lg overflow-hidden shrink-0">
+              <div className="w-full sm:w-1/3 md:w-1/4 aspect-video sm:aspect-square md:aspect-video relative shrink-0">
                 <img src={continueCourse.image ? getFullUrl(continueCourse.image) : DEFAULT_COURSE_IMAGE} alt="Course" className="w-full h-full object-cover group-hover:scale-105 transition-duration-500" />
-                <div className="absolute top-2 right-2 badge bg-white/90 text-primary shadow-sm backdrop-blur-sm">
+                <div className="absolute top-3 right-3 badge glass text-primary shadow-[0_4px_12px_rgba(79,70,229,0.15)] border-primary/20">
                   Continue
                 </div>
               </div>

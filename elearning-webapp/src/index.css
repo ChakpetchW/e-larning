@@ -28,22 +28,42 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 gap-2 shadow-sm;
+    @apply inline-flex items-center justify-center px-6 py-2.5 rounded-full font-semibold transition-all gap-2 shadow-sm;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 400ms;
   }
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-md;
+    @apply bg-primary text-white hover:bg-primary-hover hover:-translate-y-0.5;
+    box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+  }
+  .btn-primary:active {
+    @apply transform translate-y-0 scale-95;
+    box-shadow: none;
   }
   .btn-outline {
-    @apply border border-gray-200 bg-white text-gray-700 hover:bg-gray-50;
+    @apply border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300;
   }
   .card {
-    @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300;
+    @apply bg-white border outline-none overflow-hidden transition-all;
+    border-radius: 1.5rem;
+    border-color: rgba(229, 231, 235, 0.5); /* ultra-light gray border */
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 500ms;
   }
   .card:hover {
-    @apply shadow-md border-gray-200/60 -translate-y-0.5;
+    box-shadow: 0 20px 40px -4px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    border-color: rgba(229, 231, 235, 0.8);
   }
   .badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider leading-none;
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider leading-none transition-all;
+  }
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
+  }
+  .glass-dark {
+    @apply bg-gray-900/70 backdrop-blur-md border border-gray-700/50 shadow-sm text-white;
   }
 }
 
@@ -60,16 +80,23 @@
 
 /* Custom UI Elements that are hard to do purely with utilities */
 .points-pill {
-  background-color: #FEF3C7;
+  background-color: rgba(254, 243, 199, 0.85); /* FEF3C7 */
+  backdrop-filter: blur(8px);
   color: #D97706;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 99px;
   font-size: 0.75rem;
   gap: 4px;
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(253, 230, 138, 0.5); /* FDE68A */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.points-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.2);
 }
 
 .bg-gradient-primary {
