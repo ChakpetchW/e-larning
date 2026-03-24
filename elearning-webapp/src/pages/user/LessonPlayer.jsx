@@ -173,11 +173,11 @@ const LessonPlayer = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="flex-1">
               <div className="flex items-center gap-2.5 mb-5">
-                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/5 text-primary rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border border-primary/10">
-                  {lesson.type === 'video' ? <Play size={12} fill="currentColor"/> : <FileText size={12}/>} {lesson.type || 'Video'}
+                <span className="flex items-center gap-1.5 px-3 py-2 bg-primary/5 text-primary rounded-lg text-xs font-black uppercase tracking-[0.2em] border border-primary/10">
+                  {lesson.type === 'video' ? <Play size={14} fill="currentColor"/> : <FileText size={14}/>} {lesson.type || 'Video'}
                 </span>
-                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border border-slate-100">
-                  <Clock size={12}/> {lesson.duration || '10'}m
+                <span className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 text-slate-400 rounded-lg text-xs font-black uppercase tracking-[0.2em] border border-slate-100">
+                  <Clock size={14}/> {lesson.duration || '10'}m
                 </span>
               </div>
               <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">{lesson.title}</h1>
@@ -219,16 +219,16 @@ const LessonPlayer = () => {
                           {quizResult.passed ? <CheckCircle size={48} strokeWidth={2}/> : <div className="text-4xl font-black">!</div>}
                        </div>
                        <div>
-                         <h3 className={`text-3xl font-black tracking-tighter mb-1 ${quizResult.passed ? 'text-emerald-600' : 'text-red-700'}`}>
+                         <h3 className={`text-4xl font-black tracking-tighter mb-2 ${quizResult.passed ? 'text-emerald-600' : 'text-red-700'}`}>
                            {quizResult.passed ? 'ยอดเยี่ยมมาก!' : 'เกือบผ่านแล้ว!'}
                          </h3>
-                         <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">คะแนนของคุณ</p>
+                         <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-xs">คะแนนของคุณ</p>
                        </div>
-                       <div className="bg-slate-50 px-8 py-3 rounded-2xl border border-slate-100">
-                          <p className="text-5xl font-black text-slate-900 tracking-tighter">{quizResult.scorePercent}%</p>
+                       <div className="bg-slate-50 px-10 py-5 rounded-[2rem] border border-slate-100 mt-4">
+                          <p className="text-7xl font-black text-slate-900 tracking-tighter">{quizResult.scorePercent}%</p>
                        </div>
                        
-                       <button onClick={() => { setQuizResult(null); setAnswers({}); }} className="mt-4 px-10 py-3.5 rounded-2xl font-black transition-all border border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 text-slate-600 text-[11px] tracking-widest uppercase">
+                       <button onClick={() => { setQuizResult(null); setAnswers({}); }} className="mt-8 px-12 py-4.5 rounded-2xl font-black transition-all border border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 text-slate-600 text-base tracking-widest uppercase">
                          {quizResult.passed ? 'ตรวจคำตอบ' : 'ทำควิซอีกครั้ง'}
                        </button>
                     </div>
@@ -330,14 +330,14 @@ const LessonPlayer = () => {
                     {nextLessonId ? (
                       <button
                         onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}
-                        className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black text-sm tracking-[0.2em] uppercase hover:bg-primary transition-all shadow-2xl shadow-slate-200 active:scale-95"
+                        className="w-full py-6 bg-slate-900 text-white rounded-[1.5rem] font-black text-base tracking-[0.2em] uppercase hover:bg-primary transition-all shadow-2xl shadow-slate-200 active:scale-95"
                       >
                         เรียนบทถัดไป →
                       </button>
                     ) : (
                       <button
                         onClick={() => navigate(`/user/courses/${courseId}`)}
-                        className="w-full py-5 bg-slate-100 text-slate-900 rounded-[1.5rem] font-black text-sm tracking-[0.2em] uppercase hover:bg-slate-200 transition-all active:scale-95"
+                        className="w-full py-6 bg-slate-100 text-slate-900 rounded-[1.5rem] font-black text-base tracking-[0.2em] uppercase hover:bg-slate-200 transition-all active:scale-95"
                       >
                         กลับสู่คอร์สเรียน
                       </button>
