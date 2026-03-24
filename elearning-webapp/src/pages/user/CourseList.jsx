@@ -55,8 +55,9 @@ const CourseList = () => {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in h-full pt-2 relative">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
+      <div className="sticky top-0 z-30 bg-[#f8fafc]/95 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 space-y-4 shadow-sm border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
         <button 
           onClick={() => setShowFilterModal(true)}
           className="text-gray-500 hover:text-primary transition-colors bg-white p-2.5 rounded-full shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 flex items-center gap-2 group relative"
@@ -109,6 +110,7 @@ const CourseList = () => {
           </button>
         ))}
       </div>
+      </div>
 
       {loading && (
         <div className="flex items-center justify-center py-10">
@@ -117,7 +119,7 @@ const CourseList = () => {
       )}
 
       {/* Course List Grid (SkillLane Style) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4 mb-10 relative z-10">
         {!loading && filtered.length > 0 ? (
           filtered.map(course => (
             <div 

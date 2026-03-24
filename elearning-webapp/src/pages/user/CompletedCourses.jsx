@@ -89,7 +89,7 @@ const CompletedCourses = () => {
                     <CheckCircle className="text-white" size={32} strokeWidth={3} />
                  </div>
                  <div className="absolute top-2 right-2 badge bg-success text-white shadow-lg shadow-success/20 border-none px-2 py-1 text-[10px]">
-                    COMPLETED
+                    เรียนจบแล้ว
                  </div>
               </div>
               <div className="p-3.5 flex-1 flex flex-col justify-between">

@@ -185,7 +185,7 @@ const Home = () => {
         <section key={category.id}>
           <div className="flex justify-between items-end mb-6 pl-2">
             <h3 className="text-[1.75rem] font-black text-slate-900 tracking-tight">{category.name}</h3>
-            <button className="text-primary text-sm font-bold flex items-center gap-1 hover:text-primary-hover px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-full active:scale-95 transition-all">
+            <button onClick={() => navigate('/user/courses')} className="text-primary text-sm font-bold flex items-center gap-1 hover:text-primary-hover px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-full active:scale-95 transition-all">
               ดูทั้งหมด <ChevronRight size={16} strokeWidth={3} />
             </button>
           </div>

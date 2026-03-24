@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, Zap, Ticket, Coffee, CheckCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { userAPI } from '../../utils/api';
-
-const getFullUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('/uploads')) return `http://localhost:5000${url}`;
-  return url;
-};
+import { userAPI, getFullUrl } from '../../utils/api';
 
 const iconMap = {
   coffee: <Coffee className="text-green-600" size={32} strokeWidth={1.5}/>,
@@ -135,11 +129,11 @@ const Rewards = () => {
             return (
             <div key={reward.id} className={`card border-gray-100 flex flex-col h-full bg-white relative overflow-hidden group ${(isOutOfStock || isLimitReached) ? 'opacity-70 grayscale-[0.8]' : ''}`}>
               
-              <div className={`${reward.image?.includes('/') ? 'bg-gray-100' : bgMap[reward.image] || bgMap.default} h-28 flex items-center justify-center relative overflow-hidden transition-colors duration-300 group-hover:bg-opacity-80`}>
+              <div className={`${reward.image?.includes('/') ? 'bg-white border-b border-gray-100' : bgMap[reward.image] || bgMap.default} h-36 flex items-center justify-center relative overflow-hidden transition-colors duration-300 group-hover:bg-opacity-80 p-4`}>
                 <div className="absolute top-0 right-0 w-16 h-16 bg-white/30 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
-                <div className="transform group-hover:scale-110 transition-transform duration-300 drop-shadow-sm flex items-center justify-center w-full h-full">
+                <div className="transform group-hover:scale-105 transition-transform duration-300 drop-shadow-sm flex items-center justify-center w-full h-full">
                   {reward.image?.includes('/') ? (
-                    <img src={getFullUrl(reward.image)} alt={reward.name} className="w-full h-full object-cover" />
+                    <img src={getFullUrl(reward.image)} alt={reward.name} className="w-full h-full object-contain mix-blend-multiply" />
                   ) : (
                     iconMap[reward.image] || iconMap.default
                   )}
