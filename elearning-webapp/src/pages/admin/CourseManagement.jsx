@@ -460,152 +460,155 @@ const CourseManagement = () => {
                       </div>
 
                       {/* Video & Stats */}
-                      <div className="space-y-4 p-5 bg-slate-50 rounded-xl border border-slate-100">
-                        <p className="text-xs font-black text-slate-400 uppercase mb-2">สื่อและสถิติ</p>
+                      <div className="space-y-4 p-6 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-sm font-black text-slate-400 uppercase mb-3">สื่อและสถิติหลักสูตร</p>
                         <div>
-                          <label className="text-xs font-bold text-slate-500 block mb-1">วิดีโอตัวอย่าง (YouTube URL)</label>
+                          <label className="text-sm font-bold text-slate-600 block mb-1.5">วิดีโอตัวอย่าง (YouTube URL)</label>
                           <div className="flex items-center gap-2">
-                            <Video size={18} className="text-muted" />
-                            <input type="text" placeholder="https://youtube.com/..." className="form-input flex-1 bg-white text-base py-2.5" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} />
+                            <Video size={18} className="text-slate-400" />
+                            <input type="text" placeholder="https://youtube.com/..." className="form-input flex-1 bg-white text-base py-3" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} />
                           </div>
                         </div>
                         <div>
-                          <label className="text-xs font-bold text-slate-500 block mb-1">ความยาวคอร์สรวม</label>
+                          <label className="text-sm font-bold text-slate-600 block mb-1.5">ความยาวคอร์สทั้งหมด</label>
                           <div className="flex items-center gap-2">
-                            <Clock size={18} className="text-muted" />
-                            <input type="text" placeholder="เช่น 15 ชั่วโมง" className="form-input flex-1 bg-white text-base py-2.5" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
+                            <Clock size={18} className="text-slate-400" />
+                            <input type="text" placeholder="เช่น 24 ชั่วโมง หรือ 120 นาที" className="form-input flex-1 bg-white text-base py-3" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-3 pt-2">
+                        <div className="grid grid-cols-3 gap-4 pt-2">
                            <div>
-                             <label className="text-[10px] font-bold text-slate-400 uppercase">เรตติ้ง (0-5)</label>
-                             <input type="number" step="0.1" placeholder="4.8" className="form-input w-full bg-white text-base py-2" value={courseForm.rating} onChange={(e) => setCourseForm({ ...courseForm, rating: e.target.value })} />
+                             <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">เรตติ้ง (0-5)</label>
+                             <input type="number" step="0.1" placeholder="4.8" className="form-input w-full bg-white text-base py-2.5" value={courseForm.rating} onChange={(e) => setCourseForm({ ...courseForm, rating: e.target.value })} />
                            </div>
                            <div>
-                             <label className="text-[10px] font-bold text-slate-400 uppercase">รีวิว (คน)</label>
-                             <input type="number" placeholder="1240" className="form-input w-full bg-white text-base py-2" value={courseForm.reviewCount} onChange={(e) => setCourseForm({ ...courseForm, reviewCount: e.target.value })} />
+                             <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">รีวิว (คน)</label>
+                             <input type="number" placeholder="1240" className="form-input w-full bg-white text-base py-2.5" value={courseForm.reviewCount} onChange={(e) => setCourseForm({ ...courseForm, reviewCount: e.target.value })} />
                            </div>
                            <div>
-                             <label className="text-[10px] font-bold text-slate-400 uppercase">ผู้เรียน (คน)</label>
-                             <input type="number" placeholder="5000" className="form-input w-full bg-white text-base py-2" value={courseForm.studentCount} onChange={(e) => setCourseForm({ ...courseForm, studentCount: e.target.value })} />
+                             <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">ผู้เรียน (คน)</label>
+                             <input type="number" placeholder="5000" className="form-input w-full bg-white text-base py-2.5" value={courseForm.studentCount} onChange={(e) => setCourseForm({ ...courseForm, studentCount: e.target.value })} />
                            </div>
                         </div>
                       </div>
 
-                      {/* Lists Editor */}
-                      <div className="md:col-span-2 space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* What You'll Learn Editor */}
-                            <div>
-                               <label className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                 <Plus size={14} className="text-emerald-500"/> สิ่งที่จะได้เรียนรู้ (ข้อดีของคอร์ส)
-                               </label>
-                               <div className="space-y-2">
-                                 {(() => {
-                                   try {
-                                     const items = JSON.parse(courseForm.whatYouWillLearn || '[]');
-                                     return (
-                                       <>
-                                         {items.map((item, idx) => (
-                                           <div key={idx} className="flex gap-1">
-                                             <input 
-                                               className="form-input flex-1 bg-white text-xs border-emerald-100" 
-                                               value={item} 
-                                               onChange={(e) => {
-                                                 const newItems = [...items];
-                                                 newItems[idx] = e.target.value;
-                                                 setCourseForm({ ...courseForm, whatYouWillLearn: JSON.stringify(newItems) });
-                                               }}
-                                             />
-                                             <button type="button" onClick={() => {
-                                               const newItems = items.filter((_, i) => i !== idx);
-                                               setCourseForm({ ...courseForm, whatYouWillLearn: JSON.stringify(newItems) });
-                                             }} className="p-1 text-danger hover:bg-red-50 rounded"><Trash2 size={14}/></button>
-                                           </div>
-                                         ))}
-                                         <button type="button" onClick={() => {
-                                           const newItems = [...items, ""];
-                                           setCourseForm({ ...courseForm, whatYouWillLearn: JSON.stringify(newItems) });
-                                         }} className="text-[10px] font-bold text-emerald-600 hover:underline">+ เพิ่มรายการ</button>
-                                       </>
-                                     );
-                                   } catch (e) {
-                                     return <textarea rows={2} className="form-input w-full bg-white font-mono text-[10px]" value={courseForm.whatYouWillLearn} onChange={(e) => setCourseForm({ ...courseForm, whatYouWillLearn: e.target.value })} />;
-                                   }
-                                 })()}
-                               </div>
+                      {/* Lists Editor Section */}
+                      <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-xl border border-slate-100 mt-2">
+                         {/* What You'll Learn Editor */}
+                         <div className="space-y-3">
+                            <label className="text-base font-black text-slate-800 flex items-center gap-2">
+                              <Plus size={18} className="text-emerald-500"/> สิ่งที่จะได้เรียนรู้ (ข้อดี)
+                            </label>
+                            <div className="space-y-2">
+                              {(() => {
+                                try {
+                                  const rawValue = courseForm.whatYouWillLearn || '[]';
+                                  const items = Array.isArray(JSON.parse(rawValue)) ? JSON.parse(rawValue) : [];
+                                  return (
+                                    <>
+                                      {items.map((item, idx) => (
+                                        <div key={idx} className="flex gap-1 group">
+                                          <input 
+                                            className="form-input flex-1 bg-white text-sm py-2.5 border-emerald-100 focus:border-emerald-300" 
+                                            value={item} 
+                                            placeholder="กรอกข้อความ..."
+                                            onChange={(e) => {
+                                              const newItems = [...items];
+                                              newItems[idx] = e.target.value;
+                                              setCourseForm({ ...courseForm, whatYouWillLearn: JSON.stringify(newItems) });
+                                            }}
+                                          />
+                                          <button type="button" onClick={() => {
+                                            const newItems = items.filter((_, i) => i !== idx);
+                                            setCourseForm({ ...courseForm, whatYouWillLearn: JSON.stringify(newItems) });
+                                          }} className="p-2 text-red-300 hover:text-red-500 hover:bg-red-50 rounded transition-all"><Trash2 size={16}/></button>
+                                        </div>
+                                      ))}
+                                      <button type="button" onClick={() => {
+                                        const newItems = [...items, ""];
+                                        setCourseForm({ ...courseForm, whatYouWillLearn: JSON.stringify(newItems) });
+                                      }} className="text-xs font-bold text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-lg border border-dashed border-emerald-200 block w-full text-center">+ เพิ่มข้อได้เปรียบใหม่</button>
+                                    </>
+                                  );
+                                } catch (e) {
+                                  return <textarea rows={4} className="form-input w-full bg-white font-mono text-xs" value={courseForm.whatYouWillLearn} onChange={(e) => setCourseForm({ ...courseForm, whatYouWillLearn: e.target.value })} />;
+                                }
+                              })()}
                             </div>
+                         </div>
 
-                            {/* What You'll Get Editor */}
-                            <div>
-                               <label className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                 <Layers size={14} className="text-primary"/> สิ่งที่จะได้รับในคอร์สนี้ (พร้อมไอคอน)
-                               </label>
-                               <div className="space-y-2">
-                                 {(() => {
-                                   try {
-                                     // Support both old string array and new object array
-                                     const rawItems = JSON.parse(courseForm.whatYouWillGet || '[]');
-                                     const items = rawItems.map(item => typeof item === 'string' ? { icon: 'MonitorPlay', text: item } : item);
-                                     
-                                     const iconOptions = [
-                                       { val: 'MonitorPlay', icon: <MonitorPlay size={14}/> },
-                                       { val: 'FileText', icon: <FileText size={14}/> },
-                                       { val: 'InfinityIcon', icon: <InfinityIcon size={14}/> },
-                                       { val: 'Award', icon: <Award size={14}/> },
-                                       { val: 'PlayCircle', icon: <PlayCircle size={14}/> },
-                                       { val: 'BookOpen', icon: <BookOpen size={14}/> }
-                                     ];
+                         {/* What You'll Get Editor (with Icon Picker) */}
+                         <div className="space-y-3">
+                            <label className="text-base font-black text-slate-800 flex items-center gap-2">
+                              <Layers size={18} className="text-primary"/> สิ่งที่จะได้รับ (พร้อมไอคอน)
+                            </label>
+                            <div className="space-y-3">
+                              {(() => {
+                                try {
+                                  const rawValue = courseForm.whatYouWillGet || '[]';
+                                  const rawItems = Array.isArray(JSON.parse(rawValue)) ? JSON.parse(rawValue) : [];
+                                  const items = rawItems.map(item => (typeof item === 'string' || item === null) ? { icon: 'MonitorPlay', text: item || '' } : item);
+                                  
+                                  const iconOptions = [
+                                    { val: 'MonitorPlay', label: 'วิดีโอ' },
+                                    { val: 'FileText', label: 'เอกสาร' },
+                                    { val: 'InfinityIcon', label: 'ตลอดชีพ' },
+                                    { val: 'Award', label: 'วุฒิบัตร' },
+                                    { val: 'PlayCircle', label: 'เล่น' },
+                                    { val: 'BookOpen', label: 'บทเรียน' }
+                                  ];
 
-                                     return (
-                                       <>
-                                         {items.map((item, idx) => (
-                                           <div key={idx} className="flex flex-col gap-1 p-2 bg-white rounded-lg border border-slate-100 shadow-sm">
-                                             <div className="flex gap-2 items-center">
-                                               <select 
-                                                 className="bg-slate-50 border-none text-[10px] font-bold rounded p-1"
-                                                 value={item.icon || 'MonitorPlay'}
-                                                 onChange={(e) => {
-                                                   const newItems = [...items];
-                                                   newItems[idx] = { ...item, icon: e.target.value };
-                                                   setCourseForm({ ...courseForm, whatYouWillGet: JSON.stringify(newItems) });
-                                                 }}
-                                               >
-                                                 <option value="MonitorPlay">Video</option>
-                                                 <option value="FileText">Document</option>
-                                                 <option value="InfinityIcon">Lifetime</option>
-                                                 <option value="Award">Certificate</option>
-                                                 <option value="PlayCircle">Play</option>
-                                                 <option value="BookOpen">Lessons</option>
-                                               </select>
-                                               <input 
-                                                 className="form-input flex-1 border-none bg-transparent text-xs p-1" 
-                                                 placeholder="คำบรรยาย..."
-                                                 value={item.text} 
-                                                 onChange={(e) => {
-                                                   const newItems = [...items];
-                                                   newItems[idx] = { ...item, text: e.target.value };
-                                                   setCourseForm({ ...courseForm, whatYouWillGet: JSON.stringify(newItems) });
-                                                 }}
-                                               />
-                                               <button type="button" onClick={() => {
-                                                 const newItems = items.filter((_, i) => i !== idx);
-                                                 setCourseForm({ ...courseForm, whatYouWillGet: JSON.stringify(newItems) });
-                                               }} className="p-1 text-danger hover:bg-red-50 rounded"><Trash2 size={14}/></button>
-                                             </div>
-                                           </div>
-                                         ))}
-                                         <button type="button" onClick={() => {
-                                           const newItems = [...items, { icon: 'MonitorPlay', text: '' }];
-                                           setCourseForm({ ...courseForm, whatYouWillGet: JSON.stringify(newItems) });
-                                         }} className="text-[10px] font-bold text-primary hover:underline">+ เพิ่มรายการใหม่</button>
-                                       </>
-                                     );
-                                   } catch (e) {
-                                     return <textarea rows={2} className="form-input w-full bg-white font-mono text-[10px]" value={courseForm.whatYouWillGet} onChange={(e) => setCourseForm({ ...courseForm, whatYouWillGet: e.target.value })} />;
-                                   }
-                                 })()}
-                               </div>
+                                  return (
+                                    <>
+                                      {items.map((item, idx) => (
+                                        <div key={idx} className="flex flex-col gap-2 p-3 bg-white rounded-xl border border-slate-200 shadow-sm group">
+                                          <div className="flex gap-3 items-center">
+                                            <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                               {(() => {
+                                                  const IconComp = { MonitorPlay, FileText, InfinityIcon, Award, PlayCircle, BookOpen }[item.icon || 'MonitorPlay'] || MonitorPlay;
+                                                  return <IconComp size={18} className="text-primary" />;
+                                               })()}
+                                            </div>
+                                            <select 
+                                              className="bg-slate-50 border-none text-[11px] font-black rounded p-1 focus:ring-0 cursor-pointer text-slate-500 uppercase"
+                                              value={item.icon || 'MonitorPlay'}
+                                              onChange={(e) => {
+                                                const newItems = [...items];
+                                                newItems[idx] = { ...item, icon: e.target.value };
+                                                setCourseForm({ ...courseForm, whatYouWillGet: JSON.stringify(newItems) });
+                                              }}
+                                            >
+                                              {iconOptions.map(opt => <option key={opt.val} value={opt.val}>{opt.label}</option>)}
+                                            </select>
+                                            <div className="flex-1"></div>
+                                            <button type="button" onClick={() => {
+                                              const newItems = items.filter((_, i) => i !== idx);
+                                              setCourseForm({ ...courseForm, whatYouWillGet: JSON.stringify(newItems) });
+                                            }} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
+                                          </div>
+                                          <input 
+                                            className="form-input w-full border-none bg-slate-50/50 text-sm py-2 px-3 rounded-lg focus:bg-white transition-all" 
+                                            placeholder="เช่น วิดีโอระดับ Full HD..."
+                                            value={item.text} 
+                                            onChange={(e) => {
+                                              const newItems = [...items];
+                                              newItems[idx] = { ...item, text: e.target.value };
+                                              setCourseForm({ ...courseForm, whatYouWillGet: JSON.stringify(newItems) });
+                                            }}
+                                          />
+                                        </div>
+                                      ))}
+                                      <button type="button" onClick={() => {
+                                        const newItems = [...items, { icon: 'MonitorPlay', text: '' }];
+                                        setCourseForm({ ...courseForm, whatYouWillGet: JSON.stringify(newItems) });
+                                      }} className="text-xs font-bold text-primary hover:bg-primary/5 px-3 py-2 rounded-xl border border-dashed border-primary/20 block w-full text-center">+ เพิ่มสิทธิประโยชน์ใหม่</button>
+                                    </>
+                                  );
+                                } catch (e) {
+                                   console.error('List Editor Error:', e);
+                                   return <textarea rows={4} className="form-input w-full bg-white font-mono text-xs" value={courseForm.whatYouWillGet} onChange={(e) => setCourseForm({ ...courseForm, whatYouWillGet: e.target.value })} />;
+                                }
+                              })()}
                             </div>
                          </div>
                       </div>
