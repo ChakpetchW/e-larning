@@ -119,9 +119,14 @@ const Home = () => {
               <div className="w-5 h-5 rounded-full bg-slate-200 flex-shrink-0"></div>
               <span className="text-[11px] font-medium text-gray-500 truncate">ผู้สอน: {course.instructorName || 'ทีมงานวิทยากร'}</span>
            </div>
-           <span className="text-[1.1rem] font-black text-primary">
-              {course.points > 0 ? `${course.points.toLocaleString()} พ้อยท์` : 'ฟรีเรียน'}
-           </span>
+           <div className="flex flex-col items-end leading-tight shrink-0">
+              <span className="text-[1.1rem] font-black text-primary tracking-tighter">
+                 {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
+              </span>
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest -mt-0.5">
+                 {course.points > 0 ? 'Pts.' : 'เรียน'}
+              </span>
+           </div>
         </div>
       </div>
     </div>
@@ -266,7 +271,7 @@ const Home = () => {
                 <button 
                   key={cat.id} 
                   onClick={() => navigate(`/user/courses?category=${encodeURIComponent(cat.name)}`)}
-                  className="shrink-0 px-6 md:px-8 py-3.5 bg-white text-slate-600 border border-slate-200 rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest hover:border-primary hover:text-primary active:scale-95 transition-all shadow-sm whitespace-nowrap min-w-fit"
+                  className="shrink-0 px-6 md:px-8 py-3.5 bg-white text-slate-600 border border-slate-200 rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest hover:border-primary hover:text-primary active:scale-95 transition-all shadow-sm whitespace-nowrap min-w-[100px] md:min-w-[140px]"
                 >
                   {cat.name}
                 </button>

@@ -30,29 +30,31 @@ const CompletedCourses = () => {
   );
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in h-full pt-2">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">คอร์สที่เรียนจบแล้ว</h2>
-          <p className="text-sm text-gray-500 font-medium">รวมผลงานและความสำเร็จทั้งหมดของคุณ</p>
+    <div className="flex flex-col gap-6 animate-fade-in h-full pt-2 pb-32 relative">
+      <div className="sticky top-[-1px] z-40 bg-[#f8fafc]/95 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">คอร์สที่เรียนจบแล้ว</h2>
+            <p className="text-sm text-gray-500 font-medium">รวมผลงานและความสำเร็จทั้งหมดของคุณ</p>
+          </div>
+          <div className="bg-success/10 text-success p-3 rounded-2xl border border-success/20">
+            <CheckCircle size={24} />
+          </div>
         </div>
-        <div className="bg-success/10 text-success p-3 rounded-2xl border border-success/20">
-          <CheckCircle size={24} />
-        </div>
-      </div>
 
-      {/* Search Bar */}
-      <div className="relative group">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
-          <Search size={20} />
+        {/* Search Bar */}
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+            <Search size={20} />
+          </div>
+          <input 
+            type="text" 
+            placeholder="ค้นหาในคอร์สที่จบแล้ว..." 
+            className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm transition-all text-[15px] font-medium placeholder-gray-400"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-        <input 
-          type="text" 
-          placeholder="ค้นหาในคอร์สที่จบแล้ว..." 
-          className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm transition-all text-[15px] font-medium placeholder-gray-400"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
       </div>
 
       {loading && (
@@ -124,10 +126,12 @@ const CompletedCourses = () => {
 
                 {/* Footer Points Info */}
                 <div className="pt-3.5 border-t border-gray-100 flex justify-between items-center mt-auto gap-4">
-                   <div className="flex flex-col">
-                      <span className="text-[9px] text-gray-400 font-bold uppercase mb-0.5">คะแนนที่ได้รับ</span>
-                      <span className="text-sm font-black text-amber-600">
-                        {course.points.toLocaleString()} Pts
+                   <div className="flex flex-col items-end leading-tight shrink-0">
+                      <span className="text-[1.1rem] font-black text-amber-600 tracking-tighter">
+                         {course.points.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest -mt-0.5">
+                         Pts.
                       </span>
                    </div>
                    <div className="flex items-center gap-1.5 overflow-hidden">

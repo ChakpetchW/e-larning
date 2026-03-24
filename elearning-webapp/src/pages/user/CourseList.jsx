@@ -63,8 +63,8 @@ const CourseList = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in h-full pt-2 relative">
-      <div className="sticky top-0 z-30 bg-[#f8fafc]/95 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 space-y-4">
+    <div className="flex flex-col gap-6 animate-fade-in h-full pt-2 relative pb-32">
+      <div className="sticky top-[-1px] z-40 bg-[#f8fafc]/95 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
         <button 
@@ -109,14 +109,14 @@ const CourseList = () => {
           <button 
             key={cat.id}
             onClick={() => setActiveCat(cat.name)}
-            className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-bold transition-all ${
-              activeCat === cat.name 
-                ? 'bg-primary text-white shadow-md shadow-primary/30' 
-                : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-            }`}
-          >
-            {cat.name}
-          </button>
+             className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-bold transition-all min-w-[100px] ${
+               activeCat === cat.name 
+                 ? 'bg-primary text-white shadow-md shadow-primary/30' 
+                 : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700 border border-gray-100'
+             }`}
+           >
+             {cat.name}
+           </button>
         ))}
       </div>
       </div>
@@ -182,9 +182,14 @@ const CourseList = () => {
                       <div className="w-5 h-5 rounded-full bg-slate-200 flex-shrink-0"></div>
                       <span className="text-[11px] font-medium text-gray-500 truncate">ผู้สอน: {course.instructorName || 'ทีมงานวิทยากร'}</span>
                    </div>
-                   <span className="text-[1.1rem] font-black text-primary">
-                      {course.points > 0 ? `${course.points.toLocaleString()} พ้อยท์` : 'ฟรีเรียน'}
-                   </span>
+                   <div className="flex flex-col items-end leading-tight shrink-0">
+                      <span className="text-[1.1rem] font-black text-primary tracking-tighter">
+                         {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
+                      </span>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest -mt-0.5">
+                         {course.points > 0 ? 'Pts.' : 'เรียน'}
+                      </span>
+                   </div>
                 </div>
               </div>
             </div>
