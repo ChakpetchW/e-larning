@@ -111,10 +111,10 @@ const Home = () => {
   );
 
   return (
-    <div className="flex flex-col gap-8 md:gap-10 animate-fade-in pt-2 md:pt-4 pb-12">
+    <div className="flex flex-col gap-8 md:gap-10 animate-fade-in pt-0 md:pt-4 pb-12">
       
-      {/* Premium Hero Section */}
-      <section className="relative w-full rounded-[2rem] md:rounded-[3rem] overflow-hidden mesh-bg-premium p-6 md:p-12 lg:p-16 mb-2 border border-white/60 shadow-2xl shadow-slate-200/50 group">
+      {/* Premium Hero Section - Full width on mobile */}
+      <section className="relative w-[calc(100%+2.5rem)] -mx-5 md:mx-0 md:w-full rounded-none md:rounded-[3rem] md:rounded-t-[3rem] overflow-hidden mesh-bg-premium p-6 md:p-12 lg:p-16 mb-2 border-b md:border border-white/60 shadow-2xl shadow-slate-200/50 group">
         <div className="absolute top-0 right-0 w-1/3 h-full overflow-hidden pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity">
           <div className="absolute top-[-10%] right-[-10%] w-[150%] h-[150%] bg-gradient-to-br from-primary/30 to-transparent rounded-full blur-[100px]"></div>
         </div>
