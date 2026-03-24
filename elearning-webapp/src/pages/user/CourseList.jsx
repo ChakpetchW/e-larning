@@ -102,8 +102,8 @@ const CourseList = () => {
             onClick={() => setActiveCat(cat.name)}
             className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-bold transition-all ${
               activeCat === cat.name 
-                ? 'bg-primary text-white shadow-md shadow-primary/30 border border-transparent' 
-                : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
+                ? 'bg-primary text-white shadow-md shadow-primary/30' 
+                : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700'
             }`}
           >
             {cat.name}

@@ -120,7 +120,7 @@ const Rewards = () => {
           <h3 className="text-xl font-bold tracking-tight text-gray-900">ของรางวัลสุดพิเศษ</h3>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {rewards.map(reward => {
             const isLimitReached = reward.userRedeemedCount >= reward.maxPerUser;
             const isOutOfStock = reward.stock === 0;
