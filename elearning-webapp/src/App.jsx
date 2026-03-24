@@ -15,6 +15,7 @@ import CompletedCourses from './pages/user/CompletedCourses';
 import CourseDetail from './pages/user/CourseDetail';
 import LessonPlayer from './pages/user/LessonPlayer';
 import Rewards from './pages/user/Rewards';
+import PointsHistory from './pages/user/PointsHistory';
 import Profile from './pages/user/Profile';
 
 // Admin Pages
@@ -53,6 +54,7 @@ function App() {
           <Route path="courses/:id" element={<CourseDetail />} />
           <Route path="courses/:id/lesson/:lessonId" element={<LessonPlayer />} />
           <Route path="rewards" element={<Rewards />} />
+          <Route path="points-history" element={<PointsHistory />} />
           <Route path="profile" element={<Profile />} />
         </Route>
       </Route>

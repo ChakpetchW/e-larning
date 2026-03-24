@@ -59,7 +59,6 @@ export const authAPI = {
   getCurrentUser: () => api.get('/auth/me')
 };
 
-// User Endpoints
 export const userAPI = {
   getCourses: () => api.get('/user/courses'),
   getCourseDetails: (id) => api.get(`/user/courses/${id}`),
@@ -69,7 +68,16 @@ export const userAPI = {
   getRewards: () => api.get('/user/rewards'),
   getCategories: () => api.get('/user/categories'),
   requestRedeem: (rewardId) => api.post(`/user/redeem/${rewardId}`),
-  submitQuiz: (lessonId, data) => api.post(`/user/lessons/${lessonId}/quiz`, data)
+  submitQuiz: (lessonId, data) => api.post(`/user/lessons/${lessonId}/quiz`, data),
+  updateProfile: (data) => api.put('/user/profile', data),
+  getPointsHistory: () => api.get('/user/points'), // Alias for clarity
+  uploadFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
 };
 
 // Admin Endpoints

@@ -42,6 +42,15 @@ const Home = () => {
   // Fallback for courses without category or if list is empty
   const uncategorized = courses.filter(c => !c.categoryId);
 
+  // Calculate courses completed this week
+  const completedThisWeekCount = courses.filter(c => {
+    if (c.enrollmentStatus !== 'COMPLETED' || !c.completedAt) return false;
+    const completedDate = new Date(c.completedAt);
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    return completedDate >= oneWeekAgo;
+  }).length;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -144,7 +153,7 @@ const Home = () => {
         {/* Weekly Goal Bento (takes 1 col) */}
         <div className="card bg-white p-8 flex flex-col justify-between h-full shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-slate-100 border-none">
           <div>
-            <div className="w-14 h-14 rounded-[1.25rem] bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 shadow-inner ring-1 ring-indigo-100/50">
+            <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center mb-6 shadow-inner ring-1 ${completedThisWeekCount >= 1 ? 'bg-emerald-50 text-emerald-600 ring-emerald-100/50' : 'bg-indigo-50 text-indigo-600 ring-indigo-100/50'}`}>
               <Target size={28} strokeWidth={2.5}/>
             </div>
             <p className="text-[10px] text-slate-400 font-extrabold mb-2 uppercase tracking-widest">เป้าหมายประจำสัปดาห์</p>
@@ -154,7 +163,9 @@ const Home = () => {
           <div className="mt-8 pt-6 border-t border-slate-100/80">
              <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-slate-500">ความสำเร็จ</span>
-                <span className="text-lg font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">0/1</span>
+                <span className={`text-lg font-black px-3 py-1 rounded-lg ${completedThisWeekCount >= 1 ? 'text-emerald-600 bg-emerald-50' : 'text-indigo-600 bg-indigo-50'}`}>
+                  {completedThisWeekCount}/1
+                </span>
              </div>
           </div>
         </div>

@@ -15,5 +15,6 @@ router.get('/points', userController.getPointsHistory);
 router.get('/rewards', userController.getRewards);
 router.get('/categories', userController.getCategories);
 router.post('/redeem/:id', userController.requestRedeem);
+router.put('/profile', userController.updateProfile);
 
 module.exports = router;

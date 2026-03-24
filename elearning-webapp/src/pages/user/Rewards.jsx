@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, Zap, Ticket, Coffee, CheckCircle, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 
 const getFullUrl = (url) => {
@@ -25,6 +26,7 @@ const bgMap = {
 };
 
 const Rewards = () => {
+  const navigate = useNavigate();
   const [points, setPoints] = useState(0);
   const [history, setHistory] = useState([]);
   const [rewards, setRewards] = useState([]);
@@ -91,7 +93,9 @@ const Rewards = () => {
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
               <span className="text-xs font-bold text-white uppercase tracking-wider">แต้มของคุณ</span>
             </div>
-            <button className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors">
+            <button 
+              onClick={() => navigate('/user/points-history')}
+              className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors">
               <ArrowRight size={16} className="text-white" />
             </button>
           </div>

@@ -242,17 +242,42 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { password, ...data } = req.body;
+    const { password, pointsBalance, ...data } = req.body;
     
     if (password) {
       data.password = await bcrypt.hash(password, 10);
     }
 
-    const user = await prisma.user.update({
-      where: { id },
-      data
+    await prisma.$transaction(async (tx) => {
+      // If admin is updating points, handle the ledger diff
+      if (pointsBalance !== undefined) {
+        const newBalance = parseInt(pointsBalance, 10);
+        
+        // Calculate current actual balance
+        const ledger = await tx.pointsLedger.findMany({ where: { userId: id } });
+        const currentBalance = ledger.reduce((acc, curr) => acc + curr.points, 0);
+        
+        const diff = newBalance - currentBalance;
+        if (diff !== 0) {
+          await tx.pointsLedger.create({
+            data: {
+               userId: id,
+               sourceType: 'admin_edit',
+               points: diff,
+               note: `Admin adjusted balance by ${diff} (Target: ${newBalance})`
+            }
+          });
+        }
+        data.pointsBalance = newBalance; // Keep the User record sync'd just in case
+      }
+
+      const user = await tx.user.update({
+        where: { id },
+        data
+      });
+      res.json(user);
     });
-    res.json(user);
+
   } catch (error) {
     console.error('Update user error:', error);
     res.status(500).json({ message: 'Internal server error' });
