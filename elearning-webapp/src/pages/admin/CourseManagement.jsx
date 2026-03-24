@@ -292,12 +292,6 @@ const CourseManagement = () => {
             {isEditing && (
               <div className="flex border-b border-border px-4 bg-white">
                 <button
-                  onClick={() => setActiveTab('premium')}
-                  className={`py-3 px-6 text-sm font-bold transition-colors border-b-2 ${activeTab === 'premium' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-gray-700'}`}
-                >
-                  ตั้งค่าการแสดงผล (Premium) ✨
-                </button>
-                <button
                   onClick={() => setActiveTab('basic')}
                   className={`py-3 px-6 text-sm font-bold transition-colors border-b-2 ${activeTab === 'basic' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-gray-700'}`}
                 >
@@ -435,81 +429,62 @@ const CourseManagement = () => {
                     )}
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-1">รายละเอียด</label>
-                    <textarea rows={4} className="form-input w-full" value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} placeholder="คำอธิบายสั้นๆ ของคอร์สนี้..." />
+                    <label className="text-sm font-bold text-gray-700 block mb-1">รายละเอียด (Description)</label>
+                    <textarea rows={3} className="form-input w-full" value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} placeholder="คำอธิบายสั้นๆ ของคอร์สนี้..." />
                   </div>
-                  <div className="flex gap-2 mt-4">
-                    <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline flex-1">ยกเลิก</button>
-                    <button type="submit" className="btn btn-primary flex-1">บันทึกข้อมูล</button>
-                  </div>
-                </form>
-              ) : activeTab === 'premium' ? (
-                <form onSubmit={handleSaveCourse} className="flex flex-col gap-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Instructor Info */}
-                    <div className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <h4 className="font-bold text-primary flex items-center gap-2 border-b pb-2 mb-4"><Plus size={16}/> ข้อมูลผู้สอน</h4>
-                      <div>
-                        <label className="text-sm font-bold text-gray-700 block mb-1">ชื่อผู้สอน/ทีมงาน</label>
-                        <input type="text" className="form-input w-full bg-white" value={courseForm.instructorName} onChange={(e) => setCourseForm({ ...courseForm, instructorName: e.target.value })} />
-                      </div>
-                      <div>
-                        <label className="text-sm font-bold text-gray-700 block mb-1">ตำแหน่ง (Role)</label>
-                        <input type="text" className="form-input w-full bg-white" value={courseForm.instructorRole} onChange={(e) => setCourseForm({ ...courseForm, instructorRole: e.target.value })} />
-                      </div>
-                      <div>
-                        <label className="text-sm font-bold text-gray-700 block mb-1">ประวัติย่อ (Bio)</label>
-                        <textarea rows={3} className="form-input w-full bg-white" value={courseForm.instructorBio} onChange={(e) => setCourseForm({ ...courseForm, instructorBio: e.target.value })} />
-                      </div>
-                    </div>
 
-                    {/* Media & Stats */}
-                    <div className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <h4 className="font-bold text-primary flex items-center gap-2 border-b pb-2 mb-4"><Video size={16}/> สื่อและสถิติ (Display)</h4>
-                      <div>
-                        <label className="text-sm font-bold text-gray-700 block mb-1">วิดีโอตัวอย่าง (YouTube URL)</label>
-                        <input type="text" className="form-input w-full bg-white" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
+                  {/* Group: Instructor & Metadata (Premium Fields) */}
+                  <div className="mt-4 pt-6 border-t border-slate-100">
+                    <h4 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
+                       <Layers size={16}/> รายละเอียดหลักสูตรเพิ่มเติม (Premium Display)
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Instructor */}
+                      <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">ข้อมูลผู้สอน</p>
+                        <input type="text" placeholder="ชื่อผู้สอน" className="form-input w-full bg-white text-sm" value={courseForm.instructorName} onChange={(e) => setCourseForm({ ...courseForm, instructorName: e.target.value })} />
+                        <input type="text" placeholder="ตำแหน่ง (Role)" className="form-input w-full bg-white text-sm" value={courseForm.instructorRole} onChange={(e) => setCourseForm({ ...courseForm, instructorRole: e.target.value })} />
+                        <textarea placeholder="ประวัติย่อ (Bio)" rows={2} className="form-input w-full bg-white text-sm" value={courseForm.instructorBio} onChange={(e) => setCourseForm({ ...courseForm, instructorBio: e.target.value })} />
                       </div>
-                      <div>
-                        <label className="text-sm font-bold text-gray-700 block mb-1">ความยาวคอร์ส (แสดงผล)</label>
-                        <input type="text" className="form-input w-full bg-white" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} placeholder="เช่น 120 ชม. หรือ 15 ชม. 30 นาที" />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <div>
-                          <label className="text-[10px] font-bold text-gray-500 uppercase">เรตติ้ง</label>
-                          <input type="number" step="0.1" className="form-input w-full bg-white text-sm" value={courseForm.rating} onChange={(e) => setCourseForm({ ...courseForm, rating: e.target.value })} />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-gray-500 uppercase">รีวิว (คน)</label>
-                          <input type="number" className="form-input w-full bg-white text-sm" value={courseForm.reviewCount} onChange={(e) => setCourseForm({ ...courseForm, reviewCount: e.target.value })} />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-gray-500 uppercase">ผู้เรียน (คน)</label>
-                          <input type="number" className="form-input w-full bg-white text-sm" value={courseForm.studentCount} onChange={(e) => setCourseForm({ ...courseForm, studentCount: e.target.value })} />
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* JSON Lists */}
-                    <div className="md:col-span-2 space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <h4 className="font-bold text-primary flex items-center gap-2 border-b pb-2 mb-4"><FileText size={16}/> รายละเอียดหลักสูตร (List Items)</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-sm font-bold text-gray-700 block mb-1">สิ่งที่จะได้เรียนรู้ (JSON Array)</label>
-                          <textarea rows={4} className="form-input w-full bg-white font-mono text-xs" value={courseForm.whatYouWillLearn} onChange={(e) => setCourseForm({ ...courseForm, whatYouWillLearn: e.target.value })} placeholder='["หัวข้อที่ 1", "หัวข้อที่ 2"]' />
-                          <p className="text-[10px] text-muted mt-1">ใส่เป็น JSON Array เช่น ["เรียนรู้ A", "เก่ง B"]</p>
+                      {/* Video & Stats */}
+                      <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">สื่อและสถิติ</p>
+                        <div className="flex items-center gap-2">
+                          <Video size={16} className="text-muted" />
+                          <input type="text" placeholder="Link วิดีโอตัวอย่าง (YouTube)" className="form-input flex-1 bg-white text-sm" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} />
                         </div>
-                        <div>
-                          <label className="text-sm font-bold text-gray-700 block mb-1">สิ่งที่จะได้รับ (JSON Array)</label>
-                          <textarea rows={4} className="form-input w-full bg-white font-mono text-xs" value={courseForm.whatYouWillGet} onChange={(e) => setCourseForm({ ...courseForm, whatYouWillGet: e.target.value })} placeholder='["เนื้อหา HD", "ใบเซอร์"]' />
+                        <div className="flex items-center gap-2">
+                          <Clock size={16} className="text-muted" />
+                          <input type="text" placeholder="ความยาวคอร์ส (e.g. 120 ชม.)" className="form-input flex-1 bg-white text-sm" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
                         </div>
+                        <div className="grid grid-cols-3 gap-2">
+                           <input type="number" step="0.1" placeholder="เรตติ้ง" className="form-input w-full bg-white text-[10px]" value={courseForm.rating} onChange={(e) => setCourseForm({ ...courseForm, rating: e.target.value })} />
+                           <input type="number" placeholder="รีวิว (คน)" className="form-input w-full bg-white text-[10px]" value={courseForm.reviewCount} onChange={(e) => setCourseForm({ ...courseForm, reviewCount: e.target.value })} />
+                           <input type="number" placeholder="ผู้เรียน (คน)" className="form-input w-full bg-white text-[10px]" value={courseForm.studentCount} onChange={(e) => setCourseForm({ ...courseForm, studentCount: e.target.value })} />
+                        </div>
+                      </div>
+
+                      {/* Lists */}
+                      <div className="md:col-span-2 space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                               <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">สิ่งที่จะได้เรียนรู้ (JSON List)</label>
+                               <textarea rows={2} className="form-input w-full bg-white font-mono text-[10px]" value={courseForm.whatYouWillLearn} onChange={(e) => setCourseForm({ ...courseForm, whatYouWillLearn: e.target.value })} />
+                            </div>
+                            <div>
+                               <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">สิ่งที่จะได้รับ (JSON List)</label>
+                               <textarea rows={2} className="form-input w-full bg-white font-mono text-[10px]" value={courseForm.whatYouWillGet} onChange={(e) => setCourseForm({ ...courseForm, whatYouWillGet: e.target.value })} />
+                            </div>
+                         </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="flex gap-2">
+
+                  <div className="flex gap-2 mt-6">
                     <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline flex-1">ยกเลิก</button>
-                    <button type="submit" className="btn btn-primary flex-1">บันทึกตั้งค่าพรีเมียม</button>
+                    <button type="submit" className="btn btn-primary flex-1">บันทึกข้อมูลคอร์ส</button>
                   </div>
                 </form>
               ) : (
