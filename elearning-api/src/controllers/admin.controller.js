@@ -1,524 +1,147 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const AdminService = require('../services/admin.service');
+const asyncHandler = require('../middleware/async');
+const ErrorResponse = require('../utils/errorResponse');
 
 // DASHBOARD
-const getDashboardStats = async (req, res) => {
-  try {
-    const totalUsers = await prisma.user.count({ where: { role: 'user' } });
-    const totalCourses = await prisma.course.count();
-    const activeEnrollments = await prisma.userCourse.count({ where: { status: 'IN_PROGRESS' } });
-    
-    // Get popular courses
-    const popularCourses = await prisma.course.findMany({
-      take: 3,
-      include: {
-        _count: { select: { enrollments: true } }
-      },
-      orderBy: {
-        enrollments: { _count: 'desc' }
-      }
-    });
-
-    res.json({
-      totalUsers,
-      totalCourses,
-      totalEnrollments: activeEnrollments,
-      popularCourses: popularCourses.map(c => ({
-        id: c.id,
-        title: c.title,
-        students: c._count.enrollments,
-        completionRate: '100%' // Placeholder for now
-      }))
-    });
-  } catch (error) {
-    console.error('Dashboard stats error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const getDashboardStats = asyncHandler(async (req, res) => {
+  const stats = await AdminService.getDashboardStats();
+  res.json({ success: true, data: stats });
+});
 
 // USERS
-const getUsers = async (req, res) => {
-  try {
-    const users = await prisma.user.findMany({
-      where: { role: 'user' },
-      include: {
-        _count: { select: { enrollments: { where: { status: 'COMPLETED' } } } }
-      },
-      orderBy: { pointsBalance: 'desc' }
-    });
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+const getUsers = asyncHandler(async (req, res) => {
+  const users = await AdminService.getUsers();
+  res.json({ success: true, data: users });
+});
+
+const createUser = asyncHandler(async (req, res) => {
+  const user = await AdminService.createUser(req.body);
+  res.status(201).json({ success: true, data: user });
+});
+
+const updateUser = asyncHandler(async (req, res) => {
+  const user = await AdminService.updateUser(req.params.id, req.body);
+  res.json({ success: true, data: user });
+});
+
+const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (req.user.userId === id) {
+    throw new ErrorResponse('Cannot delete your own account', 400);
   }
-};
+  await AdminService.deleteUser(id);
+  res.json({ success: true, message: 'User deleted successfully' });
+});
 
 // COURSES
-const getAdminCourses = async (req, res) => {
-  try {
-    const courses = await prisma.course.findMany({
-      include: { category: true, _count: { select: { enrollments: true, lessons: true } } },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json(courses);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const getAdminCourses = asyncHandler(async (req, res) => {
+  const courses = await AdminService.getAdminCourses();
+  res.json({ success: true, data: courses });
+});
 
-const createCourse = async (req, res) => {
-  try {
-    const { 
-      title, description, categoryId, points, status, image, 
-      instructorName, instructorRole, instructorAvatar, instructorBio,
-      previewVideoUrl, totalDuration, whatYouWillLearn, whatYouWillGet,
-      rating, reviewCount, studentCount
-    } = req.body;
-    
-    const course = await prisma.course.create({
-      data: { 
-        title, description, categoryId, points, status, image, 
-        instructorName, instructorRole, instructorAvatar, instructorBio,
-        previewVideoUrl, totalDuration, whatYouWillLearn, whatYouWillGet,
-        rating: rating !== undefined ? parseFloat(rating) : undefined,
-        reviewCount: reviewCount !== undefined ? parseInt(reviewCount) : undefined,
-        studentCount: studentCount !== undefined ? parseInt(studentCount) : undefined
-      }
-    });
-    res.status(201).json(course);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const createCourse = asyncHandler(async (req, res) => {
+  const course = await AdminService.createCourse(req.body);
+  res.status(201).json({ success: true, data: course });
+});
 
-const updateCourse = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = req.body;
+const updateCourse = asyncHandler(async (req, res) => {
+  const course = await AdminService.updateCourse(req.params.id, req.body);
+  res.json({ success: true, data: course });
+});
 
-    // Parse numeric fields if they exist
-    if (data.rating !== undefined) data.rating = parseFloat(data.rating);
-    if (data.reviewCount !== undefined) data.reviewCount = parseInt(data.reviewCount);
-    if (data.studentCount !== undefined) data.studentCount = parseInt(data.studentCount);
-    if (data.points !== undefined) data.points = parseInt(data.points);
-
-    const course = await prisma.course.update({
-      where: { id },
-      data
-    });
-    res.json(course);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-const deleteCourse = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await prisma.course.delete({ where: { id } });
-    res.json({ message: 'Course deleted' });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const deleteCourse = asyncHandler(async (req, res) => {
+  await AdminService.deleteCourse(req.params.id);
+  res.json({ success: true, message: 'Course deleted' });
+});
 
 // CATEGORIES
-const getCategories = async (req, res) => {
-  try {
-    const categories = await prisma.category.findMany({ orderBy: { order: 'asc' } });
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const getCategories = asyncHandler(async (req, res) => {
+  const categories = await AdminService.getCategories();
+  res.json({ success: true, data: categories });
+});
 
-const createCategory = async (req, res) => {
-  try {
-    const { name, order } = req.body;
-    const category = await prisma.category.create({ data: { name, order } });
-    res.status(201).json(category);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const createCategory = asyncHandler(async (req, res) => {
+  const category = await AdminService.createCategory(req.body);
+  res.status(201).json({ success: true, data: category });
+});
+
+const updateCategory = asyncHandler(async (req, res) => {
+  const category = await AdminService.updateCategory(req.params.id, req.body);
+  res.json({ success: true, data: category });
+});
+
+const deleteCategory = asyncHandler(async (req, res) => {
+  await AdminService.deleteCategory(req.params.id);
+  res.json({ success: true, message: 'Category deleted' });
+});
+
+const reorderCategories = asyncHandler(async (req, res) => {
+  await AdminService.reorderCategories(req.body.categoryIds);
+  res.json({ success: true, message: 'Categories reordered successfully' });
+});
 
 // REWARDS
-const getAdminRewards = async (req, res) => {
-  try {
-    const rewards = await prisma.reward.findMany({ orderBy: { createdAt: 'desc' } });
-    res.json(rewards);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+const getAdminRewards = asyncHandler(async (req, res) => {
+  const rewards = await AdminService.getAdminRewards();
+  res.json({ success: true, data: rewards });
+});
+
+const createReward = asyncHandler(async (req, res) => {
+  const reward = await AdminService.createReward(req.body);
+  res.status(201).json({ success: true, data: reward });
+});
+
+const updateReward = asyncHandler(async (req, res) => {
+  const reward = await AdminService.updateReward(req.params.id, req.body);
+  res.json({ success: true, data: reward });
+});
+
+const deleteReward = asyncHandler(async (req, res) => {
+  await AdminService.deleteReward(req.params.id);
+  res.json({ success: true, message: 'Reward deleted' });
+});
+
+// REDEMPTIONS
+const getRedeemRequests = asyncHandler(async (req, res) => {
+  const requests = await AdminService.getRedeemRequests();
+  res.json({ success: true, data: requests });
+});
+
+const updateRedeemStatus = asyncHandler(async (req, res) => {
+  const { status, adminNote } = req.body;
+  if (!['APPROVED', 'REJECTED', 'FULFILLED'].includes(status)) {
+    throw new ErrorResponse('Invalid status', 400);
   }
-};
+  await AdminService.updateRedeemStatus(req.params.id, status, adminNote);
+  res.json({ success: true, message: `Request ${status}` });
+});
 
-const createReward = async (req, res) => {
-  try {
-    const { name, pointsCost, stock, maxPerUser, status, image } = req.body;
-    const reward = await prisma.reward.create({
-      data: { 
-        name, 
-        pointsCost: parseInt(pointsCost), 
-        stock: parseInt(stock), 
-        maxPerUser: maxPerUser !== undefined ? parseInt(maxPerUser) : 1,
-        status, 
-        image 
-      }
-    });
-    res.status(201).json(reward);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+// LESSONS
+const getCourseLessons = asyncHandler(async (req, res) => {
+  const lessons = await AdminService.getCourseLessons(req.params.courseId);
+  res.json({ success: true, data: lessons });
+});
 
-const updateReward = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = req.body;
-    if (data.maxPerUser !== undefined) data.maxPerUser = parseInt(data.maxPerUser);
-    if (data.pointsCost !== undefined) data.pointsCost = parseInt(data.pointsCost);
-    if (data.stock !== undefined) data.stock = parseInt(data.stock);
-    const reward = await prisma.reward.update({ where: { id }, data });
-    res.json(reward);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const createLesson = asyncHandler(async (req, res) => {
+  const lesson = await AdminService.createLesson(req.body);
+  res.status(201).json({ success: true, data: lesson });
+});
 
-// REDEEMS
-const getRedeemRequests = async (req, res) => {
-  try {
-    const requests = await prisma.redeemRequest.findMany({
-      include: { user: { select: { name: true, email: true } }, reward: true },
-      orderBy: { requestedAt: 'desc' }
-    });
-    res.json(requests);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+const updateLesson = asyncHandler(async (req, res) => {
+  const lesson = await AdminService.updateLesson(req.params.id, req.body);
+  res.json({ success: true, data: lesson });
+});
 
-const updateRedeemStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status, adminNote } = req.body;
-    
-    // Validate bounds
-    if (!['APPROVED', 'REJECTED', 'FULFILLED'].includes(status)) {
-      return res.status(400).json({ message: 'Invalid status' });
-    }
+const deleteLesson = asyncHandler(async (req, res) => {
+  await AdminService.deleteLesson(req.params.id);
+  res.json({ success: true, message: 'Lesson deleted' });
+});
 
-    const request = await prisma.redeemRequest.findUnique({ where: { id } });
-    if (!request) return res.status(404).json({ message: 'Request not found' });
-
-    await prisma.$transaction(async (prisma) => {
-      // If rejected, refund points and restore stock
-      if (status === 'REJECTED' && request.status !== 'REJECTED') {
-        await prisma.pointsLedger.create({
-          data: {
-            userId: request.userId,
-            sourceType: 'reward_adjust',
-            sourceId: request.id,
-            points: request.pointsCost,
-            note: `Refund for rejected redeem: ${id}`
-          }
-        });
-
-        await prisma.reward.update({
-          where: { id: request.rewardId },
-          data: { stock: { increment: 1 } }
-        });
-      }
-
-      await prisma.redeemRequest.update({
-        where: { id },
-        data: { status, adminNote, updatedAt: new Date() }
-      });
-    });
-
-    res.json({ message: `Request ${status}` });
-  } catch (error) {
-    console.error('Update redeem error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-// NEW: USER MANAGEMENT (ADD/EDIT)
-const bcrypt = require('bcrypt');
-
-const createUser = async (req, res) => {
-  try {
-    const { name, email, password, role, department, pointsBalance } = req.body;
-    const hashedPassword = await bcrypt.hash(password || 'password123', 10);
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: role || 'user',
-        department,
-        pointsBalance: pointsBalance || 0
-      }
-    });
-    res.status(201).json(user);
-  } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(400).json({ message: 'Email already exists' });
-    }
-    console.error('Create user error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-const updateUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { password, pointsBalance, ...data } = req.body;
-    
-    if (password) {
-      data.password = await bcrypt.hash(password, 10);
-    }
-
-    await prisma.$transaction(async (tx) => {
-      // If admin is updating points, handle the ledger diff
-      if (pointsBalance !== undefined) {
-        const newBalance = parseInt(pointsBalance, 10);
-        
-        // Calculate current actual balance
-        const ledger = await tx.pointsLedger.findMany({ where: { userId: id } });
-        const currentBalance = ledger.reduce((acc, curr) => acc + curr.points, 0);
-        
-        const diff = newBalance - currentBalance;
-        if (diff !== 0) {
-          await tx.pointsLedger.create({
-            data: {
-               userId: id,
-               sourceType: 'admin_edit',
-               points: diff,
-               note: `Admin adjusted balance by ${diff} (Target: ${newBalance})`
-            }
-          });
-        }
-        data.pointsBalance = newBalance; // Keep the User record sync'd just in case
-      }
-
-      const user = await tx.user.update({
-        where: { id },
-        data
-      });
-      res.json(user);
-    });
-
-  } catch (error) {
-    console.error('Update user error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-const deleteUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Prevent deleting your own account
-    if (req.user.userId === id) {
-      return res.status(400).json({ message: 'Cannot delete your own account' });
-    }
-
-    await prisma.user.delete({ where: { id } });
-    res.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    console.error('Delete user error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-// NEW: CATEGORY MANAGEMENT (UPDATE/DELETE)
-const updateCategory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, order } = req.body;
-    const category = await prisma.category.update({
-      where: { id },
-      data: { name, order }
-    });
-    res.json(category);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-const deleteCategory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    // Note: This might fail if courses exist under this category depending on Prisma constraints
-    await prisma.category.delete({ where: { id } });
-    res.json({ message: 'Category deleted' });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error (check if courses exist in this category)' });
-  }
-};
-
-const reorderCategories = async (req, res) => {
-  try {
-    const { categoryIds } = req.body;
-    const updates = categoryIds.map((id, index) => 
-      prisma.category.update({
-        where: { id },
-        data: { order: index }
-      })
-    );
-    await prisma.$transaction(updates);
-    res.json({ message: 'Categories reordered successfully' });
-  } catch (error) {
-    console.error('Reorder error:', error);
-    res.status(500).json({ message: 'Internal server error while reordering' });
-  }
-};
-
-// --- LESSON MANAGEMENT ---
-
-const getCourseLessons = async (req, res) => {
-  try {
-    const { courseId } = req.params;
-    const lessons = await prisma.lesson.findMany({
-      where: { courseId },
-      include: {
-        questions: {
-          include: { choices: true },
-          orderBy: { order: 'asc' }
-        }
-      },
-      orderBy: { order: 'asc' }
-    });
-    res.json(lessons);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching lessons' });
-  }
-};
-
-const createLesson = async (req, res) => {
-  try {
-    const { courseId, title, type, contentUrl, content, duration, order, points, passScore, questions } = req.body;
-    
-    const lessonData = {
-      courseId,
-      title,
-      type,
-      contentUrl,
-      content,
-      duration,
-      order: parseInt(order) || 0,
-      points: parseInt(points) || 0,
-      passScore: parseInt(passScore) || 0
-    };
-
-    if (type === 'quiz' && questions && questions.length > 0) {
-      lessonData.questions = {
-        create: questions.map((q, idx) => ({
-          text: q.text,
-          order: idx,
-          points: parseInt(q.points) || 1,
-          choices: {
-            create: q.choices.map(c => ({
-              text: c.text,
-              isCorrect: !!c.isCorrect
-            }))
-          }
-        }))
-      };
-    }
-
-    const lesson = await prisma.lesson.create({
-      data: lessonData,
-      include: { questions: { include: { choices: true } } }
-    });
-    res.status(201).json(lesson);
-  } catch (error) {
-    console.error('Create lesson error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-const updateLesson = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { title, type, contentUrl, content, duration, order, points, passScore, questions } = req.body;
-    
-    // If it's a quiz, delete previous questions and recreate
-    if (type === 'quiz') {
-      await prisma.question.deleteMany({ where: { lessonId: id } });
-    }
-
-    const lessonData = {
-      title,
-      type,
-      contentUrl,
-      content,
-      duration,
-      order: parseInt(order) || 0,
-      points: parseInt(points) || 0,
-      passScore: parseInt(passScore) || 0
-    };
-
-    if (type === 'quiz' && questions && questions.length > 0) {
-      lessonData.questions = {
-        create: questions.map((q, idx) => ({
-          text: q.text,
-          order: idx,
-          points: parseInt(q.points) || 1,
-          choices: {
-            create: q.choices.map(c => ({
-              text: c.text,
-              isCorrect: !!c.isCorrect
-            }))
-          }
-        }))
-      };
-    }
-
-    const lesson = await prisma.lesson.update({
-      where: { id },
-      data: lessonData,
-      include: { questions: { include: { choices: true } } }
-    });
-    res.json(lesson);
-  } catch (error) {
-    console.error('Update lesson error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-const deleteLesson = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await prisma.lesson.delete({ where: { id } });
-    res.json({ message: 'Lesson deleted' });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-// NEW: QUIZ REPORTS
-const getCourseQuizAttempts = async (req, res) => {
-  try {
-    const { courseId } = req.params;
-    const attempts = await prisma.quizAttempt.findMany({
-      where: {
-        lesson: {
-          courseId: courseId
-        }
-      },
-      include: {
-        user: { select: { id: true, name: true, email: true, department: true } },
-        lesson: { select: { id: true, title: true, passScore: true } }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json(attempts);
-  } catch (error) {
-    console.error('Get quiz attempts error:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+// QUIZ REPORTS
+const getCourseQuizAttempts = asyncHandler(async (req, res) => {
+  const attempts = await AdminService.getCourseQuizAttempts(req.params.courseId);
+  res.json({ success: true, data: attempts });
+});
 
 module.exports = {
   getDashboardStats,
@@ -534,6 +157,7 @@ module.exports = {
   getAdminRewards,
   createReward,
   updateReward,
+  deleteReward,
   getRedeemRequests,
   updateRedeemStatus,
   getUsers,

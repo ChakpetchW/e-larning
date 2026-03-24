@@ -40,9 +40,15 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Add interceptor to handle token expiry / unauth
+// Add interceptor to handle token expiry / unauth / response unwrapping
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Automatically unwrap { success: true, data: ... }
+    if (response.data && response.data.success === true && response.data.data !== undefined) {
+      return { ...response, data: response.data.data };
+    }
+    return response;
+  },
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');

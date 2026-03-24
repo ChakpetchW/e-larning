@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, Clock, ChevronRight, Target, Star } from 'lucide-react';
+import { PlayCircle, ChevronRight, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { userAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
+import { userAPI } from '../../utils/api';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
+import SectionHeader from '../../components/common/SectionHeader';
 import { Grid } from 'lucide-react';
 
 const Home = () => {
@@ -45,16 +46,13 @@ const Home = () => {
 
   const continueCourse = courses.find(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS');
   
-  // Group courses by category
   const categorizedCourses = categories.map(cat => ({
     ...cat,
     courses: courses.filter(c => c.categoryId === cat.id)
   })).filter(cat => cat.courses.length > 0);
 
-  // Fallback for courses without category or if list is empty
   const uncategorized = courses.filter(c => !c.categoryId);
 
-  // Calculate courses completed this week
   const completedThisWeekCount = courses.filter(c => {
     if (c.enrollmentStatus !== 'COMPLETED' || !c.completedAt) return false;
     const completedDate = new Date(c.completedAt);
@@ -71,11 +69,10 @@ const Home = () => {
     );
   }
 
-
   return (
     <div className="flex flex-col gap-8 md:gap-10 animate-fade-in pt-0 md:pt-4 pb-12">
       
-      {/* Premium Hero Section - Full width on mobile */}
+      {/* Premium Hero Section */}
       <section className="relative w-[calc(100%+2.5rem)] -mx-5 md:mx-0 md:w-full rounded-none md:rounded-[3rem] md:rounded-t-[3rem] overflow-hidden mesh-bg-premium p-6 md:p-12 lg:p-16 mb-2 border-b md:border border-white/60 shadow-2xl shadow-slate-200/50 group">
         <div className="absolute top-0 right-0 w-1/3 h-full overflow-hidden pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity">
           <div className="absolute top-[-10%] right-[-10%] w-[150%] h-[150%] bg-gradient-to-br from-primary/30 to-transparent rounded-full blur-[100px]"></div>
@@ -98,7 +95,6 @@ const Home = () => {
               วันนี้เรามาอัปสกิลใหม่ๆ ไปด้วยกันนะครับ
             </p>
             
-            {/* Horizontal Stats for Hero */}
             <div className="flex flex-wrap gap-6 md:gap-12 pt-6 border-t border-slate-200/60">
                <div>
                   <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">คอร์สที่เรียนอยู่</p>
@@ -117,7 +113,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Continue Learning Float Card */}
           <div className="lg:col-span-2 relative">
             {continueCourse ? (
               <div 
@@ -193,12 +188,12 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Categories Quick Filter Bar (Scrollable on mobile) */}
+        {/* Categories Quick Filter Bar */}
         <div className="md:col-span-2 flex flex-col gap-5">
-           <div className="flex items-center justify-between px-2">
+            <div className="flex items-center justify-between px-2">
               <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">Browse Categories</h3>
               <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{categories.length} Topics</p>
-           </div>
+            </div>
 
             <div className="flex gap-3 flex-wrap items-center text-xs px-1">
                <button
@@ -225,8 +220,7 @@ const Home = () => {
                    <Grid size={14} /> ดูทั้งหมด
                  </button>
                )}
-
-           </div>
+            </div>
 
            <div
              onClick={() => navigate('/user/rewards')}
@@ -246,36 +240,28 @@ const Home = () => {
       <div className="space-y-12 md:space-y-20 mt-12 md:mt-16">
         {categorizedCourses.map(category => (
           <section key={category.id}>
-          <div className="flex justify-between items-end mb-6 pl-2">
-            <h3 className="text-2xl md:text-[1.75rem] font-black text-slate-900 tracking-tight">{category.name}</h3>
-            <button 
-              onClick={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)} 
-              className="text-primary text-[11px] md:text-sm font-bold flex items-center gap-1 hover:text-primary-hover px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-full active:scale-95 transition-all"
-            >
-              ดูทั้งหมด <ChevronRight size={14} strokeWidth={3} className="md:w-4 md:h-4" />
-            </button>
-          </div>
-          
-          <div className="flex items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
-            {category.courses.map(course => (
-              <CourseCard 
-                key={course.id} 
-                course={course} 
-                onClick={() => navigate(`/user/courses/${course.id}`)}
-                className="w-[280px] md:w-full snap-center md:snap-none shrink-0"
-              />
-            ))}
-          </div>
-        </section>
-      ))}
+            <SectionHeader 
+              title={category.name}
+              onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
+            />
+            <div className="flex items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
+              {category.courses.map(course => (
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onClick={() => navigate(`/user/courses/${course.id}`)}
+                  className="w-[280px] md:w-full snap-center md:snap-none shrink-0"
+                />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
 
       {/* Uncategorized Fallback */}
       {uncategorized.length > 0 && (
         <section>
-          <div className="flex justify-between items-center mb-6 pl-2">
-            <h3 className="text-[1.75rem] font-black text-slate-900 tracking-tight">คอร์สแนะนำสำหรับคุณ</h3>
-          </div>
+          <SectionHeader title="คอร์สแนะนำสำหรับคุณ" showViewAll={false} />
           <div className="flex items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
             {uncategorized.map(course => (
               <CourseCard 
@@ -299,10 +285,8 @@ const Home = () => {
         </div>
       )}
 
-      {/* spacer for bottom padding */}
       <div className="h-8"></div>
 
-      {/* Categories Search Modal */}
       <CategorySearchModal 
         isOpen={isCatModalOpen}
         onClose={() => setIsCatModalOpen(false)}

@@ -80,4 +80,4 @@ const CourseCard = ({ course, onClick, className = "", variant = "default" }) =>
   );
 };
 
-export default CourseCard;
+export default React.memo(CourseCard);

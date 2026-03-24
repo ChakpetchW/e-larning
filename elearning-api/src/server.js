@@ -7,6 +7,7 @@ const userRoutes = require('./routes/user.routes');
 const adminRoutes = require('./routes/admin.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const settingRoutes = require('./routes/setting.routes');
+const errorHandler = require('./middleware/error');
 
 const app = express();
 
@@ -30,15 +31,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingRoutes);
 
-// Error Handling Middleware
-app.use((err, req, res, next) => {
-  console.error('SERVER ERROR:', err);
-  res.status(500).json({ 
-    message: 'Internal Server Error', 
-    error: err.message,
-    path: req.path
-  });
-});
+// Error Handling Middleware (Centralized)
+app.use(errorHandler);
 
 // Start Server (Only when not running as a Vercel function)
 if (process.env.NODE_ENV !== 'production') {
