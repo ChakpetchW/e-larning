@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Search, Edit, Trash2, MoreVertical, FileText, Video, Layers, X, ChevronRight, Play, Upload, Clock, Image as ImageIcon } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, MoreVertical, FileText, Video, Layers, X, ChevronRight, Play, Upload, Clock, MonitorPlay, Infinity as InfinityIcon, PlayCircle, BookOpen, Image as ImageIcon } from 'lucide-react';
 import { adminAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 
 const CourseManagement = () => {
