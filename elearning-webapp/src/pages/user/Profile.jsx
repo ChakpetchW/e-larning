@@ -5,17 +5,16 @@ import { authAPI, userAPI, getFullUrl } from '../../utils/api';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
   
   const [user, setUser] = useState(null);
   const [points, setPoints] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Modals state
   const [showEditModal, setShowEditModal] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [savingName, setSavingName] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
@@ -31,7 +30,6 @@ const Profile = () => {
         userAPI.getPoints()
       ]);
       setUser(userRes.data);
-      setNewName(userRes.data.name);
       setPoints(pointsRes.data.balance);
     } catch (error) {
       console.error('Fetch profile error:', error);
@@ -46,59 +44,23 @@ const Profile = () => {
     navigate('/login');
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
+  const handleUpdatePassword = async () => {
+    if (!currentPassword || !newPassword) return alert('กรุณากรอกรหัสผ่านให้ครบถ้วน');
+    if (newPassword.length < 6) return alert('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
+    
     try {
-      setUploadingAvatar(true);
-      const uploadRes = await userAPI.uploadFile(file);
-      const imageUrl = uploadRes.data.url;
-      
-      // Update profile with new avatar
-      await userAPI.updateProfile({ avatar: imageUrl });
-      
-      // Refresh local state
-      setUser({ ...user, avatar: imageUrl });
-      
-      // Update local storage so Header gets it too
-      const localData = JSON.parse(localStorage.getItem('user') || '{}');
-      localData.avatar = imageUrl;
-      localStorage.setItem('user', JSON.stringify(localData));
-      
-      alert('อัปเดตรูปโปรไฟล์สำเร็จ');
-    } catch (error) {
-      console.error('Error uploading avatar:', error);
-      alert('ไม่สามารถอัปโหลดรูปภาพได้');
-    } finally {
-      setUploadingAvatar(false);
-      e.target.value = null; // reset input
-    }
-  };
-
-  const handleUpdateName = async () => {
-    if (!newName.trim()) return alert('กรุณากรอกชื่อ');
-    try {
-      setSavingName(true);
-      await userAPI.updateProfile({ name: newName });
-      
-      setUser({ ...user, name: newName });
-      
-      const localData = JSON.parse(localStorage.getItem('user') || '{}');
-      localData.name = newName;
-      localStorage.setItem('user', JSON.stringify(localData));
+      setSavingPassword(true);
+      await userAPI.updateProfile({ currentPassword, newPassword });
       
       setShowEditModal(false);
-      alert('บันทึกชื่อสำเร็จ');
+      setCurrentPassword('');
+      setNewPassword('');
+      alert('เปลี่ยนรหัสผ่านสำเร็จ');
     } catch (error) {
-      console.error('Update name error', error);
-      alert('บันทึกชื่อไม่สำเร็จ');
+      console.error('Update password error', error);
+      alert(error.response?.data?.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ');
     } finally {
-      setSavingName(false);
+      setSavingPassword(false);
     }
   };
 
@@ -135,22 +97,9 @@ const Profile = () => {
         </div>
         
         <div className="px-6 flex flex-col items-center pb-6">
-          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center border-4 border-white shadow-lg relative -mt-12 z-10 p-1 group">
-            <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-            <div 
-              onClick={handleAvatarClick}
-              className="w-full h-full bg-slate-100 rounded-full flex items-center justify-center relative overflow-hidden cursor-pointer group-hover:bg-slate-200 transition-colors"
-            >
-                {uploadingAvatar ? (
-                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
-                ) : user?.avatar ? (
-                  <img src={getFullUrl(user.avatar)} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <UserIcon size={40} className="text-slate-400" />
-                )}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera size={24} className="text-white" />
-                </div>
+          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center border-4 border-white shadow-lg relative -mt-12 z-10 p-1">
+            <div className="w-full h-full bg-slate-100 rounded-full flex items-center justify-center relative overflow-hidden">
+                <UserIcon size={40} className="text-slate-400" />
             </div>
           </div>
           
@@ -187,8 +136,8 @@ const Profile = () => {
                       <Settings size={20}/>
                   </div>
                   <div>
-                      <span className="font-bold text-gray-900 block text-sm mb-0.5">การตั้งค่าบัญชี</span>
-                      <span className="text-xs font-medium text-gray-400 block">แก้ไขชื่อโปรไฟล์ส่วนตัว</span>
+                      <span className="font-bold text-gray-900 block text-sm mb-0.5">เปลี่ยนรหัสผ่าน</span>
+                      <span className="text-xs font-medium text-gray-400 block">อัปเดตรหัสผ่านใหม่เพื่อความปลอดภัย</span>
                   </div>
               </div>
               <ChevronRight size={18} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
@@ -237,37 +186,48 @@ const Profile = () => {
         </button>
       </div>
 
-      {/* Edit Profile Modal */}
+      {/* Edit Password Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-white rounded-[2rem] p-6 md:p-8 max-w-sm w-full shadow-2xl animate-fade-in flex flex-col items-center">
-            <h3 className="text-2xl font-black text-slate-800 mb-6 w-full text-center">แก้ใขโปรไฟล์</h3>
+            <h3 className="text-2xl font-black text-slate-800 mb-6 w-full text-center">เปลี่ยนรหัสผ่าน</h3>
             
-            <div className="w-full mb-6">
-              <label className="block text-sm font-bold text-slate-700 mb-2">ชื่อแสดงผล</label>
+            <div className="w-full mb-4">
+              <label className="block text-sm font-bold text-slate-700 mb-2">รหัสผ่านปัจจุบัน</label>
               <input 
-                type="text" 
-                value={newName} 
-                onChange={e => setNewName(e.target.value)}
+                type="password" 
+                value={currentPassword} 
+                onChange={e => setCurrentPassword(e.target.value)}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 font-medium"
-                placeholder="กรอกชื่อของคุณ"
+                placeholder="กรอกรหัสผ่านปัจจุบัน"
+              />
+            </div>
+
+            <div className="w-full mb-6">
+              <label className="block text-sm font-bold text-slate-700 mb-2">รหัสผ่านใหม่</label>
+              <input 
+                type="password" 
+                value={newPassword} 
+                onChange={e => setNewPassword(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 font-medium"
+                placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
               />
             </div>
 
             <div className="flex gap-3 w-full">
               <button 
-                onClick={() => setShowEditModal(false)}
+                onClick={() => { setShowEditModal(false); setCurrentPassword(''); setNewPassword(''); }}
                 className="flex-1 py-3 px-4 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                disabled={savingName}
+                disabled={savingPassword}
               >
                 ยกเลิก
               </button>
               <button 
-                onClick={handleUpdateName}
-                disabled={savingName}
+                onClick={handleUpdatePassword}
+                disabled={savingPassword}
                 className="flex-1 py-3 px-4 rounded-xl font-bold bg-primary text-white hover:bg-primary-hover shadow-md transition-colors flex justify-center items-center"
               >
-                {savingName ? <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div> : 'บันทึก'}
+                {savingPassword ? <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div> : 'เปลี่ยนรหัสผ่าน'}
               </button>
             </div>
           </div>
