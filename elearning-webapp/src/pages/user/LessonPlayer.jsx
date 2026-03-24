@@ -415,10 +415,10 @@ const LessonPlayer = () => {
           </button>
         ) : (
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/user/courses/${courseId}`)}
             className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[13px] tracking-widest uppercase"
           >
-            ย้อนกลับ
+            กลับสู่หน้ารายละเอียด
           </button>
         )}
       </div>
