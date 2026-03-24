@@ -280,12 +280,6 @@ const Home = () => {
           </div>
         </section>
       ))}
-          
-          <div className="flex items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
-            {category.courses.map(course => <CourseCard key={course.id} course={course} />)}
-          </div>
-        </section>
-      ))}
 
       {/* Uncategorized Fallback */}
       {uncategorized.length > 0 && (
