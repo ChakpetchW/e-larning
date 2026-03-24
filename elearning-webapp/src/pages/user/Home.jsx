@@ -62,122 +62,195 @@ const Home = () => {
   const CourseCard = ({ course }) => (
     <div 
       onClick={() => navigate(`/user/courses/${course.id}`)}
-      className="group flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer w-[280px] md:w-full snap-center md:snap-none shrink-0"
+      className="group flex flex-col bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 transition-all duration-500 cursor-pointer w-[280px] md:w-full snap-center md:snap-none shrink-0"
     >
-      <div className="relative w-full aspect-[16/9] bg-gray-100 overflow-hidden border-b border-gray-100">
+      <div className="relative w-full aspect-[16/10] bg-slate-50 overflow-hidden">
         <img 
            src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE} 
            alt={course.title} 
-           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
         />
-        <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-           <div className="w-14 h-14 bg-white/95 rounded-full shadow-lg flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300">
-             <PlayCircle size={28} className="text-primary ml-1" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center z-10">
+           <div className="w-16 h-16 bg-white/95 rounded-full shadow-2xl flex items-center justify-center transform scale-50 group-hover:scale-100 transition-all duration-500">
+             <PlayCircle size={32} className="text-primary" />
            </div>
         </div>
+        {course.isEnrolled && (
+          <div className="absolute top-4 right-4 z-20">
+            <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest backdrop-blur-md border ${course.enrollmentStatus === 'COMPLETED' ? 'bg-emerald-500/90 text-white border-emerald-400' : 'bg-primary/90 text-white border-primary-light'}`}>
+              {course.enrollmentStatus === 'COMPLETED' ? 'Completed' : 'Enrolled'}
+            </span>
+          </div>
+        )}
       </div>
       
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex justify-between items-start mb-2">
-           <span className="text-[11px] font-bold text-gray-500 tracking-wider uppercase">{course.category?.name || 'Uncategorized'}</span>
-           {course.isEnrolled && (
-              <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${course.enrollmentStatus === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-primary/10 text-primary'}`}>
-                {course.enrollmentStatus === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน'}
-              </span>
-            )}
-        </div>
-        <h3 className="text-[1.05rem] font-bold text-slate-900 leading-snug line-clamp-2 min-h-[44px] mb-2 group-hover:text-primary transition-colors">{course.title}</h3>
-        
-        <div className="flex items-center gap-3 mt-auto mb-4">
-           <div className="flex items-center gap-1.5 text-gray-500 text-[13px] font-medium border-gray-200">
-              <Clock size={14} className="text-gray-400" />
+      <div className="p-7 flex flex-col flex-1">
+        <div className="flex justify-between items-center mb-4">
+           <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{course.category?.name || 'Knowledge'}</span>
+           <div className="flex items-center gap-1.5 text-slate-400 text-[11px] font-bold">
+              <Clock size={12} strokeWidth={2.5} />
               <span>{course.lessons?.reduce((acc, l) => acc + (parseInt(l.duration)||0), 0) || '2'} ชม.</span>
            </div>
         </div>
-
-        <div className="pt-3.5 border-t border-gray-100 flex justify-between items-center mt-auto">
-           <span className="text-[1.1rem] font-black text-primary">
-              {course.points > 0 ? `${course.points} Pts` : 'ฟรีเรียน'}
-           </span>
+        
+        <h3 className="text-lg font-black text-slate-900 leading-tight line-clamp-2 min-h-[52px] mb-6 group-hover:text-primary transition-colors tracking-tight">{course.title}</h3>
+        
+        <div className="pt-5 border-t border-slate-50 flex justify-between items-center">
+           <div className="flex flex-col">
+              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Price / Reward</p>
+              <span className="text-lg font-black text-slate-900 tracking-tighter">
+                {course.points > 0 ? `${course.points.toLocaleString()} Pts` : 'Free Access'}
+              </span>
+           </div>
+           <div className="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-primary group-hover:text-white transition-all flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover:border-primary">
+              <ChevronRight size={18} strokeWidth={3} />
+           </div>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="flex flex-col gap-12 animate-fade-in pt-6 md:pt-2">
+    <div className="flex flex-col gap-10 animate-fade-in pt-4 pb-12">
       
-      {/* Header Section */}
-      <div className="mb-2">
-        <h2 className="text-title text-slate-800 mb-2 flex items-center gap-3">
-          สวัสดีคุณ {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'} <span className="text-4xl hover:animate-bounce cursor-default">👋</span>
-        </h2>
-        <p className="text-[1.1rem] text-slate-500 font-medium">ยินดีต้อนรับกลับสู่แพลตฟอร์มการเรียนรู้ของคุณ</p>
-      </div>
-
-      {/* Bento Dashboard Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Continue Learning Hero (takes 2 cols on lg) */}
-        <div className="lg:col-span-2 flex flex-col h-full">
-          {continueCourse ? (
-             <div 
-               className="card mesh-bg relative overflow-hidden group cursor-pointer h-[320px] md:h-full min-h-[300px] flex flex-col md:flex-row shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-none ring-1 ring-slate-200/50"
-               onClick={() => navigate(`/user/courses/${continueCourse.id}`)}
-             >
-               <div className="flex-1 p-8 md:p-10 flex flex-col justify-center relative z-10 w-full md:w-3/5">
-                 <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur-md text-primary font-bold text-xs mb-5 w-max border border-white/60 shadow-sm uppercase tracking-wider">เรียนต่อจากคราวที่แล้ว</span>
-                 <h3 className="text-2xl md:text-[2rem] font-extrabold text-slate-900 leading-tight mb-4 group-hover:text-primary transition-colors line-clamp-2 md:line-clamp-3">{continueCourse.title}</h3>
-                 
-                 <div className="mt-auto md:mt-8 w-full max-w-sm">
-                   <div className="flex justify-between text-xs font-bold text-slate-600 mb-2.5">
-                     <span>ความคืบหน้า</span>
-                     <span className="text-primary">{continueCourse.progressPercent}%</span>
-                   </div>
-                   <div className="w-full bg-white/60 backdrop-blur-sm rounded-full h-3 overflow-hidden shadow-inner ring-1 ring-black/5">
-                     <div className="bg-primary h-full rounded-full relative" style={{ width: `${continueCourse.progressPercent}%` }}>
-                       <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-white/40 to-transparent"></div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-               
-               <div className="absolute inset-0 md:relative md:w-2/5 aspect-video md:aspect-auto shrink-0 opacity-20 md:opacity-100">
-                  <img src={continueCourse.image ? getFullUrl(continueCourse.image) : DEFAULT_COURSE_IMAGE} alt="Course" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#F1F5F9] md:via-[#F1F5F9]/50 to-transparent mix-blend-normal"></div>
-               </div>
-             </div>
-          ) : (
-            <div className="card h-full min-h-[300px] bg-slate-50 border-none ring-1 ring-slate-200/50 flex flex-col items-center justify-center text-center p-8 border-dashed">
-               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
-                 <PlayCircle size={32} className="text-slate-300" />
-               </div>
-               <h3 className="text-xl font-bold text-slate-700 mb-2">ยังไม่มีคอร์สที่กำลังเรียนขณนี้</h3>
-               <p className="text-slate-500 font-medium">เริ่มต้นค้นหาและลงทะเบียนคอร์สใหม่เพื่อดูความคืบหน้าที่นี่</p>
-            </div>
-          )}
+      {/* Premium Hero Section */}
+      <section className="relative w-full rounded-[3rem] overflow-hidden mesh-bg-premium p-8 md:p-12 lg:p-16 mb-2 border border-white/60 shadow-2xl shadow-slate-200/50 group">
+        <div className="absolute top-0 right-0 w-1/3 h-full overflow-hidden pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity">
+          <div className="absolute top-[-10%] right-[-10%] w-[150%] h-[150%] bg-gradient-to-br from-primary/30 to-transparent rounded-full blur-[100px]"></div>
         </div>
-        
-        {/* Weekly Goal Bento (takes 1 col) */}
-        <div className="card bg-white p-8 flex flex-col justify-between h-full shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-slate-100 border-none">
-          <div>
-            <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center mb-6 shadow-inner ring-1 ${completedThisWeekCount >= 1 ? 'bg-emerald-50 text-emerald-600 ring-emerald-100/50' : 'bg-indigo-50 text-indigo-600 ring-indigo-100/50'}`}>
-              <Target size={28} strokeWidth={2.5}/>
+
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
+          <div className="lg:col-span-3">
+            <div className="flex items-center gap-3 mb-6 animate-slide-up">
+              <span className="px-4 py-1.5 bg-primary/10 text-primary text-[11px] font-black uppercase tracking-[0.3em] rounded-full border border-primary/10 backdrop-blur-sm">
+                WELCOME BACK
+              </span>
             </div>
-            <p className="text-[10px] text-slate-400 font-extrabold mb-2 uppercase tracking-widest">เป้าหมายประจำสัปดาห์</p>
-            <h3 className="text-2xl font-black text-slate-800 mb-3 tracking-tight">เรียนจบ 1 คอร์ส</h3>
-            <p className="text-slate-500 font-medium text-[15px] leading-relaxed">พัฒนาและอัปสกิลของคุณอย่างต่อเนื่องเพื่อการเติบโตที่ไม่สิ้นสุด</p>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9] mb-6">
+              สวัสดีคุณ<br/>
+              <span className="text-gradient-primary">
+                {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}
+              </span> <span className="inline-block hover:rotate-12 transition-transform cursor-default">👋</span>
+            </h1>
+            <p className="text-lg md:text-xl text-slate-500 font-medium max-w-lg leading-relaxed mb-10">
+              ยินดีต้อนรับกลับสู่เส้นทางการเรียนรู้ของคุณ วันนี้เรามาอัปสกิลใหม่ๆ ไปด้วยกันนะครับ
+            </p>
+            
+            {/* Horizontal Stats for Hero */}
+            <div className="flex flex-wrap gap-8 md:gap-12 pt-4 border-t border-slate-200/60">
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">คอร์สที่เรียนอยู่</p>
+                  <p className="text-3xl font-black text-slate-900 tracking-tighter">{courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length}</p>
+               </div>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">เรียนจบแล้ว</p>
+                  <p className="text-3xl font-black text-slate-900 tracking-tighter">{courses.filter(c => c.enrollmentStatus === 'COMPLETED').length}</p>
+               </div>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">คะแนนสะสม</p>
+                  <p className="text-3xl font-black text-primary tracking-tighter">{(courses.reduce((acc, c) => acc + (c.points || 0), 0)).toLocaleString()}</p>
+               </div>
+            </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-slate-100/80">
-             <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-500">ความสำเร็จ</span>
-                <span className={`text-lg font-black px-3 py-1 rounded-lg ${completedThisWeekCount >= 1 ? 'text-emerald-600 bg-emerald-50' : 'text-indigo-600 bg-indigo-50'}`}>
+
+          {/* Continue Learning Float Card */}
+          <div className="lg:col-span-2 relative">
+            {continueCourse ? (
+              <div 
+                onClick={() => navigate(`/user/courses/${continueCourse.id}`)}
+                className="group/cont glass-card rounded-[2.5rem] p-7 md:p-8 cursor-pointer transition-all duration-700 hover:-translate-y-3 hover:shadow-[0_40px_80px_-15px_rgba(79,70,229,0.25)] border-white/80 ring-1 ring-black/5"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-xl shadow-primary/30">
+                    <PlayCircle size={24} />
+                  </div>
+                  <span className="px-3 py-1 bg-primary/5 text-primary text-[10px] font-black rounded-lg uppercase tracking-widest border border-primary/10">In Progress</span>
+                </div>
+                
+                <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-6 line-clamp-2 group-hover/cont:text-primary transition-colors">
+                  {continueCourse.title}
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</p>
+                    <p className="text-sm font-black text-primary italic">{continueCourse.progressPercent}%</p>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden ring-1 ring-black/5">
+                    <div 
+                      className="h-full bg-gradient-to-r from-primary to-indigo-400 rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${continueCourse.progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+                
+                <button className="w-full mt-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 group-hover/cont:bg-primary transition-all">
+                  Resume Lesson <ChevronRight size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="card h-full min-h-[300px] glass-card border-none flex flex-col items-center justify-center text-center p-10">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                  <Target size={28} className="text-slate-300" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 mb-2">เริ่มบทเรียนใหม่</h3>
+                <p className="text-slate-400 text-sm font-medium leading-relaxed">ค้นหาคอร์สที่น่าสนใจและเริ่มเส้นทางการเรียนรู้ของคุณเลย!</p>
+              </div>
+            )}
+            
+            {/* Decorative dots for hero */}
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none transition-transform group-hover:scale-150 duration-1000"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Secondary Dashboard Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Weekly Goal Bento */}
+        <div className="card bg-white p-8 rounded-[2.5rem] flex flex-col justify-between h-full shadow-[0_20px_40px_rgba(0,0,0,0.02)] ring-1 ring-slate-100 border-none group hover:ring-primary/20 transition-all duration-500">
+          <div>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-xl transition-transform group-hover:scale-110 duration-500 ${completedThisWeekCount >= 1 ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-slate-900 text-white shadow-slate-200'}`}>
+              <Target size={26} strokeWidth={2.5}/>
+            </div>
+            <p className="text-[10px] text-slate-400 font-extrabold mb-1.5 uppercase tracking-widest">WEEKLY TARGET</p>
+            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Complete 1 Course</h3>
+          </div>
+          <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
+             <div className="flex -space-x-2">
+                {[1, 2, 3].map(i => <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-slate-100 text-[8px] flex items-center justify-center font-bold text-slate-400">{i}</div>)}
+             </div>
+             <div className="flex items-center gap-3">
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
+                <span className={`text-xl font-black px-4 py-1.5 rounded-xl ${completedThisWeekCount >= 1 ? 'text-emerald-600 bg-emerald-50' : 'text-slate-900 bg-slate-50'}`}>
                   {completedThisWeekCount}/1
                 </span>
              </div>
           </div>
         </div>
-        
+
+        {/* Categories Quick Filter Bar (Scrollable on mobile) */}
+        <div className="md:col-span-2 flex flex-col gap-4">
+           <div className="flex items-center justify-between px-2">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">Browse Categories</h3>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{categories.length} Topics</p>
+           </div>
+           <div className="flex flex-wrap gap-3">
+              <button className="px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-200 active:scale-95 transition-all">All Courses</button>
+              {categories.map(cat => (
+                <button key={cat.id} className="px-6 py-3.5 bg-white text-slate-600 border border-slate-100 rounded-2xl font-bold text-xs uppercase tracking-widest hover:border-primary hover:text-primary active:scale-95 transition-all shadow-sm">
+                  {cat.name}
+                </button>
+              ))}
+           </div>
+           <div className="mt-4 p-8 rounded-[2.5rem] bg-slate-900 text-white flex items-center justify-between overflow-hidden relative group cursor-pointer">
+              <div className="relative z-10">
+                 <h4 className="text-xl font-black mb-1">Explore New Rewards</h4>
+                 <p className="text-slate-400 text-xs font-medium">Use your points to unlock exclusive certificates and rewards.</p>
+              </div>
+              <ChevronRight className="relative z-10 group-hover:translate-x-2 transition-transform" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-[60px] translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700"></div>
+           </div>
+        </div>
       </div>
 
       {/* Categorized Courses */}
