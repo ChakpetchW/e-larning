@@ -316,14 +316,14 @@ const LessonPlayer = () => {
                     
                     {nextLessonId ? (
                       <button
-                        onClick={() => navigate(`/user/course/${courseId}/lesson/${nextLessonId}`)}
+                        onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}
                         className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black text-sm tracking-[0.2em] uppercase hover:bg-primary transition-all shadow-2xl shadow-slate-200 active:scale-95"
                       >
                         เรียนบทถัดไป →
                       </button>
                     ) : (
                       <button
-                        onClick={() => navigate(`/user/course/${courseId}`)}
+                        onClick={() => navigate(`/user/courses/${courseId}`)}
                         className="w-full py-5 bg-slate-100 text-slate-900 rounded-[1.5rem] font-black text-sm tracking-[0.2em] uppercase hover:bg-slate-200 transition-all active:scale-95"
                       >
                         กลับสู่คอร์สเรียน
@@ -372,7 +372,7 @@ const LessonPlayer = () => {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-50 md:hidden flex gap-3 animate-fade-in shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         {completed && nextLessonId ? (
           <button
-            onClick={() => navigate(`/user/course/${courseId}/lesson/${nextLessonId}`)}
+            onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}
             className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-[13px] tracking-widest uppercase shadow-xl"
           >
             เริ่มบทถัดไป
