@@ -285,7 +285,10 @@ const CourseManagement = () => {
           <div className="card bg-white w-full max-w-6xl h-full overflow-hidden shadow-xl flex flex-col m-auto border border-gray-100">
             {/* Header & Tabs */}
             <div className="p-4 border-b border-border bg-gray-50 flex justify-between items-center">
-              <h3 className="text-xl font-bold">{isEditing ? 'แก้ไขคอร์สเรียน' : 'สร้างคอร์สใหม่'}</h3>
+              <div className="flex flex-col">
+                <h3 className="text-xl font-bold">{isEditing ? 'แก้ไขคอร์สเรียน' : 'สร้างคอร์สใหม่'}</h3>
+                <span className="text-[10px] text-red-500 font-black animate-pulse uppercase">--- NEW VERSION 2.3 (PREMIUM FIELDS MERGED) ---</span>
+              </div>
               <button onClick={() => setShowModal(false)} className="text-muted hover:text-gray-900"><X size={20} /></button>
             </div>
 
