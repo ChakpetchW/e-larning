@@ -39,26 +39,31 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center md:items-center justify-center sm:p-4 md:p-6 animate-fade-in items-end p-0">
       <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
         onClick={onClose}
       ></div>
       
-      <div className="bg-white w-full max-w-4xl h-[90vh] md:h-[80vh] rounded-[2.5rem] shadow-2xl relative flex flex-col overflow-hidden animate-slide-up ring-1 ring-black/5">
+      <div className="bg-white w-full max-w-4xl h-[90vh] md:h-[80vh] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-2xl relative flex flex-col overflow-hidden animate-slide-up ring-1 ring-black/5 rounded-b-none md:rounded-b-[2.5rem]">
+        {/* Mobile Drag Handle */}
+        <div className="md:hidden flex justify-center pt-3 pb-1 shrink-0">
+          <div className="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+        </div>
+
         {/* Header */}
-        <div className="p-6 md:p-8 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <div className="p-6 md:p-8 pt-4 md:pt-8 border-b border-slate-100 flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-              <Grid className="text-primary" size={28} /> เลือกหมวดหมู่ที่สนใจ
+            <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+              <Grid className="text-primary" size={24} md:size={28} /> เลือกหมวดหมู่ที่สนใจ
             </h2>
-            <p className="text-slate-400 text-sm font-medium mt-1">ค้นหาจาก {categories.length} หมวดหมู่ทั้งหมดในระบบ</p>
+            <p className="text-slate-400 text-[11px] md:text-sm font-medium mt-1">ค้นหาจาก {categories.length} หมวดหมู่ทั้งหมดในระบบ</p>
           </div>
           <button 
             onClick={onClose}
-            className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100"
+            className="p-2.5 md:p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100"
           >
-            <X size={24} />
+            <X size={20} md:size={24} />
           </button>
         </div>
 

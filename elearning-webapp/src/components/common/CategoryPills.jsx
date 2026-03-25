@@ -10,7 +10,7 @@ const CategoryPills = ({
   className = "" 
 }) => {
   return (
-    <div className={`flex gap-2.5 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 items-center ${className}`}>
+    <div className={`flex gap-2.5 overflow-x-auto pb-2 no-scrollbar -mx-5 px-5 items-center ${className}`}>
       {categories.map(cat => (
         <button 
           key={cat.id}

@@ -1,4 +1,5 @@
 .user-layout {
+  --main-px: 1.25rem;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -42,8 +43,8 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 1.25rem;
-  padding-bottom: calc(85px + env(safe-area-inset-bottom)); /* Space for bottom nav + safe area */
+  padding: var(--main-px);
+  padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* Increased space for bottom nav */
   max-width: 600px; /* Mobile width container even on desktop */
   margin: 0 auto;
   width: 100%;
