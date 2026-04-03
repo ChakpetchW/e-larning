@@ -14,7 +14,11 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
       type="button"
       onClick={onClick}
       aria-label={`เปิดคอร์ส ${course.title}`}
-      className={`group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${className}`}
+      className={`group flex h-full flex-col overflow-hidden rounded-xl border bg-white text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${className}`}
+      style={{
+        borderColor: 'rgba(226, 232, 240, 0.5)', // Match --border-light
+        boxShadow: 'var(--shadow-premium)'
+      }}
     >
       <div className="relative w-full aspect-[16/9] overflow-hidden border-b border-gray-100 bg-gray-100">
         <img

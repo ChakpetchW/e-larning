@@ -250,9 +250,10 @@ const CourseDetail = () => {
                   aria-label={course.isEnrolled ? `เปิดบทเรียน ${lesson.title}` : `บทเรียน ${lesson.title} ต้องลงทะเบียนก่อน`}
                   className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border p-4 text-left transition-all duration-300 ${
                     course.isEnrolled
-                      ? 'border-slate-200 bg-white hover:border-primary/40 hover:shadow-[0_4px_20px_-4px_rgba(79,70,229,0.15)] hover:-translate-y-0.5'
+                      ? 'bg-white hover:border-primary/40 hover:-translate-y-0.5'
                       : 'border-slate-100 bg-slate-50 opacity-80 cursor-default'
                   }`}
+                  style={course.isEnrolled ? { borderColor: 'rgba(226, 232, 240, 0.5)', boxShadow: 'var(--shadow-premium)' } : {}}
                 >
                   {/* Status Indicator Bar (Left Edge) */}
                   {course.isEnrolled && (
@@ -341,7 +342,10 @@ const CourseDetail = () => {
         </div>
 
         <aside className="w-full shrink-0 lg:w-[360px]">
-          <div className={`sticky top-24 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_18px_50px_-16px_rgba(15,23,42,0.12)] transition-transform duration-500 ${isScrolled ? 'lg:-translate-y-3' : ''}`}>
+          <div 
+            className={`sticky top-24 overflow-hidden rounded-[2rem] border bg-white transition-transform duration-500 ${isScrolled ? 'lg:-translate-y-3' : ''}`}
+            style={{ borderColor: 'rgba(226, 232, 240, 0.5)', boxShadow: 'var(--shadow-card-hover)' }}
+          >
             <div className="relative aspect-video overflow-hidden bg-slate-900">
               {showVideo && course.previewVideoUrl ? (
                 <iframe

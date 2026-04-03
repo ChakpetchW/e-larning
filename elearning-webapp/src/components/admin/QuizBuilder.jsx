@@ -105,12 +105,19 @@ const QuizBuilder = ({ questions = [], onChange }) => {
               {q.choices.map((c, cIndex) => (
                 <div key={c.id || cIndex} className="flex gap-2 items-center relative z-10 pl-4 border-l-2 border-transparent focus-within:border-primary transition-colors">
                   <div className="absolute left-[-23px] w-4 h-px bg-gray-200"></div>
-                  <div 
-                    className="w-5 h-5 shrink-0 flex items-center justify-center bg-white border border-gray-300 rounded-full cursor-pointer hover:border-primary" 
+                  <button 
+                    type="button"
+                    title="เลือกเป็นคำตอบที่ถูกต้อง"
+                    aria-label={`เลือกตัวเลือกที่ ${cIndex + 1} เป็นคำตอบที่ถูกต้อง`}
+                    className={`w-5 h-5 shrink-0 flex items-center justify-center rounded-full border transition-all ${
+                      c.isCorrect 
+                        ? 'bg-green-500 border-green-500 shadow-sm' 
+                        : 'bg-white border-gray-300 hover:border-primary focus:ring-2 focus:ring-primary/20'
+                    }`} 
                     onClick={() => setCorrectChoice(qIndex, cIndex)}
                   >
-                    {c.isCorrect && <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-sm"></div>}
-                  </div>
+                    {c.isCorrect && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                  </button>
                   <input 
                     type="text" 
                     className={`form-input flex-1 text-sm py-1.5 ${c.isCorrect ? 'border-green-300 bg-green-50/10 font-medium' : ''}`} 

@@ -390,10 +390,20 @@ const CourseManagement = () => {
 
       {showCategoryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="card flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden bg-white p-6 shadow-xl">
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="category-modal-title"
+            className="card flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden bg-white p-6 shadow-xl"
+          >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold">จัดการหมวดหมู่</h3>
-              <button onClick={() => { setShowCategoryModal(false); setEditingCategoryId(null); setCategoryForm({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }} className="text-muted hover:text-gray-800">
+              <h3 id="category-modal-title" className="text-xl font-bold">จัดการหมวดหมู่</h3>
+              <button 
+                type="button"
+                aria-label="ปิดหน้าต่างจัดการหมวดหมู่"
+                onClick={() => { setShowCategoryModal(false); setEditingCategoryId(null); setCategoryForm({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }} 
+                className="text-muted hover:text-gray-800"
+              >
                 ปิด
               </button>
             </div>

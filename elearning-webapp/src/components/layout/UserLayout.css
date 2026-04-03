@@ -1,5 +1,4 @@
 .user-layout {
-  --main-px: 1.25rem;
   display: flex;
   flex-direction: column;
   height: 100vh;

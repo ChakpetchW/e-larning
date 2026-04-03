@@ -20,6 +20,11 @@
   
   --font-sans: 'Kanit', sans-serif;
   --main-px: 1.25rem;
+  
+  /* Shared Tokens */
+  --shadow-premium: 0 10px 40px -12px rgba(15, 23, 42, 0.12);
+  --shadow-card-hover: 0 22px 50px -16px rgba(15, 23, 42, 0.18);
+  --border-light: 1px solid rgba(226, 232, 240, 0.5); /* slate-200 with 50% alpha */
 }
 
 @layer base {

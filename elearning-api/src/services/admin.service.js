@@ -205,10 +205,10 @@ const buildCourseMutationPayload = async (tx, input) => {
     const visibleDepartmentIds = normalizeIdArray(input.visibleDepartmentIds);
     const visibleTierIds = normalizeIdArray(input.visibleTierIds);
 
-    await Promise.all([
-        ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds),
-        ensureReferenceIdsExist(tx, 'tier', visibleTierIds)
-    ]);
+    // Using sequential await instead of Promise.all to prevent "Transaction already closed" 
+    // errors when one check fails while others are still running on the same tx object.
+    await ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds);
+    await ensureReferenceIdsExist(tx, 'tier', visibleTierIds);
 
     const data = {
         title: input.title,
@@ -383,8 +383,8 @@ const getUserDetails = async (id) => {
     };
 };
 
-const createUser = async (inputData) => {
-    return prisma.$transaction(async (tx) => {
+const createUser = async (inputData) => prisma.$transaction(async (tx) => {
+    try {
         const data = await buildUserMutationData(tx, inputData, { isCreate: true });
 
         const user = await tx.user.create({
@@ -410,11 +410,17 @@ const createUser = async (inputData) => {
         }
 
         return mapUserRecord(user);
-    });
-};
+    } catch (error) {
+        console.error('Transaction Error in createUser:', error.message);
+        throw error;
+    }
+}, {
+    maxWait: 5000,
+    timeout: 10000
+});
 
-const updateUser = async (id, inputData) => {
-    return prisma.$transaction(async (tx) => {
+const updateUser = async (id, inputData) => prisma.$transaction(async (tx) => {
+    try {
         const data = await buildUserMutationData(tx, inputData);
 
         if (inputData.pointsBalance !== undefined) {
@@ -447,8 +453,14 @@ const updateUser = async (id, inputData) => {
         });
 
         return mapUserRecord(user);
-    });
-};
+    } catch (error) {
+        console.error('Transaction Error in updateUser:', error.message);
+        throw error;
+    }
+}, {
+    maxWait: 5000,
+    timeout: 10000
+});
 
 const deleteUser = async (id) => prisma.user.delete({ where: { id } });
 
@@ -507,38 +519,54 @@ const getAdminCourses = async () => {
 };
 
 const createCourse = async (input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds } = await buildCourseMutationPayload(tx, input);
+    try {
+        const { data, visibleDepartmentIds, visibleTierIds } = await buildCourseMutationPayload(tx, input);
 
-    const course = await tx.course.create({
-        data
-    });
+        const course = await tx.course.create({
+            data
+        });
 
-    await saveCourseVisibility(tx, course.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+        await saveCourseVisibility(tx, course.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
 
-    const createdCourse = await tx.course.findUnique({
-        where: { id: course.id },
-        include: courseInclude
-    });
+        const createdCourse = await tx.course.findUnique({
+            where: { id: course.id },
+            include: courseInclude
+        });
 
-    return mapCourseRecord(createdCourse);
+        return mapCourseRecord(createdCourse);
+    } catch (error) {
+        console.error('Transaction Error in createCourse:', error.message);
+        throw error;
+    }
+}, {
+    maxWait: 5000, 
+    timeout: 15000 
 });
 
 const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds } = await buildCourseMutationPayload(tx, input);
+    try {
+        const { data, visibleDepartmentIds, visibleTierIds } = await buildCourseMutationPayload(tx, input);
 
-    await tx.course.update({
-        where: { id },
-        data
-    });
+        await tx.course.update({
+            where: { id },
+            data
+        });
 
-    await saveCourseVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+        await saveCourseVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
 
-    const updatedCourse = await tx.course.findUnique({
-        where: { id },
-        include: courseInclude
-    });
+        const updatedCourse = await tx.course.findUnique({
+            where: { id },
+            include: courseInclude
+        });
 
-    return mapCourseRecord(updatedCourse);
+        return mapCourseRecord(updatedCourse);
+    } catch (error) {
+        console.error('Transaction Error in updateCourse:', error.message);
+        throw error;
+    }
+}, {
+    maxWait: 5000,
+    timeout: 15000
 });
 
 const deleteCourse = async (id) => prisma.course.delete({ where: { id } });
@@ -629,35 +657,43 @@ const updateRedeemStatus = async (id, status, adminNote) => {
     }
 
     return prisma.$transaction(async (tx) => {
-        if (status === 'REJECTED' && request.status !== 'REJECTED') {
-            await tx.pointsLedger.create({
-                data: {
-                    userId: request.userId,
-                    sourceType: 'reward_adjust',
-                    sourceId: request.id,
-                    points: request.pointsCost,
-                    note: `Refund for rejected redeem: ${id}`
-                }
-            });
-
-            await tx.reward.update({
-                where: { id: request.rewardId },
-                data: {
-                    stock: {
-                        increment: 1
+        try {
+            if (status === 'REJECTED' && request.status !== 'REJECTED') {
+                await tx.pointsLedger.create({
+                    data: {
+                        userId: request.userId,
+                        sourceType: 'reward_adjust',
+                        sourceId: request.id,
+                        points: request.pointsCost,
+                        note: `Refund for rejected redeem: ${id}`
                     }
+                });
+
+                await tx.reward.update({
+                    where: { id: request.rewardId },
+                    data: {
+                        stock: {
+                            increment: 1
+                        }
+                    }
+                });
+            }
+
+            return tx.redeemRequest.update({
+                where: { id },
+                data: {
+                    status,
+                    adminNote,
+                    updatedAt: new Date()
                 }
             });
+        } catch (error) {
+            console.error('Transaction Error in updateRedeemStatus:', error.message);
+            throw error;
         }
-
-        return tx.redeemRequest.update({
-            where: { id },
-            data: {
-                status,
-                adminNote,
-                updatedAt: new Date()
-            }
-        });
+    }, {
+        maxWait: 5000,
+        timeout: 10000
     });
 };
 
