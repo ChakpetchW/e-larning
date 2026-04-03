@@ -40,7 +40,7 @@ const CategoryPills = ({
           <button
             type="button"
             onClick={onViewAll}
-            className="ml-1 flex min-h-[46px] shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 md:ml-2 md:min-h-0 md:rounded-none md:border-transparent md:bg-transparent md:px-0 md:py-0 md:pb-3 md:text-[15px]"
+            className="ml-1 flex min-h-[46px] shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 md:ml-2 md:min-h-0 md:rounded-none md:border-transparent md:bg-transparent md:px-0 md:py-0 md:pb-3 md:text-[15px] md:hover:bg-transparent md:hover:text-primary/80"
           >
             <Grid size={16} />
             ดูทั้งหมด
