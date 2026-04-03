@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Grid } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import { filterCourses, sortCourses } from '../../utils/courseFilters';
