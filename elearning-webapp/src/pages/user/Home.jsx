@@ -177,10 +177,15 @@ const Home = () => {
 
       {/* Smart Preview Categories Horizontal Float */}
       {categories.length > 0 && (
-         <div className="-mt-1 mb-2">
-            <div className="flex items-center justify-between mb-3 md:mb-4 px-1 md:px-2">
-               <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight">คุณกำลังสนใจเรื่องอะไร?</h3>
-               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 md:text-[11px]">{categories.length} หมวด</p>
+         <div className="-mt-1 mb-4">
+            <div className="flex items-center justify-between mb-4 md:mb-5 px-1 md:px-2">
+               <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">คุณกำลังสนใจเรื่องอะไร?</h3>
+               <button 
+                  onClick={() => navigate('/user/courses')}
+                  className="flex items-center gap-1.5 rounded-full bg-slate-100 hover:bg-slate-200 px-4 py-1.5 text-xs md:text-sm font-bold text-slate-600 transition-colors"
+               >
+                 ดูคอร์สทั้งหมด <ChevronRight size={16} />
+               </button>
             </div>
             <div className="-mx-5 md:mx-0">
                <CategoryPills 

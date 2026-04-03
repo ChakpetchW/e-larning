@@ -19,7 +19,7 @@ const CategoryPills = ({
           <button 
             key={cat.id}
             onClick={() => onSelect(cat.name)}
-            className={`shrink-0 whitespace-nowrap pb-3 text-sm font-bold transition-all relative ${
+            className={`shrink-0 whitespace-nowrap pb-3 text-[15px] md:text-base font-bold transition-all relative ${
               activeCat === cat.name 
                 ? 'text-slate-900' 
                 : 'text-slate-400 hover:text-slate-700'
@@ -35,7 +35,7 @@ const CategoryPills = ({
         {showViewAll && (
           <button 
             onClick={onViewAll}
-            className="shrink-0 pb-3 text-sm font-bold text-primary hover:text-primary-dark transition-all whitespace-nowrap flex items-center gap-1.5 ml-2"
+            className="shrink-0 pb-3 text-[15px] md:text-base font-bold text-primary hover:text-primary-dark transition-all whitespace-nowrap flex items-center gap-1.5 ml-2"
           >
             <Grid size={14} /> ดูทั้งหมด
           </button>
