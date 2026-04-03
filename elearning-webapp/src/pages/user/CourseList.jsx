@@ -59,12 +59,18 @@ const CourseList = () => {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pt-2 relative pb-10">
-      <div className="sticky top-[-1px] z-40 bg-[#f8fafc]/95 backdrop-blur-md pt-2 md:pt-3 pb-2 md:pb-4 space-y-3 sm:space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
-        <div className="flex items-center justify-between px-5 sm:px-0">
+      <div className="sticky top-[-1.25rem] md:top-[-1px] z-40 -mx-5 px-5 md:-mx-0 md:px-0 bg-[#f8fafc]/95 backdrop-blur-md pt-5 md:pt-3 pb-2 md:pb-4 space-y-3 sm:space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
+        <div className="flex items-center justify-between">
           <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
+          <button 
+             onClick={() => setIsCatModalOpen(true)}
+             className="md:hidden flex items-center gap-1.5 rounded-full bg-slate-100 hover:bg-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors"
+          >
+            หมวดหมู่ <Grid size={13} />
+          </button>
         </div>
 
-        <div className="flex items-center gap-2 px-5 sm:px-0">
+        <div className="flex items-center gap-2">
           <div className="flex-1">
             <SearchInput 
               value={searchQuery}
@@ -85,12 +91,14 @@ const CourseList = () => {
         </div>
 
         {/* Categories Horizontal Scroll */}
-        <div className="px-5 sm:px-0">
+        {/* Categories Horizontal Scroll */}
+        <div className="-mx-5 md:mx-0">
           <CategoryPills 
             categories={categories}
             activeCat={activeCat}
             onSelect={setActiveCat}
             onViewAll={() => setIsCatModalOpen(true)}
+            showViewAll={false}
             className="mt-1"
           />
         </div>
