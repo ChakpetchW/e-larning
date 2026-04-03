@@ -8,6 +8,8 @@ import {
   Bell,
   Shield,
   X,
+  PlayCircle,
+  CheckCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
@@ -25,6 +27,8 @@ const Profile = () => {
   const [savingPassword, setSavingPassword] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
 
   const editDialogRef = useRef(null);
   const editInputRef = useRef(null);
@@ -38,16 +42,19 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const [userRes, pointsRes] = await Promise.all([
+        const [userRes, pointsRes, coursesRes] = await Promise.all([
           authAPI.getCurrentUser(),
           userAPI.getPoints(),
+          userAPI.getCourses(),
         ]);
         setUser(userRes.data);
         setPoints(pointsRes.data.balance);
+        setCourses(coursesRes.data);
       } catch (error) {
         console.error('Fetch profile error:', error);
       } finally {
         setLoading(false);
+        setCoursesLoading(false);
       }
     };
 
@@ -186,6 +193,52 @@ const Profile = () => {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-2 flex flex-col gap-1">
+        <h4 className="mb-2 pl-2 text-xs font-bold uppercase tracking-widest text-gray-400">
+          กิจกรรมการเรียน
+        </h4>
+        
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => navigate('/user/home')}
+            className="group relative flex flex-col items-start rounded-3xl border border-slate-100 bg-white p-5 text-left transition-all hover:shadow-xl hover:-translate-y-0.5"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/5 text-primary transition-transform group-hover:scale-110">
+              <PlayCircle size={24} />
+            </div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">กำลังเรียนอยู่</p>
+            <div className="mt-1 flex w-full items-end justify-between">
+              <h5 className="text-xl font-black text-slate-800">
+                {courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length} คอร์ส
+              </h5>
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-50 opacity-0 transition-opacity group-hover:opacity-100">
+                <ChevronRight size={16} className="text-slate-400" />
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate('/user/completed')}
+            className="group relative flex flex-col items-start rounded-3xl border border-slate-100 bg-white p-5 text-left transition-all hover:shadow-xl hover:-translate-y-0.5"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 transition-transform group-hover:scale-110">
+              <CheckCircle size={24} />
+            </div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">เรียนจบแล้ว</p>
+            <div className="mt-1 flex w-full items-end justify-between">
+              <h5 className="text-xl font-black text-slate-800">
+                {courses.filter(c => c.enrollmentStatus === 'COMPLETED').length} คอร์ส
+              </h5>
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-50 opacity-0 transition-opacity group-hover:opacity-100">
+                <ChevronRight size={16} className="text-slate-400" />
+              </div>
+            </div>
+          </button>
+        </div>
       </div>
 
       <div className="mt-2 flex flex-col gap-1">
