@@ -60,7 +60,39 @@
   }
 }
 
-/* Premium Typography Patterns */
+/* Premium Decoration Patterns */
+.mesh-bg {
+  background-color: #F8FAFC;
+  background-image: 
+    radial-gradient(at 100% 0%, rgba(67, 56, 202, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
+}
+
+.mesh-bg-premium {
+  background:
+    radial-gradient(circle at 70% 30%, rgba(67, 56, 202, 0.05), transparent 40%),
+    radial-gradient(circle at 20% 70%, rgba(14, 165, 233, 0.04), transparent 40%),
+    linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  position: relative;
+}
+
+.mesh-bg-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.015;
+  pointer-events: none;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+}
+
 .text-hero {
   font-size: clamp(1.75rem, 4.5vw, 3rem);
   line-height: 1.15;
@@ -75,29 +107,8 @@
   letter-spacing: -0.015em;
 }
 
-.mesh-bg {
-  background-color: #F1F5F9;
-  background-image: radial-gradient(at 88% 12%, hsla(234, 100%, 75%, 0.15) 0px, transparent 50%),
-                    radial-gradient(at 19% 82%, hsla(199, 100%, 72%, 0.1) 0px, transparent 50%);
-}
-
-.mesh-bg-premium {
-  background:
-    radial-gradient(circle at top right, rgba(67, 56, 202, 0.08), transparent 34%),
-    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.06), transparent 32%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
-  background-color: #f8fafc;
-}
-
-.glass-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.86));
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 16px 40px -18px rgba(15, 23, 42, 0.1);
-}
-
 .text-gradient-primary {
-  background: linear-gradient(135deg, #312e81 0%, #4338ca 45%, #1e1b4b 100%);
+  background: linear-gradient(135deg, #1E293B 0%, #4338CA 50%, #6366F1 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -118,7 +129,7 @@
     box-shadow: none;
   }
   .btn-outline {
-    @apply border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300;
+    @apply border border-slate-200 bg-white/50 backdrop-blur-sm text-slate-600 hover:bg-slate-50 hover:border-slate-300;
   }
   .card {
     @apply bg-white border outline-none overflow-hidden transition-all;
@@ -149,23 +160,23 @@
 }
 
 .points-pill {
-  background-color: rgba(254, 243, 199, 0.6); 
+  background-color: rgba(254, 243, 199, 0.5); 
   backdrop-filter: blur(8px);
   color: #B45309;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
   padding: 0.35rem 0.85rem;
-  border-radius: 99px;
+  border-radius: 12px;
   font-size: 0.75rem;
-  gap: 4px;
-  box-shadow: 0 4px 10px rgba(180, 83, 9, 0.06);
-  border: 1px solid rgba(253, 230, 138, 0.4); 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.04);
+  border: 1px solid rgba(253, 230, 138, 0.3); 
+  transition: all 0.2s ease;
 }
 
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 55%, #312e81 100%);
+  background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 55%, #312E81 100%);
 }
 
 @keyframes fadeIn {
@@ -184,4 +195,14 @@
 
 .animate-slide-up {
   animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }
