@@ -389,7 +389,7 @@ const Profile = () => {
                   setCurrentPassword('');
                   setNewPassword('');
                 }}
-                className="flex-1 rounded-xl bg-slate-100 px-4 py-3 font-bold text-slate-600 transition-colors hover:bg-slate-200"
+                className="flex-1 rounded-xl bg-slate-100 px-4 py-3 font-bold text-slate-600 transition-colors hover:bg-slate-200 focus:outline-none"
                 disabled={savingPassword}
               >
                 ยกเลิก
@@ -398,7 +398,7 @@ const Profile = () => {
                 type="button"
                 onClick={handleUpdatePassword}
                 disabled={savingPassword}
-                className="flex flex-1 items-center justify-center rounded-xl bg-primary px-4 py-3 font-bold text-white shadow-md transition-colors hover:bg-primary-hover"
+                className="flex flex-1 items-center justify-center rounded-xl bg-primary px-4 py-3 font-bold text-white shadow-md transition-colors hover:bg-primary-hover focus:outline-none"
               >
                 {savingPassword ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -437,7 +437,7 @@ const Profile = () => {
                 type="button"
                 onClick={() => setShowPolicyModal(false)}
                 aria-label="ปิดหน้าต่างนโยบายความเป็นส่วนตัว"
-                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100"
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 focus:outline-none"
               >
                 <X size={20} />
               </button>
@@ -466,7 +466,7 @@ const Profile = () => {
             <button
               type="button"
               onClick={() => setShowPolicyModal(false)}
-              className="w-full rounded-xl bg-primary py-3.5 font-bold text-white shadow-md transition-all hover:bg-primary-hover hover:shadow-lg"
+              className="w-full rounded-xl bg-primary py-3.5 font-bold text-white shadow-md transition-all hover:bg-primary-hover hover:shadow-lg focus:outline-none"
             >
               ฉันเข้าใจและยอมรับ
             </button>

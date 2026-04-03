@@ -54,7 +54,7 @@ const FilterSidebar = ({
             type="button"
             onClick={onClose}
             aria-label="ปิดตัวกรองคอร์ส"
-            className="rounded-full bg-gray-50 p-2 text-gray-500 transition-colors hover:bg-gray-100"
+            className="rounded-full bg-gray-50 p-2 text-gray-500 transition-colors hover:bg-gray-100 focus:outline-none"
           >
             <X size={18} />
           </button>
@@ -73,7 +73,7 @@ const FilterSidebar = ({
             ].map((option) => (
               <label
                 key={option.value}
-                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50"
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50 focus:outline-none"
               >
                 <span className="font-bold text-gray-700">{option.label}</span>
                 <input
@@ -99,7 +99,7 @@ const FilterSidebar = ({
             ].map((option) => (
               <label
                 key={option.value}
-                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50"
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50 focus:outline-none"
               >
                 <span className="font-bold text-gray-700">{option.label}</span>
                 <input
@@ -123,12 +123,12 @@ const FilterSidebar = ({
                   key={category.id}
                   type="button"
                   onClick={() => setActiveCat(category.name)}
-                  className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-all ${
-                    activeCat === category.name
-                      ? 'border-primary/30 bg-primary/10 text-primary'
-                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
+                    className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-all focus:outline-none ${
+                        activeCat === category.name
+                          ? 'border-primary/30 bg-primary/10 text-primary'
+                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
                   {category.name}
                 </button>
               ))}
@@ -140,14 +140,14 @@ const FilterSidebar = ({
           <button
             type="button"
             onClick={onReset}
-            className="flex-1 rounded-xl border border-gray-200 bg-white py-3.5 font-bold text-gray-600 transition-colors hover:bg-gray-100"
+            className="flex-1 rounded-xl border border-gray-200 bg-white py-3.5 font-bold text-gray-600 transition-colors hover:bg-gray-100 focus:outline-none"
           >
             ล้างค่า
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl bg-primary py-3.5 font-bold text-white shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] transition-all hover:bg-primary-hover hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)]"
+            className="flex-1 rounded-xl bg-primary py-3.5 font-bold text-white shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] transition-all hover:bg-primary-hover hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] focus:outline-none"
           >
             ดูผลลัพธ์
           </button>

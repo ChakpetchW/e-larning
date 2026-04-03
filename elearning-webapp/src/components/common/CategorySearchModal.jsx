@@ -122,7 +122,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
             type="button"
             onClick={handleClose}
             aria-label="ปิดหน้าต่างเลือกหมวดหมู่"
-            className="rounded-2xl border border-slate-100 bg-slate-50 p-2.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 md:p-3"
+            className="rounded-2xl border border-slate-100 bg-slate-50 p-2.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 focus:outline-none md:p-3"
           >
             <X size={20} />
           </button>
@@ -140,7 +140,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
               id={searchInputId}
               type="text"
               placeholder="พิมพ์ชื่อหมวดหมู่ที่ต้องการค้นหา..."
-              className="w-full rounded-2xl border border-slate-200 bg-white py-4.5 pl-14 pr-6 text-lg font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
+              className="w-full rounded-2xl border border-slate-200 bg-white py-4.5 pl-14 pr-6 text-lg font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 px-4"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
@@ -162,7 +162,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
                       onSelect(category.name);
                       handleClose();
                     }}
-                    className="group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-[2rem] border border-slate-100 bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-[2rem] border border-slate-100 bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/10 group-hover:text-primary">
                       <Icon size={24} />
