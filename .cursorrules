@@ -1,0 +1,6 @@
+# Visual & Code Standard Rules
+
+- **CRITICAL**: When adding new Lucide icons, UI components, or utilities, ALWAYS verify that the necessary imports are added to the top of the file to prevent ReferenceErrors at runtime.
+- Maintain Thai language support in all UI and file content (UTF-8).
+- Prioritize high-end aesthetics (Glassmorphism, gradients, modern typography).
+- Verify design consistency across different screen sizes before completion.
