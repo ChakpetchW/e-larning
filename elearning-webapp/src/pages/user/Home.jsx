@@ -86,8 +86,8 @@ const Home = () => {
               Learning Dashboard
             </div>
             
-            <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-slate-800 tracking-tight leading-[1.2] mb-6 flex flex-wrap items-baseline justify-center lg:justify-start gap-x-3">
-              สวัสดีคุณ
+            <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-slate-800 tracking-tight leading-[1.2] mb-6 flex flex-wrap items-baseline justify-center lg:justify-start gap-x-4">
+              <span className="mr-1">สวัสดีคุณ</span>
               <span className="text-gradient-primary inline-block">
                 {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}
               </span> 👋
@@ -120,7 +120,7 @@ const Home = () => {
             <img 
               src="/assets/images/hero_premium.png" 
               alt="Premium Learning Illustration" 
-              className="relative z-10 w-2/3 max-w-[240px] lg:w-full lg:max-w-[420px] object-contain drop-shadow-2xl animate-float"
+              className="relative z-10 w-[45%] max-w-[180px] lg:w-full lg:max-w-[420px] object-contain drop-shadow-2xl animate-float"
             />
             
             {/* Floating Action Overlay (Desktop Only) */}
