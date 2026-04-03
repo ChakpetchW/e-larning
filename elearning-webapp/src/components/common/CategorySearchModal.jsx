@@ -1,4 +1,5 @@
-import React, { useId, useMemo, useRef, useState } from 'react';
+import React, { useId, useMemo, useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Search,
@@ -19,7 +20,6 @@ import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const dialogRef = useRef(null);
-  const searchInputRef = useRef(null);
   const titleId = useId();
   const searchInputId = useId();
 
@@ -67,16 +67,31 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
     isOpen,
     onClose: handleClose,
     containerRef: dialogRef,
-    initialFocusRef: searchInputRef,
+    // Removed autofocus so mobile keyboard doesn't pop up and shift the screen
   });
+
+  // Lock body scroll tightly when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none'; // Prevent pulling down to refresh
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 animate-fade-in sm:p-4 md:items-center md:p-6">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-end justify-center p-0 sm:p-4 md:items-center md:p-6" style={{ pointerEvents: 'auto' }}>
       <button
         type="button"
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-fade-in cursor-default"
         onClick={handleClose}
         aria-label="ปิดหน้าต่างเลือกหมวดหมู่"
       />
@@ -87,7 +102,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative flex h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-t-[2.5rem] rounded-b-none bg-white shadow-2xl ring-1 ring-black/5 animate-slide-up md:h-[80vh] md:rounded-[2.5rem]"
+        className="relative flex h-[85dvh] w-full max-w-4xl flex-col overflow-hidden rounded-t-[2.5rem] rounded-b-none bg-white shadow-2xl animate-slide-up md:h-[80dvh] md:rounded-[2.5rem]"
       >
         <div className="md:hidden flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
@@ -123,7 +138,6 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
             </label>
             <input
               id={searchInputId}
-              ref={searchInputRef}
               type="text"
               placeholder="พิมพ์ชื่อหมวดหมู่ที่ต้องการค้นหา..."
               className="w-full rounded-2xl border border-slate-200 bg-white py-4.5 pl-14 pr-6 text-lg font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
@@ -133,7 +147,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar bg-slate-50/30">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar bg-slate-50/30 overscroll-contain">
           {filteredCategories.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
               {filteredCategories.map((category) => {
@@ -178,7 +192,8 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
