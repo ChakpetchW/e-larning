@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, ChevronRight, Target } from 'lucide-react';
+import { PlayCircle, ChevronRight, Target, Gift, Grid } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
 import SectionHeader from '../../components/common/SectionHeader';
 import CategoryPills from '../../components/common/CategoryPills';
-import { Grid } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
