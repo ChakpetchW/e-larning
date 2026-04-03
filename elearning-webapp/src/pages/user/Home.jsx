@@ -77,9 +77,9 @@ const Home = () => {
       <section className="relative -mx-5 mb-2 overflow-hidden rounded-none bg-slate-50 p-8 md:mx-0 md:rounded-[2.5rem] md:p-12 lg:p-16 border border-slate-100">
         <div className="relative z-10 flex flex-col lg:grid lg:grid-cols-5 gap-8 items-center text-center lg:text-left">
           <div className="lg:col-span-3 flex flex-col items-center lg:items-start w-full">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter leading-[1.1] mb-4">
+            <h1 className="text-3xl md:text-5xl lg:text-[3.25rem] font-bold text-slate-800 tracking-tight leading-[1.15] mb-4">
               สวัสดีคุณ<br className="hidden lg:block"/>
-              <span className="text-primary">
+              <span className="text-primary italic">
                 {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}
               </span> 👋
             </h1>
@@ -88,20 +88,20 @@ const Home = () => {
             </p>
             
             <div className="flex flex-wrap justify-center lg:justify-start gap-4 md:gap-10 w-full pt-6 border-t border-slate-200/50">
-               <div className="text-center lg:text-left">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">กําลังเรียน</p>
-                  <p className="text-xl md:text-2xl font-black text-slate-900">{courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length}</p>
-               </div>
-               <div className="text-center lg:text-left">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">เรียนจบแล้ว</p>
-                  <p className="text-xl md:text-2xl font-black text-slate-900">{courses.filter(c => c.enrollmentStatus === 'COMPLETED').length}</p>
-               </div>
-               <div className="text-center lg:text-left">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">คะแนน</p>
-                  <p className="text-xl md:text-2xl font-black text-primary">
-                    {pointsLoading ? '...' : points.toLocaleString()}
-                  </p>
-               </div>
+                <div className="text-center lg:text-left">
+                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">กําลังเรียน</p>
+                   <p className="text-xl md:text-2xl font-bold text-slate-800">{courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length}</p>
+                </div>
+                <div className="text-center lg:text-left">
+                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">เรียนจบแล้ว</p>
+                   <p className="text-xl md:text-2xl font-bold text-slate-800">{courses.filter(c => c.enrollmentStatus === 'COMPLETED').length}</p>
+                </div>
+                <div className="text-center lg:text-left">
+                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">คะแนน</p>
+                   <p className="text-xl md:text-2xl font-bold text-primary">
+                     {pointsLoading ? '...' : points.toLocaleString()}
+                   </p>
+                </div>
             </div>
           </div>
 
@@ -111,37 +111,37 @@ const Home = () => {
                 type="button"
                 onClick={() => navigate(`/user/courses/${continueCourse.id}`)}
                 aria-label={`เปิดคอร์ส ${continueCourse.title}`}
-                className="group/cont w-full bg-slate-900 rounded-[2rem] p-6 lg:p-8 text-left shadow-[0_20px_40px_-15px_rgba(15,23,42,0.4)] ring-1 ring-white/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(79,70,229,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:rounded-[2.5rem] overflow-hidden relative"
+                className="group/cont w-full bg-slate-800 rounded-[2rem] p-6 lg:p-8 text-left shadow-[0_20px_40px_-20px_rgba(15,23,42,0.2)] ring-1 ring-white/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_-15px_rgba(67,56,202,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:rounded-[2.5rem] overflow-hidden relative"
               >
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/30 rounded-full blur-[60px] pointer-events-none -translate-y-12 translate-x-12"></div>
                 <div className="flex items-center justify-between mb-5 lg:mb-8 relative z-10">
                   <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/10 text-white backdrop-blur-md shadow-inner shadow-white/20 lg:h-12 lg:w-12 lg:rounded-2xl">
                     <PlayCircle size={20} className="text-white lg:w-6 lg:h-6" />
                   </div>
-                  <span className="rounded-lg bg-emerald-500/15 border border-emerald-500/20 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 lg:text-[10px]">
+                  <span className="rounded-lg bg-white/10 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-300 lg:text-[10px]">
                     คอร์สปัจจุบัน
                   </span>
                 </div>
                 
-                <h3 className="text-lg lg:text-2xl font-black text-white leading-tight mb-5 lg:mb-6 line-clamp-2 transition-colors relative z-10">
+                <h3 className="text-lg lg:text-2xl font-bold text-white leading-tight mb-5 lg:mb-6 line-clamp-2 transition-colors relative z-10">
                   {continueCourse.title}
                 </h3>
                 
                 <div className="space-y-3 relative z-10">
                   <div className="flex justify-between items-end">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 lg:text-[10px]">ความคืบหน้า</p>
-                    <p className="text-xs lg:text-sm font-black text-white italic drop-shadow-md">{continueCourse.progressPercent}%</p>
+                    <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 lg:text-[10px]">ความคืบหน้า</p>
+                    <p className="text-xs lg:text-sm font-bold text-white drop-shadow-md">{continueCourse.progressPercent}%</p>
                   </div>
-                  <div className="w-full bg-slate-800 rounded-full h-2 lg:h-2.5 overflow-hidden shadow-inner">
+                  <div className="w-full bg-slate-700/50 rounded-full h-2 lg:h-2 overflow-hidden shadow-inner">
                     <div 
-                      className="h-full bg-gradient-to-r from-primary to-sky-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(79,70,229,0.5)]"
+                      className="h-full bg-primary rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(67,56,202,0.3)]"
                       style={{ width: `${continueCourse.progressPercent}%` }}
                     />
                   </div>
                 </div>
                 
-                <div className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 backdrop-blur-sm py-3.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-white/20 lg:mt-8 lg:rounded-2xl lg:py-4 lg:text-xs relative z-10">
-                  เรียนต่อจากบทล่าสุด <ChevronRight size={14} className="lg:w-4 lg:h-4 text-white/70" />
+                <div className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 backdrop-blur-sm py-3.5 text-[10px] font-semibold uppercase tracking-widest text-white transition-colors hover:bg-white/10 lg:mt-8 lg:rounded-2xl lg:py-4 lg:text-xs relative z-10">
+                  เรียนต่อจากบทล่าสุด <ChevronRight size={14} className="lg:w-4 lg:h-4 text-white/50" />
                 </div>
               </button>
             ) : (
@@ -191,14 +191,14 @@ const Home = () => {
       {/* Simplified Secondary Dashboard Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
         {/* Weekly Goal Widget */}
-        <div className="flex flex-col justify-between rounded-[2rem] bg-white p-7 border border-slate-100 transition-all hover:border-primary/20">
+        <div className="flex flex-col justify-between rounded-[2rem] bg-white p-7 border border-slate-100 transition-all hover:border-primary/10">
           <div className="flex items-center gap-4">
-            <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white'}`}>
+            <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-white'}`}>
               <Target size={24} />
             </div>
             <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">เป้าหมายสัปดาห์นี้</p>
-              <h3 className="text-lg font-black text-slate-900 leading-none">{completedThisWeekCount}/{weeklyGoal} คอร์ส</h3>
+              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mb-0.5">เป้าหมายสัปดาห์นี้</p>
+              <h3 className="text-lg font-bold text-slate-800 leading-none">{completedThisWeekCount}/{weeklyGoal} คอร์ส</h3>
             </div>
           </div>
           <div className="mt-6 flex items-center justify-between gap-4">
@@ -208,7 +208,7 @@ const Home = () => {
                 style={{ width: `${Math.min(100, (completedThisWeekCount / weeklyGoal) * 100)}%` }}
               />
             </div>
-            <span className="text-xs font-bold text-slate-500">{Math.round(Math.min(100, (completedThisWeekCount / weeklyGoal) * 100))}%</span>
+            <span className="text-xs font-semibold text-slate-400">{Math.round(Math.min(100, (completedThisWeekCount / weeklyGoal) * 100))}%</span>
           </div>
         </div>
 
@@ -216,16 +216,16 @@ const Home = () => {
         <button
           type="button"
           onClick={() => navigate('/user/rewards')}
-          className="group relative flex items-center justify-between overflow-hidden rounded-[2rem] bg-slate-900 p-7 text-left transition-all hover:bg-slate-800"
+          className="group relative flex items-center justify-between overflow-hidden rounded-[2rem] bg-slate-800 p-7 text-left transition-all hover:bg-slate-700"
         >
            <div className="relative z-10">
-              <h4 className="text-xl font-black text-white mb-1">แลกรางวัล</h4>
+              <h4 className="text-xl font-bold text-white mb-1">แลกรางวัล</h4>
               <p className="text-slate-400 text-xs font-medium">ใช้แต้มสะสมของคุณแลกรางวัลพิเศษ</p>
            </div>
-           <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
-              <Gift size={24} className="text-amber-300" />
+           <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-white">
+              <Gift size={24} className="text-amber-200" />
            </div>
-           <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-primary/20 rounded-full blur-[40px] pointer-events-none"></div>
+           <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none"></div>
         </button>
       </div>
 

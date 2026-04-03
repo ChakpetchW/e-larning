@@ -33,7 +33,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
         </div>
         {course.isEnrolled && (
           <div className="absolute right-2 top-2 z-20">
-            <span className={`rounded px-2 py-0.5 text-[10px] font-bold ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-primary/10 text-primary'}`}>
+            <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-primary/5 text-primary'}`}>
               {isCompleted ? 'เรียนจบแล้ว' : 'กำลังเรียน'}
             </span>
           </div>
@@ -42,24 +42,24 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
 
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-2 flex items-start justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
             {course.category?.name || 'หมวดทั่วไป'}
           </span>
         </div>
-        <h3 className="mb-3 line-clamp-2 text-[1.1rem] font-black leading-[1.2] text-slate-900 transition-colors group-hover:text-primary">
+        <h3 className="mb-3 line-clamp-2 text-[1rem] font-bold leading-[1.3] text-slate-800 transition-colors group-hover:text-primary">
           {course.title}
         </h3>
 
-        <div className="mt-auto flex items-center justify-between gap-4 border-t border-gray-100/50 pt-4">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="mt-auto flex items-center justify-between gap-4 border-t border-slate-100/50 pt-4">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
             <Clock size={12} strokeWidth={2.5} />
             <span>{course.lessons?.reduce((acc, lesson) => acc + (parseInt(lesson.duration, 10) || 0), 0) || course.totalDuration || 'พรีเมียม'}</span>
           </div>
           <div className="flex flex-col items-end leading-none">
-            <span className="text-[1.15rem] font-black tracking-tighter text-primary">
+            <span className="text-[1.125rem] font-bold tracking-tight text-primary">
               {course.points > 0 ? course.points.toLocaleString() : 'FREE'}
             </span>
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mt-0.5">
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 mt-0.5">
               {pointsSuffix}
             </span>
           </div>
