@@ -37,12 +37,14 @@ router.delete('/categories/:id', adminController.deleteCategory);
 router.get('/rewards', adminController.getAdminRewards);
 router.post('/rewards', adminController.createReward);
 router.put('/rewards/:id', adminController.updateReward);
+router.delete('/rewards/:id', adminController.deleteReward);
 
 router.get('/redeems', adminController.getRedeemRequests);
 router.put('/redeems/:id/status', adminController.updateRedeemStatus);
 
 // Lesson Management
 router.get('/courses/:courseId/lessons', adminController.getCourseLessons);
+router.put('/lessons/reorder', adminController.reorderLessons);
 router.post('/lessons', adminController.createLesson);
 router.put('/lessons/:id', adminController.updateLesson);
 router.delete('/lessons/:id', adminController.deleteLesson);

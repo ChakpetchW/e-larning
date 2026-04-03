@@ -205,6 +205,19 @@ const CourseManagement = () => {
     }
   };
 
+  const handleReorderLessons = async (reorderedLessons) => {
+    const originalLessons = [...lessons];
+    setLessons(reorderedLessons);
+
+    try {
+      await adminAPI.reorderLessons(reorderedLessons.map((l) => l.id));
+    } catch (error) {
+      console.error('Reorder lessons error:', error);
+      setLessons(originalLessons);
+      alert('ไม่สามารถจัดลำดับบทเรียนได้');
+    }
+  };
+
   const handleDeleteLesson = async (lessonId) => {
     if (!window.confirm('ยืนยันการลบบทเรียนนี้ใช่หรือไม่?')) {
       return;
@@ -373,6 +386,7 @@ const CourseManagement = () => {
           setLessonForm(getDefaultLessonForm(lessons.length + 1));
           setShowLessonModal(true);
         }}
+        onReorderLessons={handleReorderLessons}
         fetchQuizReports={fetchQuizReports}
         uploading={uploading}
       />

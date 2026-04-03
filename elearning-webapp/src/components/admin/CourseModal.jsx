@@ -1,8 +1,87 @@
 import React, { useRef } from 'react';
-import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Play, Edit } from 'lucide-react';
+import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Play, Edit, GripVertical } from 'lucide-react';
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+const SortableLessonItem = ({ lesson, idx, onEdit, onDelete }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: lesson.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 group transition-all hover:border-primary/20 ${isDragging ? 'shadow-lg border-primary/40 bg-white ring-2 ring-primary/10' : 'hover:shadow-sm'}`}
+    >
+      <div 
+        {...attributes} 
+        {...listeners} 
+        className="cursor-grab active:cursor-grabbing p-1 text-slate-300 hover:text-slate-500 transition-colors"
+      >
+        <GripVertical size={18} />
+      </div>
+      
+      <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0 font-bold text-xs text-muted">
+        {idx + 1}
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          {lesson.type === 'video' ? <Play size={12} className="text-primary" /> : <FileText size={12} className="text-blue-500" />}
+          <h4 className="text-sm font-bold truncate">{lesson.title}</h4>
+        </div>
+        <p className="text-[10px] text-gray-400 truncate font-medium">{lesson.contentUrl || 'ไม่มีที่อยู่ไฟล์'}</p>
+      </div>
+      
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          type="button"
+          onClick={() => onEdit(lesson)}
+          className="p-1.5 hover:bg-white rounded transition-colors text-primary"
+        >
+          <Edit size={14} />
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(lesson.id)}
+          className="p-1.5 hover:bg-white rounded transition-colors text-danger"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const CourseModal = ({
   isOpen,
@@ -24,10 +103,34 @@ const CourseModal = ({
   onEditLesson,
   onDeleteLesson,
   onAddLesson,
+  onReorderLessons,
   fetchQuizReports,
   uploading
 }) => {
   const imageInputRef = useRef(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+        activationConstraint: {
+            distance: 5,
+        },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = lessons.findIndex((l) => l.id === active.id);
+      const newIndex = lessons.findIndex((l) => l.id === over.id);
+      
+      const reorderedLessons = arrayMove(lessons, oldIndex, newIndex);
+      onReorderLessons(reorderedLessons);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -385,34 +488,27 @@ const CourseModal = ({
               </div>
 
               <div className="flex flex-col gap-2">
-                {lessons.map((lesson, idx) => (
-                  <div key={lesson.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 group transition-all hover:border-primary/20 hover:shadow-sm">
-                    <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0 font-bold text-xs text-muted">
-                      {idx + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        {lesson.type === 'video' ? <Play size={12} className="text-primary" /> : <FileText size={12} className="text-blue-500" />}
-                        <h4 className="text-sm font-bold truncate">{lesson.title}</h4>
-                      </div>
-                      <p className="text-[10px] text-gray-400 truncate font-medium">{lesson.contentUrl || 'ไม่มีที่อยู่ไฟล์'}</p>
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => onEditLesson(lesson)} 
-                        className="p-1.5 hover:bg-white rounded transition-colors text-primary"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteLesson(lesson.id)} 
-                        className="p-1.5 hover:bg-white rounded transition-colors text-danger"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={lessons.map(l => l.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {lessons.map((lesson, idx) => (
+                      <SortableLessonItem
+                        key={lesson.id}
+                        lesson={lesson}
+                        idx={idx}
+                        onEdit={onEditLesson}
+                        onDelete={onDeleteLesson}
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+                
                 {lessons.length === 0 && (
                   <div className="py-12 border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-400">
                     <Layers size={32} className="mb-2 opacity-20" />

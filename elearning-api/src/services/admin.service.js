@@ -789,6 +789,13 @@ const updateLesson = async (id, data) => {
 
 const deleteLesson = async (id) => prisma.lesson.delete({ where: { id } });
 
+const reorderLessons = async (lessonIds) => prisma.$transaction(
+    lessonIds.map((id, index) => prisma.lesson.update({
+        where: { id },
+        data: { order: index }
+    }))
+);
+
 const getCourseQuizAttempts = async (courseId) => {
     const attempts = await prisma.quizAttempt.findMany({
         where: {
