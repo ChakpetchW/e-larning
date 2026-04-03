@@ -188,7 +188,7 @@ const CourseModal = ({
                 <div className="flex flex-col gap-1">
                   <h4 className="text-base font-black text-slate-900">สิทธิ์การมองเห็นคอร์ส</h4>
                   <p className="text-sm text-slate-500">
-                    กำหนดได้ว่าแผนกไหนและ tier ไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
+                    กำหนดได้ว่าแผนกไหนและระดับผู้ใช้งานไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
                   </p>
                 </div>
 
@@ -210,7 +210,7 @@ const CourseModal = ({
                     <span>
                       <span className="block text-sm font-bold text-slate-900">เปิดให้ทุกคนเห็นคอร์สนี้</span>
                       <span className="block text-xs text-slate-500">
-                        ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกและ tier ด้านล่างในการคุมการมองเห็น
+                        ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกและระดับผู้ใช้งานด้านล่างในการคุมการมองเห็น
                       </span>
                     </span>
                   </label>
@@ -221,7 +221,7 @@ const CourseModal = ({
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
                       <div className="mb-3">
                         <h5 className="text-sm font-black text-slate-900">แผนกที่เห็นคอร์สได้</h5>
-                        <p className="text-xs text-slate-500">ถ้าไม่เลือกแผนกเลย จะใช้เฉพาะการคุมด้วย tier</p>
+                        <p className="text-xs text-slate-500">ถ้าไม่เลือกแผนกเลย จะใช้เฉพาะระดับผู้ใช้งานในการคุมสิทธิ์</p>
                       </div>
                       <div className="space-y-2">
                         {departments.length === 0 ? (
@@ -253,12 +253,12 @@ const CourseModal = ({
 
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
                       <div className="mb-3">
-                        <h5 className="text-sm font-black text-slate-900">Tier ที่เห็นคอร์สได้</h5>
-                        <p className="text-xs text-slate-500">ถ้าเลือกทั้งแผนกและ tier ผู้ใช้ต้องผ่านเงื่อนไขที่กำหนด</p>
+                        <h5 className="text-sm font-black text-slate-900">ระดับผู้ใช้งานที่เห็นคอร์สได้</h5>
+                        <p className="text-xs text-slate-500">ถ้าเลือกทั้งแผนกและระดับผู้ใช้งาน ผู้ใช้ต้องผ่านเงื่อนไขที่กำหนด</p>
                       </div>
                       <div className="space-y-2">
                         {tiers.length === 0 ? (
-                          <p className="text-sm text-slate-500">ยังไม่มี tier ในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
+                          <p className="text-sm text-slate-500">ยังไม่มีระดับผู้ใช้งานในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
                         ) : (
                           tiers.map((tier) => (
                             <label key={tier.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700">

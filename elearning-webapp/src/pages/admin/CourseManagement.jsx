@@ -330,7 +330,7 @@ const CourseManagement = () => {
         <div>
           <h2 className="mb-1 text-2xl font-bold">จัดการคอร์สเรียน</h2>
           <p className="text-sm text-muted">
-            สร้างคอร์ส จัดการบทเรียน และกำหนดว่าแผนกหรือ tier ไหนจะมองเห็นคอร์สนี้ได้
+            สร้างคอร์ส จัดการบทเรียน และกำหนดว่าแผนกหรือระดับผู้ใช้งานไหนจะมองเห็นคอร์สนี้ได้
           </p>
         </div>
 
@@ -522,7 +522,7 @@ const CourseManagement = () => {
                       ) : (
                         <div className="space-y-1">
                           <div>แผนก {course.visibleDepartments?.length || 0} รายการ</div>
-                          <div>Tier {course.visibleTiers?.length || 0} รายการ</div>
+                          <div>ระดับผู้ใช้งาน {course.visibleTiers?.length || 0} รายการ</div>
                         </div>
                       )}
                     </td>

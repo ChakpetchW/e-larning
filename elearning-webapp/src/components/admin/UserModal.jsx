@@ -24,7 +24,7 @@ const UserModal = ({
               {editingUser ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              เลือกแผนกและ tier จากข้อมูลกลางของระบบเพื่อให้จัดสิทธิ์คอร์สได้แม่นยำ
+              เลือกแผนกและระดับผู้ใช้งานจากข้อมูลกลางของระบบเพื่อให้จัดสิทธิ์คอร์สได้แม่นยำ
             </p>
           </div>
           <button
@@ -96,13 +96,13 @@ const UserModal = ({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">Tier</label>
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">ระดับผู้ใช้งาน</label>
                 <select
                   className="form-input w-full"
                   value={formData.tierId}
                   onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
                 >
-                  <option value="">ยังไม่กำหนด tier</option>
+                  <option value="">ยังไม่กำหนดระดับ</option>
                   {tiers.map((tier) => (
                     <option key={tier.id} value={tier.id}>
                       {tier.name}

@@ -59,36 +59,41 @@ const CourseList = () => {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pt-2 relative pb-10">
-      <div className="sticky top-[-1px] z-40 bg-[#f8fafc]/95 backdrop-blur-md pt-2 pb-4 -mx-5 px-5 sm:mx-0 sm:px-0 space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
+      <div className="sticky top-[-1px] z-40 bg-[#f8fafc]/95 backdrop-blur-md pt-2 md:pt-3 pb-2 md:pb-4 space-y-3 sm:space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
+        <div className="flex items-center justify-between px-5 sm:px-0">
+          <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
+        </div>
+
+        <div className="flex items-center gap-2 px-5 sm:px-0">
+          <div className="flex-1">
+            <SearchInput 
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              placeholder="ค้นหาชื่อคอร์ส..."
+            />
+          </div>
           <button 
             onClick={() => setShowFilterModal(true)}
-            className="text-gray-500 hover:text-primary transition-colors bg-white p-2.5 rounded-full shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 flex items-center gap-2 group relative"
+            className="text-slate-500 hover:text-primary transition-colors bg-white h-[46px] w-[46px] flex items-center justify-center rounded-xl shadow-sm border border-slate-200 group relative shrink-0"
           >
-            <Filter size={18} className="group-hover:text-primary" />
-            <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">ตัวกรอง</span>
+            <Filter size={20} className="group-hover:text-primary" />
             {(activeCat !== 'All' || sortBy !== 'newest') && (
-              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-primary rounded-full border-2 border-white"></span>
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full"></span>
             )}
           </button>
         </div>
 
-        {/* Search Bar */}
-        <SearchInput 
-          value={searchQuery}
-          onChange={setSearchQuery}
-          onClear={() => setSearchQuery('')}
-          placeholder="ค้นหาชื่อคอร์ส หรือคำอธิบาย..."
-        />
-
         {/* Categories Horizontal Scroll */}
-        <CategoryPills 
-          categories={categories}
-          activeCat={activeCat}
-          onSelect={setActiveCat}
-          onViewAll={() => setIsCatModalOpen(true)}
-        />
+        <div className="px-5 sm:px-0">
+          <CategoryPills 
+            categories={categories}
+            activeCat={activeCat}
+            onSelect={setActiveCat}
+            onViewAll={() => setIsCatModalOpen(true)}
+            className="mt-1"
+          />
+        </div>
       </div>
 
       {loading && (

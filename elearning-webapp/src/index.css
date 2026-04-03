@@ -218,6 +218,11 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+.fade-right-edge {
+  mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 100%);
+}
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
