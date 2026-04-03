@@ -4,6 +4,9 @@
   --color-primary: #4F46E5;
   --color-primary-hover: #4338CA;
   --color-primary-light: #EEF2FF;
+  --color-border: #E2E8F0;
+  --color-text-main: #0F172A;
+  --color-text-muted: #64748B;
   
   --color-success: #10B981;
   --color-warning: #F59E0B;
@@ -11,6 +14,9 @@
   
   --color-background: #F8FAFC;
   --color-surface: #FFFFFF;
+  --radius-md: 1rem;
+  --transition-fast: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-xl: 0 28px 60px -24px rgba(15, 23, 42, 0.28);
   
   --font-sans: 'Kanit', sans-serif;
 }
@@ -28,6 +34,24 @@
   /* Prevent Safari auto-zoom on focus by ensuring at least 18px font-size */
   input, select, textarea {
     font-size: 18px !important;
+  }
+
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea {
+    outline: none;
+  }
+
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
   }
 }
 
@@ -51,6 +75,28 @@
   background-image: radial-gradient(at 88% 12%, hsla(234, 100%, 75%, 0.25) 0px, transparent 50%),
                     radial-gradient(at 19% 82%, hsla(199, 100%, 72%, 0.2) 0px, transparent 50%),
                     radial-gradient(at 15% 15%, hsla(285, 100%, 75%, 0.2) 0px, transparent 50%);
+}
+
+.mesh-bg-premium {
+  background:
+    radial-gradient(circle at top right, rgba(79, 70, 229, 0.14), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.12), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  background-color: #f8fafc;
+}
+
+.glass-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.76));
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 22px 50px -26px rgba(15, 23, 42, 0.18);
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, #312e81 0%, #4f46e5 45%, #0f766e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 @layer components {
@@ -127,7 +173,7 @@
 }
 
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 55%, #0f766e 100%);
 }
 
 /* Animations */
@@ -138,6 +184,24 @@
 
 .animate-fade-in {
   animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes celebratePop {

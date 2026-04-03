@@ -15,17 +15,22 @@ model User {
   password      String
   role          String  @default("user") // "user" | "admin"
   department    String?
+  departmentId  String?
+  tierId        String?
   pointsBalance Int     @default(0)
+  employmentDate DateTime?
 
   status    String   @default("ACTIVE") // "ACTIVE" | "INACTIVE"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  enrollments  UserCourse[]
-  progress     UserLessonProgress[]
-  pointsLedger PointsLedger[]
-  redeems      RedeemRequest[]
-  QuizAttempt  QuizAttempt[]
+  departmentRef Department? @relation("DepartmentUsers", fields: [departmentId], references: [id], onDelete: SetNull)
+  tier          Tier?       @relation(fields: [tierId], references: [id], onDelete: SetNull)
+  enrollments   UserCourse[]
+  progress      UserLessonProgress[]
+  pointsLedger  PointsLedger[]
+  redeems       RedeemRequest[]
+  QuizAttempt   QuizAttempt[]
 }
 
 model Course {
@@ -36,6 +41,7 @@ model Course {
   points      Int      @default(0)
   status      String   @default("DRAFT") // "DRAFT" | "PUBLISHED"
   image       String?
+  visibleToAll Boolean @default(true)
   
   // Premium Fields
   instructorName   String?   @default("ทีมงานวิทยากรผู้เชี่ยวชาญ")
@@ -56,6 +62,8 @@ model Course {
   category    Category?    @relation(fields: [categoryId], references: [id])
   lessons     Lesson[]
   enrollments UserCourse[]
+  departmentAccess CourseDepartmentAccess[]
+  tierAccess       CourseTierAccess[]
 }
 
 model Category {
@@ -65,6 +73,48 @@ model Category {
   createdAt DateTime @default(now())
 
   courses Course[]
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]                 @relation("DepartmentUsers")
+  courseAccess CourseDepartmentAccess[]
+}
+
+model Tier {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  courseAccess CourseTierAccess[]
+}
+
+model CourseDepartmentAccess {
+  courseId     String
+  departmentId String
+  createdAt    DateTime @default(now())
+
+  course     Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, departmentId])
+}
+
+model CourseTierAccess {
+  courseId  String
+  tierId    String
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tier   Tier   @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, tierId])
 }
 
 model Lesson {

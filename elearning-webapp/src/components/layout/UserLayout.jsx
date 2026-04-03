@@ -17,7 +17,7 @@ const UserLayout = () => {
         if (u) setUser(u);
         const res = await userAPI.getPoints();
         setPoints(res.data.balance || 0);
-      } catch (err) {
+      } catch {
         console.error("Failed to fetch user points");
       }
     };
@@ -45,7 +45,7 @@ const UserLayout = () => {
         <div className="p-4 border-b border-gray-100 shrink-0">
           <div className="points-pill w-full flex justify-center !py-2.5">
             <Gift size={16} strokeWidth={3} />
-            <span className="text-sm">{points.toLocaleString()} Pts</span>
+            <span className="text-sm">{points.toLocaleString()} แต้ม</span>
           </div>
           <div className="mt-3 text-center">
             <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">ผู้ใช้งาน</p>
@@ -102,7 +102,7 @@ const UserLayout = () => {
             </div>
             <div className="points-pill shrink-0 shadow-sm border border-orange-100/50">
               <Gift size={12} strokeWidth={3} />
-              <span className="font-extrabold">{points.toLocaleString()} Pts</span>
+              <span className="font-extrabold">{points.toLocaleString()} แต้ม</span>
             </div>
           </div>
         </header>

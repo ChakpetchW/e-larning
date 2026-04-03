@@ -1,7 +1,50 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Award, PlayCircle, BookOpen, Check, Share2, Bookmark, Star, MonitorPlay, Infinity as InfinityIcon, FileText, ChevronDown } from 'lucide-react';
+import {
+  ArrowLeft,
+  Clock,
+  Award,
+  PlayCircle,
+  BookOpen,
+  Check,
+  Star,
+  MonitorPlay,
+  Infinity as InfinityIcon,
+  FileText,
+  Bookmark,
+  Users,
+} from 'lucide-react';
 import { userAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
+
+const getLessonTypeLabel = (type) => {
+  if (type === 'quiz') return 'แบบทดสอบ';
+  if (type === 'document') return 'เอกสาร';
+  return 'วิดีโอ';
+};
+
+const parseYoutubePreview = (url) => {
+  if (!url) return '';
+
+  if (url.includes('youtube.com/embed/')) return url;
+
+  const watchId = url.match(/[?&]v=([^&]+)/)?.[1];
+  if (watchId) return `https://www.youtube.com/embed/${watchId}?autoplay=1`;
+
+  const shortId = url.match(/youtu\.be\/([^?&]+)/)?.[1];
+  if (shortId) return `https://www.youtube.com/embed/${shortId}?autoplay=1`;
+
+  return url;
+};
+
+const tryParse = (value, fallback) => {
+  try {
+    if (!value) return fallback;
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -9,8 +52,6 @@ const CourseDetail = () => {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
-  
-  // UI State
   const [isScrolled, setIsScrolled] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
 
@@ -25,11 +66,13 @@ const CourseDetail = () => {
         setLoading(false);
       }
     };
+
     fetchDetail();
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 150);
     };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [id]);
@@ -41,312 +84,334 @@ const CourseDetail = () => {
       const response = await userAPI.getCourseDetails(id);
       setCourse(response.data);
     } catch (error) {
-       console.error('Enroll error:', error);
-       alert(error.response?.data?.message || 'Enrollment failed');
+      console.error('Enroll error:', error);
+      alert(error.response?.data?.message || 'ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setEnrolling(false);
     }
   };
 
+  const durationMinutes = useMemo(
+    () => course?.lessons?.reduce((acc, lesson) => acc + (parseInt(lesson.duration, 10) || 0), 0) || 0,
+    [course],
+  );
+  const durationHours = durationMinutes > 0 ? Math.max(1, Math.round((durationMinutes / 60) * 10) / 10) : 2;
+
+  const learningPoints = useMemo(
+    () =>
+      tryParse(course?.whatYouWillLearn, [
+        'เข้าใจภาพรวมของเนื้อหาและนำไปใช้ต่อยอดในการทำงานได้จริง',
+        'มีแนวคิดและขั้นตอนที่ชัดเจนสำหรับลงมือทำด้วยตัวเอง',
+        'ได้ตัวอย่างและเทคนิคที่ช่วยให้ทำงานได้เร็วและแม่นยำขึ้น',
+        'พร้อมประยุกต์ใช้ความรู้กับสถานการณ์จริงในองค์กร',
+      ]),
+    [course],
+  );
+
+  const whatYouGet = useMemo(
+    () =>
+      tryParse(course?.whatYouWillGet, [
+        { icon: 'video', text: `วิดีโอคุณภาพสูง ความยาวรวมประมาณ ${durationHours} ชั่วโมง` },
+        { icon: 'file', text: 'เอกสารประกอบการเรียนสำหรับทบทวนหลังเรียน' },
+        { icon: 'infinite', text: 'เข้าถึงเนื้อหาได้ตลอดตามสิทธิ์ของหลักสูตร' },
+        { icon: 'award', text: 'ใบรับรองเมื่อเรียนครบตามเงื่อนไขของหลักสูตร' },
+      ]),
+    [course, durationHours],
+  );
+
+  const benefitsIconMap = {
+    video: MonitorPlay,
+    file: FileText,
+    infinite: InfinityIcon,
+    award: Award,
+    lesson: BookOpen,
+  };
+
   if (loading || !course) {
     return (
-      <div className="flex items-center justify-center min-h-[80vh]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+      <div className="flex min-h-[80vh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  const durationHours = course.lessons?.reduce((acc, l) => acc + (parseInt(l.duration)||0), 0) || 2;
-
-  // Parse JSON helper
-  const tryParse = (str, fallback) => {
-    try {
-      if (!str) return fallback;
-      const parsed = JSON.parse(str);
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : fallback;
-    } catch (e) {
-      return fallback;
-    }
-  };
-
-  const learningPoints = tryParse(course?.whatYouWillLearn, [
-    "ทักษะที่สามารถนำไปประยุกต์ใช้ในการทำงานได้จริงทันที",
-    "ทำความเข้าใจพื้นฐานที่แน่นหนา และต่อยอดไปสู่ระดับสูง",
-    "เทคนิคและเคล็ดลับจากประสบการณ์จริงของผู้เชี่ยวชาญ",
-    "วิธีคิดและแก้ปัญหาเมื่อเจอสถานการณ์จริง"
-  ]);
-
-  const whatYouGet = tryParse(course?.whatYouWillGet, [
-    { icon: <MonitorPlay size={18} className="text-primary"/>, text: `วิดีโอระดับ Full HD ความยาว {durationHours} ชั่วโมง` },
-    { icon: <FileText size={18} className="text-primary"/>, text: "เอกสารประกอบการเรียนแจกฟรี" },
-    { icon: <InfinityIcon size={18} className="text-primary"/>, text: "เข้าถึงเนื้อหาได้ตลอดชีพ ไม่มีวันหมดอายุ" },
-    { icon: <Award size={18} className="text-primary"/>, text: "ใบรับรองการจบหลักสูตร (Certificate)" }
-  ]);
-
   return (
-    <div className="flex flex-col min-h-full pb-20 md:pb-32 bg-slate-50 relative -mt-4 -mx-4 md:mt-0 md:mx-0">
-      
-      {/* 1. HERO BANNER */}
-      <div className="relative bg-slate-900 text-white pt-10 pb-16 md:pt-16 md:pb-32 px-5 md:px-8 xl:px-0 overflow-hidden">
-         {/* Dynamic Background Image with Blur and Overlay */}
-         <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-[60px] opacity-60 transform scale-110"
-            style={{ backgroundImage: `url("${course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}")` }}
-         />
-         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/20" />
-         
-         <div className="max-w-6xl mx-auto flex flex-col md:flex-row relative z-10">
-            
-            {/* Left Content (Text) */}
-            <div className="w-full lg:w-[60%] lg:pr-12 z-10">
-               {/* Breadcrumb & Navigation */}
-               <div className="flex items-center gap-4 text-sm font-bold text-slate-400 mb-6">
-                  <button onClick={() => navigate(-1)} className="hover:text-white transition-colors flex items-center gap-1">
-                     <ArrowLeft size={16} /> กลับ
-                  </button>
-                  <span>/</span>
-                  <span className="text-primary-light uppercase tracking-wider">{course.category?.name || 'หมวดหมู่ทั่วไป'}</span>
-               </div>
+    <div className="relative -mx-4 -mt-4 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
+      <section className="relative overflow-hidden bg-slate-950 px-5 pb-16 pt-10 text-white md:px-8 md:pb-28 md:pt-14 xl:px-0">
+        <div
+          className="absolute inset-0 scale-110 bg-cover bg-center bg-no-repeat opacity-60 blur-[56px]"
+          style={{ backgroundImage: `url("${course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}")` }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(2,6,23,0.92),rgba(15,23,42,0.86),rgba(15,23,42,0.48))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(79,70,229,0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.12),transparent_26%)]" />
 
-               <h1 className="text-3xl sm:text-4xl md:text-[2.5rem] font-black text-white leading-tight mb-4 drop-shadow-sm">
-                  {course.title}
-               </h1>
-               
-               <p className="text-lg text-slate-300 font-medium mb-6 line-clamp-2 md:line-clamp-3 leading-relaxed">
-                  {course.description || "เรียนรู้ทักษะที่จำเป็นและนำไปใช้ได้จริงในสายงานของคุณ พร้อมเทคนิคจากผู้เชี่ยวชาญระดับประเทศ"}
-               </p>
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8">
+          <div className="flex items-center gap-4 text-sm font-bold text-slate-300">
+            <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-1 transition-colors hover:text-white">
+              <ArrowLeft size={16} /> กลับ
+            </button>
+            <span>/</span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 uppercase tracking-[0.24em] text-[10px] text-slate-200">
+              {course.category?.name || 'หมวดทั่วไป'}
+            </span>
+          </div>
 
-               {/* Meta Stats Row */}
-               <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm font-bold">
-                  <div className="flex items-center gap-1.5 text-amber-400 bg-amber-400/10 px-3 py-1.5 rounded-md">
-                     <Star size={16} className="fill-amber-400" />
-                     <span className="text-white text-base">{course.rating || 4.8}</span>
-                     <span className="text-slate-400 ml-1 font-medium">({(course.reviewCount || 1240).toLocaleString()} รีวิว)</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-slate-300">
-                     <MonitorPlay size={18} className="text-slate-400" />
-                     <span>ผู้เรียน {(course.studentCount || 5000).toLocaleString()}+ คน</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-slate-300">
-                     <Clock size={18} className="text-slate-400" />
-                     <span>ความยาว {course.totalDuration || `${durationHours} ชั่วโมง`}</span>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </div>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
+            <div className="max-w-3xl">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.28em] text-primary-light">
+                <BookOpen size={14} />
+                หลักสูตรแนะนำ
+              </div>
+              <h1 className="mb-4 text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl md:text-[2.85rem]">
+                {course.title}
+              </h1>
+              <p className="max-w-2xl text-base font-medium leading-relaxed text-slate-200 md:text-lg">
+                {course.description || 'หลักสูตรนี้ออกแบบมาเพื่อช่วยให้คุณเข้าใจเนื้อหาอย่างเป็นระบบ พร้อมนำความรู้ไปใช้ได้จริงกับงานในองค์กร'}
+              </p>
 
-      {/* 2. MAIN CONTENT GRID (Split Layout) */}
-      <div className="max-w-6xl mx-auto w-full px-5 md:px-8 xl:px-0 flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 relative -mt-6 md:-mt-20 z-20">
-         
-         {/* LEFT COLUMN: Course Details */}
-         <div className="w-full lg:w-[60%] lg:flex-1 flex flex-col gap-10 pb-10 mt-6 lg:mt-0">
-            
-            {/* Mobile-only Price Card (Hidden on Desktop) */}
-            <div className="lg:hidden bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-4 flex justify-between items-center group">
-               <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">ราคาคอร์ส</p>
-                  <div className="text-2xl font-black text-primary">{course.points > 0 ? `${course.points} พ้อยท์` : 'เรียนฟรี'}</div>
-               </div>
-               {course.isEnrolled ? (
-                  <button onClick={() => navigate(`/user/courses/${course.id}/lesson/${course.lessons[0]?.id}`)} className="bg-primary/10 text-primary px-6 py-3 rounded-lg font-bold">
-                     เข้าเรียน
-                  </button>
-               ) : (
-                  <button onClick={handleEnroll} disabled={enrolling} className="bg-primary text-white px-6 py-3 rounded-lg font-bold shadow-md shadow-primary/20">
-                     ลงทะเบียน
-                  </button>
-               )}
+              <div className="mt-7 flex flex-wrap items-center gap-3 text-sm font-bold">
+                <div className="flex items-center gap-2 rounded-full border border-amber-300/15 bg-amber-300/10 px-4 py-2 text-amber-300">
+                  <Star size={16} className="fill-amber-300" />
+                  <span>{course.rating || 4.8}</span>
+                  <span className="font-medium text-slate-300">จาก {(course.reviewCount || 1240).toLocaleString()} รีวิว</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-slate-200">
+                  <Users size={16} />
+                  <span>{(course.studentCount || 5000).toLocaleString()}+ คนเรียน</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-slate-200">
+                  <Clock size={16} />
+                  <span>{course.totalDuration || `${durationHours} ชั่วโมง`}</span>
+                </div>
+              </div>
             </div>
 
-            {/* What you'll learn */}
-            <section className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
-               <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-6">สิ่งที่คุณจะได้เรียนรู้ในคอร์สนี้</h2>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                  {learningPoints.map((text, idx) => (
-                     <div key={idx} className="flex items-start gap-3">
-                        <Check size={20} className="text-emerald-500 shrink-0 mt-0.5" strokeWidth={3} />
-                        <span className="text-[15px] font-medium text-slate-600 leading-relaxed">{text}</span>
-                     </div>
-                  ))}
-               </div>
-            </section>
-
-            {/* Course Description */}
-            <section>
-               <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-4 px-2">เนื้อหาหลักสูตร (Description)</h2>
-               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 text-slate-600 leading-loose font-medium text-[15px]">
-                  {course.description || "คอร์สนี้ถูกออกแบบมาเพื่อให้ผู้เรียนสามารถเข้าใจเนื้อหาได้อย่างรวดเร็วและเป็นระบบ ไม่ว่าคุณจะมีพื้นฐานมาก่อนหรือไม่ก็ตาม เราจะพากันไปตั้งแต่ก้าวแรกจนถึงการสร้างผลงานชิ้นโบว์แดงด้วยตัวคุณเอง"}
-               </div>
-            </section>
-
-            {/* Syllabus / Lessons */}
-            <section>
-               <div className="flex justify-between items-end mb-4 px-2">
-                  <h2 className="text-xl md:text-2xl font-black text-slate-900">สารบัญคอร์สเรียน</h2>
-                  <div className="text-sm font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full">{course.lessons?.length || 0} บทเรียน</div>
-               </div>
-               
-               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col divide-y divide-slate-100">
-                  {course.lessons?.map((lesson, idx) => (
-                     <div 
-                        key={lesson.id} 
-                        onClick={() => course.isEnrolled && navigate(`/user/courses/${course.id}/lesson/${lesson.id}`)}
-                        className={`p-5 flex items-center gap-4 transition-colors
-                                  ${course.isEnrolled ? 'cursor-pointer hover:bg-slate-50 group' : 'opacity-90'}
-                        `}
-                     >
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 
-                                       ${lesson.isCompleted ? 'bg-emerald-100 text-emerald-600' : 
-                                         course.isEnrolled ? 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors' : 
-                                         'bg-slate-100 text-slate-400'}`}>
-                           {lesson.isCompleted ? <Check size={16} strokeWidth={3}/> : <PlayCircle size={16} strokeWidth={2.5}/>}
-                        </div>
-                        
-                        <div className="flex-1">
-                           <h4 className={`text-[15px] font-bold ${lesson.isCompleted ? 'text-slate-500' : 'text-slate-800'}`}>
-                              {idx + 1}. {lesson.title}
-                           </h4>
-                           <div className="flex items-center gap-3 mt-1 text-[11px] font-bold text-slate-400">
-                              <span className="flex items-center gap-1"><MonitorPlay size={12}/> วิดีโอ</span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1"><Clock size={12}/> {lesson.duration || '10'} นาที</span>
-                           </div>
-                        </div>
-
-                        {!course.isEnrolled && (
-                           <div className="shrink-0 text-slate-300">
-                              <Bookmark size={18} />
-                           </div>
-                        )}
-                     </div>
-                  ))}
-               </div>
-            </section>
-
-            {/* Instructor */}
-            <section className="mb-10">
-               <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-4 px-2">ผู้สอน (Instructor)</h2>
-               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-5 items-center sm:items-start text-center sm:text-left">
-                  <div className="w-24 h-24 rounded-full bg-slate-200 shrink-0 border-4 border-white shadow-md overflow-hidden">
-                     {course.instructorAvatar ? (
-                        <img src={getFullUrl(course.instructorAvatar)} alt="Instructor" className="w-full h-full object-cover" />
-                     ) : (
-                        <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400 font-bold text-2xl uppercase">
-                           {course.instructorName?.charAt(0) || 'I'}
-                        </div>
-                     )}
-                  </div>
-                  <div>
-                     <h3 className="text-lg font-black text-slate-900 mb-1">{course.instructorName || 'ทีมงานวิทยากรผู้เชี่ยวชาญ'}</h3>
-                     <p className="text-[13px] font-bold text-primary mb-3">{course.instructorRole || 'Enterprise Instructor'}</p>
-                     <p className="text-sm font-medium text-slate-500 leading-relaxed">
-                        {course.instructorBio || "ทีมงานผู้มีความเชี่ยวชาญเฉพาะด้านที่ผ่านประสบการณ์การทำงานในองค์กรชั้นนำ พร้อมถ่ายทอดทักษะระดับมืออาชีพให้คุณ"}
-                     </p>
-                  </div>
-               </div>
-            </section>
-         </div>
-
-         {/* RIGHT COLUMN: Sticky Sidebar Card */}
-         <div className="w-full lg:w-[40%] xl:w-[35%] shrink-0 lg:max-w-[380px]">
-            <div className={`bg-white rounded-[1.5rem] shadow-[0_15px_40px_-10px_rgba(0,0,0,0.1)] border border-slate-200 overflow-hidden sticky top-24 transition-transform duration-500 ${isScrolled ? 'lg:-translate-y-4' : ''}`}>
-               
-               {/* Video Thumbnail Area */}
-               <div className="relative aspect-video bg-slate-900 group cursor-pointer overflow-hidden pb-1">
-                  {showVideo && course.previewVideoUrl ? (
-                     <iframe 
-                       className="w-full h-full"
-                       src={course.previewVideoUrl.includes('youtube.com') || course.previewVideoUrl.includes('youtu.be') 
-                         ? `https://www.youtube.com/embed/${course.previewVideoUrl.split('v=')[1]?.split('&')[0] || course.previewVideoUrl.split('/').pop()}?autoplay=1` 
-                         : course.previewVideoUrl}
-                       title="Course Preview"
-                       frameBorder="0"
-                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                       allowFullScreen
-                     ></iframe>
-                  ) : (
-                     <>
-                       <img src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE} alt="Thumbnail" className="w-full h-full object-cover opacity-80 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700" />
-                       <div className="absolute inset-0 flex flex-col items-center justify-center" onClick={() => course.previewVideoUrl && setShowVideo(true)}>
-                          <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full border border-white/40 flex items-center justify-center mb-2 group-hover:bg-primary transition-colors duration-300 shadow-xl">
-                             <PlayCircle size={32} className="text-white ml-1" strokeWidth={2}/>
-                          </div>
-                          <span className="text-white text-xs font-bold tracking-widest uppercase drop-shadow-md">ดูตัวอย่างคอร์สฟรี</span>
-                       </div>
-                     </>
-                  )}
-               </div>
-
-               {/* Pricing & Actions */}
-               <div className="p-6 md:p-8">
-                  <div className="flex items-end gap-2 mb-6">
-                     <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
-                        {course.points > 0 ? course.points : 'ฟรี'}
-                     </span>
-                     <span className="text-lg font-bold text-slate-400 mb-1">{course.points > 0 ? 'พ้อยท์' : 'บาท'}</span>
-                  </div>
-
-                  {course.isEnrolled ? (
-                     <div className="flex flex-col gap-3">
-                        <div className="w-full bg-slate-100 rounded-full h-2 mb-2">
-                           <div className="bg-primary h-2 rounded-full transition-all duration-1000" style={{width: `${course.progressPercent || 0}%`}}></div>
-                        </div>
-                        <p className="text-sm font-bold text-slate-500 text-center mb-2">เรียนไปแล้ว {course.progressPercent || 0}%</p>
-                        
-                        <button 
-                           onClick={() => navigate(`/user/courses/${course.id}/lesson/${course.lessons[0]?.id}`)}
-                           className="w-full py-4 bg-primary text-white rounded-xl font-bold tracking-wide shadow-lg shadow-primary/30 hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 text-[15px]"
-                        >
-                           {course.progressPercent === 100 ? 'ทบทวนบทเรียน' : (course.progressPercent === 0 ? 'เริ่มเรียนเลย' : 'เรียนต่อให้จบ')} <ArrowLeft size={18} className="rotate-180" />
-                        </button>
-                     </div>
-                  ) : (
-                     <button 
-                        onClick={handleEnroll}
-                        disabled={enrolling}
-                        className="w-full py-4 bg-primary text-white rounded-xl font-bold tracking-wide shadow-lg shadow-primary/30 hover:bg-primary-hover transition-colors flex items-center justify-center text-[15px]"
-                     >
-                        {enrolling ? (
-                           <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                        ) : 'ลงทะเบียนเรียนทันที'}
-                     </button>
-                  )}
-
-                  <p className="text-xs font-bold text-center text-slate-400 mt-4">รับประกันความพึงพอใจ</p>
-
-                  <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col gap-4">
-                     <h4 className="text-sm font-black text-slate-900 mb-1">สิ่งที่คุณจะได้รับ</h4>
-                     {(() => {
-                        const IconMap = {
-                           MonitorPlay: MonitorPlay,
-                           FileText: FileText,
-                           InfinityIcon: InfinityIcon,
-                           Award: Award,
-                           PlayCircle: PlayCircle,
-                           BookOpen: BookOpen
-                        };
-
-                        return whatYouGet.map((item, idx) => {
-                           // Support both string (old) and object (new)
-                           const isObj = typeof item === 'object' && item !== null && !item.$$typeof;
-                           const iconName = isObj ? item.icon : null;
-                           const text = (isObj ? item.text : item).replace('{durationHours}', durationHours);
-                           const IconComponent = IconMap[iconName] || MonitorPlay;
-
-                           return (
-                              <div key={idx} className="flex items-center gap-3 text-slate-600 text-[13.5px] font-medium">
-                                 {isObj ? <IconComponent size={18} className="text-primary"/> : (item.icon || <MonitorPlay size={18} className="text-primary"/>)}
-                                 {text}
-                              </div>
-                           );
-                        });
-                     })()}
-                  </div>
-               </div>
+            <div className="glass-card rounded-[2rem] p-5 ring-1 ring-white/10 lg:justify-self-end">
+              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">ค่าลงทะเบียน</span>
+              <div className="mt-2 flex items-end gap-2">
+                <span className="text-4xl font-black tracking-tighter text-slate-900">
+                  {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
+                </span>
+                <span className="mb-1 text-sm font-bold text-slate-500">{course.points > 0 ? 'แต้ม' : 'ไม่มีค่าใช้จ่าย'}</span>
+              </div>
+              <p className="mt-2 text-sm font-medium text-slate-600">
+                {course.isEnrolled ? 'คุณลงทะเบียนแล้ว สามารถเข้าเรียนต่อได้ทันที' : 'ลงทะเบียนเพื่อเริ่มเรียนและปลดล็อกเนื้อหาทั้งหมด'}
+              </p>
             </div>
-         </div>
+          </div>
+        </div>
+      </section>
 
+      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-6xl flex-col-reverse gap-8 px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-0">
+        <div className="flex w-full flex-col gap-8 lg:min-w-0 lg:flex-1">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">คุณจะได้เรียนรู้อะไรจากคอร์สนี้</h2>
+                <p className="mt-1 text-sm font-medium text-slate-500">สรุปประเด็นสำคัญที่ออกแบบมาให้ต่อยอดกับการทำงานจริง</p>
+              </div>
+              <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary md:flex">
+                <Check size={24} strokeWidth={2.5} />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {learningPoints.map((text, index) => (
+                <div key={index} className="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <Check size={16} strokeWidth={3} />
+                  </div>
+                  <p className="text-sm font-medium leading-relaxed text-slate-700">{text}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">รายละเอียดหลักสูตร</h2>
+            <p className="mt-4 text-[15px] font-medium leading-loose text-slate-600">
+              {course.description || 'หลักสูตรนี้จะพาคุณเรียนรู้จากพื้นฐานไปจนถึงการประยุกต์ใช้จริง ด้วยบทเรียนที่เรียงลำดับอย่างชัดเจนและเข้าใจง่าย'}
+            </p>
+          </section>
+
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">สารบัญบทเรียน</h2>
+                <p className="mt-1 text-sm font-medium text-slate-500">ดูภาพรวมของบทเรียนทั้งหมดก่อนเริ่มเรียน</p>
+              </div>
+              <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">
+                {course.lessons?.length || 0} บทเรียน
+              </span>
+            </div>
+
+            <div className="flex flex-col divide-y divide-slate-100 overflow-hidden rounded-[1.5rem] border border-slate-100 bg-slate-50/50">
+              {course.lessons?.map((lesson, index) => (
+                <button
+                  type="button"
+                  key={lesson.id}
+                  onClick={() => course.isEnrolled && navigate(`/user/courses/${course.id}/lesson/${lesson.id}`)}
+                  disabled={!course.isEnrolled}
+                  aria-label={course.isEnrolled ? `เปิดบทเรียน ${lesson.title}` : `บทเรียน ${lesson.title} ต้องลงทะเบียนก่อน`}
+                  className={`flex w-full items-center gap-4 px-5 py-4 text-left transition-colors ${course.isEnrolled ? 'group hover:bg-white' : 'cursor-default opacity-90'}`}
+                >
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                      lesson.isCompleted
+                        ? 'bg-emerald-100 text-emerald-600'
+                        : course.isEnrolled
+                          ? 'bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white'
+                          : 'bg-slate-100 text-slate-400'
+                    }`}
+                  >
+                    {lesson.isCompleted ? <Check size={18} strokeWidth={3} /> : <PlayCircle size={18} strokeWidth={2.4} />}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className={`text-[15px] font-bold ${lesson.isCompleted ? 'text-slate-500' : 'text-slate-900'}`}>
+                        {index + 1}. {lesson.title}
+                      </h3>
+                      {lesson.isCompleted && (
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">
+                          ผ่านแล้ว
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-400">
+                      <span className="flex items-center gap-1">
+                        {lesson.type === 'video' ? <MonitorPlay size={12} /> : lesson.type === 'quiz' ? <Check size={12} /> : <FileText size={12} />}
+                        {getLessonTypeLabel(lesson.type)}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {lesson.duration || '10'} นาที
+                      </span>
+                    </div>
+                  </div>
+
+                  {!course.isEnrolled && <Bookmark size={18} className="shrink-0 text-slate-300" />}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <h2 className="mb-5 text-xl font-black tracking-tight text-slate-900 md:text-2xl">ผู้สอน</h2>
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white bg-slate-200 shadow-md">
+                {course.instructorAvatar ? (
+                  <img src={getFullUrl(course.instructorAvatar)} alt="ผู้สอน" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-slate-200 text-2xl font-bold uppercase text-slate-400">
+                    {course.instructorName?.charAt(0) || 'I'}
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0">
+                <h3 className="text-lg font-black text-slate-900">{course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ'}</h3>
+                <p className="mt-1 text-sm font-bold text-primary">{course.instructorRole || 'วิทยากรประจำหลักสูตร'}</p>
+                <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">
+                  {course.instructorBio || 'ผู้สอนมีประสบการณ์ทำงานจริงและถ่ายทอดเนื้อหาให้เข้าใจง่าย พร้อมยกตัวอย่างที่นำไปใช้งานต่อได้ทันทีในบริบทขององค์กร'}
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside className="w-full shrink-0 lg:w-[360px]">
+          <div className={`sticky top-24 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_18px_50px_-16px_rgba(15,23,42,0.12)] transition-transform duration-500 ${isScrolled ? 'lg:-translate-y-3' : ''}`}>
+            <div className="relative aspect-video overflow-hidden bg-slate-900">
+              {showVideo && course.previewVideoUrl ? (
+                <iframe
+                  className="h-full w-full"
+                  src={parseYoutubePreview(course.previewVideoUrl)}
+                  title="ตัวอย่างคอร์ส"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <>
+                  <img
+                    src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}
+                    alt={course.title}
+                    className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
+                  <button
+                    type="button"
+                    className="absolute inset-0 flex flex-col items-center justify-center"
+                    onClick={() => course.previewVideoUrl && setShowVideo(true)}
+                    disabled={!course.previewVideoUrl}
+                    aria-label="เล่นวิดีโอตัวอย่างคอร์ส"
+                  >
+                    <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/40 bg-white/20 text-white shadow-xl backdrop-blur-md transition-colors duration-300 hover:bg-primary">
+                      <PlayCircle size={32} className="ml-1" strokeWidth={2} />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-[0.24em] text-white drop-shadow-md">ดูตัวอย่างคอร์สฟรี</span>
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div className="p-6 md:p-7">
+              <div className="mb-6 flex items-end gap-2">
+                <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">
+                  {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
+                </span>
+                <span className="mb-1 text-sm font-bold text-slate-500">{course.points > 0 ? 'แต้ม' : 'ไม่มีค่าใช้จ่าย'}</span>
+              </div>
+
+              {course.isEnrolled ? (
+                <div className="flex flex-col gap-3">
+                  <div className="mb-1 h-2 w-full rounded-full bg-slate-100">
+                    <div className="h-2 rounded-full bg-primary transition-all duration-1000" style={{ width: `${course.progressPercent || 0}%` }}></div>
+                  </div>
+                  <p className="text-center text-sm font-bold text-slate-500">เรียนไปแล้ว {course.progressPercent || 0}%</p>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/user/courses/${course.id}/lesson/${course.lessons[0]?.id}`)}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-[15px] font-bold text-white shadow-lg shadow-primary/30 transition-colors hover:bg-primary-hover"
+                  >
+                    {course.progressPercent === 100 ? 'ทบทวนบทเรียน' : course.progressPercent === 0 ? 'เริ่มเรียนเลย' : 'เรียนต่อให้จบ'}
+                    <ArrowLeft size={18} className="rotate-180" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                  className="flex w-full items-center justify-center rounded-xl bg-primary py-4 text-[15px] font-bold text-white shadow-lg shadow-primary/30 transition-colors hover:bg-primary-hover disabled:opacity-70"
+                >
+                  {enrolling ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div> : 'ลงทะเบียนเรียนทันที'}
+                </button>
+              )}
+
+              <p className="mt-4 text-center text-xs font-bold text-slate-400">พร้อมเรียนได้ทันทีบนทุกอุปกรณ์</p>
+
+              <div className="mt-8 flex flex-col gap-4 border-t border-slate-100 pt-6">
+                <h3 className="text-sm font-black text-slate-900">สิ่งที่จะได้รับ</h3>
+                {whatYouGet.map((item, index) => {
+                  const text = typeof item === 'string' ? item : item.text;
+                  const iconKey = typeof item === 'string' ? 'video' : item.icon;
+                  const IconComponent = benefitsIconMap[iconKey] || MonitorPlay;
+
+                  return (
+                    <div key={index} className="flex items-start gap-3 text-[13.5px] font-medium text-slate-600">
+                      <IconComponent size={18} className="mt-0.5 shrink-0 text-primary" />
+                      <span>{text}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );

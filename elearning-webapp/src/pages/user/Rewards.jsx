@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, Zap, Ticket, Coffee, CheckCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { userAPI, getFullUrl } from '../../utils/api';
+import { userAPI } from '../../utils/api';
 import RewardCard from '../../components/common/RewardCard';
 
 
@@ -70,31 +70,30 @@ const Rewards = () => {
     <div className="flex flex-col gap-8 animate-fade-in pb-8 pt-2">
       
       {/* Points Card */}
-      <div className="bg-gradient-primary rounded-[1.5rem] p-6 text-white shadow-xl relative overflow-hidden flex flex-col items-center">
-        {/* Background blobs for premium effect */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-[40px] transform translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-[mix-blend-mode:overlay] bg-indigo-400/30 rounded-full blur-[30px] transform -translate-x-1/2 translate-y-1/3"></div>
+      <div className="relative flex flex-col items-center overflow-hidden rounded-[1.75rem] bg-gradient-primary p-6 text-white shadow-[0_28px_60px_-28px_rgba(67,56,202,0.6)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.12),_transparent_30%)]"></div>
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/10 to-transparent"></div>
         
         <div className="relative z-10 w-full">
           <div className="flex justify-between items-start w-full">
-            <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/20">
+            <div className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 backdrop-blur-md">
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
               <span className="text-xs font-bold text-white uppercase tracking-wider">แต้มของคุณ</span>
             </div>
             <button 
               onClick={() => navigate('/user/points-history')}
-              className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors">
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition-colors hover:bg-white/20">
               <ArrowRight size={16} className="text-white" />
             </button>
           </div>
           
           <div className="mt-6 flex flex-col items-center md:items-start md:flex-row md:justify-between md:items-end">
             <div>
-              <h2 className="text-5xl font-black flex items-baseline gap-2 tabular-nums drop-shadow-sm tracking-tight">
-                {points.toLocaleString()} <span className="text-xl font-bold opacity-80 uppercase">Pts</span>
+              <h2 className="flex items-baseline gap-2 text-5xl font-black tracking-tight text-white tabular-nums drop-shadow-sm">
+                {points.toLocaleString()} <span className="text-xl font-bold opacity-80">แต้ม</span>
               </h2>
             </div>
-            <p className="text-xs text-indigo-100 mt-4 md:mt-0 opacity-80 backdrop-blur-sm bg-black/10 px-3 py-1.5 rounded-full border border-white/10">
+            <p className="mt-4 rounded-full border border-white/10 bg-black/10 px-3 py-1.5 text-xs text-white/90 backdrop-blur-sm md:mt-0">
               หมดอายุ 31 ธ.ค. 2026
             </p>
           </div>
@@ -125,25 +124,25 @@ const Rewards = () => {
         <h3 className="text-lg font-bold mb-3 tracking-tight text-gray-900">ประวัติล่าสุด</h3>
         <div className="flex flex-col gap-3">
           {history.length > 0 ? history.map(entry => (
-            <div key={entry.id} className="card p-4 bg-white border border-gray-100 flex justify-between items-center hover:border-gray-200 transition-colors">
+            <div key={entry.id} className="card flex items-center justify-between border border-slate-100 bg-white p-4 transition-colors hover:border-slate-200">
               <div className="flex items-center gap-4">
                 <div className={`p-3 rounded-xl border ${entry.points > 0 ? 'bg-green-50 text-success border-green-100' : 'bg-orange-50 text-warning border-orange-100'}`}>
                   {entry.points > 0 ? <CheckCircle size={20} strokeWidth={2}/> : <Gift size={20} strokeWidth={2}/>}
                 </div>
                 <div>
-                  <h4 className="text-[15px] font-bold text-gray-900 truncate max-w-[160px] leading-tight mb-1">{entry.note}</h4>
-                  <p className="text-xs text-gray-500 font-medium">{new Date(entry.createdAt).toLocaleDateString('th-TH')}</p>
+                  <h4 className="mb-1 max-w-[160px] truncate text-[15px] font-bold leading-tight text-slate-900">{entry.note}</h4>
+                  <p className="text-xs font-medium text-slate-500">{new Date(entry.createdAt).toLocaleDateString('th-TH')}</p>
                 </div>
               </div>
               <div className="text-right flex flex-col justify-center">
                 <p className={`text-base font-black ${entry.points > 0 ? 'text-success' : 'text-danger'}`}>
                   {entry.points > 0 ? `+${entry.points}` : entry.points}
                 </p>
-                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mt-0.5">{entry.sourceType}</p>
+                <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{entry.sourceType}</p>
               </div>
             </div>
           )) : (
-            <div className="text-center py-6 text-gray-400 border border-dashed rounded-xl border-gray-200">
+            <div className="rounded-xl border border-dashed border-slate-200 py-6 text-center text-slate-500">
               <p className="font-medium">ยังไม่มีประวัติการรับแต้ม</p>
             </div>
           )}

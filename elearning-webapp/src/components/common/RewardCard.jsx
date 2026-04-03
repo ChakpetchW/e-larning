@@ -24,10 +24,10 @@ const RewardCard = ({ reward, points, onRedeem, redeeming }) => {
   const isDisabled = isLimitReached || isOutOfStock || points < reward.pointsCost || redeeming;
 
   return (
-    <div className={`card border-gray-100 flex flex-col h-full bg-white relative overflow-hidden group ${(isOutOfStock || isLimitReached) ? 'opacity-70 grayscale-[0.8]' : ''}`}>
-      <div className={`${reward.image?.includes('/') ? 'bg-white border-b border-gray-50' : bgMap[reward.image] || bgMap.default} h-28 flex items-center justify-center relative overflow-hidden transition-colors duration-300 group-hover:bg-opacity-80 p-2`}>
-        <div className="absolute top-0 right-0 w-16 h-16 bg-white/30 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
-        <div className="transform group-hover:scale-105 transition-transform duration-300 flex items-center justify-center w-full h-full">
+    <div className={`card relative flex h-full flex-col overflow-hidden border-slate-100 bg-white group ${(isOutOfStock || isLimitReached) ? 'opacity-70 grayscale-[0.8]' : ''}`}>
+      <div className={`${reward.image?.includes('/') ? 'bg-white border-b border-slate-100' : bgMap[reward.image] || bgMap.default} relative flex h-28 items-center justify-center overflow-hidden p-2 transition-colors duration-300 group-hover:bg-opacity-80`}>
+        <div className="absolute top-0 right-0 h-16 w-16 translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30 blur-xl"></div>
+        <div className="flex h-full w-full transform items-center justify-center transition-transform duration-300 group-hover:scale-105">
           {reward.image?.includes('/') ? (
             <img src={getFullUrl(reward.image)} alt={reward.name} className="w-full h-full object-contain mix-blend-multiply" />
           ) : (
@@ -36,12 +36,12 @@ const RewardCard = ({ reward, points, onRedeem, redeeming }) => {
         </div>
       </div>
 
-      <div className="p-4 flex-1 flex flex-col justify-between gap-3">
-        <h4 className="font-bold text-[15px] leading-snug text-gray-900">{reward.name}</h4>
+      <div className="flex flex-1 flex-col justify-between gap-3 p-4">
+        <h4 className="text-[15px] font-bold leading-snug text-slate-900">{reward.name}</h4>
         <div className="flex flex-col gap-3">
-          <div className="flex justify-between items-end border-t border-gray-100 pt-3">
-            <span className="font-black text-warning text-sm bg-orange-50 px-2 py-0.5 rounded text-warning/90 border border-orange-100">
-              {reward.pointsCost} Pts
+          <div className="flex items-end justify-between border-t border-slate-100 pt-3">
+            <span className="rounded border border-orange-100 bg-orange-50 px-2 py-0.5 text-sm font-black text-warning/90">
+              {reward.pointsCost} แต้ม
             </span>
             {reward.stock > 0 ? (
               <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">เหลือ {reward.stock}</span>
@@ -53,9 +53,7 @@ const RewardCard = ({ reward, points, onRedeem, redeeming }) => {
           <button 
             onClick={() => onRedeem(reward.id, reward.pointsCost, reward.maxPerUser, reward.userRedeemedCount)}
             disabled={isDisabled}
-            className="w-full py-2 rounded-lg text-sm font-bold transition-all
-                       disabled:bg-gray-100 disabled:text-gray-400 disabled:shadow-none
-                       bg-primary text-white hover:bg-primary-hover shadow-sm hover:shadow-md"
+            className="w-full rounded-lg bg-primary py-2 text-sm font-bold text-white transition-all hover:bg-primary-hover hover:shadow-md disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
           >
             {isLimitReached ? 'เต็มสิทธิแล้ว' : isOutOfStock ? 'ครบจำนวนแลกแล้ว' : 'แลกรางวัล'}
           </button>

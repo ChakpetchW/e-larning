@@ -13,6 +13,12 @@ const getFullUrl = (url) => {
   return url;
 };
 
+const getLessonTypeLabel = (type) => {
+  if (type === 'quiz') return 'แบบทดสอบ';
+  if (type === 'video') return 'วิดีโอ';
+  return 'เอกสาร';
+};
+
 const LessonPlayer = () => {
   const { id: courseId, lessonId } = useParams();
   const navigate = useNavigate();
@@ -112,12 +118,12 @@ const LessonPlayer = () => {
     <div className="flex flex-col w-full max-w-5xl mx-auto md:px-4 md:py-6 relative min-h-screen pb-24 md:pb-12">
       
       {/* Immersive Header / Media Section */}
-      <div className="relative w-full bg-slate-900 md:rounded-[2.5rem] overflow-hidden shadow-2xl z-20 group">
+      <div className="relative z-20 w-full overflow-hidden bg-slate-950 shadow-[0_34px_80px_-40px_rgba(15,23,42,0.8)] md:rounded-[2.5rem]">
         {/* Back Button Overlay - Floating Glass */}
         <div className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
           <button
             onClick={() => navigate(`/user/courses/${courseId}`)}
-            className="w-11 h-11 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95 shadow-xl"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur-xl transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
           >
             <ArrowLeft size={22} strokeWidth={2.5} />
           </button>
@@ -132,30 +138,29 @@ const LessonPlayer = () => {
               onEnded={handleComplete}
             />
           ) : lesson.type === 'quiz' ? (
-            <div className="flex flex-col items-center gap-6 text-white px-6 py-20 md:py-32 text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#1E293B] via-[#0F172A] to-black z-0"></div>
-              {/* Decorative mesh elements */}
-              <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
+            <div className="relative flex flex-col items-center gap-6 overflow-hidden px-6 py-20 text-center text-white md:py-32">
+              <div className="absolute inset-0 z-0 bg-[linear-gradient(135deg,#0f172a_0%,#111827_45%,#020617_100%)]"></div>
+              <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,_rgba(79,70,229,0.22),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(20,184,166,0.14),_transparent_26%)]"></div>
               
-              <div className="relative z-10 w-24 h-24 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] flex items-center justify-center text-primary shadow-2xl transform transition-transform duration-700 hover:rotate-3">
+              <div className="relative z-10 flex h-24 w-24 items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/10 text-primary shadow-[0_24px_60px_-32px_rgba(79,70,229,0.45)] backdrop-blur-2xl">
                  <FileText size={48} strokeWidth={1} />
               </div>
               <div className="relative z-10 max-w-lg">
-                 <h2 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tighter">Knowledge Check</h2>
+                 <h2 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tighter">แบบทดสอบท้ายบท</h2>
                  <p className="text-slate-400 text-lg font-medium leading-relaxed">ทดสอบความเข้าใจของคุณเกี่ยวกับบทเรียนนี้ เพื่อปลดล็อกเนื้อหาถัดไป</p>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-8 py-20 md:py-32 text-center bg-slate-950 relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
-              <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center text-primary backdrop-blur-xl shadow-2xl relative z-10">
+            <div className="relative flex flex-col items-center gap-8 overflow-hidden bg-slate-950 py-20 text-center md:py-32">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(79,70,229,0.15),_transparent_35%)]"></div>
+              <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/5 text-primary shadow-[0_24px_60px_-32px_rgba(79,70,229,0.45)] backdrop-blur-xl">
                 <BookOpen size={40} strokeWidth={1.5} />
               </div>
               <div className="relative z-10">
-                <p className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-4">Documentary Lesson</p>
+                <p className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-4">บทเรียนเอกสาร</p>
                 <button
                   onClick={() => window.open(getFullUrl(lesson.contentUrl), '_blank')}
-                  className="btn btn-primary px-10 py-4 text-base rounded-2xl shadow-[0_20px_40px_rgba(79,70,229,0.3)] hover:scale-105"
+                  className="btn btn-primary rounded-2xl px-10 py-4 text-base shadow-[0_18px_36px_-18px_rgba(79,70,229,0.55)] hover:scale-[1.02]"
                 >
                   เปิดอ่านเอกสารบทเรียน
                 </button>
@@ -166,7 +171,7 @@ const LessonPlayer = () => {
       </div>
 
       {/* Unified Content Container - Premium & Professional */}
-      <div className="bg-white md:border md:border-slate-100 md:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] md:rounded-[3rem] -mt-8 md:mt-8 relative z-30 overflow-hidden">
+      <div className="relative z-30 -mt-8 overflow-hidden bg-white md:mt-8 md:rounded-[3rem] md:border md:border-slate-100 md:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">
         
         <div className="px-6 py-10 md:p-12">
           {/* Lesson Metadata & Title */}
@@ -174,9 +179,9 @@ const LessonPlayer = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2.5 mb-5">
                 <span className="flex items-center gap-1.5 px-3 py-2 bg-primary/5 text-primary rounded-lg text-xs font-black uppercase tracking-[0.2em] border border-primary/10">
-                  {lesson.type === 'video' ? <Play size={14} fill="currentColor"/> : <FileText size={14}/>} {lesson.type || 'Video'}
+                  {lesson.type === 'video' ? <Play size={14} fill="currentColor"/> : <FileText size={14}/>} {getLessonTypeLabel(lesson.type)}
                 </span>
-                <span className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 text-slate-400 rounded-lg text-xs font-black uppercase tracking-[0.2em] border border-slate-100">
+                <span className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
                   <Clock size={14}/> {lesson.duration || '10'}m
                 </span>
               </div>
@@ -188,12 +193,12 @@ const LessonPlayer = () => {
                 <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-200">
                   <CheckCircle size={14} strokeWidth={3} />
                 </div>
-                <span className="text-sm font-black text-emerald-700 uppercase tracking-wider">Completed</span>
+                <span className="text-sm font-black text-emerald-700 uppercase tracking-wider">เรียนจบแล้ว</span>
               </div>
             )}
           </div>
 
-          <div className="h-px w-full bg-slate-50 mb-12"></div>
+          <div className="mb-12 h-px w-full bg-slate-100"></div>
 
           {/* Main Content Area Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -201,11 +206,11 @@ const LessonPlayer = () => {
               {lesson.type === 'quiz' ? (
                 <div className="flex flex-col gap-8">
                   {!quizResult && (
-                    <div className="bg-slate-950 p-7 rounded-3xl border border-slate-800 flex items-start gap-5 shadow-2xl relative overflow-hidden group">
+                    <div className="group relative flex items-start gap-5 overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-7 shadow-[0_26px_60px_-38px_rgba(15,23,42,0.95)]">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       <div className="w-10 h-10 bg-primary/20 text-primary rounded-xl flex items-center justify-center shrink-0 font-black border border-primary/20 relative z-10">i</div>
                       <div className="relative z-10">
-                        <p className="font-bold text-white mb-1">Knowledge Verification</p>
+                        <p className="font-bold text-white mb-1">เกณฑ์การผ่าน</p>
                         <p className="text-sm text-slate-400 leading-relaxed font-medium">คุณต้องได้คะแนนอย่างน้อย {lesson.passScore || 60}% ({Math.ceil((lesson.passScore || 60)/100 * (lesson.questions?.length || 0))} ข้อ) จากทั้งหมด {lesson.questions?.length || 0} ข้อ เพื่อผ่านบทเรียนนี้</p>
                       </div>
                     </div>
@@ -318,7 +323,7 @@ const LessonPlayer = () => {
             <div className="lg:col-span-4 flex flex-col gap-8">
               {/* Achievement Card - "Exclusive Looking" */}
               {completed && (
-                <div className="bg-white border border-slate-100 rounded-[3rem] p-12 text-center shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] relative overflow-hidden animate-celebrate">
+                <div className="relative overflow-hidden rounded-[3rem] border border-slate-100 bg-white p-12 text-center shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] animate-celebrate">
                   <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[80px]"></div>
                   <div className="relative z-10 flex flex-col items-center">
                     <div className="w-20 h-20 bg-emerald-500 text-white rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl shadow-emerald-200 transform rotate-3 hover:rotate-0 transition-transform duration-500">
@@ -348,9 +353,9 @@ const LessonPlayer = () => {
 
               {/* Resources Column */}
               {lesson.resources && lesson.resources.length > 0 && (
-                <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 sticky top-8">
+                <div className="sticky top-8 rounded-3xl border border-slate-100 bg-slate-50 p-8">
                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 flex items-center gap-2.5">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div> Supplementary
+                    <div className="w-2 h-2 bg-primary rounded-full"></div> เอกสารเสริม
                   </h4>
                   <div className="flex flex-col gap-3.5">
                     {lesson.resources.map((res, i) => (
@@ -367,7 +372,7 @@ const LessonPlayer = () => {
                           </div>
                           <div>
                             <p className="text-sm font-black text-slate-800 line-clamp-1">{res.title}</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{res.size || 'External Link'}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{res.size || 'ลิงก์ภายนอก'}</p>
                           </div>
                         </div>
                         <ChevronRight size={16} className="text-slate-300 group-hover:text-primary transition-colors" />
@@ -382,7 +387,7 @@ const LessonPlayer = () => {
       </div>
 
       {/* Sticky Action Bar (Mobile Only) */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-50 md:hidden flex gap-3 animate-fade-in shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex gap-3 border-t border-slate-100 bg-white/90 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] backdrop-blur-xl animate-fade-in md:hidden">
         {completed && nextLessonId ? (
           <button
             onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}
