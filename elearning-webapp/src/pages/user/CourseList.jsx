@@ -65,7 +65,7 @@ const CourseList = () => {
           <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
           <button 
              onClick={() => setIsCatModalOpen(true)}
-             className="md:hidden flex items-center gap-1.5 rounded-full bg-slate-100 hover:bg-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors"
+             className="md:hidden inline-flex min-h-[44px] items-center gap-2 rounded-full bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200"
           >
             หมวดหมู่ <Grid size={13} />
           </button>
@@ -82,7 +82,7 @@ const CourseList = () => {
           </div>
           <button 
             onClick={() => setShowFilterModal(true)}
-            className="text-slate-500 hover:text-primary transition-colors bg-white h-[46px] w-[46px] flex items-center justify-center rounded-xl shadow-sm border border-slate-200 group relative shrink-0"
+            className="group relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-primary"
           >
             <Filter size={20} className="group-hover:text-primary" />
             {(activeCat !== 'All' || sortBy !== 'newest') && (
