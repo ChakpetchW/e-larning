@@ -5,6 +5,7 @@ import { userAPI } from '../../utils/api';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
 import SectionHeader from '../../components/common/SectionHeader';
+import CategoryPills from '../../components/common/CategoryPills';
 import { Grid } from 'lucide-react';
 
 const Home = () => {
@@ -174,9 +175,27 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Smart Preview Categories Horizontal Float */}
+      {categories.length > 0 && (
+         <div className="-mt-1 mb-2">
+            <div className="flex items-center justify-between mb-3 md:mb-4 px-1 md:px-2">
+               <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight">คุณกำลังสนใจเรื่องอะไร?</h3>
+               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 md:text-[11px]">{categories.length} หมวด</p>
+            </div>
+            <div className="-mx-5 md:mx-0">
+               <CategoryPills 
+                  categories={categories.slice(0, 6)}
+                  activeCat={''}
+                  onSelect={(catName) => navigate(`/user/courses?category=${encodeURIComponent(catName)}`)}
+                  onViewAll={() => setIsCatModalOpen(true)}
+                  showViewAll={categories.length > 6}
+               />
+            </div>
+         </div>
+      )}
+
       {/* Secondary Dashboard Row */}
-      {/* Secondary Dashboard Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
         {/* Weekly Goal Bento */}
         <div className="card flex h-full flex-col justify-between rounded-[2rem] border-none bg-white p-7 shadow-[0_20px_40px_rgba(0,0,0,0.02)] ring-1 ring-slate-100 transition-all duration-500 hover:ring-primary/20 md:rounded-[2.5rem] md:p-8">
           <div>

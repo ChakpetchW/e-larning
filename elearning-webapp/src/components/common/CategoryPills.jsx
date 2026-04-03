@@ -14,7 +14,7 @@ const CategoryPills = ({
       {/* Right fade edge for pure tab design */}
       <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#f8fafc] to-transparent pointer-events-none z-10"></div>
       
-      <div className="flex gap-6 overflow-x-auto pb-1 no-scrollbar border-b border-gray-200/60 items-center">
+      <div className="flex gap-6 overflow-x-auto px-5 md:px-0 pb-1 no-scrollbar border-b border-gray-200/60 items-center">
         {categories.map(cat => (
           <button 
             key={cat.id}
