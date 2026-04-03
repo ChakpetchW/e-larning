@@ -136,7 +136,7 @@ const CourseDetail = () => {
   }
 
   return (
-    <div className="relative -mx-4 -mt-4 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
+    <div className="relative -mx-5 -mt-5 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
       <section className="relative overflow-hidden bg-slate-950 px-5 pb-16 pt-10 text-white md:px-8 md:pb-28 md:pt-14 xl:px-0">
         <div
           className="absolute inset-0 scale-110 bg-cover bg-center bg-no-repeat opacity-60 blur-[56px]"
@@ -187,15 +187,15 @@ const CourseDetail = () => {
             </div>
 
             <div className="glass-card rounded-[2rem] p-5 ring-1 ring-white/10 lg:justify-self-end">
-              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">ค่าลงทะเบียน</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">แต้มสะสมเมื่อเรียนจบ</span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-black tracking-tighter text-slate-900">
                   {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
                 </span>
-                <span className="mb-1 text-sm font-bold text-slate-500">{course.points > 0 ? 'แต้ม' : 'ไม่มีค่าใช้จ่าย'}</span>
+                <span className="mb-1 text-sm font-bold text-slate-500">{course.points > 0 ? 'แต้ม' : 'บทเรียน'}</span>
               </div>
               <p className="mt-2 text-sm font-medium text-slate-600">
-                {course.isEnrolled ? 'คุณลงทะเบียนแล้ว สามารถเข้าเรียนต่อได้ทันที' : 'ลงทะเบียนเพื่อเริ่มเรียนและปลดล็อกเนื้อหาทั้งหมด'}
+                {course.isEnrolled ? 'คุณลงทะเบียนแล้ว สามารถเข้าเรียนต่อได้ทันที' : 'เรียนจบคอร์สนี้เพื่อรับแต้มสะสมไปแลกของรางวัล'}
               </p>
             </div>
           </div>
@@ -359,11 +359,14 @@ const CourseDetail = () => {
             </div>
 
             <div className="p-6 md:p-7">
-              <div className="mb-6 flex items-end gap-2">
-                <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">
-                  {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
-                </span>
-                <span className="mb-1 text-sm font-bold text-slate-500">{course.points > 0 ? 'แต้ม' : 'ไม่มีค่าใช้จ่าย'}</span>
+              <div className="mb-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500 block mb-2">แต้มที่จะได้รับทั้งหมด</span>
+                <div className="flex items-end gap-2">
+                  <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">
+                    {course.points > 0 ? course.points.toLocaleString() : '0'}
+                  </span>
+                  <span className="mb-1 text-sm font-bold text-slate-500">แต้ม</span>
+                </div>
               </div>
 
               {course.isEnrolled ? (

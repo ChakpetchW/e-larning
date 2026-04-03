@@ -31,7 +31,7 @@ const UserLayout = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-transparent">
+    <div className="user-layout flex flex-col md:flex-row h-screen overflow-hidden bg-transparent">
       
       {/* Desktop Sidebar (Hidden on mobile) */}
       <aside className="hidden md:flex w-[280px] flex-col bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-gray-100/80 my-5 ml-5 h-[calc(100vh-2.5rem)] z-20 overflow-hidden shrink-0">
