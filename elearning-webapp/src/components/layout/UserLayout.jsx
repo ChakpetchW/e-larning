@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Gift, User, BookMarked, LogOut, CheckCircle } from 'lucide-react';
+import { Home, BookOpen, Gift, User, BookMarked, LogOut } from 'lucide-react';
 import { userAPI } from '../../utils/api';
 import './UserLayout.css';
 
@@ -62,10 +62,6 @@ const UserLayout = () => {
             <BookOpen size={20} /> <span>คอร์สเรียน</span>
           </NavLink>
           
-          <NavLink to="/user/completed" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary-light/60 text-primary shadow-[0_2px_10px_-2px_rgba(79,70,229,0.1)] border border-primary/10' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 group-hover:scale-105'}`}>
-            <CheckCircle size={20} /> <span>คอร์สที่เรียนจบแล้ว</span>
-          </NavLink>
-          
           <NavLink to="/user/rewards" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary-light/60 text-primary shadow-[0_2px_10px_-2px_rgba(79,70,229,0.1)] border border-primary/10' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 group-hover:scale-105'}`}>
             <Gift size={20} /> <span>ของรางวัล</span>
           </NavLink>
@@ -123,11 +119,6 @@ const UserLayout = () => {
             <NavLink to="/user/courses" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-wrapper"><BookOpen size={22} /></div>
               <span>คอร์สเรียน</span>
-            </NavLink>
-
-            <NavLink to="/user/completed" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
-              <div className="nav-icon-wrapper"><CheckCircle size={22} /></div>
-              <span>จบแล้ว</span>
             </NavLink>
             
             <NavLink to="/user/rewards" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>

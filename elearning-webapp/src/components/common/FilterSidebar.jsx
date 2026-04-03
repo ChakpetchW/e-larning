@@ -10,6 +10,8 @@ const FilterSidebar = ({
   categories,
   activeCat,
   setActiveCat,
+  status,
+  setStatus,
   onReset,
 }) => {
   const dialogRef = useRef(null);
@@ -87,6 +89,32 @@ const FilterSidebar = ({
 
           <div className="flex flex-col gap-3">
             <h4 className="mb-1 text-sm font-bold uppercase tracking-widest text-gray-400">
+              สถานะ (Status)
+            </h4>
+            {[
+              { label: 'ทั้งหมด (All)', value: 'all' },
+              { label: 'กําลังเรียน (Enrolled)', value: 'enrolled' },
+              { label: 'เรียนจบแล้ว (Completed)', value: 'completed' },
+              { label: 'ยังไม่เริ่ม (Not Started)', value: 'not_started' },
+            ].map((option) => (
+              <label
+                key={option.value}
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50"
+              >
+                <span className="font-bold text-gray-700">{option.label}</span>
+                <input
+                  type="radio"
+                  name="status"
+                  checked={status === option.value}
+                  onChange={() => setStatus(option.value)}
+                  className="h-4 w-4 accent-primary"
+                />
+              </label>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h4 className="mb-1 text-sm font-bold uppercase tracking-widest text-gray-400">
               หมวดหมู่ (Category)
             </h4>
             <div className="flex flex-wrap gap-2">
@@ -95,7 +123,7 @@ const FilterSidebar = ({
                   key={category.id}
                   type="button"
                   onClick={() => setActiveCat(category.name)}
-                  className={`rounded-xl border px-4 py-2 text-sm font-bold transition-all ${
+                  className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-all ${
                     activeCat === category.name
                       ? 'border-primary/30 bg-primary/10 text-primary'
                       : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'

@@ -20,6 +20,7 @@ const CourseList = () => {
   // Filter & Search State
   const [activeCat, setActiveCat] = useState(urlCategory || 'All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [status, setStatus] = useState(searchParams.get('status') || 'all');
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'a-z'
   
   // UI State
@@ -53,7 +54,7 @@ const CourseList = () => {
 
   // Compute Filtered and Sorted Array
   const filtered = sortCourses(
-    filterCourses(courses, { activeCat, searchQuery }),
+    filterCourses(courses, { activeCat, searchQuery, status }),
     sortBy
   );
 
@@ -128,7 +129,7 @@ const CourseList = () => {
             <h3 className="font-bold text-gray-600 text-lg mb-1">ไม่พบคอร์สที่ค้นหา</h3>
             <p className="text-sm text-gray-400">ลองเปลี่ยนคำค้นหา หรือใช้ตัวกรองหมวดหมู่อื่นดูสิ</p>
             <button 
-              onClick={() => { setSearchQuery(''); setActiveCat('All'); setSortBy('newest'); }}
+              onClick={() => { setSearchQuery(''); setActiveCat('All'); setStatus('all'); setSortBy('newest'); }}
               className="mt-6 px-6 py-2 bg-primary/10 text-primary font-bold rounded-full hover:bg-primary hover:text-white transition-colors"
             >
               ล้างตัวกรองทั้งหมด
@@ -146,7 +147,9 @@ const CourseList = () => {
         categories={categories}
         activeCat={activeCat}
         setActiveCat={setActiveCat}
-        onReset={() => { setActiveCat('All'); setSortBy('newest'); }}
+        status={status}
+        setStatus={setStatus}
+        onReset={() => { setActiveCat('All'); setSearchQuery(''); setStatus('all'); setSortBy('newest'); }}
       />
 
       {/* Categories Search Modal */}

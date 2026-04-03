@@ -1,7 +1,7 @@
 /**
  * Utility for filtering and sorting courses consistently across the app.
  */
-export const filterCourses = (courses, { activeCat = 'All', searchQuery = '' }) => {
+export const filterCourses = (courses, { activeCat = 'All', searchQuery = '', status = 'all' }) => {
   if (!courses) return [];
   
   return courses.filter(c => {
@@ -9,7 +9,18 @@ export const filterCourses = (courses, { activeCat = 'All', searchQuery = '' }) 
     const searchLower = searchQuery.toLowerCase();
     const matchSearch = c.title.toLowerCase().includes(searchLower) || 
                       (c.description && c.description.toLowerCase().includes(searchLower));
-    return matchCat && matchSearch;
+    
+    // Status Filter
+    let matchStatus = true;
+    if (status === 'enrolled') {
+      matchStatus = c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS';
+    } else if (status === 'completed') {
+      matchStatus = c.enrollmentStatus === 'COMPLETED';
+    } else if (status === 'not_started') {
+      matchStatus = !c.isEnrolled;
+    }
+
+    return matchCat && matchSearch && matchStatus;
   });
 };
 

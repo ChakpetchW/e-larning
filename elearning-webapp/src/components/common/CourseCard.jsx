@@ -46,43 +46,20 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
             {course.category?.name || 'หมวดทั่วไป'}
           </span>
         </div>
-        <h3 className="mb-2 min-h-[44px] line-clamp-2 text-[1.05rem] font-bold leading-snug text-slate-900 transition-colors group-hover:text-primary">
+        <h3 className="mb-3 line-clamp-2 text-[1.1rem] font-black leading-[1.2] text-slate-900 transition-colors group-hover:text-primary">
           {course.title}
         </h3>
 
-        <div className="mb-4 mt-auto flex items-center gap-3">
-          {variant === 'completed' ? (
-            <div className="flex items-center gap-2 rounded border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
-              <Clock size={12} /> {completedDate}
-            </div>
-          ) : (
-            <div className="flex items-center gap-1">
-              <Star size={14} className="fill-amber-400 text-amber-400" />
-              <span className="text-sm font-bold text-slate-800">{course.rating || '4.8'}</span>
-              <span className="text-xs font-medium text-gray-400">({course.reviewCount || '124'})</span>
-            </div>
-          )}
-
-          {variant !== 'completed' && (
-            <div className="flex items-center gap-1.5 border-l border-gray-200 pl-3 text-[13px] font-medium text-gray-500">
-              <Clock size={14} className="text-gray-400" />
-              <span>{course.lessons?.reduce((acc, lesson) => acc + (parseInt(lesson.duration, 10) || 0), 0) || course.totalDuration || '2 ชม.'}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-auto flex items-center justify-between gap-4 border-t border-gray-100 pt-3.5">
-          <div className={`flex items-center gap-1.5 overflow-hidden ${variant === 'completed' ? 'order-2' : ''}`}>
-            <div className="h-5 w-5 flex-shrink-0 rounded-full bg-slate-200" />
-            <span className="truncate text-[11px] font-medium text-gray-500">
-              ผู้สอน: {course.instructorName || 'ทีมงานวิทยากร'}
-            </span>
+        <div className="mt-auto flex items-center justify-between gap-4 border-t border-gray-100/50 pt-4">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <Clock size={12} strokeWidth={2.5} />
+            <span>{course.lessons?.reduce((acc, lesson) => acc + (parseInt(lesson.duration, 10) || 0), 0) || course.totalDuration || 'พรีเมียม'}</span>
           </div>
-          <div className={`flex shrink-0 flex-col items-end leading-tight ${variant === 'completed' ? 'order-1' : ''}`}>
-            <span className={`text-[1.1rem] font-black tracking-tighter ${variant === 'completed' ? 'text-amber-600' : 'text-primary'}`}>
-              {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
+          <div className="flex flex-col items-end leading-none">
+            <span className="text-[1.15rem] font-black tracking-tighter text-primary">
+              {course.points > 0 ? course.points.toLocaleString() : 'FREE'}
             </span>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 -mt-0.5">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mt-0.5">
               {pointsSuffix}
             </span>
           </div>

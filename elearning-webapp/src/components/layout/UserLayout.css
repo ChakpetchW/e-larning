@@ -84,7 +84,7 @@
   justify-content: center;
   gap: 4px;
   color: var(--color-text-muted);
-  width: 20%; /* Fixed width for better distribution */
+  width: 25%; /* Fixed width for 4 items */
   height: 100%;
   transition: all var(--transition-fast);
   text-decoration: none;
