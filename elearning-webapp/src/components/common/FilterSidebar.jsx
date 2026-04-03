@@ -1,88 +1,125 @@
-import React from 'react';
+import React, { useId, useRef } from 'react';
 import { Filter, X } from 'lucide-react';
+import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 
-const FilterSidebar = ({ 
-  isOpen, 
-  onClose, 
-  sortBy, 
-  setSortBy, 
-  categories, 
-  activeCat, 
+const FilterSidebar = ({
+  isOpen,
+  onClose,
+  sortBy,
+  setSortBy,
+  categories,
+  activeCat,
   setActiveCat,
-  onReset
+  onReset,
 }) => {
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const titleId = useId();
+
+  useAccessibleOverlay({
+    isOpen,
+    onClose,
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+  });
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end bg-slate-900/30 backdrop-blur-sm animate-fade-in">
-      {/* Click away area */}
-      <div className="absolute inset-0" onClick={onClose}></div>
-      
-      {/* Slide Panel */}
-      <div className="w-full max-w-sm bg-white h-full shadow-2xl relative flex flex-col animate-slide-in-right transform">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white">
-          <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-            <Filter size={20} className="text-primary"/> ตัวกรองขั้นสูง
+      <button
+        type="button"
+        className="absolute inset-0"
+        onClick={onClose}
+        aria-label="ปิดตัวกรองคอร์ส"
+      />
+
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className="relative flex h-full w-full max-w-sm transform flex-col bg-white shadow-2xl animate-slide-in-right"
+      >
+        <div className="flex items-center justify-between border-b border-gray-100 bg-white p-6">
+          <h3 id={titleId} className="flex items-center gap-2 text-xl font-black text-gray-900">
+            <Filter size={20} className="text-primary" />
+            ตัวกรองขั้นสูง
           </h3>
-          <button onClick={onClose} className="p-2 bg-gray-50 text-gray-500 rounded-full hover:bg-gray-100 transition-colors">
+          <button
+            ref={closeButtonRef}
+            type="button"
+            onClick={onClose}
+            aria-label="ปิดตัวกรองคอร์ส"
+            className="rounded-full bg-gray-50 p-2 text-gray-500 transition-colors hover:bg-gray-100"
+          >
             <X size={18} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8">
-          {/* Sort Section */}
+        <div className="flex flex-1 flex-col gap-8 overflow-y-auto p-6">
           <div className="flex flex-col gap-3">
-            <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">การจัดเรียง (Sort By)</h4>
+            <h4 className="mb-1 text-sm font-bold uppercase tracking-widest text-gray-400">
+              การจัดเรียง (Sort By)
+            </h4>
             {[
               { label: 'เพิ่มล่าสุด (Newest)', value: 'newest' },
               { label: 'เก่าที่สุด (Oldest)', value: 'oldest' },
               { label: 'เรียงตามพยัญชนะ (A-Z)', value: 'a-z' },
-              { label: 'คะแนนสูงสุด (Max Points)', value: 'points_desc' }
+              { label: 'คะแนนสูงสุด (Max Points)', value: 'points_desc' },
             ].map((option) => (
-              <label key={option.value} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <label
+                key={option.value}
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50"
+              >
                 <span className="font-bold text-gray-700">{option.label}</span>
-                <input 
-                  type="radio" 
-                  name="sort" 
-                  checked={sortBy === option.value} 
-                  onChange={() => setSortBy(option.value)} 
-                  className="w-4 h-4 text-primary accent-primary" 
+                <input
+                  type="radio"
+                  name="sort"
+                  checked={sortBy === option.value}
+                  onChange={() => setSortBy(option.value)}
+                  className="h-4 w-4 accent-primary"
                 />
               </label>
             ))}
           </div>
 
-          {/* Category Section in Modal */}
           <div className="flex flex-col gap-3">
-            <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">หมวดหมู่ (Category)</h4>
+            <h4 className="mb-1 text-sm font-bold uppercase tracking-widest text-gray-400">
+              หมวดหมู่ (Category)
+            </h4>
             <div className="flex flex-wrap gap-2">
-              {categories.map(cat => (
-                <button 
-                  key={cat.id}
-                  onClick={() => setActiveCat(cat.name)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${
-                    activeCat === cat.name 
-                      ? 'bg-primary/10 text-primary border-primary/30' 
-                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => setActiveCat(category.name)}
+                  className={`rounded-xl border px-4 py-2 text-sm font-bold transition-all ${
+                    activeCat === category.name
+                      ? 'border-primary/30 bg-primary/10 text-primary'
+                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  {cat.name}
+                  {category.name}
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
-          <button 
+        <div className="flex gap-3 border-t border-gray-100 bg-gray-50 p-6">
+          <button
+            type="button"
             onClick={onReset}
-            className="flex-1 py-3.5 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors"
+            className="flex-1 rounded-xl border border-gray-200 bg-white py-3.5 font-bold text-gray-600 transition-colors hover:bg-gray-100"
           >
             ล้างค่า
           </button>
-          <button 
+          <button
+            type="button"
             onClick={onClose}
-            className="flex-1 py-3.5 bg-primary text-white font-bold rounded-xl shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] hover:bg-primary-hover transition-all"
+            className="flex-1 rounded-xl bg-primary py-3.5 font-bold text-white shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] transition-all hover:bg-primary-hover hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)]"
           >
             ดูผลลัพธ์
           </button>

@@ -1,41 +1,33 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Play, Maximize, RotateCcw } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Play } from 'lucide-react';
 
-// Extract YouTube video ID from various URL formats
 const getYouTubeVideoId = (url) => {
   if (!url) return null;
-  const trimmed = url.trim();
 
-  // Match /embed/VIDEO_ID
+  const trimmed = url.trim();
   let match = trimmed.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+
   if (match) return match[1];
 
-  // Match ?v=VIDEO_ID
   match = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
   if (match) return match[1];
 
-  // Match youtu.be/VIDEO_ID
   match = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
   if (match) return match[1];
 
   return null;
 };
 
-const VideoPlayer = ({ url, onEnded }) => {
+const VideoPlayer = ({ url }) => {
   const videoId = getYouTubeVideoId(url);
   const iframeRef = useRef(null);
   const [hasStarted, setHasStarted] = useState(false);
-  const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const thumbnailUrl = videoId
+    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+    : '';
 
-  useEffect(() => {
-    if (videoId) {
-      // Use highest quality thumbnail available
-      setThumbnailUrl(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
-    }
-  }, [videoId]);
-
-  const handleContextMenu = (e) => {
-    e.preventDefault();
+  const handleContextMenu = (event) => {
+    event.preventDefault();
   };
 
   if (!url || !videoId) {
@@ -46,47 +38,43 @@ const VideoPlayer = ({ url, onEnded }) => {
     );
   }
 
-  // Show thumbnail with play button before starting
   if (!hasStarted) {
     return (
-      <div
+      <button
+        type="button"
         className="relative w-full aspect-video bg-slate-900 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] cursor-pointer group"
         onClick={() => setHasStarted(true)}
         onContextMenu={handleContextMenu}
+        aria-label="เริ่มเล่นวิดีโอ"
       >
-        {/* Thumbnail with subtle zoom on hover */}
         <img
           src={thumbnailUrl}
-          alt="Video thumbnail"
+          alt="ภาพตัวอย่างวิดีโอ"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          onError={(e) => { e.target.style.display = 'none'; }}
+          onError={(event) => {
+            event.target.style.display = 'none';
+          }}
         />
 
-        {/* Graduated dark overlay for cinematic depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:bg-black/10 transition-colors duration-500"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:bg-black/10 transition-colors duration-500" />
 
-        {/* Premium Play Button - Glassmorphism Style */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative">
-            {/* Outer Pulse Ring */}
-            <div className="absolute inset-0 bg-white/20 rounded-full animate-ping scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-            
-            {/* Main Button Container */}
+            <div className="absolute inset-0 bg-white/20 rounded-full animate-ping scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+
             <div className="w-20 h-20 bg-white/20 backdrop-blur-xl border border-white/30 text-white rounded-full flex items-center justify-center pl-1 shadow-[0_0_40px_rgba(255,255,255,0.2)] transform group-hover:scale-110 group-hover:bg-white/30 transition-all duration-500">
               <Play size={44} fill="currentColor" className="drop-shadow-lg" />
             </div>
           </div>
         </div>
 
-        {/* Subtle Label - Elegant & Professional */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 glass px-5 py-2 rounded-full text-[11px] font-bold text-white uppercase tracking-[0.2em] opacity-80 group-hover:opacity-100 transition-all border border-white/20 shadow-xl">
-          Start Learning
+          เริ่มเรียน
         </div>
-      </div>
+      </button>
     );
   }
 
-  // After clicking play, show the iframe
   return (
     <div
       className="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10"
@@ -102,7 +90,7 @@ const VideoPlayer = ({ url, onEnded }) => {
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
         style={{ border: 0 }}
-      ></iframe>
+      />
     </div>
   );
 };

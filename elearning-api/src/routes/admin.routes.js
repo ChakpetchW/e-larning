@@ -8,9 +8,20 @@ router.use(verifyToken, verifyAdmin); // All admin routes require token AND admi
 router.get('/dashboard', adminController.getDashboardStats);
 
 router.get('/users', adminController.getUsers);
+router.get('/users/:id/details', adminController.getUserDetails);
 router.post('/users', adminController.createUser);
 router.put('/users/:id', adminController.updateUser);
 router.delete('/users/:id', adminController.deleteUser);
+
+router.get('/departments', adminController.getDepartments);
+router.post('/departments', adminController.createDepartment);
+router.put('/departments/:id', adminController.updateDepartment);
+router.delete('/departments/:id', adminController.deleteDepartment);
+
+router.get('/tiers', adminController.getTiers);
+router.post('/tiers', adminController.createTier);
+router.put('/tiers/:id', adminController.updateTier);
+router.delete('/tiers/:id', adminController.deleteTier);
 
 router.get('/courses', adminController.getAdminCourses);
 router.post('/courses', adminController.createCourse);

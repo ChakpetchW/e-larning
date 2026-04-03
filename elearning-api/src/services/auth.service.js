@@ -2,8 +2,29 @@ const prisma = require('../utils/prisma');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const mapPublicUser = (user) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    status: user.status,
+    createdAt: user.createdAt,
+    employmentDate: user.employmentDate || user.createdAt,
+    departmentId: user.departmentRef?.id || user.departmentId || null,
+    department: user.departmentRef?.name || user.department || null,
+    tierId: user.tier?.id || user.tierId || null,
+    tier: user.tier?.name || null
+});
+
 const login = async (email, password) => {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+            departmentRef: true,
+            tier: true
+        }
+    });
+
     if (!user) {
         throw new Error('Invalid credentials');
     }
@@ -25,27 +46,16 @@ const login = async (email, password) => {
 
     return {
         token,
-        user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            department: user.department
-        }
+        user: mapPublicUser(user)
     };
 };
 
 const getCurrentUser = async (userId) => {
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            department: true,
-            status: true,
-            createdAt: true
+        include: {
+            departmentRef: true,
+            tier: true
         }
     });
 
@@ -53,7 +63,7 @@ const getCurrentUser = async (userId) => {
         throw new Error('User not found');
     }
 
-    return user;
+    return mapPublicUser(user);
 };
 
 module.exports = {

@@ -1,51 +1,66 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowDown, ArrowUp, Edit, Plus, Search, Trash2 } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
 
+const getDefaultCourseForm = () => ({
+  title: '',
+  description: '',
+  categoryId: '',
+  points: 100,
+  image: '',
+  instructorName: 'ทีมวิทยากรผู้เชี่ยวชาญ',
+  instructorRole: 'Enterprise Instructor',
+  instructorBio: 'ทีมงานผู้เชี่ยวชาญที่พร้อมถ่ายทอดความรู้ให้พนักงานในองค์กรอย่างเป็นระบบ',
+  previewVideoUrl: '',
+  totalDuration: '',
+  whatYouWillLearn: '[]',
+  whatYouWillGet: '[]',
+  rating: 4.8,
+  reviewCount: 1240,
+  studentCount: 5000,
+  visibleToAll: true,
+  visibleDepartmentIds: [],
+  visibleTierIds: [],
+});
+
+const getDefaultLessonForm = (order = 0) => ({
+  title: '',
+  type: 'video',
+  contentUrl: '',
+  content: '',
+  order,
+  points: 0,
+  passScore: 60,
+  questions: [],
+});
+
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [tiers, setTiers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
-  const [loading, setLoading] = useState(true);
 
-  // Modal State - Course
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [courseForm, setCourseForm] = useState({ 
-    title: '', 
-    description: '', 
-    categoryId: '', 
-    points: 100, 
-    image: '',
-    instructorName: 'ทีมงานวิทยากรผู้เชี่ยวชาญ',
-    instructorRole: 'Enterprise Instructor',
-    instructorBio: 'ทีมงานผู้มีความเชี่ยวชาญเฉพาะด้านที่ผ่านประสบการณ์การทำงานในองค์กรชั้นนำ พร้อมถ่ายทอดทักษะระดับมืออาชีพให้คุณ',
-    previewVideoUrl: '',
-    totalDuration: '',
-    whatYouWillLearn: '[]',
-    whatYouWillGet: '[]',
-    rating: 4.8,
-    reviewCount: 1240,
-    studentCount: 5000
-  });
   const [activeTab, setActiveTab] = useState('basic');
+  const [courseForm, setCourseForm] = useState(getDefaultCourseForm());
+  const [lessons, setLessons] = useState([]);
   const [quizReports, setQuizReports] = useState([]);
   const [loadingReports, setLoadingReports] = useState(false);
 
-  // Modal State - Lesson
-  const [lessons, setLessons] = useState([]);
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
-  const [lessonForm, setLessonForm] = useState({ title: '', type: 'video', contentUrl: '', content: '', order: 0, points: 0, passScore: 60, questions: [] });
+  const [lessonForm, setLessonForm] = useState(getDefaultLessonForm());
 
-  // Modal State - Category
-  const [showCatModal, setShowCatModal] = useState(false);
-  const [catForm, setCatForm] = useState({ name: '', order: 0 });
-  const [editingCatId, setEditingCatId] = useState(null);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [categoryForm, setCategoryForm] = useState({ name: '', order: 0 });
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -54,81 +69,36 @@ const CourseManagement = () => {
 
   const fetchData = async () => {
     try {
-      const [courseRes, catRes] = await Promise.all([
+      const [courseResponse, categoryResponse, departmentResponse, tierResponse] = await Promise.all([
         adminAPI.getCourses(),
-        adminAPI.getCategories()
+        adminAPI.getCategories(),
+        adminAPI.getDepartments(),
+        adminAPI.getTiers(),
       ]);
-      setCourses(courseRes.data);
-      setCategories(catRes.data);
+
+      setCourses(courseResponse.data);
+      setCategories(categoryResponse.data);
+      setDepartments(departmentResponse.data);
+      setTiers(tierResponse.data);
     } catch (error) {
-      console.error('Fetch courses error:', error);
+      console.error('Fetch course management data error:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleMoveCat = (index, direction) => {
-    const newCats = [...categories];
-    if (direction === -1 && index > 0) {
-      [newCats[index - 1], newCats[index]] = [newCats[index], newCats[index - 1]];
-    } else if (direction === 1 && index < newCats.length - 1) {
-      [newCats[index + 1], newCats[index]] = [newCats[index], newCats[index + 1]];
-    } else return;
-    
-    newCats.forEach((c, idx) => c.order = idx);
-    setCategories(newCats);
-    handleSaveCatOrder(newCats);
-  };
-
-  const handleSaveCatOrder = async (orderedCats) => {
-    try {
-      const categoryIds = orderedCats.map(c => c.id);
-      await adminAPI.reorderCategories({ categoryIds });
-    } catch (error) {
-      console.error('Save order error:', error);
-      alert('บันทึกการเรียงลำดับล้มเหลว');
-    }
-  };
-
-  const handleSaveCourse = async (e) => {
-    e.preventDefault();
-    try {
-      if (isEditing) {
-        await adminAPI.updateCourse(editingId, courseForm);
-        alert('แก้ไขคอร์สสำเร็จ!');
-      } else {
-        await adminAPI.createCourse({ ...courseForm, status: 'PUBLISHED' });
-        alert('สร้างคอร์สสำเร็จ!');
-      }
-      setShowModal(false);
-      resetCourseForm();
-      fetchData();
-    } catch (error) {
-      console.error(error);
-      alert('เกิดข้อผิดพลาด');
-    }
-  };
-
   const resetCourseForm = () => {
-    setCourseForm({ 
-      title: '', 
-      description: '', 
-      categoryId: '', 
-      points: 100, 
-      image: '',
-      instructorName: 'ทีมงานวิทยากรผู้เชี่ยวชาญ',
-      instructorRole: 'Enterprise Instructor',
-      instructorBio: 'ทีมงานผู้มีความเชี่ยวชาญเฉพาะด้านที่ผ่านประสบการณ์การทำงานในองค์กรชั้นนำ พร้อมถ่ายทอดทักษะระดับมืออาชีพให้คุณ',
-      previewVideoUrl: '',
-      totalDuration: '',
-      whatYouWillLearn: '[]',
-      whatYouWillGet: '[]',
-      rating: 4.8,
-      reviewCount: 1240,
-      studentCount: 5000
-    });
+    setCourseForm(getDefaultCourseForm());
+    setLessons([]);
+    setQuizReports([]);
     setIsEditing(false);
     setEditingId(null);
+    setActiveTab('basic');
+  };
+
+  const openAddCourse = () => {
+    resetCourseForm();
+    setShowModal(true);
   };
 
   const openEditCourse = async (course) => {
@@ -140,7 +110,7 @@ const CourseManagement = () => {
       categoryId: course.categoryId || '',
       points: course.points || 0,
       image: course.image || '',
-      instructorName: course.instructorName || 'ทีมงานวิทยากรผู้เชี่ยวชาญ',
+      instructorName: course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ',
       instructorRole: course.instructorRole || 'Enterprise Instructor',
       instructorBio: course.instructorBio || '',
       previewVideoUrl: course.previewVideoUrl || '',
@@ -149,11 +119,14 @@ const CourseManagement = () => {
       whatYouWillGet: course.whatYouWillGet || '[]',
       rating: course.rating || 4.8,
       reviewCount: course.reviewCount || 1240,
-      studentCount: course.studentCount || 5000
+      studentCount: course.studentCount || 5000,
+      visibleToAll: course.visibleToAll ?? true,
+      visibleDepartmentIds: course.visibleDepartmentIds || [],
+      visibleTierIds: course.visibleTierIds || [],
     });
     setActiveTab('basic');
     setShowModal(true);
-    fetchLessons(course.id);
+    await fetchLessons(course.id);
   };
 
   const fetchLessons = async (courseId) => {
@@ -168,8 +141,8 @@ const CourseManagement = () => {
   const fetchQuizReports = async (courseId) => {
     try {
       setLoadingReports(true);
-      const res = await adminAPI.getCourseQuizReports(courseId);
-      setQuizReports(res.data);
+      const response = await adminAPI.getCourseQuizReports(courseId);
+      setQuizReports(response.data);
     } catch (error) {
       console.error('Fetch quiz reports error:', error);
     } finally {
@@ -177,126 +150,202 @@ const CourseManagement = () => {
     }
   };
 
-  const handleSaveLesson = async (e) => {
-    e.preventDefault();
+  const handleSaveCourse = async (event) => {
+    event.preventDefault();
+
+    try {
+      if (isEditing) {
+        await adminAPI.updateCourse(editingId, courseForm);
+        alert('อัปเดตคอร์สเรียบร้อย');
+      } else {
+        await adminAPI.createCourse({ ...courseForm, status: 'PUBLISHED' });
+        alert('สร้างคอร์สเรียบร้อย');
+      }
+
+      setShowModal(false);
+      resetCourseForm();
+      fetchData();
+    } catch (error) {
+      console.error('Save course error:', error);
+      alert(error.response?.data?.message || 'ไม่สามารถบันทึกคอร์สได้');
+    }
+  };
+
+  const handleDeleteCourse = async (id) => {
+    if (!window.confirm('ยืนยันการลบคอร์สนี้ใช่หรือไม่?')) {
+      return;
+    }
+
+    try {
+      await adminAPI.deleteCourse(id);
+      setCourses((currentCourses) => currentCourses.filter((course) => course.id !== id));
+    } catch (error) {
+      console.error('Delete course error:', error);
+      alert(error.response?.data?.message || 'ลบคอร์สไม่สำเร็จ');
+    }
+  };
+
+  const handleSaveLesson = async (event) => {
+    event.preventDefault();
+
     try {
       if (editingLesson) {
         await adminAPI.updateLesson(editingLesson.id, lessonForm);
       } else {
         await adminAPI.createLesson({ ...lessonForm, courseId: editingId });
       }
+
       setShowLessonModal(false);
       setEditingLesson(null);
-      setLessonForm({ title: '', type: 'video', contentUrl: '', content: '', order: 0, points: 0, passScore: 60, questions: [] });
+      setLessonForm(getDefaultLessonForm());
       fetchLessons(editingId);
     } catch (error) {
-      alert('เกิดข้อผิดพลาดในการบันทึกเนื้อหา');
+      console.error('Save lesson error:', error);
+      alert(error.response?.data?.message || 'ไม่สามารถบันทึกบทเรียนได้');
     }
   };
 
-  const deleteLesson = async (lessonId) => {
-    if (confirm('ยืนยันการลบบทเรียนนี้?')) {
-      try {
-        await adminAPI.deleteLesson(lessonId);
-        fetchLessons(editingId);
-      } catch (error) {
-        alert('ลบไม่สำเร็จ');
-      }
+  const handleDeleteLesson = async (lessonId) => {
+    if (!window.confirm('ยืนยันการลบบทเรียนนี้ใช่หรือไม่?')) {
+      return;
     }
-  };
 
-  const openAddCourse = () => {
-    resetCourseForm();
-    setShowModal(true);
-  };
-
-  // CATEGORY ACTIONS
-  const handleSaveCategory = async (e) => {
-    e.preventDefault();
     try {
-      if (editingCatId) {
-        await adminAPI.updateCategory(editingCatId, catForm);
-      } else {
-        await adminAPI.createCategory(catForm);
-      }
-      setCatForm({ name: '', order: 0 });
-      setEditingCatId(null);
-      fetchData();
+      await adminAPI.deleteLesson(lessonId);
+      fetchLessons(editingId);
     } catch (error) {
-      console.error(error);
-      alert('เกิดข้อผิดพลาดในการจัดการหมวดหมู่');
+      console.error('Delete lesson error:', error);
+      alert(error.response?.data?.message || 'ลบบทเรียนไม่สำเร็จ');
     }
   };
 
-  const handleDeleteCat = async (id) => {
-    if (confirm('ยืนยันการลบหมวดหมู่? (คอร์สในหมวดนี้อาจได้รับผลกระทบ)')) {
-      try {
-        await adminAPI.deleteCategory(id);
-        fetchData();
-      } catch (error) {
-        alert('ลบไม่สำเร็จ กรุณาตรวจสอบว่ามีคอร์สค้างอยู่ในหมวดนี้หรือไม่');
-      }
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
     }
-  };
 
-  const handleDelete = async (id) => {
-    if (confirm('ยืนยันการลบคอร์สเรียนนี้?')) {
-      try {
-        await adminAPI.deleteCourse(id);
-        setCourses(courses.filter(c => c.id !== id));
-      } catch (error) {
-        console.error('Delete course error', error);
-        alert('ลบคอร์สไม่สำเร็จ');
-      }
-    }
-  }
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
     try {
-      const res = await adminAPI.uploadFile(file);
-      setCourseForm({ ...courseForm, image: res.data.fileUrl });
+      setUploading(true);
+      const response = await adminAPI.uploadFile(file);
+      setCourseForm((currentForm) => ({ ...currentForm, image: response.data.fileUrl }));
     } catch (error) {
+      console.error('Upload image error:', error);
       alert('อัปโหลดรูปไม่สำเร็จ');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleDocUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
+  const handleDocUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
+    }
+
     try {
-      const res = await adminAPI.uploadFile(file);
-      setLessonForm({ ...lessonForm, contentUrl: res.data.fileUrl });
+      setUploading(true);
+      const response = await adminAPI.uploadFile(file);
+      setLessonForm((currentForm) => ({ ...currentForm, contentUrl: response.data.fileUrl }));
     } catch (error) {
+      console.error('Upload document error:', error);
       alert('อัปโหลดเอกสารไม่สำเร็จ');
     } finally {
       setUploading(false);
     }
   };
 
+  const handleSaveCategory = async (event) => {
+    event.preventDefault();
+
+    try {
+      if (editingCategoryId) {
+        await adminAPI.updateCategory(editingCategoryId, categoryForm);
+      } else {
+        await adminAPI.createCategory(categoryForm);
+      }
+
+      setCategoryForm({ name: '', order: 0 });
+      setEditingCategoryId(null);
+      fetchData();
+    } catch (error) {
+      console.error('Save category error:', error);
+      alert(error.response?.data?.message || 'ไม่สามารถบันทึกหมวดหมู่ได้');
+    }
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm('ยืนยันการลบหมวดหมู่นี้ใช่หรือไม่?')) {
+      return;
+    }
+
+    try {
+      await adminAPI.deleteCategory(id);
+      fetchData();
+    } catch (error) {
+      console.error('Delete category error:', error);
+      alert(error.response?.data?.message || 'ลบหมวดหมู่ไม่สำเร็จ');
+    }
+  };
+
+  const handleMoveCategory = async (index, direction) => {
+    const reordered = [...categories];
+
+    if (direction === -1 && index > 0) {
+      [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
+    } else if (direction === 1 && index < reordered.length - 1) {
+      [reordered[index + 1], reordered[index]] = [reordered[index], reordered[index + 1]];
+    } else {
+      return;
+    }
+
+    const normalized = reordered.map((category, itemIndex) => ({
+      ...category,
+      order: itemIndex,
+    }));
+
+    setCategories(normalized);
+
+    try {
+      await adminAPI.reorderCategories({
+        categoryIds: normalized.map((category) => category.id),
+      });
+    } catch (error) {
+      console.error('Reorder categories error:', error);
+      alert(error.response?.data?.message || 'บันทึกลำดับหมวดหมู่ไม่สำเร็จ');
+    }
+  };
+
+  const filteredCourses = useMemo(() => (
+    courses.filter((course) => {
+      const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'ALL' || course.categoryId === selectedCategory;
+      return matchesSearch && matchesCategory;
+    })
+  ), [courses, searchTerm, selectedCategory]);
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-2xl font-bold mb-1">จัดการคอร์สเรียน</h2>
-          <p className="text-muted text-sm">เพิ่ม ลบ หรือแก้ไขข้อมูลคอร์สเรียนในระบบ</p>
+          <h2 className="mb-1 text-2xl font-bold">จัดการคอร์สเรียน</h2>
+          <p className="text-sm text-muted">
+            สร้างคอร์ส จัดการบทเรียน และกำหนดว่าแผนกหรือ tier ไหนจะมองเห็นคอร์สนี้ได้
+          </p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowCatModal(true)} className="btn btn-outline">
-            เพิ่ม/แก้ไข หมวดหมู่
+
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setShowCategoryModal(true)} className="btn btn-outline">
+            จัดการหมวดหมู่
           </button>
           <button onClick={openAddCourse} className="btn btn-primary">
-            <Plus size={18} /> สร้างคอร์สใหม่
+            <Plus size={18} />
+            สร้างคอร์สใหม่
           </button>
         </div>
       </div>
 
-      <CourseModal 
+      <CourseModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         isEditing={isEditing}
@@ -306,19 +355,29 @@ const CourseManagement = () => {
         courseForm={courseForm}
         setCourseForm={setCourseForm}
         categories={categories}
+        departments={departments}
+        tiers={tiers}
         lessons={lessons}
         loadingReports={loadingReports}
         quizReports={quizReports}
         onSaveCourse={handleSaveCourse}
         onImageUpload={handleImageUpload}
-        onEditLesson={(lesson) => { setEditingLesson(lesson); setLessonForm(lesson); setShowLessonModal(true); }}
-        onDeleteLesson={deleteLesson}
-        onAddLesson={() => { setEditingLesson(null); setLessonForm({ title: '', type: 'video', contentUrl: '', content: '', order: lessons.length + 1, points: 0, passScore: 60, questions: [] }); setShowLessonModal(true); }}
+        onEditLesson={(lesson) => {
+          setEditingLesson(lesson);
+          setLessonForm(lesson);
+          setShowLessonModal(true);
+        }}
+        onDeleteLesson={handleDeleteLesson}
+        onAddLesson={() => {
+          setEditingLesson(null);
+          setLessonForm(getDefaultLessonForm(lessons.length + 1));
+          setShowLessonModal(true);
+        }}
         fetchQuizReports={fetchQuizReports}
         uploading={uploading}
       />
 
-      <LessonModal 
+      <LessonModal
         isOpen={showLessonModal}
         onClose={() => setShowLessonModal(false)}
         onSave={handleSaveLesson}
@@ -329,33 +388,75 @@ const CourseManagement = () => {
         isEditing={!!editingLesson}
       />
 
-      {/* Category Management Modal */}
-      {showCatModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-          <div className="card bg-white w-full max-md p-6 shadow-xl max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center mb-4">
+      {showCategoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="card flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-bold">จัดการหมวดหมู่</h3>
-              <button onClick={() => setShowCatModal(false)} className="text-muted hover:text-gray-800">ปิด</button>
+              <button onClick={() => setShowCategoryModal(false)} className="text-muted hover:text-gray-800">
+                ปิด
+              </button>
             </div>
 
-            <form onSubmit={handleSaveCategory} className="flex gap-2 mb-6">
-              <input required type="text" placeholder="ชื่อหมวดหมู่ใหม่..." className="form-input flex-1" value={catForm.name} onChange={e => setCatForm({ ...catForm, name: e.target.value })} />
-              <button type="submit" className="btn btn-primary">{editingCatId ? 'บันทึก' : 'เพิ่ม'}</button>
+            <form onSubmit={handleSaveCategory} className="mb-6 flex gap-2">
+              <input
+                required
+                type="text"
+                placeholder="ชื่อหมวดหมู่..."
+                className="form-input flex-1"
+                value={categoryForm.name}
+                onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
+              />
+              <button type="submit" className="btn btn-primary">
+                {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
+              </button>
             </form>
 
             <div className="flex-1 overflow-y-auto">
-              <p className="text-xs font-bold text-muted mb-2 uppercase">รายการปัจจุบัน</p>
+              <p className="mb-2 text-xs font-bold uppercase text-muted">ลำดับหมวดหมู่ปัจจุบัน</p>
               <div className="flex flex-col gap-2">
-                {categories.map((cat, index) => (
-                  <div key={cat.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <span className="text-sm font-medium">{cat.name}</span>
-                    <div className="flex gap-2 items-center">
-                      <div className="flex flex-col mr-2 bg-white rounded shadow-sm border border-slate-100 pb-[1px]">
-                         <button disabled={index === 0} onClick={() => handleMoveCat(index, -1)} className="text-slate-400 hover:text-primary disabled:opacity-30 disabled:hover:text-slate-400 p-0.5"><ArrowUp size={14} strokeWidth={3}/></button>
-                         <button disabled={index === categories.length - 1} onClick={() => handleMoveCat(index, 1)} className="text-slate-400 hover:text-primary disabled:opacity-30 disabled:hover:text-slate-400 p-0.5"><ArrowDown size={14} strokeWidth={3}/></button>
+                {categories.map((category, index) => (
+                  <div
+                    key={category.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3"
+                  >
+                    <span className="text-sm font-medium">{category.name}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="mr-2 flex flex-col rounded border border-slate-100 bg-white pb-[1px] shadow-sm">
+                        <button
+                          type="button"
+                          disabled={index === 0}
+                          onClick={() => handleMoveCategory(index, -1)}
+                          className="p-0.5 text-slate-400 hover:text-primary disabled:opacity-30"
+                        >
+                          <ArrowUp size={14} strokeWidth={3} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={index === categories.length - 1}
+                          onClick={() => handleMoveCategory(index, 1)}
+                          className="p-0.5 text-slate-400 hover:text-primary disabled:opacity-30"
+                        >
+                          <ArrowDown size={14} strokeWidth={3} />
+                        </button>
                       </div>
-                      <button onClick={() => { setEditingCatId(cat.id); setCatForm({ name: cat.name, order: cat.order }); }} className="text-primary p-1.5 hover:bg-primary/10 rounded transition-colors"><Edit size={14} /></button>
-                      <button onClick={() => handleDeleteCat(cat.id)} className="text-danger p-1.5 hover:bg-red-50 rounded transition-colors"><Trash2 size={14} /></button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCategoryId(category.id);
+                          setCategoryForm({ name: category.name, order: category.order });
+                        }}
+                        className="rounded p-1.5 text-primary transition-colors hover:bg-primary/10"
+                      >
+                        <Edit size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCategory(category.id)}
+                        className="rounded p-1.5 text-danger transition-colors hover:bg-red-50"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -366,63 +467,82 @@ const CourseManagement = () => {
       )}
 
       <div className="card overflow-hidden">
-        {/* Toolbar */}
-        <div className="p-4 border-b border-border flex flex-wrap justify-between items-center gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border p-4">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input
               type="text"
               placeholder="ค้นหาคอร์ส..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-border rounded-md focus:outline-none focus:border-primary text-sm"
+              className="w-full rounded-md border border-border bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(event) => setSearchTerm(event.target.value)}
             />
           </div>
-          <div className="flex gap-2 text-sm">
-            <select 
-              className="border border-border rounded-md px-3 py-2 bg-white text-muted focus:outline-none cursor-pointer"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="ALL">ทุกหมวดหมู่</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
+
+          <select
+            className="cursor-pointer rounded-md border border-border bg-white px-3 py-2 text-sm text-muted focus:outline-none"
+            value={selectedCategory}
+            onChange={(event) => setSelectedCategory(event.target.value)}
+          >
+            <option value="ALL">ทุกหมวดหมู่</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="flex min-h-[50vh] items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[600px]">
+            <table className="w-full min-w-[760px] border-collapse text-left">
               <thead>
-                <tr className="bg-gray-50 border-b border-border text-sm text-muted">
+                <tr className="border-b border-border bg-gray-50 text-sm text-muted">
                   <th className="p-4 font-medium">ชื่อคอร์ส</th>
                   <th className="p-4 font-medium">หมวดหมู่</th>
-                  <th className="p-4 font-medium text-center">ผู้เรียน</th>
-                  <th className="p-4 font-medium text-right">จัดการ</th>
+                  <th className="p-4 font-medium">สิทธิ์การเห็น</th>
+                  <th className="p-4 text-center font-medium">ผู้เรียน</th>
+                  <th className="p-4 text-right font-medium">จัดการ</th>
                 </tr>
               </thead>
               <tbody>
-                {courses
-                  .filter(c => {
-                    const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
-                    const matchesCat = selectedCategory === 'ALL' || c.categoryId === selectedCategory;
-                    return matchesSearch && matchesCat;
-                  })
-                  .map((course) => (
-                  <tr key={course.id} className="border-b border-border hover:bg-gray-50/50 transition-colors">
+                {filteredCourses.map((course) => (
+                  <tr key={course.id} className="border-b border-border transition-colors hover:bg-gray-50/50">
                     <td className="p-4 font-medium">{course.title}</td>
                     <td className="p-4 text-sm text-muted">{course.category?.name || 'Uncategorized'}</td>
-                    <td className="p-4 text-sm text-center">{course._count?.enrollments || 0}</td>
+                    <td className="p-4 text-sm text-muted">
+                      {course.visibleToAll ? (
+                        <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                          ทุกคน
+                        </span>
+                      ) : (
+                        <div className="space-y-1">
+                          <div>แผนก {course.visibleDepartments?.length || 0} รายการ</div>
+                          <div>Tier {course.visibleTiers?.length || 0} รายการ</div>
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4 text-center text-sm">{course._count?.enrollments || 0}</td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => openEditCourse(course)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"><Edit size={16} /></button>
-                        <button onClick={() => handleDelete(course.id)} className="p-1.5 text-danger hover:bg-red-50 rounded"><Trash2 size={16} /></button>
+                        <button
+                          type="button"
+                          onClick={() => openEditCourse(course)}
+                          className="rounded p-1.5 text-blue-600 hover:bg-blue-50"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCourse(course.id)}
+                          className="rounded p-1.5 text-danger hover:bg-red-50"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>

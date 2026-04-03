@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, UserCircle, ShieldAlert } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -8,90 +8,113 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const emailInputId = useId();
+  const passwordInputId = useId();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
+
     if (token && userStr) {
       const user = JSON.parse(userStr);
-      if (user.role === 'admin') navigate('/admin/dashboard');
-      else navigate('/user/home');
-    }
-  }, [navigate]);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    try {
-      const { authAPI } = await import('../../utils/api');
-      const response = await authAPI.login(email, password);
-      
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      
-      const userRole = response.data.user.role;
-      if (userRole === 'admin') {
+      if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/user/home');
       }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check credentials.');
+    }
+  }, [navigate]);
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const { authAPI } = await import('../../utils/api');
+      const response = await authAPI.login(email, password);
+
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      if (response.data.user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/home');
+      }
+    } catch (loginError) {
+      setError(loginError.response?.data?.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบอีเมลและรหัสผ่านอีกครั้ง');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center w-full min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-4 animate-fade-in relative overflow-hidden">
-      
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[linear-gradient(135deg,_#f7faff_0%,_#eef2ff_45%,_#f8fafc_100%)] p-4 animate-fade-in">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(79,70,229,0.12),_transparent_32%),radial-gradient(circle_at_bottom_left,_rgba(15,118,110,0.1),_transparent_30%)]" />
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/80 to-transparent" />
 
-      <div className="card w-full max-w-sm p-8 flex flex-col items-center bg-white/80 backdrop-blur-xl border border-white shadow-2xl relative z-10">
-        
-        <div className="bg-gradient-primary text-white w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-primary/30 transform -rotate-6 hover:rotate-0 transition-transform duration-300">
+      <div className="relative z-10 flex w-full max-w-sm flex-col items-center overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-8 shadow-[0_28px_70px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl">
+        <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-gradient-primary text-white shadow-[0_22px_40px_-20px_rgba(79,70,229,0.6)] transition-transform duration-300 hover:-translate-y-0.5">
           <BookOpen size={40} strokeWidth={1.5} />
         </div>
-        
-        <h1 className="text-3xl font-black mb-1 text-center tracking-tight text-gray-900">LMS Connect</h1>
-        <p className="text-gray-500 font-medium text-sm text-center mb-8">e-Learning ระบบพัฒนาบุคลากร</p>
 
-        <form onSubmit={handleLogin} className="w-full flex-col flex gap-5">
-          {error && <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">{error}</div>}
-          
+        <h1 className="mb-1 text-center text-3xl font-black tracking-tight text-gray-900">
+          LMS Connect
+        </h1>
+        <p className="mb-8 text-center text-sm font-medium text-slate-600">
+          e-Learning ระบบพัฒนาบุคลากร
+        </p>
+
+        <form onSubmit={handleLogin} className="flex w-full flex-col gap-5">
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
+              {error}
+            </div>
+          )}
+
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-bold text-gray-700">อีเมล / รหัสพนักงาน</label>
-            <input 
-              type="text" 
-              className="p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 w-full transition-all text-sm font-medium" 
+            <label htmlFor={emailInputId} className="text-sm font-bold text-slate-700">
+              อีเมล / รหัสพนักงาน
+            </label>
+            <input
+              id={emailInputId}
+              type="text"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 p-3 text-sm font-medium text-slate-900 transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
               placeholder="employee@company.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-bold text-gray-700">รหัสผ่าน</label>
-            <input 
-              type="password" 
-              className="p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 w-full transition-all text-sm font-medium" 
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(event) => setEmail(event.target.value)}
               required
             />
           </div>
 
-          <button type="submit" disabled={loading} className="btn btn-primary w-full mt-4 py-3.5 justify-center text-[15px] shadow-lg shadow-primary/20 rounded-xl font-bold disabled:opacity-70">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={passwordInputId} className="text-sm font-bold text-slate-700">
+              รหัสผ่าน
+            </label>
+            <input
+              id={passwordInputId}
+              type="password"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 p-3 text-sm font-medium text-slate-900 transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
+              placeholder="••••••••"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary mt-4 w-full justify-center rounded-xl py-3.5 text-[15px] font-bold shadow-[0_18px_30px_-18px_rgba(79,70,229,0.7)] disabled:opacity-70"
+          >
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 font-medium mt-8 text-center bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+        <p className="mt-8 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-center text-xs font-medium text-slate-500">
           v1.0 MVP
         </p>
       </div>

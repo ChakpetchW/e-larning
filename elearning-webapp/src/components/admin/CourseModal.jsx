@@ -14,6 +14,8 @@ const CourseModal = ({
   courseForm,
   setCourseForm,
   categories,
+  departments,
+  tiers,
   lessons,
   loadingReports,
   quizReports,
@@ -180,6 +182,109 @@ const CourseModal = ({
               <div>
                 <label className="text-sm font-bold text-gray-700 block mb-1">รายละเอียด (Description)</label>
                 <textarea rows={3} className="form-input w-full" value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} placeholder="คำอธิบายสั้นๆ ของคอร์สนี้..." />
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+                <div className="flex flex-col gap-1">
+                  <h4 className="text-base font-black text-slate-900">สิทธิ์การมองเห็นคอร์ส</h4>
+                  <p className="text-sm text-slate-500">
+                    กำหนดได้ว่าแผนกไหนและ tier ไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
+                  </p>
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={courseForm.visibleToAll}
+                      onChange={(event) =>
+                        setCourseForm({
+                          ...courseForm,
+                          visibleToAll: event.target.checked,
+                          visibleDepartmentIds: event.target.checked ? [] : courseForm.visibleDepartmentIds,
+                          visibleTierIds: event.target.checked ? [] : courseForm.visibleTierIds,
+                        })
+                      }
+                      className="mt-1 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    <span>
+                      <span className="block text-sm font-bold text-slate-900">เปิดให้ทุกคนเห็นคอร์สนี้</span>
+                      <span className="block text-xs text-slate-500">
+                        ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกและ tier ด้านล่างในการคุมการมองเห็น
+                      </span>
+                    </span>
+                  </label>
+                </div>
+
+                {!courseForm.visibleToAll && (
+                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                      <div className="mb-3">
+                        <h5 className="text-sm font-black text-slate-900">แผนกที่เห็นคอร์สได้</h5>
+                        <p className="text-xs text-slate-500">ถ้าไม่เลือกแผนกเลย จะใช้เฉพาะการคุมด้วย tier</p>
+                      </div>
+                      <div className="space-y-2">
+                        {departments.length === 0 ? (
+                          <p className="text-sm text-slate-500">ยังไม่มีแผนกในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
+                        ) : (
+                          departments.map((department) => (
+                            <label key={department.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={courseForm.visibleDepartmentIds.includes(department.id)}
+                                onChange={(event) => {
+                                  const nextIds = event.target.checked
+                                    ? [...courseForm.visibleDepartmentIds, department.id]
+                                    : courseForm.visibleDepartmentIds.filter((id) => id !== department.id);
+
+                                  setCourseForm({
+                                    ...courseForm,
+                                    visibleDepartmentIds: nextIds,
+                                  });
+                                }}
+                                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                              />
+                              {department.name}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                      <div className="mb-3">
+                        <h5 className="text-sm font-black text-slate-900">Tier ที่เห็นคอร์สได้</h5>
+                        <p className="text-xs text-slate-500">ถ้าเลือกทั้งแผนกและ tier ผู้ใช้ต้องผ่านเงื่อนไขที่กำหนด</p>
+                      </div>
+                      <div className="space-y-2">
+                        {tiers.length === 0 ? (
+                          <p className="text-sm text-slate-500">ยังไม่มี tier ในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
+                        ) : (
+                          tiers.map((tier) => (
+                            <label key={tier.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={courseForm.visibleTierIds.includes(tier.id)}
+                                onChange={(event) => {
+                                  const nextIds = event.target.checked
+                                    ? [...courseForm.visibleTierIds, tier.id]
+                                    : courseForm.visibleTierIds.filter((id) => id !== tier.id);
+
+                                  setCourseForm({
+                                    ...courseForm,
+                                    visibleTierIds: nextIds,
+                                  });
+                                }}
+                                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                              />
+                              {tier.name}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Group: Instructor & Metadata */}

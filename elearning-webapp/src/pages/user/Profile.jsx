@@ -1,42 +1,72 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { User as UserIcon, LogOut, Settings, Award, Clock, ChevronRight, Bell, Shield, BookOpen, Camera, X } from 'lucide-react';
+import React, { useEffect, useId, useRef, useState } from 'react';
+import {
+  User as UserIcon,
+  LogOut,
+  Settings,
+  Award,
+  ChevronRight,
+  Bell,
+  Shield,
+  X,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI, userAPI, getFullUrl } from '../../utils/api';
+import { authAPI, userAPI } from '../../utils/api';
+import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 
 const Profile = () => {
   const navigate = useNavigate();
-  
+
   const [user, setUser] = useState(null);
   const [points, setPoints] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  // Modals state
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
-  
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
 
+  const editDialogRef = useRef(null);
+  const editInputRef = useRef(null);
+  const policyDialogRef = useRef(null);
+  const policyCloseButtonRef = useRef(null);
+  const passwordDialogTitleId = useId();
+  const policyDialogTitleId = useId();
+  const currentPasswordId = useId();
+  const newPasswordId = useId();
+
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const [userRes, pointsRes] = await Promise.all([
+          authAPI.getCurrentUser(),
+          userAPI.getPoints(),
+        ]);
+        setUser(userRes.data);
+        setPoints(pointsRes.data.balance);
+      } catch (error) {
+        console.error('Fetch profile error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProfile();
   }, []);
 
-  const fetchProfile = async () => {
-    try {
-      const [userRes, pointsRes] = await Promise.all([
-        authAPI.getCurrentUser(),
-        userAPI.getPoints()
-      ]);
-      setUser(userRes.data);
-      setPoints(pointsRes.data.balance);
-    } catch (error) {
-      console.error('Fetch profile error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useAccessibleOverlay({
+    isOpen: showEditModal,
+    onClose: () => setShowEditModal(false),
+    containerRef: editDialogRef,
+    initialFocusRef: editInputRef,
+  });
+
+  useAccessibleOverlay({
+    isOpen: showPolicyModal,
+    onClose: () => setShowPolicyModal(false),
+    containerRef: policyDialogRef,
+    initialFocusRef: policyCloseButtonRef,
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -45,13 +75,19 @@ const Profile = () => {
   };
 
   const handleUpdatePassword = async () => {
-    if (!currentPassword || !newPassword) return alert('กรุณากรอกรหัสผ่านให้ครบถ้วน');
-    if (newPassword.length < 6) return alert('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
-    
+    if (!currentPassword || !newPassword) {
+      alert('กรุณากรอกรหัสผ่านให้ครบถ้วน');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      alert('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
+      return;
+    }
+
     try {
       setSavingPassword(true);
       await userAPI.updateProfile({ currentPassword, newPassword });
-      
       setShowEditModal(false);
       setCurrentPassword('');
       setNewPassword('');
@@ -65,201 +101,325 @@ const Profile = () => {
   };
 
   const toggleNotifications = () => {
-    setNotificationsEnabled(!notificationsEnabled);
+    setNotificationsEnabled((current) => !current);
     alert(notificationsEnabled ? 'ปิดการแจ้งเตือนแล้ว' : 'เปิดการแจ้งเตือนแล้ว');
   };
 
   const statBoxes = [
-    { label: 'แต้มสะสม', value: points.toLocaleString(), icon: <Award size={18} className="text-warning"/>, color: 'text-warning', bg: 'bg-orange-50' },
-    { label: 'สถานะ', value: user?.status === 'ACTIVE' ? 'ปกติ' : '-', icon: <Shield size={18} className="text-primary"/>, color: 'text-primary', bg: 'bg-indigo-50' },
-    { label: 'บทบาท', value: user?.role === 'admin' ? 'Admin' : 'User', icon: <UserIcon size={18} className="text-success"/>, color: 'text-success', bg: 'bg-green-50' }
+    {
+      label: 'แต้มสะสม',
+      value: points.toLocaleString(),
+      icon: <Award size={18} className="text-warning" />,
+      color: 'text-warning',
+      bg: 'bg-orange-50',
+    },
+    {
+      label: 'สถานะ',
+      value: user?.status === 'ACTIVE' ? 'ปกติ' : '-',
+      icon: <Shield size={18} className="text-primary" />,
+      color: 'text-primary',
+      bg: 'bg-indigo-50',
+    },
+    {
+      label: 'บทบาท',
+      value: user?.role === 'admin' ? 'Admin' : 'User',
+      icon: <UserIcon size={18} className="text-success" />,
+      color: 'text-success',
+      bg: 'bg-green-50',
+    },
   ];
 
   if (loading) {
-     return (
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-     );
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in pb-8 pt-2 h-full">
+    <div className="flex h-full flex-col gap-6 animate-fade-in pb-8 pt-2">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">โปรไฟล์</h2>
-        <button onClick={() => setShowEditModal(true)} className="text-gray-400 hover:text-gray-600 transition-colors"><Settings size={24} /></button>
+        <button
+          type="button"
+          onClick={() => setShowEditModal(true)}
+          aria-label="เปิดหน้าต่างเปลี่ยนรหัสผ่าน"
+          className="text-gray-400 transition-colors hover:text-gray-600"
+        >
+          <Settings size={24} />
+        </button>
       </div>
-      
-      {/* Profile Header Card */}
-      <div className="card p-0 bg-white border border-gray-100 overflow-hidden shadow-sm relative">
-        <div className="h-32 bg-gradient-to-r from-primary to-indigo-400 relative">
-            <div className="absolute inset-0 bg-white/10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
+
+      <div className="relative overflow-hidden border border-gray-100 bg-white p-0 card shadow-sm">
+        <div className="relative h-32 bg-gradient-to-r from-primary to-indigo-400">
+          <div className="absolute inset-0 bg-white/10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
         </div>
-        
-        <div className="px-6 flex flex-col items-center pb-6">
-          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center border-4 border-white shadow-lg relative -mt-12 z-10 p-1">
-            <div className="w-full h-full bg-slate-100 rounded-full flex items-center justify-center relative overflow-hidden">
-                <UserIcon size={40} className="text-slate-400" />
+
+        <div className="flex flex-col items-center px-6 pb-6">
+          <div className="relative z-10 -mt-12 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-white p-1 shadow-lg">
+            <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-slate-100">
+              <UserIcon size={40} className="text-slate-400" />
             </div>
           </div>
-          
-          <h3 className="text-xl font-bold mt-3 text-gray-900">{user?.name || 'User'}</h3>
-          <p className="text-sm font-medium text-gray-500 mb-1">{user?.email}</p>
-          <div className="badge bg-indigo-50 text-primary mt-2 flex items-center gap-1 border border-indigo-100 font-bold px-3 py-1 rounded-full text-xs">
+
+          <h3 className="mt-3 text-xl font-bold text-gray-900">{user?.name || 'User'}</h3>
+          <p className="mb-1 text-sm font-medium text-gray-500">{user?.email}</p>
+          <div className="badge mt-2 flex items-center gap-1 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-bold text-primary">
             {user?.department || 'พนักงาน'}
           </div>
         </div>
       </div>
 
-      {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
-        {statBoxes.map((stat, idx) => (
-            <div key={idx} className="card bg-white p-4 flex flex-col items-center justify-center border border-gray-100 text-center gap-1.5 hover:border-gray-200 transition-colors">
-                <div className={`p-2 rounded-full ${stat.bg} mb-1`}>
-                    {stat.icon}
-                </div>
-                <h4 className={`text-[1.15rem] font-black ${stat.color} leading-none truncate w-full px-1`}>{stat.value}</h4>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate">{stat.label}</p>
-            </div>
+        {statBoxes.map((stat) => (
+          <div
+            key={stat.label}
+            className="card flex flex-col items-center justify-center gap-1.5 border border-gray-100 bg-white p-4 text-center transition-colors hover:border-gray-200"
+          >
+            <div className={`mb-1 rounded-full p-2 ${stat.bg}`}>{stat.icon}</div>
+            <h4 className={`w-full truncate px-1 text-[1.15rem] font-black leading-none ${stat.color}`}>
+              {stat.value}
+            </h4>
+            <p className="truncate text-[10px] font-bold uppercase tracking-wide text-gray-400">
+              {stat.label}
+            </p>
+          </div>
         ))}
       </div>
 
-      {/* Settings / Actions List */}
-      <div className="flex flex-col gap-1 mt-2">
-        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-2 mb-2">การตั้งค่า</h4>
-        
-        <div className="card bg-white border border-gray-100 overflow-hidden flex flex-col divide-y divide-gray-100">
-            {/* Account Settings */}
-            <button onClick={() => setShowEditModal(true)} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left group">
-              <div className="flex items-center gap-4">
-                  <div className="p-2.5 rounded-xl bg-gray-100 text-gray-700 group-hover:scale-105 transition-transform">
-                      <Settings size={20}/>
-                  </div>
-                  <div>
-                      <span className="font-bold text-gray-900 block text-sm mb-0.5">เปลี่ยนรหัสผ่าน</span>
-                      <span className="text-xs font-medium text-gray-400 block">อัปเดตรหัสผ่านใหม่เพื่อความปลอดภัย</span>
-                  </div>
-              </div>
-              <ChevronRight size={18} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
-            </button>
+      <div className="mt-2 flex flex-col gap-1">
+        <h4 className="mb-2 pl-2 text-xs font-bold uppercase tracking-widest text-gray-400">
+          การตั้งค่า
+        </h4>
 
-            {/* Notifications */}
-            <button onClick={toggleNotifications} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left group">
-              <div className="flex items-center gap-4">
-                  <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform">
-                      <Bell size={20}/>
-                  </div>
-                  <div>
-                      <span className="font-bold text-gray-900 block text-sm mb-0.5">การแจ้งเตือน</span>
-                      <span className="text-xs font-medium text-gray-400 block">{notificationsEnabled ? 'เปิดการแจ้งเตือนอยู่' : 'ปิดการแจ้งเตือนแล้ว'}</span>
-                  </div>
+        <div className="card flex flex-col divide-y divide-gray-100 overflow-hidden border border-gray-100 bg-white">
+          <button
+            type="button"
+            onClick={() => setShowEditModal(true)}
+            className="group flex items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="rounded-xl bg-gray-100 p-2.5 text-gray-700 transition-transform group-hover:scale-105">
+                <Settings size={20} />
               </div>
-              <div className={`w-12 h-6 rounded-full p-1 flex items-center transition-colors ${notificationsEnabled ? 'bg-primary' : 'bg-gray-200'}`}>
-                 <div className={`w-4 h-4 rounded-full bg-white transition-transform ${notificationsEnabled ? 'translate-x-6' : ''}`}></div>
+              <div>
+                <span className="mb-0.5 block text-sm font-bold text-gray-900">
+                  เปลี่ยนรหัสผ่าน
+                </span>
+                <span className="block text-xs font-medium text-gray-400">
+                  อัปเดตรหัสผ่านใหม่เพื่อความปลอดภัย
+                </span>
               </div>
-            </button>
+            </div>
+            <ChevronRight size={18} className="text-gray-300 transition-colors group-hover:text-gray-500" />
+          </button>
 
-            {/* Policy */}
-            <button onClick={() => setShowPolicyModal(true)} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left group">
-              <div className="flex items-center gap-4">
-                  <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 group-hover:scale-105 transition-transform">
-                      <Shield size={20}/>
-                  </div>
-                  <div>
-                      <span className="font-bold text-gray-900 block text-sm mb-0.5">ความเป็นส่วนตัว</span>
-                      <span className="text-xs font-medium text-gray-400 block">นโยบายและเงื่อนไข</span>
-                  </div>
+          <button
+            type="button"
+            onClick={toggleNotifications}
+            aria-pressed={notificationsEnabled}
+            className="group flex items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-105">
+                <Bell size={20} />
               </div>
-              <ChevronRight size={18} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
-            </button>
+              <div>
+                <span className="mb-0.5 block text-sm font-bold text-gray-900">การแจ้งเตือน</span>
+                <span className="block text-xs font-medium text-gray-400">
+                  {notificationsEnabled ? 'เปิดการแจ้งเตือนอยู่' : 'ปิดการแจ้งเตือนแล้ว'}
+                </span>
+              </div>
+            </div>
+            <div
+              className={`flex h-6 w-12 items-center rounded-full p-1 transition-colors ${
+                notificationsEnabled ? 'bg-primary' : 'bg-gray-200'
+              }`}
+            >
+              <div
+                className={`h-4 w-4 rounded-full bg-white transition-transform ${
+                  notificationsEnabled ? 'translate-x-6' : ''
+                }`}
+              />
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowPolicyModal(true)}
+            className="group flex items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 transition-transform group-hover:scale-105">
+                <Shield size={20} />
+              </div>
+              <div>
+                <span className="mb-0.5 block text-sm font-bold text-gray-900">
+                  ความเป็นส่วนตัว
+                </span>
+                <span className="block text-xs font-medium text-gray-400">
+                  นโยบายและเงื่อนไข
+                </span>
+              </div>
+            </div>
+            <ChevronRight size={18} className="text-gray-300 transition-colors group-hover:text-gray-500" />
+          </button>
         </div>
       </div>
 
-      {/* Logout Button */}
-      <div className="mt-4 mb-8">
-        <button 
+      <div className="mb-8 mt-4">
+        <button
+          type="button"
           onClick={handleLogout}
-          className="w-full card bg-white border border-red-100 p-4 flex items-center justify-center gap-2 text-danger hover:bg-red-50 transition-colors font-bold shadow-sm"
+          className="card flex w-full items-center justify-center gap-2 border border-red-100 bg-white p-4 font-bold text-danger shadow-sm transition-colors hover:bg-red-50"
         >
-          <LogOut size={20}/>
+          <LogOut size={20} />
           <span>ออกจากระบบ</span>
         </button>
       </div>
 
-      {/* Edit Password Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
-          <div className="bg-white rounded-[2rem] p-6 md:p-8 max-w-sm w-full shadow-2xl animate-fade-in flex flex-col items-center">
-            <h3 className="text-2xl font-black text-slate-800 mb-6 w-full text-center">เปลี่ยนรหัสผ่าน</h3>
-            
-            <div className="w-full mb-4">
-              <label className="block text-sm font-bold text-slate-700 mb-2">รหัสผ่านปัจจุบัน</label>
-              <input 
-                type="password" 
-                value={currentPassword} 
-                onChange={e => setCurrentPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 font-medium"
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => setShowEditModal(false)}
+            aria-label="ปิดหน้าต่างเปลี่ยนรหัสผ่าน"
+          />
+          <div
+            ref={editDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={passwordDialogTitleId}
+            tabIndex={-1}
+            className="relative flex w-full max-w-sm flex-col items-center rounded-[2rem] bg-white p-6 shadow-2xl animate-fade-in md:p-8"
+          >
+            <h3 id={passwordDialogTitleId} className="mb-6 w-full text-center text-2xl font-black text-slate-800">
+              เปลี่ยนรหัสผ่าน
+            </h3>
+
+            <div className="mb-4 w-full">
+              <label htmlFor={currentPasswordId} className="mb-2 block text-sm font-bold text-slate-700">
+                รหัสผ่านปัจจุบัน
+              </label>
+              <input
+                ref={editInputRef}
+                id={currentPasswordId}
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="กรอกรหัสผ่านปัจจุบัน"
               />
             </div>
 
-            <div className="w-full mb-6">
-              <label className="block text-sm font-bold text-slate-700 mb-2">รหัสผ่านใหม่</label>
-              <input 
-                type="password" 
-                value={newPassword} 
-                onChange={e => setNewPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 font-medium"
+            <div className="mb-6 w-full">
+              <label htmlFor={newPasswordId} className="mb-2 block text-sm font-bold text-slate-700">
+                รหัสผ่านใหม่
+              </label>
+              <input
+                id={newPasswordId}
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
               />
             </div>
 
-            <div className="flex gap-3 w-full">
-              <button 
-                onClick={() => { setShowEditModal(false); setCurrentPassword(''); setNewPassword(''); }}
-                className="flex-1 py-3 px-4 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+            <div className="flex w-full gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setCurrentPassword('');
+                  setNewPassword('');
+                }}
+                className="flex-1 rounded-xl bg-slate-100 px-4 py-3 font-bold text-slate-600 transition-colors hover:bg-slate-200"
                 disabled={savingPassword}
               >
                 ยกเลิก
               </button>
-              <button 
+              <button
+                type="button"
                 onClick={handleUpdatePassword}
                 disabled={savingPassword}
-                className="flex-1 py-3 px-4 rounded-xl font-bold bg-primary text-white hover:bg-primary-hover shadow-md transition-colors flex justify-center items-center"
+                className="flex flex-1 items-center justify-center rounded-xl bg-primary px-4 py-3 font-bold text-white shadow-md transition-colors hover:bg-primary-hover"
               >
-                {savingPassword ? <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div> : 'เปลี่ยนรหัสผ่าน'}
+                {savingPassword ? (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  'เปลี่ยนรหัสผ่าน'
+                )}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Policy Modal */}
       {showPolicyModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
-          <div className="bg-white rounded-[2rem] p-6 max-w-md w-full shadow-2xl animate-fade-in flex flex-col h-[80vh]">
-            <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-100">
-              <h3 className="text-xl font-black text-slate-800 flex items-center gap-2"><Shield size={22} className="text-primary"/> นโยบายความเป็นส่วนตัว</h3>
-              <button onClick={() => setShowPolicyModal(false)} className="text-slate-400 hover:bg-slate-100 p-2 rounded-full transition-colors"><X size={20}/></button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar text-sm text-slate-600 mb-6 space-y-4 leading-relaxed font-medium">
-              <p>ยินดีต้อนรับสู่แพลตฟอร์มการเรียนรู้ของเรา การปกป้องข้อมูลส่วนบุคคลของคุณคือสิ่งสำคัญที่สุด</p>
-              <h4 className="font-bold text-slate-800 text-base">1. การจัดเก็บข้อมูล</h4>
-              <p>เราจัดเก็บข้อมูลที่จำเป็นต่อการให้บริการ เช่น ชื่อ อีเมล และประวัติการเรียนรู้ของคุณ เพื่อมอบประสบการณ์ที่ดีที่สุด</p>
-              <h4 className="font-bold text-slate-800 text-base">2. การใช้ข้อมูล</h4>
-              <p>ข้อมูลของคุณจะถูกใช้เพื่อการวิเคราะห์และออกใบรับรองการจบหลักสูตร ทีมงานไม่มีนโยบายขายข้อมูลส่วนบุลคลของท่านให้กับบุคคลที่สามอย่างเด็ดขาด</p>
-              <h4 className="font-bold text-slate-800 text-base">3. สิทธิ์ของคุณ</h4>
-              <p>คุณสามารถขอแก้ไขหรือขอลบข้อมูลบัญชีของตนเองได้ตลอดเวลาตามกฎหมาย PDPA.</p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => setShowPolicyModal(false)}
+            aria-label="ปิดหน้าต่างนโยบายความเป็นส่วนตัว"
+          />
+          <div
+            ref={policyDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={policyDialogTitleId}
+            tabIndex={-1}
+            className="relative flex h-[80vh] w-full max-w-md flex-col rounded-[2rem] bg-white p-6 shadow-2xl animate-fade-in"
+          >
+            <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
+              <h3 id={policyDialogTitleId} className="flex items-center gap-2 text-xl font-black text-slate-800">
+                <Shield size={22} className="text-primary" />
+                นโยบายความเป็นส่วนตัว
+              </h3>
+              <button
+                ref={policyCloseButtonRef}
+                type="button"
+                onClick={() => setShowPolicyModal(false)}
+                aria-label="ปิดหน้าต่างนโยบายความเป็นส่วนตัว"
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100"
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <button onClick={() => setShowPolicyModal(false)} className="w-full py-3.5 rounded-xl font-bold bg-primary text-white shadow-md hover:shadow-lg hover:bg-primary-hover transition-all">
+            <div className="custom-scrollbar mb-6 flex-1 space-y-4 overflow-y-auto pr-2 text-sm font-medium leading-relaxed text-slate-600">
+              <p>
+                ยินดีต้อนรับสู่แพลตฟอร์มการเรียนรู้ของเรา การปกป้องข้อมูลส่วนบุคคลของคุณคือสิ่งสำคัญที่สุด
+              </p>
+              <h4 className="text-base font-bold text-slate-800">1. การจัดเก็บข้อมูล</h4>
+              <p>
+                เราจัดเก็บข้อมูลที่จำเป็นต่อการให้บริการ เช่น ชื่อ อีเมล และประวัติการเรียนรู้ของคุณ
+                เพื่อมอบประสบการณ์ที่ดีที่สุด
+              </p>
+              <h4 className="text-base font-bold text-slate-800">2. การใช้ข้อมูล</h4>
+              <p>
+                ข้อมูลของคุณจะถูกใช้เพื่อการวิเคราะห์และออกใบรับรองการจบหลักสูตร
+                ทีมงานไม่มีนโยบายขายข้อมูลส่วนบุคคลของท่านให้กับบุคคลที่สามอย่างเด็ดขาด
+              </p>
+              <h4 className="text-base font-bold text-slate-800">3. สิทธิของคุณ</h4>
+              <p>
+                คุณสามารถขอแก้ไขหรือลบข้อมูลบัญชีของตนเองได้ตลอดเวลาตามกฎหมาย PDPA
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowPolicyModal(false)}
+              className="w-full rounded-xl bg-primary py-3.5 font-bold text-white shadow-md transition-all hover:bg-primary-hover hover:shadow-lg"
+            >
               ฉันเข้าใจและยอมรับ
             </button>
           </div>
         </div>
       )}
-
     </div>
   );
 };

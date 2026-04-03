@@ -92,9 +92,20 @@ export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard'),
 
   getUsers: () => api.get('/admin/users'),
+  getUserDetails: (id) => api.get(`/admin/users/${id}/details`),
   createUser: (data) => api.post('/admin/users', data),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
+
+  getDepartments: () => api.get('/admin/departments'),
+  createDepartment: (data) => api.post('/admin/departments', data),
+  updateDepartment: (id, data) => api.put(`/admin/departments/${id}`, data),
+  deleteDepartment: (id) => api.delete(`/admin/departments/${id}`),
+
+  getTiers: () => api.get('/admin/tiers'),
+  createTier: (data) => api.post('/admin/tiers', data),
+  updateTier: (id, data) => api.put(`/admin/tiers/${id}`, data),
+  deleteTier: (id) => api.delete(`/admin/tiers/${id}`),
 
   getCourses: () => api.get('/admin/courses'),
   createCourse: (data) => api.post('/admin/courses', data),

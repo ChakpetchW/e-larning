@@ -14,6 +14,11 @@ const getUsers = asyncHandler(async (req, res) => {
   res.json({ success: true, data: users });
 });
 
+const getUserDetails = asyncHandler(async (req, res) => {
+  const user = await AdminService.getUserDetails(req.params.id);
+  res.json({ success: true, data: user });
+});
+
 const createUser = asyncHandler(async (req, res) => {
   const user = await AdminService.createUser(req.body);
   res.status(201).json({ success: true, data: user });
@@ -31,6 +36,48 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
   await AdminService.deleteUser(id);
   res.json({ success: true, message: 'User deleted successfully' });
+});
+
+// DEPARTMENTS
+const getDepartments = asyncHandler(async (req, res) => {
+  const departments = await AdminService.getDepartments();
+  res.json({ success: true, data: departments });
+});
+
+const createDepartment = asyncHandler(async (req, res) => {
+  const department = await AdminService.createDepartment(req.body);
+  res.status(201).json({ success: true, data: department });
+});
+
+const updateDepartment = asyncHandler(async (req, res) => {
+  const department = await AdminService.updateDepartment(req.params.id, req.body);
+  res.json({ success: true, data: department });
+});
+
+const deleteDepartment = asyncHandler(async (req, res) => {
+  await AdminService.deleteDepartment(req.params.id);
+  res.json({ success: true, message: 'Department deleted successfully' });
+});
+
+// TIERS
+const getTiers = asyncHandler(async (req, res) => {
+  const tiers = await AdminService.getTiers();
+  res.json({ success: true, data: tiers });
+});
+
+const createTier = asyncHandler(async (req, res) => {
+  const tier = await AdminService.createTier(req.body);
+  res.status(201).json({ success: true, data: tier });
+});
+
+const updateTier = asyncHandler(async (req, res) => {
+  const tier = await AdminService.updateTier(req.params.id, req.body);
+  res.json({ success: true, data: tier });
+});
+
+const deleteTier = asyncHandler(async (req, res) => {
+  await AdminService.deleteTier(req.params.id);
+  res.json({ success: true, message: 'Tier deleted successfully' });
 });
 
 // COURSES
@@ -161,9 +208,18 @@ module.exports = {
   getRedeemRequests,
   updateRedeemStatus,
   getUsers,
+  getUserDetails,
   createUser,
   updateUser,
   deleteUser,
+  getDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+  getTiers,
+  createTier,
+  updateTier,
+  deleteTier,
   getCourseLessons,
   createLesson,
   updateLesson,
