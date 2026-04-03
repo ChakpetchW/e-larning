@@ -171,7 +171,7 @@ const UserManagement = () => {
   };
 
   const handleTierDelete = async (id, name) => {
-    if (!window.confirm(`ต้องการลบ tier "${name}" ใช่หรือไม่?`)) {
+    if (!window.confirm(`ต้องการลบระดับผู้ใช้งาน "${name}" ใช่หรือไม่?`)) {
       return;
     }
 
@@ -180,7 +180,7 @@ const UserManagement = () => {
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete tier error:', error);
-      alert(error.response?.data?.message || 'ลบ tier ไม่สำเร็จ');
+      alert(error.response?.data?.message || 'ลบระดับผู้ใช้งานไม่สำเร็จ');
     }
   };
 
@@ -205,7 +205,7 @@ const UserManagement = () => {
   const columns = [
     { label: 'พนักงาน' },
     { label: 'แผนก' },
-    { label: 'Tier' },
+    { label: 'ระดับ' },
     { label: 'เริ่มงาน' },
     { label: 'คอร์สที่จบ', className: 'text-center' },
     { label: 'แต้มสะสม', className: 'text-right' },
@@ -216,7 +216,7 @@ const UserManagement = () => {
     <div className="flex flex-col gap-6">
       <AdminPageHeader
         title="ผู้ใช้งานระบบ"
-        subtitle="เพิ่มพนักงาน จัดการแผนกและ tier และดูประวัติการเรียนรายบุคคลได้จากหน้านี้"
+        subtitle="เพิ่มพนักงาน จัดการแผนกและระดับผู้ใช้งาน และดูประวัติการเรียนรายบุคคลได้จากหน้านี้"
         actions={(
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setShowDepartmentModal(true)} className="btn btn-outline">
@@ -225,7 +225,7 @@ const UserManagement = () => {
             </button>
             <button onClick={() => setShowTierModal(true)} className="btn btn-outline">
               <Sparkles size={18} />
-              จัดการ Tier
+              จัดการระดับผู้ใช้งาน
             </button>
             <button onClick={openAddUser} className="btn btn-primary">
               <Plus size={18} />
@@ -267,9 +267,9 @@ const UserManagement = () => {
 
       <ReferenceDataModal
         isOpen={showTierModal}
-        title="จัดการ Tier"
+        title="จัดการระดับผู้ใช้งาน"
         description="กำหนดระดับผู้ใช้งาน เช่น ทั้งหมด Supervisor Manager และเพิ่มได้ตามโครงสร้างองค์กร"
-        itemLabel="tier"
+        itemLabel="ระดับ"
         items={tiers}
         loading={referenceLoading}
         onClose={() => setShowTierModal(false)}
@@ -325,7 +325,7 @@ const UserManagement = () => {
             value={selectedTier}
             onChange={(event) => setSelectedTier(event.target.value)}
           >
-            <option value="ALL">ทุก Tier</option>
+            <option value="ALL">ทุกระดับ</option>
             {tiers.map((tier) => (
               <option key={tier.id} value={tier.id}>
                 {tier.name}

@@ -1,4 +1,5 @@
-import React, { useId, useMemo, useRef, useState } from 'react';
+import React, { useId, useMemo, useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Search,
@@ -19,7 +20,6 @@ import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const dialogRef = useRef(null);
-  const searchInputRef = useRef(null);
   const titleId = useId();
   const searchInputId = useId();
 
@@ -67,16 +67,31 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
     isOpen,
     onClose: handleClose,
     containerRef: dialogRef,
-    initialFocusRef: searchInputRef,
+    // Removed autofocus so mobile keyboard doesn't pop up and shift the screen
   });
+
+  // Lock body scroll tightly when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none'; // Prevent pulling down to refresh
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 animate-fade-in sm:p-4 md:items-center md:p-6">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-end justify-center p-0 sm:p-4 md:items-center md:p-6" style={{ pointerEvents: 'auto' }}>
       <button
         type="button"
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-fade-in cursor-default"
         onClick={handleClose}
         aria-label="ปิดหน้าต่างเลือกหมวดหมู่"
       />
@@ -87,7 +102,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative flex h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-t-[2.5rem] rounded-b-none bg-white shadow-2xl ring-1 ring-black/5 animate-slide-up md:h-[80vh] md:rounded-[2.5rem]"
+        className="relative flex h-[85dvh] w-full max-w-4xl flex-col overflow-hidden rounded-t-[2.5rem] rounded-b-none bg-white shadow-2xl animate-slide-up md:h-[80dvh] md:rounded-[2.5rem]"
       >
         <div className="md:hidden flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
@@ -107,7 +122,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
             type="button"
             onClick={handleClose}
             aria-label="ปิดหน้าต่างเลือกหมวดหมู่"
-            className="rounded-2xl border border-slate-100 bg-slate-50 p-2.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 md:p-3"
+            className="rounded-2xl border border-slate-100 bg-slate-50 p-2.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 focus:outline-none md:p-3"
           >
             <X size={20} />
           </button>
@@ -123,19 +138,18 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
             </label>
             <input
               id={searchInputId}
-              ref={searchInputRef}
               type="text"
               placeholder="พิมพ์ชื่อหมวดหมู่ที่ต้องการค้นหา..."
-              className="w-full rounded-2xl border border-slate-200 bg-white py-4.5 pl-14 pr-6 text-lg font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
+              className="w-full rounded-2xl border border-slate-200 bg-white py-4.5 pl-14 pr-6 text-lg font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 px-4"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 no-scrollbar md:p-8">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar bg-slate-50/30 overscroll-contain">
           {filteredCategories.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
               {filteredCategories.map((category) => {
                 const Icon = getCategoryIcon(category.name);
                 const count = getCourseCount(category.id);
@@ -148,21 +162,18 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
                       onSelect(category.name);
                       handleClose();
                     }}
-                    className="group relative flex items-center gap-4 overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 text-left transition-all hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-[2rem] border border-slate-100 bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition-all group-hover:bg-primary/10 group-hover:text-primary">
-                      <Icon size={28} />
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/10 group-hover:text-primary">
+                      <Icon size={24} />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="break-words text-[1.05rem] font-black leading-tight text-slate-900 transition-colors group-hover:text-primary">
+                    <div className="min-w-0 w-full flex-1">
+                      <h4 className="break-words text-sm md:text-base font-black leading-tight text-slate-900 transition-colors group-hover:text-primary line-clamp-2">
                         {category.name}
                       </h4>
-                      <p className="mt-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      <p className="mt-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">
                         {count} Courses
                       </p>
-                    </div>
-                    <div className="flex h-8 w-8 -translate-x-2 items-center justify-center rounded-full bg-slate-50 text-slate-300 opacity-0 transition-all group-hover:translate-x-0 group-hover:bg-primary group-hover:text-white group-hover:opacity-100">
-                      <ArrowRight size={16} />
                     </div>
                   </button>
                 );
@@ -181,7 +192,8 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

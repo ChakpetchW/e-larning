@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Grid } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import { filterCourses, sortCourses } from '../../utils/courseFilters';
@@ -20,6 +20,7 @@ const CourseList = () => {
   // Filter & Search State
   const [activeCat, setActiveCat] = useState(urlCategory || 'All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [status, setStatus] = useState(searchParams.get('status') || 'all');
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'a-z'
   
   // UI State
@@ -53,42 +54,54 @@ const CourseList = () => {
 
   // Compute Filtered and Sorted Array
   const filtered = sortCourses(
-    filterCourses(courses, { activeCat, searchQuery }),
+    filterCourses(courses, { activeCat, searchQuery, status }),
     sortBy
   );
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pt-2 relative pb-10">
-      <div className="sticky top-[-1px] z-40 bg-[#f8fafc]/95 backdrop-blur-md pt-2 pb-4 -mx-5 px-5 sm:mx-0 sm:px-0 space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
+      <div className="sticky top-[-1.25rem] md:top-[-1px] z-40 -mx-5 px-5 md:-mx-0 md:px-0 bg-[#f8fafc]/95 backdrop-blur-md pt-5 md:pt-3 pb-2 md:pb-4 space-y-3 sm:space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
+          <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
+          <button 
+             onClick={() => setIsCatModalOpen(true)}
+             className="md:hidden inline-flex min-h-[44px] items-center gap-2 rounded-full bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200"
+          >
+            หมวดหมู่ <Grid size={13} />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <SearchInput 
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              placeholder="ค้นหาชื่อคอร์ส..."
+            />
+          </div>
           <button 
             onClick={() => setShowFilterModal(true)}
-            className="text-gray-500 hover:text-primary transition-colors bg-white p-2.5 rounded-full shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 flex items-center gap-2 group relative"
+            className="group relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-primary"
           >
-            <Filter size={18} className="group-hover:text-primary" />
-            <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">ตัวกรอง</span>
+            <Filter size={20} className="group-hover:text-primary" />
             {(activeCat !== 'All' || sortBy !== 'newest') && (
-              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-primary rounded-full border-2 border-white"></span>
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full"></span>
             )}
           </button>
         </div>
 
-        {/* Search Bar */}
-        <SearchInput 
-          value={searchQuery}
-          onChange={setSearchQuery}
-          onClear={() => setSearchQuery('')}
-          placeholder="ค้นหาชื่อคอร์ส หรือคำอธิบาย..."
-        />
-
         {/* Categories Horizontal Scroll */}
-        <CategoryPills 
-          categories={categories}
-          activeCat={activeCat}
-          onSelect={setActiveCat}
-          onViewAll={() => setIsCatModalOpen(true)}
-        />
+        {/* Categories Horizontal Scroll */}
+        <div className="-mx-5 md:mx-0">
+          <CategoryPills 
+            categories={categories}
+            activeCat={activeCat}
+            onSelect={setActiveCat}
+            onViewAll={() => setIsCatModalOpen(true)}
+            className="mt-1"
+          />
+        </div>
       </div>
 
       {loading && (
@@ -116,7 +129,7 @@ const CourseList = () => {
             <h3 className="font-bold text-gray-600 text-lg mb-1">ไม่พบคอร์สที่ค้นหา</h3>
             <p className="text-sm text-gray-400">ลองเปลี่ยนคำค้นหา หรือใช้ตัวกรองหมวดหมู่อื่นดูสิ</p>
             <button 
-              onClick={() => { setSearchQuery(''); setActiveCat('All'); setSortBy('newest'); }}
+              onClick={() => { setSearchQuery(''); setActiveCat('All'); setStatus('all'); setSortBy('newest'); }}
               className="mt-6 px-6 py-2 bg-primary/10 text-primary font-bold rounded-full hover:bg-primary hover:text-white transition-colors"
             >
               ล้างตัวกรองทั้งหมด
@@ -134,7 +147,9 @@ const CourseList = () => {
         categories={categories}
         activeCat={activeCat}
         setActiveCat={setActiveCat}
-        onReset={() => { setActiveCat('All'); setSortBy('newest'); }}
+        status={status}
+        setStatus={setStatus}
+        onReset={() => { setActiveCat('All'); setSearchQuery(''); setStatus('all'); setSortBy('newest'); }}
       />
 
       {/* Categories Search Modal */}

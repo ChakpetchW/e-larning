@@ -59,7 +59,7 @@ const CourseManagement = () => {
   const [lessonForm, setLessonForm] = useState(getDefaultLessonForm());
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [categoryForm, setCategoryForm] = useState({ name: '', order: 0 });
+  const [categoryForm, setCategoryForm] = useState({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] });
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [uploading, setUploading] = useState(false);
 
@@ -205,6 +205,19 @@ const CourseManagement = () => {
     }
   };
 
+  const handleReorderLessons = async (reorderedLessons) => {
+    const originalLessons = [...lessons];
+    setLessons(reorderedLessons);
+
+    try {
+      await adminAPI.reorderLessons(reorderedLessons.map((l) => l.id));
+    } catch (error) {
+      console.error('Reorder lessons error:', error);
+      setLessons(originalLessons);
+      alert('ไม่สามารถจัดลำดับบทเรียนได้');
+    }
+  };
+
   const handleDeleteLesson = async (lessonId) => {
     if (!window.confirm('ยืนยันการลบบทเรียนนี้ใช่หรือไม่?')) {
       return;
@@ -265,7 +278,7 @@ const CourseManagement = () => {
         await adminAPI.createCategory(categoryForm);
       }
 
-      setCategoryForm({ name: '', order: 0 });
+      setCategoryForm({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] });
       setEditingCategoryId(null);
       fetchData();
     } catch (error) {
@@ -330,7 +343,7 @@ const CourseManagement = () => {
         <div>
           <h2 className="mb-1 text-2xl font-bold">จัดการคอร์สเรียน</h2>
           <p className="text-sm text-muted">
-            สร้างคอร์ส จัดการบทเรียน และกำหนดว่าแผนกหรือ tier ไหนจะมองเห็นคอร์สนี้ได้
+            สร้างคอร์ส จัดการบทเรียน และกำหนดว่าแผนกหรือระดับผู้ใช้งานไหนจะมองเห็นคอร์สนี้ได้
           </p>
         </div>
 
@@ -373,6 +386,7 @@ const CourseManagement = () => {
           setLessonForm(getDefaultLessonForm(lessons.length + 1));
           setShowLessonModal(true);
         }}
+        onReorderLessons={handleReorderLessons}
         fetchQuizReports={fetchQuizReports}
         uploading={uploading}
       />
@@ -390,26 +404,144 @@ const CourseManagement = () => {
 
       {showCategoryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="card flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden bg-white p-6 shadow-xl">
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="category-modal-title"
+            className="card flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden bg-white p-6 shadow-xl"
+          >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold">จัดการหมวดหมู่</h3>
-              <button onClick={() => setShowCategoryModal(false)} className="text-muted hover:text-gray-800">
+              <h3 id="category-modal-title" className="text-xl font-bold">จัดการหมวดหมู่</h3>
+              <button 
+                type="button"
+                aria-label="ปิดหน้าต่างจัดการหมวดหมู่"
+                onClick={() => { setShowCategoryModal(false); setEditingCategoryId(null); setCategoryForm({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }} 
+                className="text-muted hover:text-gray-800"
+              >
                 ปิด
               </button>
             </div>
 
-            <form onSubmit={handleSaveCategory} className="mb-6 flex gap-2">
-              <input
-                required
-                type="text"
-                placeholder="ชื่อหมวดหมู่..."
-                className="form-input flex-1"
-                value={categoryForm.name}
-                onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
-              />
-              <button type="submit" className="btn btn-primary">
-                {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
-              </button>
+            <form onSubmit={handleSaveCategory} className="mb-5 space-y-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+              <div className="flex gap-2">
+                <input
+                  required
+                  type="text"
+                  placeholder="ชื่อหมวดหมู่..."
+                  className="form-input flex-1"
+                  value={categoryForm.name}
+                  onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
+                />
+                <button type="submit" className="btn btn-primary shrink-0">
+                  {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
+                </button>
+              </div>
+
+              {/* Visibility Toggle */}
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase text-muted">สิทธิ์การมองเห็น</p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCategoryForm({ ...categoryForm, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] })}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                      categoryForm.visibleToAll
+                        ? 'bg-emerald-500 text-white shadow-sm'
+                        : 'border border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    ทุกคน (ALL)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCategoryForm({ ...categoryForm, visibleToAll: false })}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                      !categoryForm.visibleToAll
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'border border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    เลือกเฉพาะกลุ่ม
+                  </button>
+                </div>
+              </div>
+
+              {/* Department & Tier Selection */}
+              {!categoryForm.visibleToAll && (
+                <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-3">  
+                  {/* Departments */}
+                  <div>
+                    <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">แผนก (Department)</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {departments.length === 0 ? (
+                        <span className="text-xs text-muted">ยังไม่มีแผนก — ไปสร้างที่เมนูจัดการผู้ใช้งาน</span>
+                      ) : (
+                        departments.map((dept) => {
+                          const isSelected = (categoryForm.visibleDepartmentIds || []).includes(dept.id);
+                          return (
+                            <button
+                              key={dept.id}
+                              type="button"
+                              onClick={() => {
+                                const ids = categoryForm.visibleDepartmentIds || [];
+                                setCategoryForm({
+                                  ...categoryForm,
+                                  visibleDepartmentIds: isSelected
+                                    ? ids.filter((i) => i !== dept.id)
+                                    : [...ids, dept.id],
+                                });
+                              }}
+                              className={`rounded-full px-3 py-1 text-[11px] font-bold transition-all ${
+                                isSelected
+                                  ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
+                                  : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                              }`}
+                            >
+                              {dept.name}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tiers */}
+                  <div>
+                    <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">ระดับผู้ใช้งาน (Tier)</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {tiers.length === 0 ? (
+                        <span className="text-xs text-muted">ยังไม่มีระดับผู้ใช้งาน — ไปสร้างที่เมนูจัดการผู้ใช้งาน</span>
+                      ) : (
+                        tiers.map((tier) => {
+                          const isSelected = (categoryForm.visibleTierIds || []).includes(tier.id);
+                          return (
+                            <button
+                              key={tier.id}
+                              type="button"
+                              onClick={() => {
+                                const ids = categoryForm.visibleTierIds || [];
+                                setCategoryForm({
+                                  ...categoryForm,
+                                  visibleTierIds: isSelected
+                                    ? ids.filter((i) => i !== tier.id)
+                                    : [...ids, tier.id],
+                                });
+                              }}
+                              className={`rounded-full px-3 py-1 text-[11px] font-bold transition-all ${
+                                isSelected
+                                  ? 'bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/30'
+                                  : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                              }`}
+                            >
+                              {tier.name}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </form>
 
             <div className="flex-1 overflow-y-auto">
@@ -420,8 +552,27 @@ const CourseManagement = () => {
                     key={category.id}
                     className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3"
                   >
-                    <span className="text-sm font-medium">{category.name}</span>
-                    <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <span className="text-sm font-medium">{category.name}</span>
+                      <div className="mt-0.5 flex flex-wrap gap-1">
+                        {category.visibleToAll !== false ? (
+                          <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">ทุกคน</span>
+                        ) : (
+                          <>
+                            {(category.visibleDepartments || []).map(d => (
+                              <span key={d.id} className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">{d.name}</span>
+                            ))}
+                            {(category.visibleTiers || []).map(t => (
+                              <span key={t.id} className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">{t.name}</span>
+                            ))}
+                            {!(category.visibleDepartments?.length || category.visibleTiers?.length) && (
+                              <span className="text-[10px] text-slate-400">ยังไม่ได้กำหนด</span>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
                       <div className="mr-2 flex flex-col rounded border border-slate-100 bg-white pb-[1px] shadow-sm">
                         <button
                           type="button"
@@ -444,7 +595,13 @@ const CourseManagement = () => {
                         type="button"
                         onClick={() => {
                           setEditingCategoryId(category.id);
-                          setCategoryForm({ name: category.name, order: category.order });
+                          setCategoryForm({
+                            name: category.name,
+                            order: category.order,
+                            visibleToAll: category.visibleToAll ?? true,
+                            visibleDepartmentIds: category.visibleDepartmentIds || [],
+                            visibleTierIds: category.visibleTierIds || [],
+                          });
                         }}
                         className="rounded p-1.5 text-primary transition-colors hover:bg-primary/10"
                       >
@@ -522,7 +679,7 @@ const CourseManagement = () => {
                       ) : (
                         <div className="space-y-1">
                           <div>แผนก {course.visibleDepartments?.length || 0} รายการ</div>
-                          <div>Tier {course.visibleTiers?.length || 0} รายการ</div>
+                          <div>ระดับผู้ใช้งาน {course.visibleTiers?.length || 0} รายการ</div>
                         </div>
                       )}
                     </td>

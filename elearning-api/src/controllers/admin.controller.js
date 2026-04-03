@@ -184,6 +184,12 @@ const deleteLesson = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Lesson deleted' });
 });
 
+const reorderLessons = asyncHandler(async (req, res) => {
+  const { lessonIds } = req.body;
+  await AdminService.reorderLessons(lessonIds);
+  res.json({ success: true, message: 'Lessons reordered successfully' });
+});
+
 // QUIZ REPORTS
 const getCourseQuizAttempts = asyncHandler(async (req, res) => {
   const attempts = await AdminService.getCourseQuizAttempts(req.params.courseId);
@@ -224,5 +230,6 @@ module.exports = {
   createLesson,
   updateLesson,
   deleteLesson,
+  reorderLessons,
   getCourseQuizAttempts
 };

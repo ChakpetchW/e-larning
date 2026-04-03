@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, ChevronRight, Target } from 'lucide-react';
+import { PlayCircle, ChevronRight, Target, Gift, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
 import SectionHeader from '../../components/common/SectionHeader';
-import { Grid } from 'lucide-react';
+import CategoryPills from '../../components/common/CategoryPills';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -52,7 +52,6 @@ const Home = () => {
   })).filter(cat => cat.courses.length > 0);
 
   const uncategorized = courses.filter(c => !c.categoryId);
-  const weeklyGoalText = `เรียนให้จบ ${weeklyGoal} คอร์สในสัปดาห์นี้`;
 
   const completedThisWeekCount = courses.filter(c => {
     if (c.enrollmentStatus !== 'COMPLETED' || !c.completedAt) return false;
@@ -71,227 +70,254 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col gap-8 md:gap-10 animate-fade-in pt-0 md:pt-4 pb-12">
+    <div className="flex flex-col gap-10 md:gap-14 animate-fade-in pt-0 md:pt-4 pb-16">
       
       {/* Premium Hero Section */}
-      <section className="relative -mx-5 mb-2 overflow-hidden rounded-none border-b border-slate-200/70 mesh-bg-premium p-6 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.18)] md:mx-0 md:rounded-[3rem] md:border md:border-white/70 md:p-12 lg:p-16">
-        <div className="absolute top-0 right-0 h-full w-1/3 overflow-hidden pointer-events-none opacity-40">
-          <div className="absolute top-[-10%] right-[-10%] h-[150%] w-[150%] rounded-full bg-gradient-to-br from-primary/20 via-sky-400/10 to-transparent blur-[100px]"></div>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/65 to-transparent"></div>
-
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12 items-center">
-          <div className="lg:col-span-3">
-            <div className="flex items-center gap-3 mb-4 md:mb-6 animate-slide-up">
-              <span className="rounded-full border border-primary/10 bg-primary/10 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.3em] text-primary md:px-4 md:text-[11px]">
-                พร้อมเรียนต่อ
+      <section className="relative -mx-5 overflow-hidden rounded-none border-b border-slate-100 bg-white md:mx-0 md:rounded-[2.5rem] md:border-none shadow-sm">
+        <div className="mesh-bg-premium absolute inset-0 opacity-100"></div>
+        
+        <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center p-8 md:p-12 lg:p-16">
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-widest mb-6 border border-primary/10">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
+              Learning Dashboard
             </div>
-            <h1 className="text-3xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-[0.95] md:leading-[0.9] mb-4 md:mb-6">
-              สวัสดีคุณ<br/>
-              <span className="text-gradient-primary">
+            
+            <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-slate-800 tracking-tight leading-[1.2] mb-6 flex flex-wrap items-baseline justify-center lg:justify-start">
+              <span>สวัสดีคุณ</span>
+              <span className="mx-2 lg:mx-3 text-gradient-primary inline-block">
                 {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}
-              </span> <span className="inline-block hover:rotate-12 transition-transform cursor-default">👋</span>
+              </span> 👋
             </h1>
-            <p className="mb-8 max-w-lg text-base font-medium leading-relaxed text-slate-600 md:mb-10 md:text-xl">
-              วันนี้เรามาอัปสกิลใหม่ๆ ไปด้วยกันนะครับ
+            <p className="mb-10 max-w-md text-base md:text-lg font-medium text-slate-500 leading-relaxed">
+              พร้อมที่จะอัปเกรดทักษะของคุณแล้วหรือยัง? วันนี้มีบทเรียนใหม่ๆ รอคุณอยู่มากมาย
             </p>
             
-            <div className="flex flex-wrap gap-6 border-t border-slate-200/70 pt-6 md:gap-12">
-               <div>
-                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">คอร์สที่เรียนอยู่</p>
-                  <p className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">{courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length}</p>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-8 md:gap-12 w-full pt-8 border-t border-slate-200/40">
+               <div className="flex flex-col">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">กําลังเรียน</p>
+                  <p className="text-2xl font-bold text-slate-800">{courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length}</p>
                </div>
-               <div>
-                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">เรียนจบแล้ว</p>
-                  <p className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">{courses.filter(c => c.enrollmentStatus === 'COMPLETED').length}</p>
+               <div className="flex flex-col">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">เรียนจบแล้ว</p>
+                  <p className="text-2xl font-bold text-slate-800">{courses.filter(c => c.enrollmentStatus === 'COMPLETED').length}</p>
                </div>
-               <div>
-                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">คะแนนสะสม</p>
-                  <p className="text-2xl md:text-3xl font-black text-primary tracking-tighter">
+               <div className="flex flex-col">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">คะแนนสะสม</p>
+                  <p className="text-2xl font-bold text-primary">
                     {pointsLoading ? '...' : points.toLocaleString()}
                   </p>
                </div>
             </div>
           </div>
 
-          <div className="lg:col-span-2 relative">
-            {continueCourse ? (
-              <button
-                type="button"
-                onClick={() => navigate(`/user/courses/${continueCourse.id}`)}
-                aria-label={`เปิดคอร์ส ${continueCourse.title}`}
-                className="group/cont glass-card rounded-[2rem] p-6 text-left ring-1 ring-slate-900/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_36px_70px_-24px_rgba(79,70,229,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:rounded-[2.5rem] md:p-8"
-              >
-                <div className="flex items-center justify-between mb-6 md:mb-8">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-[0_16px_30px_-18px_rgba(79,70,229,0.7)] md:h-12 md:w-12 md:rounded-2xl">
-                    <PlayCircle size={20} className="md:w-6 md:h-6" />
-                  </div>
-                  <span className="rounded-lg border border-primary/10 bg-primary/5 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-primary md:text-[10px]">กำลังเรียน</span>
-                </div>
-                
-                <h3 className="text-lg md:text-2xl font-black text-slate-900 leading-tight mb-5 md:mb-6 line-clamp-2 group-hover/cont:text-primary transition-colors">
-                  {continueCourse.title}
-                </h3>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between items-end">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 md:text-[10px]">ความคืบหน้า</p>
-                    <p className="text-xs md:text-sm font-black text-primary italic">{continueCourse.progressPercent}%</p>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2 md:h-2.5 overflow-hidden ring-1 ring-black/5">
-                    <div 
-                      className="h-full bg-gradient-to-r from-primary to-indigo-400 rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${continueCourse.progressPercent}%` }}
-                    />
-                  </div>
-                </div>
-                
-                <div className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3.5 text-[10px] font-black uppercase tracking-widest text-white transition-all group-hover/cont:bg-primary md:mt-8 md:rounded-2xl md:py-4 md:text-xs">
-                  เรียนต่อจากบทล่าสุด <ChevronRight size={14} className="md:w-4 md:h-4" />
-                </div>
-              </button>
-            ) : (
-              <div className="glass-card flex h-full min-h-[180px] flex-row items-center justify-center p-6 text-center ring-1 ring-white/60 md:min-h-[300px] md:flex-col md:p-10">
-                <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/75 shadow-sm md:mr-0 md:mb-6 md:h-16 md:w-16">
-                  <Target size={22} className="text-slate-400 md:w-7 md:h-7" />
-                </div>
-                <div className="text-left md:text-center">
-                  <h3 className="text-base md:text-lg font-black text-slate-800 mb-1">เริ่มบทเรียนใหม่</h3>
-                  <p className="text-slate-500 text-[11px] md:text-sm font-medium leading-relaxed">ค้นหาคอร์สที่น่าสนใจและเริ่มพัฒนาทักษะได้เลย!</p>
-                </div>
-              </div>
-            )}
+          <div className="relative flex justify-center items-center lg:h-full">
+            {/* Visual Asset */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-3xl scale-110"></div>
+            <img 
+              src="/assets/images/hero_premium.png" 
+              alt="Premium Learning Illustration" 
+              className="hidden lg:block relative z-10 w-full max-w-[420px] object-contain drop-shadow-2xl animate-float"
+            />
+            
+            {/* Floating Action Overlay (Desktop Only) */}
+            <div className="hidden lg:block absolute -right-4 top-1/4 z-20 animate-slide-up delay-300">
+               {continueCourse ? (
+                 <button
+                    onClick={() => navigate(`/user/courses/${continueCourse.id}`)}
+                    className="glass-card flex items-center gap-4 p-5 rounded-2xl border-white/60 shadow-xl hover:scale-105 transition-all group"
+                 >
+                    <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                       <PlayCircle size={24} />
+                    </div>
+                    <div className="max-w-[180px]">
+                       <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">เรียนต่อ</p>
+                       <h3 className="text-sm font-bold text-slate-800 truncate">{continueCourse.title}</h3>
+                    </div>
+                 </button>
+               ) : (
+                 <button
+                    onClick={() => navigate('/user/courses')}
+                    className="glass-card flex items-center gap-4 p-5 rounded-2xl border-white/60 shadow-xl hover:scale-105 transition-all"
+                 >
+                    <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center text-white shadow-lg">
+                       <Target size={24} />
+                    </div>
+                    <div className="max-w-[180px]">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">มาเริ่มกันเลย</p>
+                       <h3 className="text-sm font-bold text-slate-800">ค้นหาคอร์สที่ใช่</h3>
+                    </div>
+                 </button>
+               )}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Secondary Dashboard Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Weekly Goal Bento */}
-        <div className="card flex h-full flex-col justify-between rounded-[2rem] border-none bg-white p-7 shadow-[0_20px_40px_rgba(0,0,0,0.02)] ring-1 ring-slate-100 transition-all duration-500 hover:ring-primary/20 md:rounded-[2.5rem] md:p-8">
-          <div>
-            <div className={`mb-6 flex h-12 w-12 items-center justify-center rounded-2xl shadow-[0_18px_30px_-18px_rgba(15,23,42,0.45)] transition-transform duration-500 md:h-14 md:w-14 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-slate-900 text-white shadow-slate-200'}`}>
-              <Target size={24} strokeWidth={2.5} className="md:w-6.5 md:h-6.5"/>
-            </div>
-            <p className="text-[10px] text-slate-400 font-extrabold mb-1.5 uppercase tracking-widest">เป้าหมายสัปดาห์นี้</p>
-            <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-3 tracking-tight">{weeklyGoalText}</h3>
-          </div>
-          <div className="mt-6 md:mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
-             <div className="flex -space-x-1.5 md:-space-x-2">
-                {[...Array(Math.min(3, weeklyGoal))].map((_, i) => (
-                  <div key={i} className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-white bg-slate-100 text-[8px] flex items-center justify-center font-bold text-slate-400">{i+1}</div>
-                ))}
-             </div>
-             <div className="flex items-center gap-3">
-                <span className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">ผลงาน</span>
-                <span className={`text-lg font-black px-3 md:px-4 py-1.5 rounded-xl ${completedThisWeekCount >= weeklyGoal ? 'text-emerald-600 bg-emerald-50' : 'text-slate-900 bg-slate-50'}`}>
-                  {completedThisWeekCount}/{weeklyGoal}
-                </span>
-             </div>
-          </div>
-        </div>
-
-        {/* Categories Quick Filter Bar */}
-        <div className="md:col-span-2 flex flex-col gap-5">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">เลือกตามหมวดหมู่</h3>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 md:text-[11px]">{categories.length} หมวด</p>
-            </div>
-
-            <div className="flex gap-3 flex-wrap items-center text-xs px-1">
-               <button
-                 onClick={() => navigate('/user/courses')}
-                 className="shrink-0 px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-slate-200 active:scale-95 transition-all whitespace-nowrap min-w-fit"
-               >
-                 ดูทุกคอร์ส
-               </button>
-               {categories.slice(0, 4).map(cat => (
-                 <button
-                   key={cat.id}
-                   onClick={() => navigate(`/user/courses?category=${encodeURIComponent(cat.name)}`)}
-                   className="shrink-0 px-6 md:px-8 py-3.5 bg-white text-slate-600 border border-slate-200 rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest hover:border-primary hover:text-primary active:scale-95 transition-all shadow-sm whitespace-nowrap min-w-[100px] md:min-w-[140px]"
-                 >
-                   {cat.name}
-                 </button>
-               ))}
-               
-               {categories.length > 4 && (
-                 <button 
-                  onClick={() => setIsCatModalOpen(true)}
-                  className="shrink-0 px-6 md:px-8 py-3.5 bg-primary/5 text-primary border border-primary/20 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-primary/10 active:scale-95 transition-all shadow-sm whitespace-nowrap flex items-center gap-2"
-                 >
-                   <Grid size={14} /> ดูทั้งหมด
-                 </button>
-               )}
-            </div>
-
+      {/* Featured Mobile CTA (Mobile only) */}
+      <div className="md:hidden -mt-6 -mx-5 px-5">
+         {continueCourse ? (
            <button
-             type="button"
-             onClick={() => navigate('/user/rewards')}
-             aria-label="ไปหน้าของรางวัล"
-             className="group relative mt-1 flex items-center justify-between overflow-hidden rounded-[2rem] bg-slate-900 p-7 text-left text-white shadow-lg shadow-slate-200 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:mt-2 md:rounded-[2.5rem] md:p-8"
+              onClick={() => navigate(`/user/courses/${continueCourse.id}`)}
+              className="w-full bg-slate-800 text-white rounded-3xl p-6 flex flex-col gap-4 shadow-xl active:scale-[0.98] transition-all"
            >
-              <div className="relative z-10">
-                 <h4 className="text-lg md:text-xl font-black mb-1">นำแต้มไปแลกรางวัล</h4>
-                 <p className="text-slate-400 text-[11px] md:text-xs font-medium">ใช้แต้มสะสมเพื่อปลดล็อกรางวัลพิเศษสำหรับพนักงาน</p>
+              <div className="flex justify-between items-center">
+                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">คอร์สปัจจุบัน</span>
+                 <span className="text-xs font-bold text-primary">{continueCourse.progressPercent}%</span>
               </div>
-              <ChevronRight className="relative z-10 group-hover:translate-x-2 transition-transform" />
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-[60px] translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700"></div>
+              <h3 className="text-lg font-bold text-left line-clamp-1">{continueCourse.title}</h3>
+              <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                 <div className="bg-primary h-full rounded-full" style={{ width: `${continueCourse.progressPercent}%` }}></div>
+              </div>
+              <div className="flex items-center justify-center gap-2 pt-2 text-[10px] font-bold uppercase tracking-widest text-primary">
+                 เรียนต่อจากบทล่าสุด <ArrowRight size={14} />
+              </div>
            </button>
-        </div>
+         ) : (
+           <button
+              onClick={() => navigate('/user/courses')}
+              className="w-full bg-primary text-white rounded-3xl p-6 flex items-center justify-between shadow-xl shadow-primary/20"
+           >
+              <div className="text-left">
+                 <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">Get Started</p>
+                 <h3 className="text-lg font-bold">เริ่มบทเรียนใหม่วันนี้</h3>
+              </div>
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                 <Target size={24} />
+              </div>
+           </button>
+         )}
       </div>
 
-      {/* Categorized Courses */}
-      <div className="space-y-12 md:space-y-20 mt-12 md:mt-16">
-        {categorizedCourses.map(category => (
-          <section key={category.id}>
+      {/* Categories Bar */}
+      {categories.length > 0 && (
+         <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
+            <div className="flex items-center justify-between mb-5 px-1 md:px-2">
+               <h3 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">คุณสนใจเรื่องไหน?</h3>
+               <button 
+                  onClick={() => setIsCatModalOpen(true)}
+                  className="text-xs md:text-sm font-semibold text-primary hover:underline flex items-center gap-1"
+               >
+                 ดูหมวดหมู่ทั้งหมด <ChevronRight size={14} />
+               </button>
+            </div>
+            <div className="-mx-5 md:mx-0">
+               <CategoryPills 
+                  categories={categories.slice(0, 6)}
+                  activeCat={''}
+                  onSelect={(catName) => navigate(`/user/courses?category=${encodeURIComponent(catName)}`)}
+                  onViewAll={() => setIsCatModalOpen(true)}
+                  showViewAll={categories.length > 6}
+               />
+            </div>
+         </div>
+      )}
+
+      {/* Stats & Actions Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 animate-slide-up" style={{ animationDelay: '400ms' }}>
+        {/* Weekly Goal Bento */}
+        <div className="group relative flex flex-col justify-between rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+          <div className="flex items-center gap-5">
+            <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
+              <Target size={28} />
+            </div>
+            <div>
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Weekly Momentum</p>
+              <h3 className="text-xl font-bold text-slate-800 leading-none">{completedThisWeekCount}/{weeklyGoal} คอร์สที่จบแล้ว</h3>
+            </div>
+          </div>
+          <div className="mt-8 space-y-3">
+             <div className="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                <span>Progress</span>
+                <span className={completedThisWeekCount >= weeklyGoal ? 'text-emerald-500' : 'text-primary'}>
+                   {Math.round(Math.min(100, (completedThisWeekCount / weeklyGoal) * 100))}%
+                </span>
+             </div>
+             <div className="relative w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+               <div 
+                 className={`h-full transition-all duration-1000 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500' : 'bg-primary'}`}
+                 style={{ width: `${Math.min(100, (completedThisWeekCount / weeklyGoal) * 100)}%` }}
+               />
+             </div>
+          </div>
+        </div>
+
+        {/* Rewards Action Card */}
+        <button
+          type="button"
+          onClick={() => navigate('/user/rewards')}
+          className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-slate-800 p-8 text-left transition-all hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1"
+        >
+           <div className="flex justify-between items-start mb-10">
+              <div className="relative z-10">
+                 <div className="bg-white/10 text-white text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full mb-4 inline-block backdrop-blur-sm">Exclusive Rewards</div>
+                 <h4 className="text-2xl font-bold text-white mb-2 tracking-tight">เลือกแลกรางวัลพิเศษ</h4>
+                 <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-[240px]">ใช้แต้มสะสมของคุณเพื่อแลกรับรางวัลและส่วนลดพิเศษสำหรับคุณโดยเฉพาะ</p>
+              </div>
+              <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-3xl bg-white/10 text-white backdrop-blur-sm group-hover:rotate-12 transition-transform duration-500">
+                 <Gift size={32} className="text-amber-300" />
+              </div>
+           </div>
+           
+           <div className="relative z-10 flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest group-hover:gap-4 transition-all">
+              ไปยังคลังของรางวัล <ArrowRight size={16} />
+           </div>
+
+           <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none group-hover:bg-primary/30 transition-colors"></div>
+        </button>
+      </div>
+
+      {/* Main Course Feed */}
+      <div className="space-y-16 md:space-y-24 mt-4">
+        {categorizedCourses.map((category, idx) => (
+          <section key={category.id} className="animate-slide-up" style={{ animationDelay: `${500 + idx * 100}ms` }}>
             <SectionHeader 
               title={category.name}
               onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
             />
-            <div className="flex items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
+            <div className="flex items-stretch md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
               {category.courses.map(course => (
                 <CourseCard 
                   key={course.id} 
                   course={course} 
                   onClick={() => navigate(`/user/courses/${course.id}`)}
-                  className="w-[280px] md:w-full snap-center md:snap-none shrink-0"
+                  className="w-[300px] md:w-full snap-center md:snap-none shrink-0"
                 />
               ))}
             </div>
           </section>
         ))}
+
+        {/* Uncategorized Fallback */}
+        {uncategorized.length > 0 && (
+          <section className="animate-slide-up" style={{ animationDelay: '800ms' }}>
+            <SectionHeader title="คอร์สแนะนำสำหรับคุณ" showViewAll={false} />
+            <div className="flex items-stretch md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
+              {uncategorized.map(course => (
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onClick={() => navigate(`/user/courses/${course.id}`)}
+                  className="w-[300px] md:w-full snap-center md:snap-none shrink-0"
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
-      {/* Uncategorized Fallback */}
-      {uncategorized.length > 0 && (
-        <section>
-          <SectionHeader title="คอร์สแนะนำสำหรับคุณ" showViewAll={false} />
-          <div className="flex items-start md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
-            {uncategorized.map(course => (
-              <CourseCard 
-                key={course.id} 
-                course={course} 
-                onClick={() => navigate(`/user/courses/${course.id}`)}
-                className="w-[280px] md:w-full snap-center md:snap-none shrink-0"
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
       {courses.length === 0 && (
-        <div className="bg-white rounded-3xl p-16 text-center shadow-sm ring-1 ring-slate-100 flex flex-col items-center">
-            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+        <div className="bg-white rounded-[2.5rem] p-20 text-center shadow-sm border border-slate-100 flex flex-col items-center">
+            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-8">
               <PlayCircle size={40} className="text-slate-300" />
             </div>
-            <h3 className="text-2xl font-bold text-slate-400 mb-2">ยังไม่มีคอร์สเรียนในระบบ</h3>
+            <h3 className="text-2xl font-bold text-slate-800 mb-2">ยังไม่มีคอร์สเรียนในระบบ</h3>
             <p className="text-slate-400 font-medium">รอการอัปเดตคอร์สดีๆ เร็วๆ นี้</p>
         </div>
       )}
-
-      <div className="h-8"></div>
 
       <CategorySearchModal 
         isOpen={isCatModalOpen}

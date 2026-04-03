@@ -10,6 +10,8 @@ const FilterSidebar = ({
   categories,
   activeCat,
   setActiveCat,
+  status,
+  setStatus,
   onReset,
 }) => {
   const dialogRef = useRef(null);
@@ -52,7 +54,7 @@ const FilterSidebar = ({
             type="button"
             onClick={onClose}
             aria-label="ปิดตัวกรองคอร์ส"
-            className="rounded-full bg-gray-50 p-2 text-gray-500 transition-colors hover:bg-gray-100"
+            className="rounded-full bg-gray-50 p-2 text-gray-500 transition-colors hover:bg-gray-100 focus:outline-none"
           >
             <X size={18} />
           </button>
@@ -71,7 +73,7 @@ const FilterSidebar = ({
             ].map((option) => (
               <label
                 key={option.value}
-                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50"
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50 focus:outline-none"
               >
                 <span className="font-bold text-gray-700">{option.label}</span>
                 <input
@@ -79,6 +81,32 @@ const FilterSidebar = ({
                   name="sort"
                   checked={sortBy === option.value}
                   onChange={() => setSortBy(option.value)}
+                  className="h-4 w-4 accent-primary"
+                />
+              </label>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h4 className="mb-1 text-sm font-bold uppercase tracking-widest text-gray-400">
+              สถานะ (Status)
+            </h4>
+            {[
+              { label: 'ทั้งหมด (All)', value: 'all' },
+              { label: 'กําลังเรียน (Enrolled)', value: 'enrolled' },
+              { label: 'เรียนจบแล้ว (Completed)', value: 'completed' },
+              { label: 'ยังไม่เริ่ม (Not Started)', value: 'not_started' },
+            ].map((option) => (
+              <label
+                key={option.value}
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50 focus:outline-none"
+              >
+                <span className="font-bold text-gray-700">{option.label}</span>
+                <input
+                  type="radio"
+                  name="status"
+                  checked={status === option.value}
+                  onChange={() => setStatus(option.value)}
                   className="h-4 w-4 accent-primary"
                 />
               </label>
@@ -95,12 +123,12 @@ const FilterSidebar = ({
                   key={category.id}
                   type="button"
                   onClick={() => setActiveCat(category.name)}
-                  className={`rounded-xl border px-4 py-2 text-sm font-bold transition-all ${
-                    activeCat === category.name
-                      ? 'border-primary/30 bg-primary/10 text-primary'
-                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
+                    className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-all focus:outline-none ${
+                        activeCat === category.name
+                          ? 'border-primary/30 bg-primary/10 text-primary'
+                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
                   {category.name}
                 </button>
               ))}
@@ -112,14 +140,14 @@ const FilterSidebar = ({
           <button
             type="button"
             onClick={onReset}
-            className="flex-1 rounded-xl border border-gray-200 bg-white py-3.5 font-bold text-gray-600 transition-colors hover:bg-gray-100"
+            className="flex-1 rounded-xl border border-gray-200 bg-white py-3.5 font-bold text-gray-600 transition-colors hover:bg-gray-100 focus:outline-none"
           >
             ล้างค่า
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl bg-primary py-3.5 font-bold text-white shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] transition-all hover:bg-primary-hover hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)]"
+            className="flex-1 rounded-xl bg-primary py-3.5 font-bold text-white shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] transition-all hover:bg-primary-hover hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] focus:outline-none"
           >
             ดูผลลัพธ์
           </button>

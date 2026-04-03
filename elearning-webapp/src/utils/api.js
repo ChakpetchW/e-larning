@@ -122,6 +122,7 @@ export const adminAPI = {
   createLesson: (data) => api.post('/admin/lessons', data),
   updateLesson: (id, data) => api.put(`/admin/lessons/${id}`, data),
   deleteLesson: (id) => api.delete(`/admin/lessons/${id}`),
+  reorderLessons: (lessonIds) => api.put('/admin/lessons/reorder', { lessonIds }),
 
   getRewards: () => api.get('/admin/rewards'),
   createReward: (data) => api.post('/admin/rewards', data),

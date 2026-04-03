@@ -136,7 +136,7 @@ const CourseDetail = () => {
   }
 
   return (
-    <div className="relative -mx-4 -mt-4 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
+    <div className="relative -mx-5 -mt-5 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
       <section className="relative overflow-hidden bg-slate-950 px-5 pb-16 pt-10 text-white md:px-8 md:pb-28 md:pt-14 xl:px-0">
         <div
           className="absolute inset-0 scale-110 bg-cover bg-center bg-no-repeat opacity-60 blur-[56px]"
@@ -187,15 +187,15 @@ const CourseDetail = () => {
             </div>
 
             <div className="glass-card rounded-[2rem] p-5 ring-1 ring-white/10 lg:justify-self-end">
-              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">ค่าลงทะเบียน</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">แต้มสะสมเมื่อเรียนจบ</span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-black tracking-tighter text-slate-900">
                   {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
                 </span>
-                <span className="mb-1 text-sm font-bold text-slate-500">{course.points > 0 ? 'แต้ม' : 'ไม่มีค่าใช้จ่าย'}</span>
+                <span className="mb-1 text-sm font-bold text-slate-500">{course.points > 0 ? 'แต้ม' : 'บทเรียน'}</span>
               </div>
               <p className="mt-2 text-sm font-medium text-slate-600">
-                {course.isEnrolled ? 'คุณลงทะเบียนแล้ว สามารถเข้าเรียนต่อได้ทันที' : 'ลงทะเบียนเพื่อเริ่มเรียนและปลดล็อกเนื้อหาทั้งหมด'}
+                {course.isEnrolled ? 'คุณลงทะเบียนแล้ว สามารถเข้าเรียนต่อได้ทันที' : 'เรียนจบคอร์สนี้เพื่อรับแต้มสะสมไปแลกของรางวัล'}
               </p>
             </div>
           </div>
@@ -227,12 +227,7 @@ const CourseDetail = () => {
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-            <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">รายละเอียดหลักสูตร</h2>
-            <p className="mt-4 text-[15px] font-medium leading-loose text-slate-600">
-              {course.description || 'หลักสูตรนี้จะพาคุณเรียนรู้จากพื้นฐานไปจนถึงการประยุกต์ใช้จริง ด้วยบทเรียนที่เรียงลำดับอย่างชัดเจนและเข้าใจง่าย'}
-            </p>
-          </section>
+
 
           <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <div className="mb-5 flex items-end justify-between gap-4">
@@ -245,7 +240,7 @@ const CourseDetail = () => {
               </span>
             </div>
 
-            <div className="flex flex-col divide-y divide-slate-100 overflow-hidden rounded-[1.5rem] border border-slate-100 bg-slate-50/50">
+            <div className="flex flex-col gap-3">
               {course.lessons?.map((lesson, index) => (
                 <button
                   type="button"
@@ -253,46 +248,70 @@ const CourseDetail = () => {
                   onClick={() => course.isEnrolled && navigate(`/user/courses/${course.id}/lesson/${lesson.id}`)}
                   disabled={!course.isEnrolled}
                   aria-label={course.isEnrolled ? `เปิดบทเรียน ${lesson.title}` : `บทเรียน ${lesson.title} ต้องลงทะเบียนก่อน`}
-                  className={`flex w-full items-center gap-4 px-5 py-4 text-left transition-colors ${course.isEnrolled ? 'group hover:bg-white' : 'cursor-default opacity-90'}`}
+                  className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border p-4 text-left transition-all duration-300 ${
+                    course.isEnrolled
+                      ? 'bg-white hover:border-primary/40 hover:-translate-y-0.5'
+                      : 'border-slate-100 bg-slate-50 opacity-80 cursor-default'
+                  }`}
+                  style={course.isEnrolled ? { borderColor: 'rgba(226, 232, 240, 0.5)', boxShadow: 'var(--shadow-premium)' } : {}}
                 >
+                  {/* Status Indicator Bar (Left Edge) */}
+                  {course.isEnrolled && (
+                    <div className={`absolute left-0 top-0 bottom-0 w-1 transition-all duration-300 ${
+                      lesson.isCompleted ? 'bg-emerald-500' : 'bg-transparent group-hover:bg-primary'
+                    }`} />
+                  )}
+
                   <div
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] shadow-sm transition-all duration-300 ${
                       lesson.isCompleted
-                        ? 'bg-emerald-100 text-emerald-600'
+                        ? 'bg-emerald-100 text-emerald-600 ring-1 ring-emerald-500/20'
                         : course.isEnrolled
-                          ? 'bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white'
-                          : 'bg-slate-100 text-slate-400'
+                          ? 'bg-slate-100 text-slate-500 group-hover:bg-primary group-hover:text-white group-hover:shadow-primary/30 group-hover:shadow-md'
+                          : 'bg-slate-100 text-slate-300'
                     }`}
                   >
-                    {lesson.isCompleted ? <Check size={18} strokeWidth={3} /> : <PlayCircle size={18} strokeWidth={2.4} />}
+                    {lesson.isCompleted ? <Check size={20} strokeWidth={3} /> : <PlayCircle size={22} strokeWidth={2.4} />}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className={`text-[15px] font-bold ${lesson.isCompleted ? 'text-slate-500' : 'text-slate-900'}`}>
+                      <h3 className={`text-[15px] font-extrabold transition-colors duration-300 ${
+                        lesson.isCompleted 
+                          ? 'text-slate-500' 
+                          : course.isEnrolled ? 'text-slate-800 group-hover:text-primary' : 'text-slate-600'
+                      }`}>
                         {index + 1}. {lesson.title}
                       </h3>
                       {lesson.isCompleted && (
-                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 ring-1 ring-emerald-600/10 shadow-sm">
                           ผ่านแล้ว
                         </span>
                       )}
                     </div>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-400">
-                      <span className="flex items-center gap-1">
-                        {lesson.type === 'video' ? <MonitorPlay size={12} /> : lesson.type === 'quiz' ? <Check size={12} /> : <FileText size={12} />}
+                    <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-400">
+                      <span className="flex items-center gap-1.5">
+                        {lesson.type === 'video' ? <MonitorPlay size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} /> : lesson.type === 'quiz' ? <Check size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} /> : <FileText size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />}
                         {getLessonTypeLabel(lesson.type)}
                       </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} />
+                      <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                      <span className="flex items-center gap-1.5">
+                        <Clock size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />
                         {lesson.duration || '10'} นาที
                       </span>
                     </div>
                   </div>
 
-                  {!course.isEnrolled && <Bookmark size={18} className="shrink-0 text-slate-300" />}
+                  {course.isEnrolled ? (
+                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+                      lesson.isCompleted ? 'text-emerald-500 opacity-0 group-hover:opacity-100' : 'bg-slate-50 text-slate-400 group-hover:bg-primary group-hover:text-white'
+                    }`}>
+                      {lesson.isCompleted ? <Check size={18} /> : <PlayCircle size={18} />}
+                    </div>
+                  ) : (
+                    <Bookmark size={20} className="shrink-0 text-slate-300" />
+                  )}
                 </button>
               ))}
             </div>
@@ -323,7 +342,10 @@ const CourseDetail = () => {
         </div>
 
         <aside className="w-full shrink-0 lg:w-[360px]">
-          <div className={`sticky top-24 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_18px_50px_-16px_rgba(15,23,42,0.12)] transition-transform duration-500 ${isScrolled ? 'lg:-translate-y-3' : ''}`}>
+          <div 
+            className={`sticky top-24 overflow-hidden rounded-[2rem] border bg-white transition-transform duration-500 ${isScrolled ? 'lg:-translate-y-3' : ''}`}
+            style={{ borderColor: 'rgba(226, 232, 240, 0.5)', boxShadow: 'var(--shadow-card-hover)' }}
+          >
             <div className="relative aspect-video overflow-hidden bg-slate-900">
               {showVideo && course.previewVideoUrl ? (
                 <iframe
@@ -359,11 +381,14 @@ const CourseDetail = () => {
             </div>
 
             <div className="p-6 md:p-7">
-              <div className="mb-6 flex items-end gap-2">
-                <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">
-                  {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
-                </span>
-                <span className="mb-1 text-sm font-bold text-slate-500">{course.points > 0 ? 'แต้ม' : 'ไม่มีค่าใช้จ่าย'}</span>
+              <div className="mb-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500 block mb-2">แต้มที่จะได้รับทั้งหมด</span>
+                <div className="flex items-end gap-2">
+                  <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">
+                    {course.points > 0 ? course.points.toLocaleString() : '0'}
+                  </span>
+                  <span className="mb-1 text-sm font-bold text-slate-500">แต้ม</span>
+                </div>
               </div>
 
               {course.isEnrolled ? (
