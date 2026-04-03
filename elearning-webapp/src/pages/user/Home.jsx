@@ -120,7 +120,7 @@ const Home = () => {
             <img 
               src="/assets/images/hero_premium.png" 
               alt="Premium Learning Illustration" 
-              className="relative z-10 w-32 md:w-40 lg:w-full lg:max-w-[420px] object-contain drop-shadow-2xl animate-float"
+              className="hidden lg:block relative z-10 w-full max-w-[420px] object-contain drop-shadow-2xl animate-float"
             />
             
             {/* Floating Action Overlay (Desktop Only) */}
