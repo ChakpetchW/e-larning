@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
-import CategoryPills from '../../components/common/CategoryPills';
 import SectionHeader from '../../components/common/SectionHeader';
 import { Grid } from 'lucide-react';
 
@@ -176,7 +175,8 @@ const Home = () => {
       </section>
 
       {/* Secondary Dashboard Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Secondary Dashboard Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Weekly Goal Bento */}
         <div className="card flex h-full flex-col justify-between rounded-[2rem] border-none bg-white p-7 shadow-[0_20px_40px_rgba(0,0,0,0.02)] ring-1 ring-slate-100 transition-all duration-500 hover:ring-primary/20 md:rounded-[2.5rem] md:p-8">
           <div>
@@ -201,39 +201,32 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Categories Quick Filter Bar */}
-        <div className="md:col-span-2 flex flex-col gap-5">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">เลือกตามหมวดหมู่</h3>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 md:text-[11px]">{categories.length} หมวด</p>
-            </div>
-
-            <div className="-mx-5 md:mx-0">
-               <CategoryPills 
-                  categories={[{ id: 'all', name: 'ดูทุกคอร์ส' }, ...categories.slice(0, 5)]}
-                  activeCat={'ดูทุกคอร์ส'}
-                  onSelect={(catName) => {
-                     if (catName === 'ดูทุกคอร์ส') navigate('/user/courses');
-                     else navigate(`/user/courses?category=${encodeURIComponent(catName)}`);
-                  }}
-                  onViewAll={() => setIsCatModalOpen(true)}
-                  showViewAll={categories.length > 5}
-               />
-            </div>
-
-           <button
-             type="button"
-             onClick={() => navigate('/user/rewards')}
-             aria-label="ไปหน้าของรางวัล"
-             className="group relative mt-1 flex items-center justify-between overflow-hidden rounded-[2rem] bg-slate-900 p-7 text-left text-white shadow-lg shadow-slate-200 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:mt-2 md:rounded-[2.5rem] md:p-8"
-           >
-              <div className="relative z-10">
-                 <h4 className="text-lg md:text-xl font-black mb-1">นำแต้มไปแลกรางวัล</h4>
-                 <p className="text-slate-400 text-[11px] md:text-xs font-medium">ใช้แต้มสะสมเพื่อปลดล็อกรางวัลพิเศษสำหรับพนักงาน</p>
+        {/* Rewards Action Card */}
+        <div className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-7 text-left shadow-xl shadow-slate-200/50 transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-300 md:rounded-[2.5rem] md:p-8">
+           <div className="relative z-10 flex items-start justify-between">
+              <div>
+                 <h4 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight">นำแต้มไปแลกรางวัล</h4>
+                 <p className="text-slate-400 text-[11px] md:text-sm font-medium leading-relaxed max-w-[200px] md:max-w-[250px]">
+                    ใช้แต้มสะสมที่คุณได้รับจากการเรียน เพื่อปลดล็อกรางวัลพิเศษสำหรับพนักงาน
+                 </p>
               </div>
-              <ChevronRight className="relative z-10 group-hover:translate-x-2 transition-transform" />
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-[60px] translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700"></div>
-           </button>
+              <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] bg-white/10 text-white backdrop-blur-md shadow-inner shadow-white/20">
+                 <Target size={24} className="text-amber-300" />
+              </div>
+           </div>
+           
+           <div className="relative z-10 mt-8">
+              <button
+                type="button"
+                onClick={() => navigate('/user/rewards')}
+                aria-label="ไปหน้าของรางวัล"
+                className="flex items-center gap-2 bg-white text-slate-900 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm"
+              >
+                 แลกรางวัลเลย <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+              </button>
+           </div>
+           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400/10 rounded-full blur-[60px] translate-x-20 -translate-y-20 group-hover:scale-125 transition-transform duration-700 pointer-events-none"></div>
+           <div className="absolute bottom-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-[40px] translate-x-10 translate-y-10 pointer-events-none"></div>
         </div>
       </div>
 
