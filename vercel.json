@@ -32,6 +32,9 @@
     },
     {
       "src": "/(.*)",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-src 'self' blob: https://docs.google.com; object-src 'self' blob:;"
+      },
       "dest": "/elearning-webapp/index.html"
     }
   ]
