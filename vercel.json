@@ -1,4 +1,5 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "builds": [
     {
@@ -13,29 +14,24 @@
       }
     }
   ],
-  "headers": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-src 'self' blob: https://docs.google.com https://*.supabase.co; object-src 'self' blob: https://*.supabase.co;"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/elearning-api/src/server.js"
+      "src": "/api/(.*)",
+      "dest": "elearning-api/src/server.js"
     },
     {
-      "source": "/uploads/(.*)",
-      "destination": "/elearning-api/src/server.js"
+      "src": "/uploads/(.*)",
+      "dest": "elearning-api/src/server.js"
     },
     {
-      "source": "/((?!api/|uploads/|assets/|vite.svg|favicon.ico|favicon.svg|_redirects).*)",
-      "destination": "/index.html"
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-src 'self' blob: https://docs.google.com https://*.supabase.co; object-src 'self' blob: https://*.supabase.co;"
+      },
+      "dest": "/elearning-webapp/index.html"
     }
   ]
 }
