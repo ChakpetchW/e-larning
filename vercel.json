@@ -24,6 +24,22 @@
       "dest": "elearning-api/src/server.js"
     },
     {
+      "src": "/assets/(.*)",
+      "dest": "/elearning-webapp/assets/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/elearning-webapp/favicon.ico"
+    },
+    {
+      "src": "/favicon.svg",
+      "dest": "/elearning-webapp/favicon.svg"
+    },
+    {
+      "src": "/vite.svg",
+      "dest": "/elearning-webapp/vite.svg"
+    },
+    {
       "handle": "filesystem"
     },
     {
