@@ -1,18 +1,9 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight, ExternalLink } from 'lucide-react';
-import { userAPI } from '../../utils/api';
+import { userAPI, getFullUrl } from '../../utils/api';
 const VideoPlayer = lazy(() => import('../../components/common/VideoPlayer'));
 import DocViewer from '../../components/common/DocViewer';
-
-const API_BASE = 'http://localhost:5000';
-
-// Helper to get full URL for uploaded files
-const getFullUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('/uploads')) return `${API_BASE}${url}`;
-  return url;
-};
 
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
@@ -69,13 +60,17 @@ const LessonPlayer = () => {
   }, [courseId, lessonId]);
 
   const handleComplete = async () => {
-    if (updating || completed) return;
+    if (updating) return false;
+    if (completed) return true;
+
     try {
       setUpdating(true);
       await userAPI.updateProgress(lessonId, 100);
       setCompleted(true);
+      return true;
     } catch (error) {
       console.error('Update progress error:', error);
+      return false;
     } finally {
       setUpdating(false);
     }
@@ -115,6 +110,16 @@ const LessonPlayer = () => {
     const currentIdx = arr.findIndex(item => item.id === lessonId);
     return idx === currentIdx + 1;
   })?.id;
+  const lessonMediaUrl = getFullUrl(lesson.contentUrl?.trim());
+
+  const handleNavigateToNextLesson = () => {
+    if (!nextLessonId) return;
+    navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`);
+  };
+
+  const handleReturnToCourse = () => {
+    navigate(`/user/courses/${courseId}`);
+  };
 
   if (loading || !lesson) {
     return (
@@ -148,8 +153,8 @@ const LessonPlayer = () => {
               </div>
             }>
               <VideoPlayer
-                key={lesson.contentUrl}
-                url={lesson.contentUrl?.trim() || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
+                key={lessonMediaUrl}
+                url={lessonMediaUrl || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
                 onEnded={handleComplete}
               />
             </Suspense>
@@ -190,10 +195,13 @@ const LessonPlayer = () => {
       {/* Secure Doc Viewer Modal */}
       {showDocViewer && lesson?.contentUrl && (
         <DocViewer
-          url={getFullUrl(lesson.contentUrl)}
+          url={lessonMediaUrl}
           title={lesson.title}
           onClose={() => setShowDocViewer(false)}
           onComplete={handleComplete}
+          isCompleted={completed}
+          onNext={nextLessonId ? handleNavigateToNextLesson : undefined}
+          onReturnToCourse={handleReturnToCourse}
         />
       )}
 
