@@ -17,6 +17,7 @@ const getFullUrl = (url) => {
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
   if (type === 'video') return 'วิดีโอ';
+  if (type === 'pdf' || type === 'document' || type === 'article') return 'เอกสาร';
   return 'เอกสาร';
 };
 
@@ -205,7 +206,13 @@ const LessonPlayer = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2.5 mb-5">
                 <span className="flex items-center gap-1.5 px-3 py-2 bg-primary/5 text-primary rounded-lg text-xs font-black uppercase tracking-[0.2em] border border-primary/10">
-                  {lesson.type === 'video' ? <Play size={14} fill="currentColor"/> : <FileText size={14}/>} {getLessonTypeLabel(lesson.type)}
+                  {lesson.type === 'video' ? (
+                    <Play size={14} fill="currentColor"/> 
+                  ) : lesson.type === 'quiz' ? (
+                    <CheckCircle size={14}/>
+                  ) : (
+                    <FileText size={14}/>
+                  )} {getLessonTypeLabel(lesson.type)}
                 </span>
                 <span className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
                   <Clock size={14}/> {lesson.duration || '10'}m
