@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
 const VideoPlayer = lazy(() => import('../../components/common/VideoPlayer'));
 import DocViewer from '../../components/common/DocViewer';
@@ -110,7 +110,12 @@ const LessonPlayer = () => {
     const currentIdx = arr.findIndex(item => item.id === lessonId);
     return idx === currentIdx + 1;
   })?.id;
+  const currentLessonIndex = course?.lessons?.findIndex((item) => item.id === lessonId) ?? -1;
+  const nextLesson = currentLessonIndex >= 0 ? course?.lessons?.[currentLessonIndex + 1] : null;
+  const totalLessons = course?.lessons?.length || 0;
+  const completedLessonsCount = course?.lessons?.filter((item) => item.isCompleted).length || 0;
   const lessonMediaUrl = getFullUrl(lesson.contentUrl?.trim());
+  const hasResources = Array.isArray(lesson.resources) && lesson.resources.length > 0;
 
   const handleNavigateToNextLesson = () => {
     if (!nextLessonId) return;
@@ -243,7 +248,7 @@ const LessonPlayer = () => {
 
           {/* Main Content Area Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-8">
+            <div className={hasResources ? 'lg:col-span-8' : 'lg:col-span-12'}>
               {lesson.type === 'quiz' ? (
                 <div className="flex flex-col gap-8">
                   {!quizResult && (
@@ -359,11 +364,109 @@ const LessonPlayer = () => {
                   </p>
                 </div>
               )}
+
+              {completed && (
+                <section className="mt-10 overflow-hidden rounded-[2.5rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.96),rgba(255,255,255,0.98),rgba(239,246,255,0.92))] shadow-[0_28px_70px_-42px_rgba(16,185,129,0.4)]">
+                  <div className="flex flex-col gap-6 p-6 md:p-8">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.75rem] bg-emerald-500 text-white shadow-[0_22px_45px_-24px_rgba(16,185,129,0.65)]">
+                          <CheckCircle size={30} strokeWidth={2.2} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-black uppercase tracking-[0.26em] text-emerald-700">Lesson Complete</p>
+                          <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 md:text-[2rem]">
+                            เรียนจบบทนี้แล้ว ไปต่อได้แบบไม่สะดุด
+                          </h3>
+                          <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-600 md:text-[15px]">
+                            ระบบบันทึกความคืบหน้าให้แล้ว คุณสามารถไปบทถัดไปทันที หรือกลับไปดูภาพรวมของคอร์สก่อนก็ได้
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 self-start">
+                        <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
+                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Progress</p>
+                          <p className="mt-1 text-lg font-black tracking-tight text-slate-900">
+                            {Math.min(completedLessonsCount, totalLessons)} / {totalLessons}
+                          </p>
+                          <p className="text-xs font-bold text-slate-500">บทที่ผ่านแล้ว</p>
+                        </div>
+                        <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
+                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Current</p>
+                          <p className="mt-1 text-lg font-black tracking-tight text-slate-900">{currentLessonIndex + 1}</p>
+                          <p className="text-xs font-bold text-slate-500">จาก {totalLessons} บท</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_45px_-35px_rgba(15,23,42,0.32)] backdrop-blur-sm md:p-6">
+                      {nextLesson ? (
+                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-primary">Up Next</p>
+                            <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
+                              {nextLesson.title}
+                            </h4>
+                            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5">
+                                <BookOpen size={14} />
+                                {getLessonTypeLabel(nextLesson.type)}
+                              </span>
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5">
+                                <Clock size={14} />
+                                {nextLesson.duration || '10'} นาที
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-3 sm:flex-row">
+                            <button
+                              onClick={handleReturnToCourse}
+                              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50"
+                            >
+                              กลับหน้าคอร์ส
+                            </button>
+                            <button
+                              onClick={handleNavigateToNextLesson}
+                              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
+                            >
+                              ไปบทถัดไป
+                              <ArrowRight size={16} strokeWidth={2.6} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-emerald-700">Course Progress</p>
+                            <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
+                              บทเรียนนี้คือช่วงท้ายของคอร์สแล้ว
+                            </h4>
+                            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
+                              กลับไปดูรายละเอียดคอร์สหรือทบทวนบทก่อนหน้าได้จากหน้าภาพรวม
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={handleReturnToCourse}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
+                          >
+                            กลับหน้าคอร์ส
+                            <ArrowRight size={16} strokeWidth={2.6} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+              )}
             </div>
 
-            <div className="lg:col-span-4 flex flex-col gap-8">
+            {hasResources && (
+              <div className="lg:col-span-4 flex flex-col gap-8">
               {/* Achievement Card - "Exclusive Looking" */}
-              {completed && (
+              {false && completed && (
                 <div className="relative overflow-hidden rounded-[3rem] border border-slate-100 bg-white p-12 text-center shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] animate-celebrate">
                   <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[80px]"></div>
                   <div className="relative z-10 flex flex-col items-center">
@@ -422,7 +525,8 @@ const LessonPlayer = () => {
                   </div>
                 </div>
               )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

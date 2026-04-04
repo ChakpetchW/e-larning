@@ -127,6 +127,19 @@ const CourseDetail = () => {
     lesson: BookOpen,
   };
 
+  const documentLessons = useMemo(
+    () =>
+      course?.lessons?.filter(
+        (lesson) => lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'article',
+      ) || [],
+    [course],
+  );
+
+  const completedDocumentCount = useMemo(
+    () => documentLessons.filter((lesson) => lesson.isCompleted).length,
+    [documentLessons],
+  );
+
   if (loading || !course) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
@@ -226,6 +239,124 @@ const CourseDetail = () => {
               ))}
             </div>
           </section>
+
+          {documentLessons.length > 0 && (
+            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+              <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">เอกสารประกอบทั้งหมดในคอร์ส</h2>
+                  <p className="mt-1 text-sm font-medium text-slate-500">
+                    รวมเอกสารสำคัญไว้ก่อนสารบัญบทเรียน เพื่อให้กลับมาเปิดอ่านซ้ำหรือทบทวนหลังเรียนจบได้ง่ายขึ้น
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-2 self-start rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">
+                  <FileText size={16} />
+                  {documentLessons.length} เอกสาร
+                </span>
+              </div>
+
+              <div className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_240px]">
+                <div className="overflow-hidden rounded-[1.75rem] border border-primary/10 bg-[linear-gradient(135deg,rgba(79,70,229,0.08),rgba(16,185,129,0.05),rgba(255,255,255,0.92))] p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-primary shadow-sm ring-1 ring-primary/10">
+                      <FileText size={22} strokeWidth={2.2} />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.24em] text-primary">Review Hub</p>
+                      <h3 className="mt-1 text-lg font-black tracking-tight text-slate-900">
+                        โซนทบทวนเอกสารที่หยิบกลับมาใช้ได้ทันที
+                      </h3>
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
+                        เหมาะสำหรับคนที่เรียนวิดีโอครบแล้ว แต่อยากย้อนกลับมาหาสรุป, คู่มือ หรือไฟล์ประกอบแต่ละบทแบบไม่ต้องไล่หาในรายการทั้งหมด
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-[1.75rem] border border-emerald-200/70 bg-emerald-50/80 p-5">
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-emerald-700">Progress</p>
+                  <div className="mt-3 flex items-end gap-2">
+                    <span className="text-3xl font-black tracking-tight text-slate-900">{completedDocumentCount}</span>
+                    <span className="pb-1 text-sm font-bold text-slate-500">/ {documentLessons.length} เปิดแล้ว</span>
+                  </div>
+                  <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
+                    {course.isEnrolled
+                      ? 'กดเปิดจากตรงนี้ได้ทันทีโดยไม่ต้องเลื่อนหาในสารบัญด้านล่าง'
+                      : 'ลงทะเบียนก่อนเพื่อเข้าอ่านเอกสารประกอบทั้งหมดของคอร์ส'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                {documentLessons.map((lesson) => (
+                  <button
+                    key={lesson.id}
+                    type="button"
+                    onClick={() => course.isEnrolled && navigate(`/user/courses/${course.id}/lesson/${lesson.id}`)}
+                    disabled={!course.isEnrolled}
+                    aria-label={course.isEnrolled ? `เปิดเอกสาร ${lesson.title}` : `เอกสาร ${lesson.title} ต้องลงทะเบียนก่อน`}
+                    className={`group relative flex w-full items-start gap-4 overflow-hidden rounded-[1.5rem] border p-4 text-left transition-all duration-300 ${
+                      course.isEnrolled
+                        ? 'bg-white hover:-translate-y-0.5 hover:border-primary/30'
+                        : 'cursor-default border-slate-100 bg-slate-50 opacity-80'
+                    }`}
+                    style={course.isEnrolled ? { borderColor: 'rgba(226, 232, 240, 0.6)', boxShadow: 'var(--shadow-premium)' } : {}}
+                  >
+                    <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(79,70,229,0.24),transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                    <div
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] transition-all duration-300 ${
+                        lesson.isCompleted
+                          ? 'bg-emerald-100 text-emerald-600 ring-1 ring-emerald-500/15'
+                          : course.isEnrolled
+                            ? 'bg-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary'
+                            : 'bg-slate-100 text-slate-300'
+                      }`}
+                    >
+                      {lesson.isCompleted ? <Check size={20} strokeWidth={2.8} /> : <FileText size={20} strokeWidth={2.2} />}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-[15px] font-extrabold text-slate-800 transition-colors duration-300 group-hover:text-primary">
+                          {lesson.title}
+                        </h3>
+                        {lesson.isCompleted && (
+                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-emerald-600/10">
+                            เปิดแล้ว
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-400">
+                        <span className="flex items-center gap-1.5">
+                          <FileText size={14} className={course.isEnrolled ? 'group-hover:text-primary/70' : ''} />
+                          เอกสารประกอบ
+                        </span>
+                        <span className="h-1 w-1 rounded-full bg-slate-300" />
+                        <span className="flex items-center gap-1.5">
+                          <Clock size={14} className={course.isEnrolled ? 'group-hover:text-primary/70' : ''} />
+                          {lesson.duration || '10'} นาที
+                        </span>
+                      </div>
+
+                      <p className="mt-3 text-sm font-medium leading-relaxed text-slate-500">
+                        {course.isEnrolled ? 'เปิดอ่านเอกสารฉบับเต็มได้ทันทีจากบล็อกนี้' : 'ลงทะเบียนก่อนเพื่อปลดล็อกเอกสารประกอบ'}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`mt-1 inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-[11px] font-black tracking-[0.16em] transition-all duration-300 ${
+                        course.isEnrolled ? 'bg-slate-900 text-white group-hover:bg-primary' : 'bg-slate-200 text-slate-500'
+                      }`}
+                    >
+                      {course.isEnrolled ? 'เปิดอ่าน' : 'Locked'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
 
 
 
