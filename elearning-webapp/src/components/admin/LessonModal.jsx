@@ -51,7 +51,7 @@ const LessonModal = ({
                   value={lessonForm.type} 
                   onChange={e => setLessonForm({ ...lessonForm, type: e.target.value })}
                 >
-                  <option value="video">วิดีโอ (YouTube/Embed)</option>
+                  <option value="video">วิดีโอ (YouTube / Vimeo)</option>
                   <option value="pdf">เอกสาร (PDF/Link)</option>
                   <option value="article">บทความเนื้อหา</option>
                   <option value="quiz">แบบทดสอบ (Quiz)</option>
@@ -62,16 +62,21 @@ const LessonModal = ({
                 <>
                   <div>
                     <label className="text-sm font-bold text-gray-700 block mb-1">
-                      {lessonForm.type === 'video' ? 'ลิงก์วิดีโอ YouTube' : 'ไฟล์เอกสาร'}
+                      {lessonForm.type === 'video' ? 'ลิงก์วิดีโอ (YouTube / Vimeo)' : 'ไฟล์เอกสาร'}
                     </label>
                     {lessonForm.type === 'video' ? (
-                      <input 
-                        type="text" 
-                        className="form-input w-full" 
-                        value={lessonForm.contentUrl} 
-                        onChange={e => setLessonForm({ ...lessonForm, contentUrl: e.target.value })} 
-                        placeholder="https://www.youtube.com/watch?v=..." 
-                      />
+                      <div className="flex flex-col gap-1.5">
+                        <input
+                          type="text"
+                          className="form-input w-full"
+                          value={lessonForm.contentUrl}
+                          onChange={e => setLessonForm({ ...lessonForm, contentUrl: e.target.value })}
+                          placeholder="https://www.youtube.com/watch?v=... หรือ https://vimeo.com/..."
+                        />
+                        <p className="text-[10px] text-muted flex items-center gap-1">
+                          <Play size={10} /> รองรับลิงก์ YouTube และ Vimeo
+                        </p>
+                      </div>
                     ) : (
                       <div className="flex flex-col gap-2">
                         <input 

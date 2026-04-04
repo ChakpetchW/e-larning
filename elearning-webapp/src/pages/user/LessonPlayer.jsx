@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight, ExternalLink } from 'lucide-react';
 import { userAPI } from '../../utils/api';
-import VideoPlayer from '../../components/common/VideoPlayer';
+const VideoPlayer = lazy(() => import('../../components/common/VideoPlayer'));
+import DocViewer from '../../components/common/DocViewer';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -27,6 +28,7 @@ const LessonPlayer = () => {
   const [completed, setCompleted] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showDocViewer, setShowDocViewer] = useState(false);
 
   // Quiz State
   const [answers, setAnswers] = useState({});
@@ -39,6 +41,13 @@ const LessonPlayer = () => {
         setCourse(response.data);
 
         const currentLesson = response.data.lessons.find(l => l.id === lessonId);
+        
+        // If it's a quiz, fetch questions on demand (not included in course details anymore)
+        if (currentLesson?.type === 'quiz') {
+          const qRes = await userAPI.getLessonQuestions(lessonId);
+          currentLesson.questions = qRes.data;
+        }
+
         setLesson(currentLesson);
         setCompleted(currentLesson?.isCompleted || false);
 
@@ -132,11 +141,17 @@ const LessonPlayer = () => {
         {/* Media Content */}
         <div className={`${lesson.type === 'quiz' ? '' : 'aspect-video'} w-full`}>
           {lesson.type === 'video' ? (
-            <VideoPlayer
-              key={lesson.contentUrl}
-              url={lesson.contentUrl?.trim() || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
-              onEnded={handleComplete}
-            />
+            <Suspense fallback={
+              <div className="w-full aspect-video bg-slate-900 flex items-center justify-center rounded-2xl">
+                <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              </div>
+            }>
+              <VideoPlayer
+                key={lesson.contentUrl}
+                url={lesson.contentUrl?.trim() || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
+                onEnded={handleComplete}
+              />
+            </Suspense>
           ) : lesson.type === 'quiz' ? (
             <div className="relative flex flex-col items-center gap-6 overflow-hidden px-6 py-20 text-center text-white md:py-32">
               <div className="absolute inset-0 z-0 bg-[linear-gradient(135deg,#0f172a_0%,#111827_45%,#020617_100%)]"></div>
@@ -156,19 +171,30 @@ const LessonPlayer = () => {
               <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/5 text-primary shadow-[0_24px_60px_-32px_rgba(79,70,229,0.45)] backdrop-blur-xl">
                 <BookOpen size={40} strokeWidth={1.5} />
               </div>
-              <div className="relative z-10">
-                <p className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-4">บทเรียนเอกสาร</p>
+              <div className="relative z-10 flex flex-col items-center gap-3">
+                <p className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-2">บทเรียนเอกสาร</p>
+                {/* Primary: Open in secure in-app viewer */}
                 <button
-                  onClick={() => window.open(getFullUrl(lesson.contentUrl), '_blank')}
-                  className="btn btn-primary rounded-2xl px-10 py-4 text-base shadow-[0_18px_36px_-18px_rgba(79,70,229,0.55)] hover:scale-[1.02]"
+                  onClick={() => setShowDocViewer(true)}
+                  className="btn btn-primary rounded-2xl px-10 py-4 text-base shadow-[0_18px_36px_-18px_rgba(79,70,229,0.55)] hover:scale-[1.02] flex items-center gap-2"
                 >
-                  เปิดอ่านเอกสารบทเรียน
+                  <FileText size={18} /> เปิดอ่านเอกสารบทเรียน
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Secure Doc Viewer Modal */}
+      {showDocViewer && lesson?.contentUrl && (
+        <DocViewer
+          url={getFullUrl(lesson.contentUrl)}
+          title={lesson.title}
+          onClose={() => setShowDocViewer(false)}
+          onComplete={handleComplete}
+        />
+      )}
 
       {/* Unified Content Container - Premium & Professional */}
       <div className="relative z-30 -mt-8 overflow-hidden bg-white md:mt-8 md:rounded-[3rem] md:border md:border-slate-100 md:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">

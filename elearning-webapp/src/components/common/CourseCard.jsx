@@ -28,6 +28,9 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
         <img
           src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}
           alt={course.title}
+          loading="lazy"
+          width={400}
+          height={225}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
