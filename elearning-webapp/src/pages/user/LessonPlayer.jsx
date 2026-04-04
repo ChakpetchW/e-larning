@@ -1,18 +1,9 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight, ExternalLink } from 'lucide-react';
-import { userAPI } from '../../utils/api';
+import { userAPI, getFullUrl } from '../../utils/api';
 const VideoPlayer = lazy(() => import('../../components/common/VideoPlayer'));
 import DocViewer from '../../components/common/DocViewer';
-
-const API_BASE = 'http://localhost:5000';
-
-// Helper to get full URL for uploaded files
-const getFullUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('/uploads')) return `${API_BASE}${url}`;
-  return url;
-};
 
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
