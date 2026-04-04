@@ -16,8 +16,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/elearning-webapp/$1",
-      "continue": true
+      "destination": "/elearning-webapp/$1"
     },
     {
       "source": "/(.*)",
