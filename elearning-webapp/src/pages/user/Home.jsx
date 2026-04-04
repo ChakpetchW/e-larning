@@ -30,10 +30,10 @@ const Home = () => {
           userAPI.getPoints(),
           userAPI.getSettings()
         ]);
-        setCourses(courseRes.data);
-        setCategories(catRes.data);
-        setPoints(pointsRes.data.balance || 0);
-        setWeeklyGoal(parseInt(settingsRes.data.weekly_goal) || 1);
+        setCourses(Array.isArray(courseRes?.data) ? courseRes.data : []);
+        setCategories(Array.isArray(catRes?.data) ? catRes.data : []);
+        setPoints(pointsRes?.data?.balance || 0);
+        setWeeklyGoal(parseInt(settingsRes?.data?.weekly_goal) || 1);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -44,22 +44,35 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const continueCourse = courses.find(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS');
-  
-  const categorizedCourses = categories.map(cat => ({
-    ...cat,
-    courses: courses.filter(c => c.categoryId === cat.id)
-  })).filter(cat => cat.courses.length > 0);
+  // Memoized safe calculations to prevent runtime crashes
+  const continueCourse = React.useMemo(() => {
+    if (!Array.isArray(courses)) return null;
+    return courses.find(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS');
+  }, [courses]);
 
-  const uncategorized = courses.filter(c => !c.categoryId);
+  const categorizedCourses = React.useMemo(() => {
+    if (!Array.isArray(categories) || !Array.isArray(courses)) return [];
+    return categories.map(cat => ({
+      ...cat,
+      courses: courses.filter(c => c.categoryId === cat.id)
+    })).filter(cat => cat.courses.length > 0);
+  }, [categories, courses]);
 
-  const completedThisWeekCount = courses.filter(c => {
-    if (c.enrollmentStatus !== 'COMPLETED' || !c.completedAt) return false;
-    const completedDate = new Date(c.completedAt);
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    return completedDate >= oneWeekAgo;
-  }).length;
+  const uncategorized = React.useMemo(() => {
+    if (!Array.isArray(courses)) return [];
+    return courses.filter(c => !c.categoryId);
+  }, [courses]);
+
+  const completedThisWeekCount = React.useMemo(() => {
+    if (!Array.isArray(courses)) return 0;
+    return courses.filter(c => {
+      if (c.enrollmentStatus !== 'COMPLETED' || !c.completedAt) return false;
+      const completedDate = new Date(c.completedAt);
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      return completedDate >= oneWeekAgo;
+    }).length;
+  }, [courses]);
 
   if (loading) {
     return (
