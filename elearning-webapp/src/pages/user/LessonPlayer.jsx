@@ -110,6 +110,7 @@ const LessonPlayer = () => {
     const currentIdx = arr.findIndex(item => item.id === lessonId);
     return idx === currentIdx + 1;
   })?.id;
+  const lessonMediaUrl = getFullUrl(lesson.contentUrl?.trim());
 
   const handleNavigateToNextLesson = () => {
     if (!nextLessonId) return;
@@ -152,8 +153,8 @@ const LessonPlayer = () => {
               </div>
             }>
               <VideoPlayer
-                key={lesson.contentUrl}
-                url={lesson.contentUrl?.trim() || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
+                key={lessonMediaUrl}
+                url={lessonMediaUrl || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
                 onEnded={handleComplete}
               />
             </Suspense>
@@ -194,7 +195,7 @@ const LessonPlayer = () => {
       {/* Secure Doc Viewer Modal */}
       {showDocViewer && lesson?.contentUrl && (
         <DocViewer
-          url={getFullUrl(lesson.contentUrl)}
+          url={lessonMediaUrl}
           title={lesson.title}
           onClose={() => setShowDocViewer(false)}
           onComplete={handleComplete}
