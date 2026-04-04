@@ -19,7 +19,7 @@ export default defineConfig({
         },
       },
     },
-    // Raise the warning threshold slightly (streaming libs are legitimately large)
-    chunkSizeWarningLimit: 600,
+    // Raise the warning threshold to 1000kB (charts + player are large)
+    chunkSizeWarningLimit: 1000,
   },
-})
+})
