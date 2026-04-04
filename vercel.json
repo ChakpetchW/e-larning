@@ -23,11 +23,6 @@
       "dest": "elearning-api/src/server.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/elearning-webapp/$1",
-      "continue": true
-    },
-    {
       "handle": "filesystem"
     },
     {
@@ -35,7 +30,7 @@
       "headers": {
         "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-src 'self' blob: https://docs.google.com https://*.supabase.co; object-src 'self' blob: https://*.supabase.co;"
       },
-      "dest": "/elearning-webapp/index.html"
+      "dest": "/index.html"
     }
   ]
 }
