@@ -1,20 +1,18 @@
-import React, { useEffect, useRef } from 'react';
-import { X, FileText, ShieldAlert } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, FileText, ShieldAlert, Loader2 } from 'lucide-react';
+import axios from 'axios';
 
 /**
  * SecureDocViewer — แสดงเอกสาร PDF ภายในแอปโดยไม่ให้ดาวน์โหลดง่ายๆ
- *
- * กลไกป้องกัน:
- * 1. Overlay div ทับ iframe — กัน right-click และ drag เอาไฟล์ออก
- * 2. ไม่ส่ง URL ตรงให้ browser (ไม่มีปุ่ม Save ของ browser)
- * 3. CSS ซ่อนเนื้อหาเวลากด Ctrl+P (Print)
- * 4. ปิด keyboard shortcut Ctrl+S และ Ctrl+P
  */
 const DocViewer = ({ url, title, onClose, onComplete }) => {
   const overlayRef = useRef(null);
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Block Ctrl+S (save) and Ctrl+P (print) globally while this is open
+    // Block Ctrl+S and Ctrl+P
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'p')) {
         e.preventDefault();
@@ -22,35 +20,50 @@ const DocViewer = ({ url, title, onClose, onComplete }) => {
       }
     };
     document.addEventListener('keydown', handleKeyDown, true);
-    return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, []);
-
-  // Build a "no-download" URL using direct embed for PDFs or Google Docs Viewer for others
-  const buildEmbedUrl = (rawUrl) => {
-    if (!rawUrl) return '';
     
-    // Check if it's a PDF (most common)
-    const isPDF = rawUrl.toLowerCase().split('?')[0].endsWith('.pdf') || rawUrl.includes('/documents/');
+    // Fetch PDF as Blob to bypass Chrome Cross-Origin Block
+    const fetchPdf = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(url, { responseType: 'blob' });
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const localUrl = URL.createObjectURL(blob);
+        // Add #toolbar=0 to the blob URL to suggest hiding the toolbar
+        setBlobUrl(`${localUrl}#toolbar=0&navpanes=0&scrollbar=0`);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching PDF blob:', err);
+        setError('ไม่สามารถโหลดเอกสารได้ โปรดลองอีกครั้ง');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (isPDF) {
-      // Direct embed for PDF is more stable with Supabase than Google Viewer
-      // Add #toolbar=0 to suggest hiding the native browser toolbar
-      return `${rawUrl}#toolbar=0&navpanes=0&scrollbar=0`;
+    if (url) {
+      if (url.toLowerCase().split('?')[0].endsWith('.pdf') || url.includes('/documents/')) {
+        fetchPdf();
+      } else {
+        // Fallback for non-PDFs (Google Viewer)
+        const encoded = encodeURIComponent(url.startsWith('http') ? url : window.location.origin + url);
+        setBlobUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
+        setLoading(false);
+      }
     }
 
-    // Fallback for Word/PPT/Legacy
-    const encoded = encodeURIComponent(rawUrl.startsWith('http') ? rawUrl : window.location.origin + rawUrl);
-    return `https://docs.google.com/viewer?url=${encoded}&embedded=true`;
-  };
-
-  const embedUrl = buildEmbedUrl(url);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      // Clean up the blob URL from memory
+      if (blobUrl && blobUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(blobUrl.split('#')[0]);
+      }
+    };
+  }, [url]);
 
   return (
     <div
       className="fixed inset-0 z-[80] flex flex-col bg-black/80 backdrop-blur-md animate-fade-in"
       onContextMenu={(e) => e.preventDefault()}
     >
-      {/* Print guard — hides everything in this modal when Ctrl+P is used */}
       <style>{`@media print { .doc-viewer-print-guard { display: none !important; } }`}</style>
 
       <div className="doc-viewer-print-guard flex flex-col w-full h-full">
@@ -71,28 +84,40 @@ const DocViewer = ({ url, title, onClose, onComplete }) => {
           <button
             onClick={onClose}
             className="w-9 h-9 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-            aria-label="ปิด"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Viewer Area */}
-        <div className="relative flex-1 overflow-hidden bg-slate-800">
-          {/* The actual document viewer */}
-          <iframe
-            src={embedUrl}
-            title={title || 'เอกสาร'}
-            className="absolute inset-0 w-full h-full border-0"
-            sandbox="allow-scripts allow-same-origin allow-forms"
-          />
+        <div className="relative flex-1 overflow-hidden bg-slate-800 flex items-center justify-center">
+          {loading ? (
+            <div className="flex flex-col items-center gap-3 text-white/60">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+              <p className="text-sm font-medium animate-pulse">กำลังเตรียมเอกสารแบบปลอดภัย...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-3xl text-center max-w-sm">
+              <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-3" />
+              <p className="text-white font-bold mb-1">เกิดข้อผิดพลาด</p>
+              <p className="text-red-400 text-sm">{error}</p>
+              <button onClick={onClose} className="mt-4 px-6 py-2 bg-white/10 text-white rounded-xl text-sm font-bold">ปิดหน้าต่าง</button>
+            </div>
+          ) : (
+            <iframe
+              src={blobUrl}
+              title={title || 'เอกสาร'}
+              className="absolute inset-0 w-full h-full border-0"
+              sandbox="allow-scripts allow-same-origin"
+            />
+          )}
 
-          {/* Transparent overlay — blocks right-click & drag on the iframe */}
+          {/* Transparent overlay */}
           <div
             ref={overlayRef}
             className="absolute inset-0 z-10"
             onContextMenu={(e) => e.preventDefault()}
-            style={{ pointerEvents: 'none' }} // allow scroll/interact but not download triggers
+            style={{ pointerEvents: 'none' }}
           />
         </div>
 
