@@ -11,11 +11,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/elearning-webapp/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/elearning-webapp/index.html"
+      "destination": "/index.html"
     }
   ]
 }
