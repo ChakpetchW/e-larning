@@ -41,8 +41,11 @@ const CourseList = () => {
           userAPI.getCourses(),
           userAPI.getCategories()
         ]);
-        setCourses(coursesRes.data);
-        setCategories([{ id: 'ALL', name: 'All' }, ...catRes.data]);
+        setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : []);
+        setCategories([
+          { id: 'ALL', name: 'All' }, 
+          ...(Array.isArray(catRes?.data) ? catRes.data : [])
+        ]);
       } catch (error) {
         console.error('Fetch data error:', error);
       } finally {
@@ -52,11 +55,15 @@ const CourseList = () => {
     fetchData();
   }, []);
 
-  // Compute Filtered and Sorted Array
-  const filtered = sortCourses(
-    filterCourses(courses, { activeCat, searchQuery, status }),
-    sortBy
-  );
+  // Compute Filtered and Sorted Array with safety checks
+  const filtered = React.useMemo(() => {
+    if (!Array.isArray(courses)) return [];
+    
+    return sortCourses(
+      filterCourses(courses, { activeCat, searchQuery, status }),
+      sortBy
+    );
+  }, [courses, activeCat, searchQuery, status, sortBy]);
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pt-2 relative pb-10">

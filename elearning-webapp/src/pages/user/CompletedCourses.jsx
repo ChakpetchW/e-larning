@@ -14,7 +14,8 @@ const CompletedCourses = () => {
     const fetchData = async () => {
       try {
         const response = await userAPI.getCourses();
-        setCourses(response.data.filter((course) => course.enrollmentStatus === 'COMPLETED'));
+        const coursesData = Array.isArray(response?.data) ? response.data : [];
+        setCourses(coursesData.filter((course) => course.enrollmentStatus === 'COMPLETED'));
       } catch (error) {
         console.error('Fetch completed courses error:', error);
       } finally {
@@ -25,10 +26,12 @@ const CompletedCourses = () => {
     fetchData();
   }, []);
 
-  const filteredCourses = useMemo(
-    () => courses.filter((course) => course.title.toLowerCase().includes(searchQuery.toLowerCase())),
-    [courses, searchQuery],
-  );
+  const filteredCourses = useMemo(() => {
+    if (!Array.isArray(courses)) return [];
+    return courses.filter((course) =>
+      course.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [courses, searchQuery]);
 
   return (
     <div className="flex h-full flex-col gap-8 pb-24 pt-2 animate-fade-in md:pb-12">
