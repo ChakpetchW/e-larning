@@ -147,17 +147,10 @@ const getCourseDetails = async (courseId, userId) => {
                     progress: {
                         where: { userId }
                     },
-                    questions: {
-                        include: {
-                            choices: {
-                                select: {
-                                    id: true,
-                                    questionId: true,
-                                    text: true
-                                }
-                            }
-                        },
-                        orderBy: { order: 'asc' }
+                    // Only send quiz metadata count, NOT full questions/choices
+                    // Full questions are loaded separately in submitQuiz
+                    _count: {
+                        select: { questions: true }
                     },
                     quizAttempts: {
                         where: { userId },
@@ -190,6 +183,8 @@ const getCourseDetails = async (courseId, userId) => {
             progress: lesson.progress[0] || null,
             isCompleted: lesson.progress[0]?.progress === 100,
             bestScore: lesson.quizAttempts[0]?.score || null,
+            questionCount: lesson._count?.questions || 0,
+            _count: undefined,
             quizAttempts: undefined
         }))
     };
@@ -457,14 +452,19 @@ const submitQuiz = async (userId, lessonId, answers) => {
 };
 
 const getPointsHistory = async (userId) => {
-    const ledger = await prisma.pointsLedger.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' }
-    });
-    const balance = ledger.reduce((sum, entry) => sum + entry.points, 0);
+    const [ledger, aggregation] = await Promise.all([
+        prisma.pointsLedger.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' }
+        }),
+        prisma.pointsLedger.aggregate({
+            where: { userId },
+            _sum: { points: true }
+        })
+    ]);
 
     return {
-        balance,
+        balance: aggregation._sum.points || 0,
         history: ledger
     };
 };
@@ -522,10 +522,11 @@ const requestRedeem = async (userId, rewardId) => {
         throw new Error('เธเธธเธ“เนเธฅเธเธฃเธฒเธเธงเธฑเธฅเธเธตเนเธเธฃเธเธ•เธฒเธกเธชเธดเธ—เธเธดเธ—เธตเนเธเธณเธซเธเธ”เนเธฅเนเธง');
     }
 
-    const ledger = await prisma.pointsLedger.findMany({
-        where: { userId }
+    const balanceResult = await prisma.pointsLedger.aggregate({
+        where: { userId },
+        _sum: { points: true }
     });
-    const balance = ledger.reduce((sum, entry) => sum + entry.points, 0);
+    const balance = balanceResult._sum.points || 0;
 
     if (balance < reward.pointsCost) {
         throw new Error('Insufficient points');
@@ -567,6 +568,28 @@ const getCategories = async () => prisma.category.findMany({
     orderBy: { order: 'asc' }
 });
 
+// Fetch quiz questions for a specific lesson (called only from LessonPlayer)
+const getLessonQuestions = async (lessonId) => {
+    const lesson = await prisma.lesson.findUnique({
+        where: { id: lessonId },
+        include: {
+            questions: {
+                include: {
+                    choices: {
+                        select: {
+                            id: true,
+                            questionId: true,
+                            text: true
+                        }
+                    }
+                },
+                orderBy: { order: 'asc' }
+            }
+        }
+    });
+    return lesson?.questions || [];
+};
+
 module.exports = {
     getCourses,
     updateProfile,
@@ -577,5 +600,6 @@ module.exports = {
     getPointsHistory,
     getRewardsData,
     requestRedeem,
-    getCategories
+    getCategories,
+    getLessonQuestions
 };

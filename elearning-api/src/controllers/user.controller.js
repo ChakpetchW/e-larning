@@ -65,6 +65,12 @@ const getCategories = asyncHandler(async (req, res) => {
   res.json({ success: true, data: categories });
 });
 
+// Get quiz questions for a specific lesson
+const getLessonQuestions = asyncHandler(async (req, res) => {
+  const questions = await UserService.getLessonQuestions(req.params.id);
+  res.json({ success: true, data: questions });
+});
+
 module.exports = {
   getCourses,
   getCourseDetails,
@@ -75,5 +81,6 @@ module.exports = {
   requestRedeem,
   getCategories,
   submitQuiz,
-  updateProfile
+  updateProfile,
+  getLessonQuestions
 };

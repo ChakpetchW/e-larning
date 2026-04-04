@@ -287,27 +287,34 @@ const getDashboardStats = async () => {
         completionRate: '85%'
     }));
 
+    // Single query for all 7 days instead of 7 separate queries
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 6);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const weeklyRaw = await prisma.$queryRaw`
+        SELECT DATE("startedAt") as day, COUNT(*)::int as count
+        FROM "UserCourse"
+        WHERE "startedAt" >= ${weekStart}
+        GROUP BY DATE("startedAt")
+        ORDER BY day ASC
+    `;
+
+    const countMap = {};
+    weeklyRaw.forEach(row => {
+        const key = new Date(row.day).toISOString().slice(0, 10);
+        countMap[key] = row.count;
+    });
+
     const weeklyActivity = [];
-    for (let index = 6; index >= 0; index -= 1) {
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - index);
-        startDate.setHours(0, 0, 0, 0);
-
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1);
-
-        const count = await prisma.userCourse.count({
-            where: {
-                startedAt: {
-                    gte: startDate,
-                    lt: endDate
-                }
-            }
-        });
-
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
         weeklyActivity.push({
-            date: startDate.toLocaleDateString('th-TH', { weekday: 'short' }),
-            count
+            date: d.toLocaleDateString('th-TH', { weekday: 'short' }),
+            count: countMap[key] || 0
         });
     }
 
@@ -877,5 +884,6 @@ module.exports = {
     createLesson,
     updateLesson,
     deleteLesson,
+    reorderLessons,
     getCourseQuizAttempts
 };

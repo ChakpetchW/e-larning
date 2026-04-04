@@ -11,6 +11,7 @@ router.post('/courses/:id/enroll', userController.enrollCourse);
 
 router.put('/lessons/:id/progress', userController.updateLessonProgress);
 router.post('/lessons/:id/quiz', userController.submitQuiz);
+router.get('/lessons/:id/questions', userController.getLessonQuestions);
 router.get('/points', userController.getPointsHistory);
 router.get('/rewards', userController.getRewards);
 router.get('/categories', userController.getCategories);
