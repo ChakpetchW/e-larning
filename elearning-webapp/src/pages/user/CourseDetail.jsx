@@ -18,7 +18,7 @@ import { userAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
-  if (type === 'document') return 'เอกสาร';
+  if (type === 'pdf' || type === 'document' || type === 'article') return 'เอกสาร';
   return 'วิดีโอ';
 };
 
@@ -292,7 +292,13 @@ const CourseDetail = () => {
 
                     <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-400">
                       <span className="flex items-center gap-1.5">
-                        {lesson.type === 'video' ? <MonitorPlay size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} /> : lesson.type === 'quiz' ? <Check size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} /> : <FileText size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />}
+                        {lesson.type === 'quiz' ? (
+                          <Check size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />
+                        ) : (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'article') ? (
+                          <FileText size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />
+                        ) : (
+                          <MonitorPlay size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />
+                        )}
                         {getLessonTypeLabel(lesson.type)}
                       </span>
                       <span className="w-1 h-1 rounded-full bg-slate-300"></span>

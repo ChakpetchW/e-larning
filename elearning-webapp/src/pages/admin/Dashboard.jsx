@@ -89,8 +89,8 @@ const Dashboard = () => {
             </select>
           </div>
           
-          <div className="flex-1 w-full h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="flex-1 w-full h-[300px] min-h-[300px] relative">
+            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <BarChart data={stats?.weeklyActivity || []}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis 
@@ -122,8 +122,8 @@ const Dashboard = () => {
             <h3 className="text-lg font-bold">สัดส่วนคอร์สตามหมวดหมู่</h3>
           </div>
           
-          <div className="flex-1 w-full h-[250px] relative">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="flex-1 w-full h-[250px] min-h-[250px] relative">
+            <ResponsiveContainer width="100%" height="100%" minHeight={250}>
               <PieChart>
                 <Pie
                   data={stats?.categoryDistribution || []}
