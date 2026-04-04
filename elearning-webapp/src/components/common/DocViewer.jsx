@@ -25,17 +25,22 @@ const DocViewer = ({ url, title, onClose, onComplete }) => {
     return () => document.removeEventListener('keydown', handleKeyDown, true);
   }, []);
 
-  // Build a "no-download" URL using Google Docs Viewer for external URLs
-  // For uploaded files (/uploads/...) we embed directly with the overlay guard
+  // Build a "no-download" URL using direct embed for PDFs or Google Docs Viewer for others
   const buildEmbedUrl = (rawUrl) => {
     if (!rawUrl) return '';
-    // Local uploaded file — serve directly, protected by the overlay
-    if (rawUrl.startsWith('/uploads') || rawUrl.startsWith('http')) {
-      // Use Google Docs viewer so the browser never downloads the file natively
-      const encoded = encodeURIComponent(rawUrl.startsWith('http') ? rawUrl : window.location.origin + rawUrl);
-      return `https://docs.google.com/viewer?url=${encoded}&embedded=true`;
+    
+    // Check if it's a PDF (most common)
+    const isPDF = rawUrl.toLowerCase().split('?')[0].endsWith('.pdf') || rawUrl.includes('/documents/');
+
+    if (isPDF) {
+      // Direct embed for PDF is more stable with Supabase than Google Viewer
+      // Add #toolbar=0 to suggest hiding the native browser toolbar
+      return `${rawUrl}#toolbar=0&navpanes=0&scrollbar=0`;
     }
-    return rawUrl;
+
+    // Fallback for Word/PPT/Legacy
+    const encoded = encodeURIComponent(rawUrl.startsWith('http') ? rawUrl : window.location.origin + rawUrl);
+    return `https://docs.google.com/viewer?url=${encoded}&embedded=true`;
   };
 
   const embedUrl = buildEmbedUrl(url);

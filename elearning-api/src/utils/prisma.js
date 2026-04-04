@@ -7,11 +7,10 @@ const prismaOptions = {
 };
 
 // Singleton pattern — prevents connection leaks in dev (nodemon restarts)
-const globalForPrisma = globalThis;
-const prisma = globalForPrisma.__prisma || new PrismaClient(prismaOptions);
+const prisma = global.prisma || new PrismaClient(prismaOptions);
 
 if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.__prisma = prisma;
+  global.prisma = prisma;
 }
 
 module.exports = prisma;
