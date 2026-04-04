@@ -1,15 +1,32 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, FileText, ShieldAlert, Loader2 } from 'lucide-react';
+import { X, FileText, ShieldAlert, Loader2, CheckCircle2, ArrowRight } from 'lucide-react';
 
 /**
  * SecureDocViewer - แสดงเอกสารภายในแอป โดยหลีกเลี่ยงการสร้าง blob URL
  * เพราะ Chrome บน production บางกรณีจะไม่ยอมโหลด blob: ภายใน iframe
  */
-const DocViewer = ({ url, title, onClose, onComplete }) => {
+const DocViewer = ({
+  url,
+  title,
+  onClose,
+  onComplete,
+  isCompleted = false,
+  onNext,
+  onReturnToCourse,
+}) => {
   const overlayRef = useRef(null);
   const [viewerUrl, setViewerUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [completionReady, setCompletionReady] = useState(Boolean(isCompleted));
+  const [completionError, setCompletionError] = useState('');
+
+  useEffect(() => {
+    setCompletionReady(Boolean(isCompleted));
+    setCompletionError('');
+    setSubmitting(false);
+  }, [isCompleted, url]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -50,6 +67,43 @@ const DocViewer = ({ url, title, onClose, onComplete }) => {
       document.removeEventListener('keydown', handleKeyDown, true);
     };
   }, [url]);
+
+  const handleFinishReading = async () => {
+    if (submitting) return;
+
+    if (completionReady) {
+      if (onNext) {
+        onNext();
+        return;
+      }
+
+      if (onReturnToCourse) {
+        onReturnToCourse();
+        return;
+      }
+
+      onClose();
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setCompletionError('');
+      const result = await onComplete?.();
+
+      if (result === false) {
+        setCompletionError('ไม่สามารถบันทึกความคืบหน้าได้ โปรดลองอีกครั้ง');
+        return;
+      }
+
+      setCompletionReady(true);
+    } catch (completionRequestError) {
+      console.error('Complete document lesson error:', completionRequestError);
+      setCompletionError('ไม่สามารถบันทึกความคืบหน้าได้ โปรดลองอีกครั้ง');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -112,19 +166,55 @@ const DocViewer = ({ url, title, onClose, onComplete }) => {
           />
         </div>
 
-        <div className="flex shrink-0 items-center justify-between gap-4 border-t border-white/10 bg-slate-900 px-6 py-4">
-          <p className="text-xs font-medium text-slate-400">
-            เนื้อหานี้เป็นทรัพย์สินของบริษัท ห้ามเผยแพร่หรือนำไปใช้โดยไม่ได้รับอนุญาต
-          </p>
-          <button
-            onClick={() => {
-              onComplete?.();
-              onClose();
-            }}
-            className="shrink-0 rounded-2xl bg-primary px-8 py-3 text-sm font-black uppercase tracking-[0.15em] text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
-          >
-            อ่านจบแล้ว ✓
-          </button>
+        <div className="flex shrink-0 flex-col gap-4 border-t border-white/10 bg-slate-900 px-6 py-4 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            {completionReady ? (
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400">
+                  <CheckCircle2 size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">บันทึกความคืบหน้าแล้ว</p>
+                  <p className="text-xs font-medium text-slate-400">
+                    {onNext ? 'พร้อมไปบทถัดไปแล้ว' : 'คุณเรียนครบส่วนเอกสารนี้แล้ว'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs font-medium text-slate-400">
+                เนื้อหานี้เป็นทรัพย์สินของบริษัท ห้ามเผยแพร่หรือนำไปใช้โดยไม่ได้รับอนุญาต
+              </p>
+            )}
+            {completionError && <p className="mt-2 text-xs font-medium text-red-400">{completionError}</p>}
+          </div>
+
+          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+            <button
+              onClick={onClose}
+              className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
+            >
+              ปิดเอกสาร
+            </button>
+            <button
+              onClick={handleFinishReading}
+              disabled={submitting}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-3 text-sm font-black uppercase tracking-[0.15em] text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  กำลังบันทึก
+                </>
+              ) : completionReady ? (
+                <>
+                  {onNext ? 'ไปบทถัดไป' : 'กลับหน้าคอร์ส'}
+                  <ArrowRight size={16} />
+                </>
+              ) : (
+                'อ่านจบแล้ว ✓'
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

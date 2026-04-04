@@ -60,13 +60,17 @@ const LessonPlayer = () => {
   }, [courseId, lessonId]);
 
   const handleComplete = async () => {
-    if (updating || completed) return;
+    if (updating) return false;
+    if (completed) return true;
+
     try {
       setUpdating(true);
       await userAPI.updateProgress(lessonId, 100);
       setCompleted(true);
+      return true;
     } catch (error) {
       console.error('Update progress error:', error);
+      return false;
     } finally {
       setUpdating(false);
     }
@@ -106,6 +110,15 @@ const LessonPlayer = () => {
     const currentIdx = arr.findIndex(item => item.id === lessonId);
     return idx === currentIdx + 1;
   })?.id;
+
+  const handleNavigateToNextLesson = () => {
+    if (!nextLessonId) return;
+    navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`);
+  };
+
+  const handleReturnToCourse = () => {
+    navigate(`/user/courses/${courseId}`);
+  };
 
   if (loading || !lesson) {
     return (
@@ -185,6 +198,9 @@ const LessonPlayer = () => {
           title={lesson.title}
           onClose={() => setShowDocViewer(false)}
           onComplete={handleComplete}
+          isCompleted={completed}
+          onNext={nextLessonId ? handleNavigateToNextLesson : undefined}
+          onReturnToCourse={handleReturnToCourse}
         />
       )}
 
