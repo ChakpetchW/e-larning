@@ -1,6 +1,12 @@
-# 📝 Next Edit Tasks (v1.0.6+)
+# 📝 Next Edit Tasks (v1.0.7+)
 
 Track here all reported bugs and UI/UX improvements to be addressed in the next iteration.
+
+## 🟢 Completed (v1.0.7)
+- [x] **Critical Fix: Desktop Specificity Conflict (Real White Screen Fix)**:
+  - **Issue**: Manual CSS rule `.user-layout { flex-direction: column }` was overriding Tailwind's `md:flex-row`.
+  - **Result**: Content was stacked vertically below the sidebar, pushed off-screen.
+  - **Fix**: Removed the conflicting CSS rules, allowing Tailwind's responsive classes to correctly align Sidebar and Content side-by-side on Desktop.
 
 ## 🟢 Completed (v1.0.6)
 - [x] **Critical Fix: Desktop White Screen (0px Height)**:

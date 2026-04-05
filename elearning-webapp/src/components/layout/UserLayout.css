@@ -2,8 +2,6 @@
   --mobile-content-top-gap: 1rem;
   --mobile-bottom-nav-height: calc(78px + env(safe-area-inset-bottom));
   --mobile-content-bottom-gap: 2.75rem;
-  display: flex;
-  flex-direction: column;
   height: 100vh;
   height: 100dvh;
   min-height: 100vh;
