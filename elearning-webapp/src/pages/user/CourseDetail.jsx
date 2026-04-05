@@ -199,17 +199,6 @@ const CourseDetail = () => {
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-3 text-sm font-bold text-slate-200">
-                <div className="flex items-center gap-2 text-amber-300">
-                  <Star size={16} className="fill-amber-300" />
-                  <span>{course.rating || 4.8}</span>
-                  <span className="font-medium text-slate-300">จาก {(course.reviewCount || 1240).toLocaleString()} รีวิว</span>
-                </div>
-                <span className="hidden h-1 w-1 rounded-full bg-white/20 sm:inline-flex" />
-                <div className="flex items-center gap-2">
-                  <Users size={16} className="text-slate-400" />
-                  <span>{(course.studentCount || 5000).toLocaleString()}+ คนเรียน</span>
-                </div>
-                <span className="hidden h-1 w-1 rounded-full bg-white/20 sm:inline-flex" />
                 <div className="flex items-center gap-2">
                   <Clock size={16} className="text-slate-400" />
                   <span>{course.totalDuration || `${durationHours} ชั่วโมง`}</span>
@@ -449,9 +438,6 @@ const CourseDetail = () => {
               <div className="min-w-0">
                 <h3 className="text-lg font-black text-slate-900">{course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ'}</h3>
                 <p className="mt-1 text-sm font-bold text-primary">{course.instructorRole || 'วิทยากรประจำหลักสูตร'}</p>
-                <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">
-                  {course.instructorBio || 'ผู้สอนมีประสบการณ์ทำงานจริงและถ่ายทอดเนื้อหาให้เข้าใจง่าย พร้อมยกตัวอย่างที่นำไปใช้งานต่อได้ทันทีในบริบทขององค์กร'}
-                </p>
               </div>
             </div>
           </section>

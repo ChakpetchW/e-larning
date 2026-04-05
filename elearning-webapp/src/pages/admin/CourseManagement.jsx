@@ -12,14 +12,11 @@ const getDefaultCourseForm = () => ({
   image: '',
   instructorName: 'ทีมวิทยากรผู้เชี่ยวชาญ',
   instructorRole: 'Enterprise Instructor',
-  instructorBio: 'ทีมงานผู้เชี่ยวชาญที่พร้อมถ่ายทอดความรู้ให้พนักงานในองค์กรอย่างเป็นระบบ',
+  instructorBio: '',
   previewVideoUrl: '',
   totalDuration: '',
   whatYouWillLearn: '[]',
   whatYouWillGet: '[]',
-  rating: 4.8,
-  reviewCount: 1240,
-  studentCount: 5000,
   visibleToAll: true,
   visibleDepartmentIds: [],
   visibleTierIds: [],
@@ -117,9 +114,6 @@ const CourseManagement = () => {
       totalDuration: course.totalDuration || '',
       whatYouWillLearn: course.whatYouWillLearn || '[]',
       whatYouWillGet: course.whatYouWillGet || '[]',
-      rating: course.rating || 4.8,
-      reviewCount: course.reviewCount || 1240,
-      studentCount: course.studentCount || 5000,
       visibleToAll: course.visibleToAll ?? true,
       visibleDepartmentIds: course.visibleDepartmentIds || [],
       visibleTierIds: course.visibleTierIds || [],
@@ -662,8 +656,7 @@ const CourseManagement = () => {
                   <th className="p-4 font-medium">ชื่อคอร์ส</th>
                   <th className="p-4 font-medium">หมวดหมู่</th>
                   <th className="p-4 font-medium">สิทธิ์การเห็น</th>
-                  <th className="p-4 text-center font-medium">ผู้เรียน</th>
-                  <th className="p-4 text-right font-medium">จัดการ</th>
+                  <th className="p-4 font-medium text-right">จัดการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -683,7 +676,6 @@ const CourseManagement = () => {
                         </div>
                       )}
                     </td>
-                    <td className="p-4 text-center text-sm">{course._count?.enrollments || 0}</td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button

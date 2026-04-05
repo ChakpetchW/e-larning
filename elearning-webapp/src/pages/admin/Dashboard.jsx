@@ -174,9 +174,7 @@ const Dashboard = () => {
             <thead>
               <tr className="text-xs font-black text-muted uppercase tracking-widest border-b border-border">
                 <th className="pb-4 font-black">ชื่อคอร์สเรียน</th>
-                <th className="pb-4 font-black text-center">ผู้เรียน</th>
-                <th className="pb-4 font-black text-center">อัตราการเรียนจบ</th>
-                <th className="pb-4 font-black text-right">คะแนนเฉลี่ย</th>
+                <th className="pb-4 font-black text-right pr-6">อัตราการเรียนจบ</th>
               </tr>
             </thead>
             <tbody>
@@ -188,16 +186,14 @@ const Dashboard = () => {
                        <span className="font-bold text-sm group-hover:text-primary transition-colors">{course.title}</span>
                     </div>
                   </td>
-                  <td className="py-4 text-sm font-bold text-center text-slate-600">{course.students.toLocaleString()}</td>
-                  <td className="py-4">
-                    <div className="flex flex-col items-center gap-1">
+                  <td className="py-4 text-right pr-6">
+                    <div className="flex flex-col items-end gap-1">
                        <span className="text-xs font-bold text-success">{course.completionRate}</span>
                        <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                           <div className="h-full bg-success rounded-full" style={{ width: course.completionRate }}></div>
                        </div>
                     </div>
                   </td>
-                  <td className="py-4 text-right font-black text-warning italic">4.9/5.0</td>
                 </tr>
               ))}
             </tbody>

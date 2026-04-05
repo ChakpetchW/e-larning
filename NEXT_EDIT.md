@@ -1,6 +1,11 @@
-# 📝 Next Edit Tasks (v1.0.8+)
+# 📝 Next Edit Tasks (v1.0.9+)
 
 Track here all reported bugs and UI/UX improvements to be addressed in the next iteration.
+
+## 🟢 Completed (v1.0.9)
+- [x] **In-House Cleanup: Remove Public Metrics**:
+  - **Issue**: Marketing-style metrics (Bio, Ratings, Reviews, Student counts) are not needed for an in-house app.
+  - **Fix**: Removed these fields from `CourseDetail.jsx`, `CourseModal.jsx`, `CourseManagement.jsx`, and `Dashboard.jsx`.
 
 ## 🟢 Completed (v1.0.8)
 - [x] **SecureDocViewer: Universal Shortcut Block**:
