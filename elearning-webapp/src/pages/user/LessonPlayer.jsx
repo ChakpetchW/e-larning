@@ -374,11 +374,11 @@ const LessonPlayer = () => {
 
                   {/* Desktop Submit Button */}
                   {!quizResult && (
-                    <div className="hidden md:flex justify-end mt-4">
+                    <div className="flex justify-center mt-8 px-6 md:px-0">
                       <button
                         onClick={handleQuizSubmit}
                         disabled={updating || Object.keys(answers).length < (lesson.questions?.length || 0)}
-                        className="px-12 py-5 bg-primary text-white rounded-2xl font-black text-sm tracking-[0.2em] uppercase shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                        className="w-full md:w-auto md:px-16 py-5 bg-primary text-white rounded-2xl font-black text-sm tracking-[0.2em] uppercase shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
                       >
                         {updating ? 'กำลังตรวจ...' : 'ส่งคำตอบควิซ →'}
                       </button>
@@ -562,7 +562,7 @@ const LessonPlayer = () => {
           >
             เริ่มบทถัดไป
           </button>
-        ) : lesson.type === 'quiz' && !quizResult ? (
+        ) : false ? (
           <button
             onClick={handleQuizSubmit}
             disabled={updating || Object.keys(answers).length < (lesson.questions?.length || 0)}
