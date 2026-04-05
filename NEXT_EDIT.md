@@ -1,6 +1,11 @@
-# 📝 Next Edit Tasks (v1.0.7+)
+# 📝 Next Edit Tasks (v1.0.8+)
 
 Track here all reported bugs and UI/UX improvements to be addressed in the next iteration.
+
+## 🟢 Completed (v1.0.8)
+- [x] **SecureDocViewer: Universal Shortcut Block**:
+  - **Issue**: "Open original" button in Google Docs viewer was still clickable on Desktop, allowing users to bypass document protections.
+  - **Fix**: Removed viewport restrictions from the protective overlay. The transparent blocking `div` now covers the top-right corner on both Mobile and Desktop viewports.
 
 ## 🟢 Completed (v1.0.7)
 - [x] **Critical Fix: Desktop Specificity Conflict (Real White Screen Fix)**:
