@@ -121,7 +121,7 @@ const ReferenceDataModal = ({
                 )}
                 <button 
                   type="submit" 
-                  className={`btn ${editingItem ? 'bg-slate-900' : 'btn-primary'} flex-1 px-8 py-3 text-xs font-black uppercase tracking-widest shadow-xl transition-all active:scale-95 md:flex-none`}
+                  className={`btn ${editingItem ? 'bg-slate-900 text-white' : 'btn-primary'} flex-1 px-8 py-3 text-xs font-black uppercase tracking-widest shadow-xl transition-all active:scale-95 md:flex-none`}
                 >
                   {editingItem ? <Edit2 size={16} /> : <Plus size={16} />}
                   {submitLabel}

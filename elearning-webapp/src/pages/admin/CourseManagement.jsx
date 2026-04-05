@@ -450,7 +450,7 @@ const CourseManagement = () => {
                   value={categoryForm.name}
                   onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
                 />
-                <button type="submit" className={`btn ${editingCategoryId ? 'bg-slate-900 px-8' : 'btn-primary px-6'} text-xs font-black uppercase tracking-widest shadow-lg`}>
+                <button type="submit" className={`btn ${editingCategoryId ? 'bg-slate-900 text-white px-8' : 'btn-primary px-6'} text-xs font-black uppercase tracking-widest shadow-lg`}>
                   {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
                 </button>
               </div>
