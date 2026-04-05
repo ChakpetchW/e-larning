@@ -43,13 +43,24 @@ api.interceptors.request.use(
 // Add interceptor to handle token expiry / unauth / response unwrapping
 api.interceptors.response.use(
   (response) => {
-    // Automatically unwrap { success: true, data: ... }
+    // 1. If the API returns success: false, treat it as an error to prevent state pollution
+    if (response.data && response.data.success === false) {
+      return Promise.reject({
+        response: response,
+        message: response.data.message || 'API Error'
+      });
+    }
+
+    // 2. Automatically unwrap { success: true, data: ... } 
+    // We return the WHOLE response object but with response.data being the inner data
+    // This maintains compatibility with standard Axios usage (res.data)
     if (response.data && response.data.success === true && response.data.data !== undefined) {
       return { ...response, data: response.data.data };
     }
     return response;
   },
   (error) => {
+    console.error("API Error Interceptor:", error.response?.data || error.message);
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

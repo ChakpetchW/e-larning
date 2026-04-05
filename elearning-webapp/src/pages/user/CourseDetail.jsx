@@ -127,6 +127,23 @@ const CourseDetail = () => {
     lesson: BookOpen,
   };
 
+  const documentLessons = useMemo(
+    () =>
+      course?.lessons?.filter(
+        (lesson) => lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'article',
+      ) || [],
+    [course],
+  );
+
+  const completedDocumentCount = useMemo(
+    () => documentLessons.filter((lesson) => lesson.isCompleted).length,
+    [documentLessons],
+  );
+
+  const handleReturnToCourseList = () => {
+    navigate('/user/courses');
+  };
+
   if (loading || !course) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
@@ -136,8 +153,8 @@ const CourseDetail = () => {
   }
 
   return (
-    <div className="relative -mx-5 -mt-5 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
-      <section className="relative overflow-hidden bg-slate-950 px-5 pb-16 pt-10 text-white md:px-8 md:pb-28 md:pt-14 xl:px-0">
+    <div className="relative -mx-6 -mt-6 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
+      <section className="relative overflow-hidden bg-slate-950 px-4 pb-14 pt-8 text-white sm:px-5 md:px-8 md:pb-28 md:pt-14 xl:px-0">
         <div
           className="absolute inset-0 scale-110 bg-cover bg-center bg-no-repeat opacity-60 blur-[56px]"
           style={{ backgroundImage: `url("${course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}")` }}
@@ -145,9 +162,9 @@ const CourseDetail = () => {
         <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(2,6,23,0.92),rgba(15,23,42,0.86),rgba(15,23,42,0.48))]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(79,70,229,0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.12),transparent_26%)]" />
 
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8">
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-6 md:gap-8">
           <div className="flex items-center gap-4 text-sm font-bold text-slate-300">
-            <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-1 transition-colors hover:text-white">
+            <button type="button" onClick={handleReturnToCourseList} className="flex items-center gap-1 transition-colors hover:text-white">
               <ArrowLeft size={16} /> กลับ
             </button>
             <span>/</span>
@@ -156,7 +173,7 @@ const CourseDetail = () => {
             </span>
           </div>
 
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
+          <div className="grid gap-8 md:gap-10 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
             <div className="max-w-3xl">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.28em] text-primary-light">
                 <BookOpen size={14} />
@@ -186,7 +203,7 @@ const CourseDetail = () => {
               </div>
             </div>
 
-            <div className="glass-card rounded-[2rem] p-5 ring-1 ring-white/10 lg:justify-self-end">
+            <div className="glass-card rounded-[1.75rem] p-4 sm:p-5 ring-1 ring-white/10 lg:justify-self-end">
               <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">แต้มสะสมเมื่อเรียนจบ</span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-black tracking-tighter text-slate-900">
@@ -202,9 +219,9 @@ const CourseDetail = () => {
         </div>
       </section>
 
-      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-6xl flex-col-reverse gap-8 px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-0">
-        <div className="flex w-full flex-col gap-8 lg:min-w-0 lg:flex-1">
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-6xl flex-col-reverse gap-6 px-4 sm:px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-0">
+        <div className="flex w-full flex-col gap-6 md:gap-8 lg:min-w-0 lg:flex-1">
+          <section className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:rounded-[2rem] md:p-8">
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">คุณจะได้เรียนรู้อะไรจากคอร์สนี้</h2>
@@ -226,6 +243,85 @@ const CourseDetail = () => {
               ))}
             </div>
           </section>
+
+          {documentLessons.length > 0 && (
+            <section className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:rounded-[2rem] md:p-8">
+              <div className="mb-4 flex flex-wrap items-center gap-2.5 md:mb-5">
+                <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">เอกสารประกอบทั้งหมด</h2>
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3.5 py-2 text-sm font-bold text-slate-600">
+                  <FileText size={16} />
+                  {documentLessons.length} เอกสาร
+                </span>
+                {course.isEnrolled && (
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-3.5 py-2 text-sm font-bold text-emerald-700 ring-1 ring-emerald-500/10">
+                    {completedDocumentCount}/{documentLessons.length} เปิดแล้ว
+                  </span>
+                )}
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                {documentLessons.map((lesson) => (
+                  <button
+                    key={lesson.id}
+                    type="button"
+                    onClick={() => course.isEnrolled && navigate(`/user/courses/${course.id}/lesson/${lesson.id}`)}
+                    disabled={!course.isEnrolled}
+                    aria-label={course.isEnrolled ? `เปิดเอกสาร ${lesson.title}` : `เอกสาร ${lesson.title} ต้องลงทะเบียนก่อน`}
+                    className={`group relative flex w-full flex-col gap-3 overflow-hidden rounded-[1.35rem] border p-4 text-left transition-all duration-300 sm:flex-row sm:items-start sm:gap-4 sm:p-5 ${
+                      course.isEnrolled
+                        ? 'bg-white hover:-translate-y-0.5 hover:border-primary/30'
+                        : 'cursor-default border-slate-100 bg-slate-50 opacity-80'
+                    }`}
+                    style={course.isEnrolled ? { borderColor: 'rgba(226, 232, 240, 0.6)', boxShadow: 'var(--shadow-premium)' } : {}}
+                  >
+                    <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(79,70,229,0.24),transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                    <div className="flex items-start gap-3 sm:min-w-0 sm:flex-1 sm:gap-4">
+                      <div
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] transition-all duration-300 sm:h-12 sm:w-12 ${
+                          lesson.isCompleted
+                            ? 'bg-emerald-100 text-emerald-600 ring-1 ring-emerald-500/15'
+                            : course.isEnrolled
+                              ? 'bg-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary'
+                              : 'bg-slate-100 text-slate-300'
+                        }`}
+                      >
+                        {lesson.isCompleted ? <Check size={20} strokeWidth={2.8} /> : <FileText size={20} strokeWidth={2.2} />}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-start gap-2">
+                          <h3 className="flex-1 text-[15px] font-extrabold leading-snug text-slate-800 transition-colors duration-300 group-hover:text-primary">
+                            {lesson.title}
+                          </h3>
+                          {lesson.isCompleted && (
+                            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-emerald-600/10">
+                              เปิดแล้ว
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <Clock size={14} className={course.isEnrolled ? 'group-hover:text-primary/70' : ''} />
+                            {lesson.duration || '10'} นาที
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`inline-flex shrink-0 items-center justify-center self-end rounded-full px-3 py-1.5 text-[11px] font-black tracking-[0.16em] transition-all duration-300 sm:mt-1 sm:self-start ${
+                        course.isEnrolled ? 'bg-slate-900 text-white group-hover:bg-primary' : 'bg-slate-200 text-slate-500'
+                      }`}
+                    >
+                      {course.isEnrolled ? 'เปิดอ่าน' : 'Locked'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
 
 
 

@@ -4,3 +4,6 @@
 - Maintain Thai language support in all UI and file content (UTF-8).
 - Prioritize high-end aesthetics (Glassmorphism, gradients, modern typography).
 - Verify design consistency across different screen sizes before completion.
+- When navigating from a lesson page back to its course detail page, use `navigate(courseDetailPath, { replace: true })` so the browser Back action returns to the course list instead of reopening the lesson.
+- The top back button on course detail pages must always navigate statically to `/user/courses`, never use `navigate(-1)` or browser history.
+- When the route changes, reset the active scroll container and `window` back to top so each new page starts at the top of the content.

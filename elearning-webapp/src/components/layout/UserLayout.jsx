@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Home, BookOpen, Gift, User, BookMarked, LogOut } from 'lucide-react';
 import { userAPI } from '../../utils/api';
@@ -7,6 +7,7 @@ import './UserLayout.css';
 const UserLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const mainRef = useRef(null);
   const [user, setUser] = useState(null);
   const [points, setPoints] = useState(0);
 
@@ -23,6 +24,14 @@ const UserLayout = () => {
     };
     fetchUser();
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname, location.search]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -104,7 +113,7 @@ const UserLayout = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="user-main flex-1 no-scrollbar md:!max-w-[1400px] md:mx-auto md:!px-12 md:!pt-12 md:!pb-12 bg-transparent w-full">
+        <main ref={mainRef} className="user-main flex-1 no-scrollbar md:!max-w-[1400px] md:mx-auto md:!px-12 md:!pt-12 md:!pb-12 bg-transparent w-full">
           <Outlet />
         </main>
 

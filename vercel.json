@@ -1,17 +1,53 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "elearning-api/src/server.js"
+      "src": "elearning-api/src/server.js",
+      "use": "@vercel/node"
     },
     {
-      "source": "/uploads/(.*)",
-      "destination": "elearning-api/src/server.js"
+      "src": "elearning-webapp/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "elearning-api/src/server.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/uploads/(.*)",
+      "dest": "elearning-api/src/server.js"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/elearning-webapp/assets/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/elearning-webapp/favicon.ico"
+    },
+    {
+      "src": "/favicon.svg",
+      "dest": "/elearning-webapp/favicon.svg"
+    },
+    {
+      "src": "/vite.svg",
+      "dest": "/elearning-webapp/vite.svg"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com https://player.vimeo.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://www.youtube.com https://player.vimeo.com; frame-src 'self' blob: https://docs.google.com https://*.supabase.co https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com; media-src 'self' blob: https:; object-src 'self' blob: https://*.supabase.co;"
+      },
+      "dest": "/elearning-webapp/index.html"
     }
   ]
 }

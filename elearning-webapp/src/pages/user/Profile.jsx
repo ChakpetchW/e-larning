@@ -28,7 +28,6 @@ const Profile = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [courses, setCourses] = useState([]);
-  const [coursesLoading, setCoursesLoading] = useState(true);
 
   const editDialogRef = useRef(null);
   const editInputRef = useRef(null);
@@ -47,14 +46,13 @@ const Profile = () => {
           userAPI.getPoints(),
           userAPI.getCourses(),
         ]);
-        setUser(userRes.data);
-        setPoints(pointsRes.data.balance);
-        setCourses(coursesRes.data);
+        setUser(userRes?.data || userRes);
+        setPoints(pointsRes?.data?.balance ?? pointsRes?.balance ?? 0);
+        setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : []);
       } catch (error) {
         console.error('Fetch profile error:', error);
       } finally {
         setLoading(false);
-        setCoursesLoading(false);
       }
     };
 

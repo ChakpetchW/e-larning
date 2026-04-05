@@ -1,18 +1,9 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight, ExternalLink } from 'lucide-react';
-import { userAPI } from '../../utils/api';
+import { ArrowLeft, ArrowRight, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight } from 'lucide-react';
+import { userAPI, getFullUrl } from '../../utils/api';
 const VideoPlayer = lazy(() => import('../../components/common/VideoPlayer'));
 import DocViewer from '../../components/common/DocViewer';
-
-const API_BASE = 'http://localhost:5000';
-
-// Helper to get full URL for uploaded files
-const getFullUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('/uploads')) return `${API_BASE}${url}`;
-  return url;
-};
 
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
@@ -30,6 +21,7 @@ const LessonPlayer = () => {
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDocViewer, setShowDocViewer] = useState(false);
+  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
 
   // Quiz State
   const [answers, setAnswers] = useState({});
@@ -38,6 +30,11 @@ const LessonPlayer = () => {
   useEffect(() => {
     const fetchLessonData = async () => {
       try {
+        setLoading(true);
+        setShowDocViewer(false);
+        setIsNavigatingAway(false);
+        setAnswers({});
+        setQuizResult(null);
         const response = await userAPI.getCourseDetails(courseId);
         setCourse(response.data);
 
@@ -69,13 +66,17 @@ const LessonPlayer = () => {
   }, [courseId, lessonId]);
 
   const handleComplete = async () => {
-    if (updating || completed) return;
+    if (updating) return false;
+    if (completed) return true;
+
     try {
       setUpdating(true);
       await userAPI.updateProgress(lessonId, 100);
       setCompleted(true);
+      return true;
     } catch (error) {
       console.error('Update progress error:', error);
+      return false;
     } finally {
       setUpdating(false);
     }
@@ -115,6 +116,37 @@ const LessonPlayer = () => {
     const currentIdx = arr.findIndex(item => item.id === lessonId);
     return idx === currentIdx + 1;
   })?.id;
+  const currentLessonIndex = course?.lessons?.findIndex((item) => item.id === lessonId) ?? -1;
+  const nextLesson = currentLessonIndex >= 0 ? course?.lessons?.[currentLessonIndex + 1] : null;
+  const totalLessons = course?.lessons?.length || 0;
+  const completedLessonsCount = course?.lessons?.filter((item) => item.isCompleted).length || 0;
+  const lessonMediaUrl = getFullUrl(lesson.contentUrl?.trim());
+  const hasResources = Array.isArray(lesson.resources) && lesson.resources.length > 0;
+  const showAchievementCard = course?.showAchievementCard === true;
+
+  const navigateToPath = (path, options = {}) => {
+    if (!path) return;
+
+    setShowDocViewer(false);
+    setIsNavigatingAway(true);
+
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
+    window.requestAnimationFrame(() => {
+      navigate(path, options);
+    });
+  };
+
+  const handleNavigateToNextLesson = () => {
+    if (!nextLessonId) return;
+    navigateToPath(`/user/courses/${courseId}/lesson/${nextLessonId}`);
+  };
+
+  const handleReturnToCourse = () => {
+    navigateToPath(`/user/courses/${courseId}`, { replace: true });
+  };
 
   if (loading || !lesson) {
     return (
@@ -132,7 +164,7 @@ const LessonPlayer = () => {
         {/* Back Button Overlay - Floating Glass */}
         <div className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
           <button
-            onClick={() => navigate(`/user/courses/${courseId}`)}
+            onClick={handleReturnToCourse}
             className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur-xl transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
           >
             <ArrowLeft size={22} strokeWidth={2.5} />
@@ -142,17 +174,23 @@ const LessonPlayer = () => {
         {/* Media Content */}
         <div className={`${lesson.type === 'quiz' ? '' : 'aspect-video'} w-full`}>
           {lesson.type === 'video' ? (
-            <Suspense fallback={
-              <div className="w-full aspect-video bg-slate-900 flex items-center justify-center rounded-2xl">
-                <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            isNavigatingAway ? (
+              <div className="flex aspect-video w-full items-center justify-center bg-slate-950">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
               </div>
-            }>
-              <VideoPlayer
-                key={lesson.contentUrl}
-                url={lesson.contentUrl?.trim() || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
-                onEnded={handleComplete}
-              />
-            </Suspense>
+            ) : (
+              <Suspense fallback={
+                <div className="w-full aspect-video bg-slate-900 flex items-center justify-center rounded-2xl">
+                  <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              }>
+                <VideoPlayer
+                  key={lessonMediaUrl}
+                  url={lessonMediaUrl || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
+                  onEnded={handleComplete}
+                />
+              </Suspense>
+            )
           ) : lesson.type === 'quiz' ? (
             <div className="relative flex flex-col items-center gap-6 overflow-hidden px-6 py-20 text-center text-white md:py-32">
               <div className="absolute inset-0 z-0 bg-[linear-gradient(135deg,#0f172a_0%,#111827_45%,#020617_100%)]"></div>
@@ -190,10 +228,13 @@ const LessonPlayer = () => {
       {/* Secure Doc Viewer Modal */}
       {showDocViewer && lesson?.contentUrl && (
         <DocViewer
-          url={getFullUrl(lesson.contentUrl)}
+          url={lessonMediaUrl}
           title={lesson.title}
           onClose={() => setShowDocViewer(false)}
           onComplete={handleComplete}
+          isCompleted={completed}
+          onNext={nextLessonId ? handleNavigateToNextLesson : undefined}
+          onReturnToCourse={handleReturnToCourse}
         />
       )}
 
@@ -235,7 +276,7 @@ const LessonPlayer = () => {
 
           {/* Main Content Area Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-8">
+            <div className={hasResources ? 'lg:col-span-8' : 'lg:col-span-12'}>
               {lesson.type === 'quiz' ? (
                 <div className="flex flex-col gap-8">
                   {!quizResult && (
@@ -351,11 +392,103 @@ const LessonPlayer = () => {
                   </p>
                 </div>
               )}
+
+              {completed && (
+                <section className="mt-10 overflow-hidden rounded-[2.5rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.96),rgba(255,255,255,0.98),rgba(239,246,255,0.92))] shadow-[0_28px_70px_-42px_rgba(16,185,129,0.4)]">
+                  <div className="flex flex-col gap-5 p-6 md:p-8">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.75rem] bg-emerald-500 text-white shadow-[0_22px_45px_-24px_rgba(16,185,129,0.65)]">
+                          <CheckCircle size={30} strokeWidth={2.2} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-black uppercase tracking-[0.26em] text-emerald-700">Complete</p>
+                          <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 md:text-[2rem]">
+                            บทนี้เสร็จแล้ว
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 self-start">
+                        <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
+                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">คืบหน้า</p>
+                          <p className="mt-1 text-lg font-black tracking-tight text-slate-900">
+                            {Math.min(completedLessonsCount, totalLessons)} / {totalLessons}
+                          </p>
+                          <p className="text-xs font-bold text-slate-500">บท</p>
+                        </div>
+                        <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
+                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">ตอนนี้</p>
+                          <p className="mt-1 text-lg font-black tracking-tight text-slate-900">{currentLessonIndex + 1}</p>
+                          <p className="text-xs font-bold text-slate-500">จาก {totalLessons}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_45px_-35px_rgba(15,23,42,0.32)] backdrop-blur-sm md:p-6">
+                      {nextLesson ? (
+                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-primary">บทถัดไป</p>
+                            <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
+                              {nextLesson.title}
+                            </h4>
+                            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5">
+                                <BookOpen size={14} />
+                                {getLessonTypeLabel(nextLesson.type)}
+                              </span>
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5">
+                                <Clock size={14} />
+                                {nextLesson.duration || '10'} นาที
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-3 sm:flex-row sm:flex-nowrap">
+                            <button
+                              onClick={handleReturnToCourse}
+                              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-700 whitespace-nowrap transition-all hover:border-slate-300 hover:bg-slate-50"
+                            >
+                              กลับหน้าคอร์ส
+                            </button>
+                            <button
+                              onClick={handleNavigateToNextLesson}
+                              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
+                            >
+                              ไปบทถัดไป
+                              <ArrowRight size={16} strokeWidth={2.6} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-emerald-700">ครบแล้ว</p>
+                            <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
+                              จบบทสุดท้ายของคอร์สแล้ว
+                            </h4>
+                          </div>
+
+                          <button
+                            onClick={handleReturnToCourse}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
+                          >
+                            กลับหน้าคอร์ส
+                            <ArrowRight size={16} strokeWidth={2.6} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+              )}
             </div>
 
-            <div className="lg:col-span-4 flex flex-col gap-8">
+            {hasResources && (
+              <div className="lg:col-span-4 flex flex-col gap-8">
               {/* Achievement Card - "Exclusive Looking" */}
-              {completed && (
+              {showAchievementCard && completed && (
                 <div className="relative overflow-hidden rounded-[3rem] border border-slate-100 bg-white p-12 text-center shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] animate-celebrate">
                   <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[80px]"></div>
                   <div className="relative z-10 flex flex-col items-center">
@@ -367,14 +500,14 @@ const LessonPlayer = () => {
                     
                     {nextLessonId ? (
                       <button
-                        onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}
+                        onClick={handleNavigateToNextLesson}
                         className="w-full py-6 bg-slate-900 text-white rounded-[1.5rem] font-black text-base tracking-[0.2em] uppercase hover:bg-primary transition-all shadow-2xl shadow-slate-200 active:scale-95"
                       >
                         เรียนบทถัดไป →
                       </button>
                     ) : (
                       <button
-                        onClick={() => navigate(`/user/courses/${courseId}`)}
+                        onClick={handleReturnToCourse}
                         className="w-full py-6 bg-slate-100 text-slate-900 rounded-[1.5rem] font-black text-base tracking-[0.2em] uppercase hover:bg-slate-200 transition-all active:scale-95"
                       >
                         กลับสู่คอร์สเรียน
@@ -414,7 +547,8 @@ const LessonPlayer = () => {
                   </div>
                 </div>
               )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -453,7 +587,7 @@ const LessonPlayer = () => {
           </button>
         ) : (
           <button
-            onClick={() => navigate(`/user/courses/${courseId}`)}
+            onClick={handleReturnToCourse}
             className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[13px] tracking-widest uppercase"
           >
             กลับสู่หน้ารายละเอียด

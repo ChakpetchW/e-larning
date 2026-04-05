@@ -1,112 +1,246 @@
-import React, { useEffect, useRef } from 'react';
-import { X, FileText, ShieldAlert } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, FileText, ShieldAlert, Loader2, CheckCircle2, ArrowRight } from 'lucide-react';
 
 /**
- * SecureDocViewer — แสดงเอกสาร PDF ภายในแอปโดยไม่ให้ดาวน์โหลดง่ายๆ
- *
- * กลไกป้องกัน:
- * 1. Overlay div ทับ iframe — กัน right-click และ drag เอาไฟล์ออก
- * 2. ไม่ส่ง URL ตรงให้ browser (ไม่มีปุ่ม Save ของ browser)
- * 3. CSS ซ่อนเนื้อหาเวลากด Ctrl+P (Print)
- * 4. ปิด keyboard shortcut Ctrl+S และ Ctrl+P
+ * SecureDocViewer - แสดงเอกสารภายในแอป โดยหลีกเลี่ยงการสร้าง blob URL
+ * เพราะ Chrome บน production บางกรณีจะไม่ยอมโหลด blob: ภายใน iframe
  */
-const DocViewer = ({ url, title, onClose, onComplete }) => {
+const DocViewer = ({
+  url,
+  title,
+  onClose,
+  onComplete,
+  isCompleted = false,
+  onNext,
+  onReturnToCourse,
+}) => {
   const overlayRef = useRef(null);
+  const [viewerUrl, setViewerUrl] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [completionReady, setCompletionReady] = useState(Boolean(isCompleted));
+  const [completionError, setCompletionError] = useState('');
 
   useEffect(() => {
-    // Block Ctrl+S (save) and Ctrl+P (print) globally while this is open
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'p')) {
-        e.preventDefault();
-        e.stopPropagation();
+    setCompletionReady(Boolean(isCompleted));
+    setCompletionError('');
+    setSubmitting(false);
+  }, [isCompleted, url]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 'p')) {
+        event.preventDefault();
+        event.stopPropagation();
       }
     };
+
     document.addEventListener('keydown', handleKeyDown, true);
-    return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, []);
+    setLoading(true);
 
-  // Build a "no-download" URL using direct embed for PDFs or Google Docs Viewer for others
-  const buildEmbedUrl = (rawUrl) => {
-    if (!rawUrl) return '';
-    
-    // Check if it's a PDF (most common)
-    const isPDF = rawUrl.toLowerCase().split('?')[0].endsWith('.pdf') || rawUrl.includes('/documents/');
+    if (!url) {
+      setViewerUrl('');
+      setError('ไม่พบ URL เอกสาร');
+      setLoading(false);
 
-    if (isPDF) {
-      // Direct embed for PDF is more stable with Supabase than Google Viewer
-      // Add #toolbar=0 to suggest hiding the native browser toolbar
-      return `${rawUrl}#toolbar=0&navpanes=0&scrollbar=0`;
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown, true);
+      };
     }
 
-    // Fallback for Word/PPT/Legacy
-    const encoded = encodeURIComponent(rawUrl.startsWith('http') ? rawUrl : window.location.origin + rawUrl);
-    return `https://docs.google.com/viewer?url=${encoded}&embedded=true`;
+    const resolvedUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+    const normalizedUrl = resolvedUrl.toLowerCase().split('?')[0];
+    const isPdf = normalizedUrl.endsWith('.pdf') || normalizedUrl.includes('/documents/');
+    const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
+    const encoded = encodeURIComponent(resolvedUrl);
+
+    if (isPdf && !isMobileViewport) {
+      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`);
+    } else {
+      setViewerUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
+    }
+
+    setError(null);
+    setLoading(false);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [url]);
+
+  const handleFinishReading = async () => {
+    if (submitting) return;
+
+    if (completionReady) {
+      if (onNext) {
+        onClose?.();
+        window.requestAnimationFrame(() => {
+          onNext();
+        });
+        return;
+      }
+
+      if (onReturnToCourse) {
+        onClose?.();
+        window.requestAnimationFrame(() => {
+          onReturnToCourse();
+        });
+        return;
+      }
+
+      onClose();
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setCompletionError('');
+      const result = await onComplete?.();
+
+      if (result === false) {
+        setCompletionError('ไม่สามารถบันทึกความคืบหน้าได้ โปรดลองอีกครั้ง');
+        return;
+      }
+
+      setCompletionReady(true);
+    } catch (completionRequestError) {
+      console.error('Complete document lesson error:', completionRequestError);
+      setCompletionError('ไม่สามารถบันทึกความคืบหน้าได้ โปรดลองอีกครั้ง');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const embedUrl = buildEmbedUrl(url);
+  const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+  const shouldBlockViewerShortcut = isMobileViewport && viewerUrl.includes('docs.google.com/viewer');
 
   return (
     <div
       className="fixed inset-0 z-[80] flex flex-col bg-black/80 backdrop-blur-md animate-fade-in"
-      onContextMenu={(e) => e.preventDefault()}
+      onContextMenu={(event) => event.preventDefault()}
     >
-      {/* Print guard — hides everything in this modal when Ctrl+P is used */}
       <style>{`@media print { .doc-viewer-print-guard { display: none !important; } }`}</style>
 
-      <div className="doc-viewer-print-guard flex flex-col w-full h-full">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-white/10 shrink-0">
+      <div className="doc-viewer-print-guard flex h-full w-full flex-col">
+        <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-slate-900 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary/20 text-primary rounded-xl flex items-center justify-center border border-primary/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/20 text-primary">
               <FileText size={18} strokeWidth={2} />
             </div>
             <div>
-              <p className="text-white font-bold text-sm leading-tight">{title || 'เอกสารบทเรียน'}</p>
-              <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="text-sm font-bold leading-tight text-white">{title || 'เอกสารบทเรียน'}</p>
+              <div className="mt-0.5 flex items-center gap-1.5">
                 <ShieldAlert size={11} className="text-amber-400" />
-                <p className="text-amber-400 text-[10px] font-bold uppercase tracking-wider">Protected · ห้ามดาวน์โหลด</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Protected • ห้ามดาวน์โหลด</p>
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-            aria-label="ปิด"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20 active:scale-95"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Viewer Area */}
-        <div className="relative flex-1 overflow-hidden bg-slate-800">
-          {/* The actual document viewer */}
-          <iframe
-            src={embedUrl}
-            title={title || 'เอกสาร'}
-            className="absolute inset-0 w-full h-full border-0"
-            sandbox="allow-scripts allow-same-origin allow-forms"
-          />
+        <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-slate-800">
+          {loading ? (
+            <div className="flex flex-col items-center gap-3 text-white/60">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-sm font-medium animate-pulse">กำลังเตรียมเอกสารแบบปลอดภัย...</p>
+            </div>
+          ) : error ? (
+            <div className="max-w-sm rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-center">
+              <ShieldAlert className="mx-auto mb-3 h-12 w-12 text-red-500" />
+              <p className="mb-1 font-bold text-white">เกิดข้อผิดพลาด</p>
+              <p className="text-sm text-red-400">{error}</p>
+              <button onClick={onClose} className="mt-4 rounded-xl bg-white/10 px-6 py-2 text-sm font-bold text-white">
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          ) : (
+            <iframe
+              src={viewerUrl}
+              title={title || 'เอกสาร'}
+              className="absolute inset-0 h-full w-full border-0"
+              referrerPolicy="no-referrer"
+            />
+          )}
 
-          {/* Transparent overlay — blocks right-click & drag on the iframe */}
+          {shouldBlockViewerShortcut && (
+            <div
+              aria-hidden="true"
+              className="absolute right-0 top-0 z-20 h-16 w-16 md:hidden"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              style={{ touchAction: 'none' }}
+            />
+          )}
+
           <div
             ref={overlayRef}
             className="absolute inset-0 z-10"
-            onContextMenu={(e) => e.preventDefault()}
-            style={{ pointerEvents: 'none' }} // allow scroll/interact but not download triggers
+            onContextMenu={(event) => event.preventDefault()}
+            style={{ pointerEvents: 'none' }}
           />
         </div>
 
-        {/* Footer Actions */}
-        <div className="shrink-0 px-6 py-4 bg-slate-900 border-t border-white/10 flex items-center justify-between gap-4">
-          <p className="text-slate-400 text-xs font-medium">
-            เนื้อหานี้เป็นทรัพย์สินของบริษัท ห้ามเผยแพร่หรือนำไปใช้โดยไม่ได้รับอนุญาต
-          </p>
-          <button
-            onClick={() => { onComplete?.(); onClose(); }}
-            className="px-8 py-3 bg-primary text-white rounded-2xl font-black text-sm tracking-[0.15em] uppercase shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all shrink-0"
-          >
-            อ่านจบแล้ว ✓
-          </button>
+        <div className="flex shrink-0 flex-col gap-4 border-t border-white/10 bg-slate-900 px-6 py-4 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            {completionReady ? (
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400">
+                  <CheckCircle2 size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">บันทึกความคืบหน้าแล้ว</p>
+                  <p className="text-xs font-medium text-slate-400">
+                    {onNext ? 'พร้อมไปบทถัดไปแล้ว' : 'คุณเรียนครบส่วนเอกสารนี้แล้ว'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs font-medium text-slate-400">
+                เนื้อหานี้เป็นทรัพย์สินของบริษัท ห้ามเผยแพร่หรือนำไปใช้โดยไม่ได้รับอนุญาต
+              </p>
+            )}
+            {completionError && <p className="mt-2 text-xs font-medium text-red-400">{completionError}</p>}
+          </div>
+
+          <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-nowrap">
+            <button
+              onClick={onClose}
+              className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white whitespace-nowrap transition-colors hover:bg-white/10"
+            >
+              ปิดเอกสาร
+            </button>
+            <button
+              onClick={handleFinishReading}
+              disabled={submitting}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-3 text-sm font-black uppercase tracking-[0.15em] text-white whitespace-nowrap shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  กำลังบันทึก
+                </>
+              ) : completionReady ? (
+                <>
+                  {onNext ? 'ไปบทถัดไป' : 'กลับหน้าคอร์ส'}
+                  <ArrowRight size={16} />
+                </>
+              ) : (
+                'อ่านจบแล้ว ✓'
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

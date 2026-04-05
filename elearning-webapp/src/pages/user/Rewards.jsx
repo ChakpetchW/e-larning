@@ -26,12 +26,14 @@ const Rewards = () => {
       ]);
       
       if (pointsRes.status === 'fulfilled') {
-        setPoints(pointsRes.value.data.balance);
-        setHistory(pointsRes.value.data.history);
+        const pData = pointsRes.value?.data || pointsRes.value;
+        setPoints(pData?.balance || 0);
+        setHistory(Array.isArray(pData?.history) ? pData.history : []);
       }
       
       if (rewardsRes.status === 'fulfilled') {
-        setRewards(rewardsRes.value.data);
+        const rData = rewardsRes.value?.data || rewardsRes.value;
+        setRewards(Array.isArray(rData) ? rData : []);
       }
     } catch (error) {
       console.error('Fetch error:', error);
