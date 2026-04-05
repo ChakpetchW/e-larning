@@ -9,6 +9,9 @@ Track here all reported bugs and UI/UX improvements to be addressed in the next 
 - [x] **Profile Cleanup**:
   - **Issue**: Unused `coursesLoading` state in `Profile.jsx`.
   - **Fix**: Removed redundant state and simplified logic.
+- [x] **Course Detail Navigation Fix**:
+  - **Issue**: Back button on course detail uses `navigate(-1)` which can lead back to a lesson.
+  - **Fix**: Changed navigation to a static `/user/courses` path for better UX consistency.
 
 ## 🟢 Completed (v1.0.2)
 - [x] **Video Navigation Sticking**:

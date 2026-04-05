@@ -140,6 +140,10 @@ const CourseDetail = () => {
     [documentLessons],
   );
 
+  const handleReturnToCourseList = () => {
+    navigate('/user/courses');
+  };
+
   if (loading || !course) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
@@ -160,7 +164,7 @@ const CourseDetail = () => {
 
         <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-6 md:gap-8">
           <div className="flex items-center gap-4 text-sm font-bold text-slate-300">
-            <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-1 transition-colors hover:text-white">
+            <button type="button" onClick={handleReturnToCourseList} className="flex items-center gap-1 transition-colors hover:text-white">
               <ArrowLeft size={16} /> กลับ
             </button>
             <span>/</span>
