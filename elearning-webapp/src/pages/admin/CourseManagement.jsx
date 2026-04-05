@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Edit, Edit2, Plus, Search, Trash2 } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
@@ -402,7 +402,7 @@ const CourseManagement = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="category-modal-title"
-            className="card flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden bg-white p-6 shadow-xl"
+            className="card flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden bg-white p-6 shadow-xl"
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 id="category-modal-title" className="text-xl font-bold">จัดการหมวดหมู่</h3>
@@ -416,17 +416,41 @@ const CourseManagement = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSaveCategory} className="mb-5 space-y-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+            <form 
+              onSubmit={handleSaveCategory} 
+              className={`mb-5 space-y-4 rounded-3xl border-2 p-5 transition-all duration-300 ${
+                editingCategoryId 
+                  ? 'border-primary/30 bg-primary/5 shadow-inner' 
+                  : 'border-slate-100 bg-slate-50/70'
+              }`}
+            >
+              <div className="flex items-center justify-between px-1">
+                <span className={`text-[10px] font-black uppercase tracking-widest ${editingCategoryId ? 'text-primary' : 'text-slate-400'}`}>
+                  {editingCategoryId ? 'กำลังแก้ไขหมวดหมู่' : 'สร้างหมวดหมู่ใหม่'}
+                </span>
+                {editingCategoryId && (
+                  <button 
+                    type="button"
+                    onClick={() => { setEditingCategoryId(null); setCategoryForm({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }}
+                    className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
+                  >
+                    ยกเลิกการแก้ไข
+                  </button>
+                )}
+              </div>
+
               <div className="flex gap-2">
                 <input
                   required
                   type="text"
                   placeholder="ชื่อหมวดหมู่..."
-                  className="form-input flex-1"
+                  className={`form-input flex-1 bg-white px-4 py-3 text-sm font-bold transition-all ${
+                    editingCategoryId ? 'border-primary/50 ring-2 ring-primary/10' : 'border-slate-200'
+                  }`}
                   value={categoryForm.name}
                   onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
                 />
-                <button type="submit" className="btn btn-primary shrink-0">
+                <button type="submit" className={`btn ${editingCategoryId ? 'bg-slate-900 text-white px-8' : 'btn-primary px-6'} text-xs font-black uppercase tracking-widest shadow-lg`}>
                   {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
                 </button>
               </div>
@@ -541,76 +565,87 @@ const CourseManagement = () => {
             <div className="flex-1 overflow-y-auto">
               <p className="mb-2 text-xs font-bold uppercase text-muted">ลำดับหมวดหมู่ปัจจุบัน</p>
               <div className="flex flex-col gap-2">
-                {categories.map((category, index) => (
-                  <div
-                    key={category.id}
-                    className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <span className="text-sm font-medium">{category.name}</span>
-                      <div className="mt-0.5 flex flex-wrap gap-1">
-                        {category.visibleToAll !== false ? (
-                          <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">ทุกคน</span>
-                        ) : (
-                          <>
-                            {(category.visibleDepartments || []).map(d => (
-                              <span key={d.id} className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">{d.name}</span>
-                            ))}
-                            {(category.visibleTiers || []).map(t => (
-                              <span key={t.id} className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">{t.name}</span>
-                            ))}
-                            {!(category.visibleDepartments?.length || category.visibleTiers?.length) && (
-                              <span className="text-[10px] text-slate-400">ยังไม่ได้กำหนด</span>
-                            )}
-                          </>
+                {categories.map((category, index) => {
+                  const isEditing = editingCategoryId === category.id;
+                  return (
+                    <div
+                      key={category.id}
+                      className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 transition-all duration-300 ${
+                        isEditing 
+                          ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10 ring-1 ring-primary' 
+                          : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className={`text-sm font-black tracking-tight ${isEditing ? 'text-primary' : 'text-slate-900 font-bold'}`}>
+                          {category.name}
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {category.visibleToAll !== false ? (
+                            <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-700">ทุกคน</span>
+                          ) : (
+                            <>
+                              {(category.visibleDepartments || []).map(d => (
+                                <span key={d.id} className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-black uppercase text-primary">{d.name}</span>
+                              ))}
+                              {(category.visibleTiers || []).map(t => (
+                                <span key={t.id} className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase text-amber-700">{t.name}</span>
+                              ))}
+                              {!(category.visibleDepartments?.length || category.visibleTiers?.length) && (
+                                <span className="text-[9px] font-bold uppercase text-slate-400 italic">ยังไม่ได้กำหนด</span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <div className="flex flex-col rounded-lg border border-slate-100 bg-slate-50 overflow-hidden shadow-sm">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => handleMoveCategory(index, -1)}
+                            className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all border-b border-slate-100"
+                          >
+                            <ArrowUp size={14} strokeWidth={3} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === categories.length - 1}
+                            onClick={() => handleMoveCategory(index, 1)}
+                            className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all"
+                          >
+                            <ArrowDown size={14} strokeWidth={3} />
+                          </button>
+                        </div>
+                        {!isEditing && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCategoryId(category.id);
+                              setCategoryForm({
+                                name: category.name,
+                                order: category.order,
+                                visibleToAll: category.visibleToAll ?? true,
+                                visibleDepartmentIds: category.visibleDepartmentIds || [],
+                                visibleTierIds: category.visibleTierIds || [],
+                              });
+                            }}
+                            className="rounded-xl bg-slate-50 p-2 text-primary transition-all hover:bg-primary hover:text-white"
+                          >
+                            <Edit2 size={16} />
+                          </button>
                         )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      <div className="mr-2 flex flex-col rounded border border-slate-100 bg-white pb-[1px] shadow-sm">
                         <button
                           type="button"
-                          disabled={index === 0}
-                          onClick={() => handleMoveCategory(index, -1)}
-                          className="p-0.5 text-slate-400 hover:text-primary disabled:opacity-30"
+                          onClick={() => handleDeleteCategory(category.id)}
+                          className="rounded-xl bg-slate-50 p-2 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
                         >
-                          <ArrowUp size={14} strokeWidth={3} />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={index === categories.length - 1}
-                          onClick={() => handleMoveCategory(index, 1)}
-                          className="p-0.5 text-slate-400 hover:text-primary disabled:opacity-30"
-                        >
-                          <ArrowDown size={14} strokeWidth={3} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingCategoryId(category.id);
-                          setCategoryForm({
-                            name: category.name,
-                            order: category.order,
-                            visibleToAll: category.visibleToAll ?? true,
-                            visibleDepartmentIds: category.visibleDepartmentIds || [],
-                            visibleTierIds: category.visibleTierIds || [],
-                          });
-                        }}
-                        className="rounded p-1.5 text-primary transition-colors hover:bg-primary/10"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteCategory(category.id)}
-                        className="rounded p-1.5 text-danger transition-colors hover:bg-red-50"
-                      >
-                        <Trash2 size={14} />
-                      </button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
