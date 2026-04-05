@@ -1,6 +1,11 @@
-# 📝 Next Edit Tasks (v1.0.5+)
+# 📝 Next Edit Tasks (v1.0.6+)
 
 Track here all reported bugs and UI/UX improvements to be addressed in the next iteration.
+
+## 🟢 Completed (v1.0.6)
+- [x] **Critical Fix: Desktop White Screen (0px Height)**:
+  - **Issue**: Content area collapsed to 0px height on Desktop viewports due to improper Flexbox `h-full` and `flex-1` interaction in `md:flex-row` mode.
+  - **Fix**: Refactored `UserLayout` containers to use `flex-1` with `min-h-0` and added `display: flex` to the `.user-main` container to ensure vertical expansion.
 
 ## 🟢 Completed (v1.0.5)
 - [x] **Layout: Mobile Stabilization**:

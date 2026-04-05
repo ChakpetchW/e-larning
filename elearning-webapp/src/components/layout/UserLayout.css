@@ -45,6 +45,8 @@
 
 .user-main {
   flex: 1;
+  display: flex; /* Added flex to ensure children can participate in relative layout */
+  flex-direction: column;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;

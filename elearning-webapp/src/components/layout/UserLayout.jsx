@@ -88,7 +88,7 @@ const UserLayout = () => {
       </aside>
 
       {/* Main Container */}
-      <div className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="relative flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
         {/* Top Header (Mobile Only) */}
         <header className="user-header md:hidden">
           <div className="header-content pt-1">
