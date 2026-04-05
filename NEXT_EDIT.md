@@ -1,6 +1,14 @@
-# 📝 Next Edit Tasks (v1.0.4+)
+# 📝 Next Edit Tasks (v1.0.5+)
 
 Track here all reported bugs and UI/UX improvements to be addressed in the next iteration.
+
+## 🟢 Completed (v1.0.5)
+- [x] **Layout: Mobile Stabilization**:
+  - **Issue**: Layout jumping or incorrect padding on mobile devices with safe-area insets.
+  - **Fix**: Refactored `UserLayout` with CSS variables for dynamic padding and added `user-main-inner` container for consistent width/spacing control across viewports.
+- [x] **DocViewer: PDF Viewing Experience**:
+  - **Issue**: PDF toolbar and navigation panes sometimes visible even when requested off.
+  - **Fix**: Updated viewer URL parameters (`pagemode=none&zoom=page-fit`) to ensure a cleaner, document-focused view by default on desktop.
 
 ## 🟢 Completed (v1.0.4)
 - [x] **Accessibility: Visual Scrollbars**:

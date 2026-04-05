@@ -56,7 +56,7 @@ const DocViewer = ({
     const encoded = encodeURIComponent(resolvedUrl);
 
     if (isPdf && !isMobileViewport) {
-      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`);
+      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`);
     } else {
       setViewerUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
     }
