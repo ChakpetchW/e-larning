@@ -407,10 +407,6 @@ const CourseModal = ({
                       <label className="text-xs font-bold text-slate-500 block mb-1">ตำแหน่ง (Role)</label>
                       <input type="text" placeholder="เช่น Enterprise Instructor" className="form-input w-full bg-white text-base py-2.5" value={courseForm.instructorRole} onChange={(e) => setCourseForm({ ...courseForm, instructorRole: e.target.value })} />
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 block mb-1">ประวัติย่อ (Bio)</label>
-                      <textarea placeholder="แนะนำตัวผู้สอนสั้นๆ..." rows={3} className="form-input w-full bg-white text-base py-2.5" value={courseForm.instructorBio} onChange={(e) => setCourseForm({ ...courseForm, instructorBio: e.target.value })} />
-                    </div>
                   </div>
 
                   <div className="space-y-4 p-6 bg-slate-50 rounded-xl border border-slate-100">
@@ -428,20 +424,6 @@ const CourseModal = ({
                         <Clock size={18} className="text-slate-400" />
                         <input type="text" placeholder="เช่น 24 ชั่วโมง หรือ 120 นาที" className="form-input flex-1 bg-white text-base py-3" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
                       </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 pt-2">
-                       <div>
-                         <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">เรตติ้ง (0-5)</label>
-                         <input type="number" step="0.1" placeholder="4.8" className="form-input w-full bg-white text-base py-2.5" value={courseForm.rating} onChange={(e) => setCourseForm({ ...courseForm, rating: e.target.value })} />
-                       </div>
-                       <div>
-                         <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">รีวิว (คน)</label>
-                         <input type="number" placeholder="1240" className="form-input w-full bg-white text-base py-2.5" value={courseForm.reviewCount} onChange={(e) => setCourseForm({ ...courseForm, reviewCount: e.target.value })} />
-                       </div>
-                       <div>
-                         <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">ผู้เรียน (คน)</label>
-                         <input type="number" placeholder="5000" className="form-input w-full bg-white text-base py-2.5" value={courseForm.studentCount} onChange={(e) => setCourseForm({ ...courseForm, studentCount: e.target.value })} />
-                       </div>
                     </div>
                   </div>
 

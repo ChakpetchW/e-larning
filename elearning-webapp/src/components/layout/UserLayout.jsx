@@ -40,7 +40,7 @@ const UserLayout = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-transparent">
+    <div className="user-layout flex flex-col md:flex-row bg-transparent">
       
       {/* Desktop Sidebar (Hidden on mobile) */}
       <aside className="hidden md:flex w-[280px] flex-col bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-gray-100/80 my-5 ml-5 h-[calc(100vh-2.5rem)] z-20 overflow-hidden shrink-0">
@@ -88,7 +88,7 @@ const UserLayout = () => {
       </aside>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+      <div className="relative flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
         {/* Top Header (Mobile Only) */}
         <header className="user-header md:hidden">
           <div className="header-content pt-1">
@@ -113,8 +113,10 @@ const UserLayout = () => {
         </header>
 
         {/* Main Content Area */}
-        <main ref={mainRef} className="user-main flex-1 no-scrollbar md:!max-w-[1400px] md:mx-auto md:!px-12 md:!pt-12 md:!pb-12 bg-transparent w-full">
-          <Outlet />
+        <main ref={mainRef} className="user-main flex-1 min-h-0 no-scrollbar bg-transparent w-full">
+          <div className="user-main-inner md:!max-w-[1400px] md:!px-12 md:!pt-12 md:!pb-12">
+            <Outlet />
+          </div>
         </main>
 
         {/* Bottom Navigation (Mobile Only) */}

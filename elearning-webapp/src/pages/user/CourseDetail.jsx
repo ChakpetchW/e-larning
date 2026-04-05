@@ -69,12 +69,24 @@ const CourseDetail = () => {
 
     fetchDetail();
 
+    let animationFrameId = null;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 150);
+      if (animationFrameId !== null) return;
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 150);
+        animationFrameId = null;
+      });
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [id]);
 
   const handleEnroll = async () => {
@@ -186,24 +198,15 @@ const CourseDetail = () => {
                 {course.description || 'หลักสูตรนี้ออกแบบมาเพื่อช่วยให้คุณเข้าใจเนื้อหาอย่างเป็นระบบ พร้อมนำความรู้ไปใช้ได้จริงกับงานในองค์กร'}
               </p>
 
-              <div className="mt-7 flex flex-wrap items-center gap-3 text-sm font-bold">
-                <div className="flex items-center gap-2 rounded-full border border-amber-300/15 bg-amber-300/10 px-4 py-2 text-amber-300">
-                  <Star size={16} className="fill-amber-300" />
-                  <span>{course.rating || 4.8}</span>
-                  <span className="font-medium text-slate-300">จาก {(course.reviewCount || 1240).toLocaleString()} รีวิว</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-slate-200">
-                  <Users size={16} />
-                  <span>{(course.studentCount || 5000).toLocaleString()}+ คนเรียน</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-slate-200">
-                  <Clock size={16} />
+              <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-3 text-sm font-bold text-slate-200">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} className="text-slate-400" />
                   <span>{course.totalDuration || `${durationHours} ชั่วโมง`}</span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card rounded-[1.75rem] p-4 sm:p-5 ring-1 ring-white/10 lg:justify-self-end">
+            <div className="rounded-[1.75rem] border border-white/10 bg-white/95 p-4 shadow-[0_24px_50px_-30px_rgba(15,23,42,0.45)] sm:p-5 lg:justify-self-end">
               <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">แต้มสะสมเมื่อเรียนจบ</span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-black tracking-tighter text-slate-900">
@@ -232,11 +235,11 @@ const CourseDetail = () => {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2">
               {learningPoints.map((text, index) => (
-                <div key={index} className="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                    <Check size={16} strokeWidth={3} />
+                <div key={index} className="flex gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-black text-white">
+                    {String(index + 1).padStart(2, '0')}
                   </div>
                   <p className="text-sm font-medium leading-relaxed text-slate-700">{text}</p>
                 </div>
@@ -435,9 +438,6 @@ const CourseDetail = () => {
               <div className="min-w-0">
                 <h3 className="text-lg font-black text-slate-900">{course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ'}</h3>
                 <p className="mt-1 text-sm font-bold text-primary">{course.instructorRole || 'วิทยากรประจำหลักสูตร'}</p>
-                <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">
-                  {course.instructorBio || 'ผู้สอนมีประสบการณ์ทำงานจริงและถ่ายทอดเนื้อหาให้เข้าใจง่าย พร้อมยกตัวอย่างที่นำไปใช้งานต่อได้ทันทีในบริบทขององค์กร'}
-                </p>
               </div>
             </div>
           </section>

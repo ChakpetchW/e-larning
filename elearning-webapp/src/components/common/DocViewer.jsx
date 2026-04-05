@@ -56,7 +56,7 @@ const DocViewer = ({
     const encoded = encodeURIComponent(resolvedUrl);
 
     if (isPdf && !isMobileViewport) {
-      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`);
+      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`);
     } else {
       setViewerUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
     }
@@ -113,7 +113,7 @@ const DocViewer = ({
   };
 
   const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
-  const shouldBlockViewerShortcut = isMobileViewport && viewerUrl.includes('docs.google.com/viewer');
+  const shouldBlockViewerShortcut = viewerUrl.includes('docs.google.com/viewer');
 
   return (
     <div
@@ -167,11 +167,10 @@ const DocViewer = ({
               referrerPolicy="no-referrer"
             />
           )}
-
           {shouldBlockViewerShortcut && (
             <div
               aria-hidden="true"
-              className="absolute right-0 top-0 z-20 h-16 w-16 md:hidden"
+              className="absolute right-0 top-0 z-20 h-16 w-16"
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();

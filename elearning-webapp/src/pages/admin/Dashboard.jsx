@@ -75,9 +75,9 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Activity Chart */}
-        <div className="card p-6 lg:col-span-2 flex flex-col min-h-[400px]">
+        <div className="card flex min-w-0 flex-col p-6 lg:col-span-2">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
               <BarChart2 size={20} className="text-primary" />
@@ -89,9 +89,9 @@ const Dashboard = () => {
             </select>
           </div>
           
-          <div className="flex-1 w-full h-[300px] min-h-[300px] relative overflow-hidden">
+          <div className="relative h-[300px] w-full min-w-0 overflow-hidden">
             {stats && (
-              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+              <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
                 <BarChart data={stats?.weeklyActivity || []}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis 
@@ -118,15 +118,15 @@ const Dashboard = () => {
         </div>
 
         {/* Category Distribution */}
-        <div className="card p-6 flex flex-col min-h-[400px]">
+        <div className="card flex min-w-0 flex-col p-6">
           <div className="flex items-center gap-2 mb-6">
             <PieIcon size={20} className="text-warning" />
             <h3 className="text-lg font-bold">สัดส่วนคอร์สตามหมวดหมู่</h3>
           </div>
           
-          <div className="flex-1 w-full h-[250px] min-h-[250px] relative overflow-hidden">
+          <div className="relative h-[250px] w-full min-w-0 overflow-hidden">
             {stats && (
-              <ResponsiveContainer width="100%" height="100%" minHeight={250}>
+              <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={250}>
                 <PieChart>
                   <Pie
                     data={stats?.categoryDistribution || []}
@@ -174,9 +174,7 @@ const Dashboard = () => {
             <thead>
               <tr className="text-xs font-black text-muted uppercase tracking-widest border-b border-border">
                 <th className="pb-4 font-black">ชื่อคอร์สเรียน</th>
-                <th className="pb-4 font-black text-center">ผู้เรียน</th>
-                <th className="pb-4 font-black text-center">อัตราการเรียนจบ</th>
-                <th className="pb-4 font-black text-right">คะแนนเฉลี่ย</th>
+                <th className="pb-4 font-black text-right pr-6">อัตราการเรียนจบ</th>
               </tr>
             </thead>
             <tbody>
@@ -188,16 +186,14 @@ const Dashboard = () => {
                        <span className="font-bold text-sm group-hover:text-primary transition-colors">{course.title}</span>
                     </div>
                   </td>
-                  <td className="py-4 text-sm font-bold text-center text-slate-600">{course.students.toLocaleString()}</td>
-                  <td className="py-4">
-                    <div className="flex flex-col items-center gap-1">
+                  <td className="py-4 text-right pr-6">
+                    <div className="flex flex-col items-end gap-1">
                        <span className="text-xs font-bold text-success">{course.completionRate}</span>
                        <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                           <div className="h-full bg-success rounded-full" style={{ width: course.completionRate }}></div>
                        </div>
                     </div>
                   </td>
-                  <td className="py-4 text-right font-black text-warning italic">4.9/5.0</td>
                 </tr>
               ))}
             </tbody>
