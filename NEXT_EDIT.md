@@ -1,6 +1,19 @@
-# 📝 Next Edit Tasks (v1.0.3+)
+# 📝 Next Edit Tasks (v1.0.4+)
 
 Track here all reported bugs and UI/UX improvements to be addressed in the next iteration.
+
+## 🟢 Completed (v1.0.4)
+- [x] **Accessibility: Visual Scrollbars**:
+  - **Issue**: Hidden scrollbars made content discoverability poor.
+  - **Fix**: Replaced `display: none` with a thin, modern, semi-transparent scrollbar in `index.css` for `.no-scrollbar`.
+- [x] **UI: Reduced Glassmorphism Slops**:
+  - **Issue**: Excessive blur and low opacity in glass cards looked generic (AI Slop).
+  - **Fix**: Increased background opacity and reduced blur radius in `.glass-card` for a more polished, stable look.
+- [x] **Identity: Enhanced Section Headers**:
+  - **Issue**: Section headers were too generic.
+  - **Fix**: Added a custom horizontal gradient bar and decorative line to `SectionHeader.jsx` to create a stronger visual identity.
+- [x] **Normalization: Systemic UI Cleanup**:
+  - **Fix**: Applied consistent border colors and shadows across `CourseCard`, `Home`, and `Profile` to align with the core design system.
 
 ## 🟢 Completed (v1.0.3)
 - [x] **Universal Scroll-to-Top**:

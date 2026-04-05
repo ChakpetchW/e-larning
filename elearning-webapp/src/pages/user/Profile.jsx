@@ -176,17 +176,17 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {statBoxes.map((stat) => (
           <div
             key={stat.label}
             className="card flex flex-col items-center justify-center gap-1.5 border border-gray-100 bg-white p-4 text-center transition-colors hover:border-gray-200"
           >
             <div className={`mb-1 rounded-full p-2 ${stat.bg}`}>{stat.icon}</div>
-            <h4 className={`w-full truncate px-1 text-[1.15rem] font-black leading-none ${stat.color}`}>
+            <h4 className={`w-full px-1 text-[1.15rem] font-black leading-tight ${stat.color}`}>
               {stat.value}
             </h4>
-            <p className="truncate text-[10px] font-bold uppercase tracking-wide text-gray-400">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
               {stat.label}
             </p>
           </div>

@@ -83,13 +83,13 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col gap-10 md:gap-14 animate-fade-in pt-0 md:pt-4 pb-16">
+    <div className="flex flex-col gap-8 md:gap-12 animate-fade-in pt-0 md:pt-4 pb-16">
       
       {/* Premium Hero Section */}
-      <section className="relative -mx-5 overflow-hidden rounded-none border-b border-slate-100 bg-white md:mx-0 md:rounded-[2.5rem] md:border-none shadow-sm">
-        <div className="mesh-bg-premium absolute inset-0 opacity-100"></div>
+      <section className="relative -mx-5 overflow-hidden rounded-none border-b border-slate-200 bg-[linear-gradient(135deg,#fffdf8_0%,#f8fafc_55%,#eef4ff_100%)] md:mx-0 md:rounded-[2.5rem] md:border md:border-slate-200 shadow-sm">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(180,83,9,0.08),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(67,56,202,0.08),transparent_32%)]"></div>
         
-        <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center p-8 md:p-12 lg:p-16">
+        <div className="relative z-10 grid lg:grid-cols-[minmax(0,1.1fr)_380px] gap-10 items-center p-7 md:p-12 lg:p-16">
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-widest mb-6 border border-primary/10">
               <span className="relative flex h-2 w-2">
@@ -99,17 +99,17 @@ const Home = () => {
               Learning Dashboard
             </div>
             
-            <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-slate-800 tracking-tight leading-[1.2] mb-6 flex flex-wrap items-baseline justify-center lg:justify-start">
+            <h1 className="text-3xl md:text-5xl lg:text-[3.4rem] font-bold text-slate-900 tracking-tight leading-[1.12] mb-6 flex flex-wrap items-baseline justify-center lg:justify-start">
               <span>สวัสดีคุณ</span>
-              <span className="mx-2 lg:mx-3 text-gradient-primary inline-block">
+              <span className="mx-2 lg:mx-3 text-primary inline-block">
                 {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}
               </span> 👋
             </h1>
-            <p className="mb-10 max-w-md text-base md:text-lg font-medium text-slate-500 leading-relaxed">
+             <p className="mb-8 max-w-xl text-base md:text-lg font-medium text-slate-600 leading-relaxed">
               พร้อมที่จะอัปเกรดทักษะของคุณแล้วหรือยัง? วันนี้มีบทเรียนใหม่ๆ รอคุณอยู่มากมาย
             </p>
             
-            <div className="flex flex-wrap justify-center lg:justify-start gap-8 md:gap-12 w-full pt-8 border-t border-slate-200/40">
+             <div className="flex flex-wrap justify-center lg:justify-start gap-x-8 gap-y-4 w-full pt-6 border-t border-slate-300/50">
                <div className="flex flex-col">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">กําลังเรียน</p>
                   <p className="text-2xl font-bold text-slate-800">{courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length}</p>
@@ -129,7 +129,7 @@ const Home = () => {
 
           <div className="relative flex justify-center items-center lg:h-full">
             {/* Visual Asset */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-3xl scale-110"></div>
+            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(180,83,9,0.14),transparent_34%),radial-gradient(circle_at_center,rgba(67,56,202,0.1),transparent_58%)] blur-3xl scale-110"></div>
             <img 
               src="/assets/images/hero_premium.png" 
               alt="Premium Learning Illustration" 
@@ -141,7 +141,7 @@ const Home = () => {
                {continueCourse ? (
                  <button
                     onClick={() => navigate(`/user/courses/${continueCourse.id}`)}
-                    className="glass-card flex items-center gap-4 p-5 rounded-2xl border-white/60 shadow-xl hover:scale-105 transition-all group"
+                     className="flex items-center gap-4 rounded-[1.6rem] border border-slate-200 bg-white px-5 py-4 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] transition-all hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-28px_rgba(15,23,42,0.4)] group"
                  >
                     <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
                        <PlayCircle size={24} />
@@ -154,7 +154,7 @@ const Home = () => {
                ) : (
                  <button
                     onClick={() => navigate('/user/courses')}
-                    className="glass-card flex items-center gap-4 p-5 rounded-2xl border-white/60 shadow-xl hover:scale-105 transition-all"
+                     className="flex items-center gap-4 rounded-[1.6rem] border border-slate-200 bg-white px-5 py-4 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] transition-all hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-28px_rgba(15,23,42,0.4)]"
                  >
                     <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center text-white shadow-lg">
                        <Target size={24} />
@@ -175,7 +175,7 @@ const Home = () => {
          {continueCourse ? (
            <button
               onClick={() => navigate(`/user/courses/${continueCourse.id}`)}
-              className="w-full bg-slate-800 text-white rounded-3xl p-6 flex flex-col gap-4 shadow-xl active:scale-[0.98] transition-all"
+               className="w-full rounded-[1.9rem] border border-slate-900 bg-slate-900 p-6 text-white flex flex-col gap-4 shadow-xl active:scale-[0.98] transition-all"
            >
               <div className="flex justify-between items-center">
                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">คอร์สปัจจุบัน</span>
@@ -192,7 +192,7 @@ const Home = () => {
          ) : (
            <button
               onClick={() => navigate('/user/courses')}
-              className="w-full bg-primary text-white rounded-3xl p-6 flex items-center justify-between shadow-xl shadow-primary/20"
+               className="w-full rounded-[1.9rem] bg-primary text-white p-6 flex items-center justify-between shadow-xl shadow-primary/20"
            >
               <div className="text-left">
                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">Get Started</p>
