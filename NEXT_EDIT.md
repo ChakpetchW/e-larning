@@ -12,6 +12,9 @@ Track here all reported bugs and UI/UX improvements to be addressed in the next 
 - [x] **Course Detail Navigation Fix**:
   - **Issue**: Back button on course detail uses `navigate(-1)` which can lead back to a lesson.
   - **Fix**: Changed navigation to a static `/user/courses` path for better UX consistency.
+- [x] **Google Docs Viewer Shortcut Block**:
+  - **Issue**: Google Docs viewer top-right "Open original" button allows users to bypass security on mobile.
+  - **Fix**: Added a transparent `div` overlay in `DocViewer.jsx` for mobile viewports to intercept touch events on the shortcut region.
 
 ## 🟢 Completed (v1.0.2)
 - [x] **Video Navigation Sticking**:

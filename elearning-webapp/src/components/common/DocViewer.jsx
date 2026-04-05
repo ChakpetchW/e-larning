@@ -112,6 +112,9 @@ const DocViewer = ({
     }
   };
 
+  const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+  const shouldBlockViewerShortcut = isMobileViewport && viewerUrl.includes('docs.google.com/viewer');
+
   return (
     <div
       className="fixed inset-0 z-[80] flex flex-col bg-black/80 backdrop-blur-md animate-fade-in"
@@ -162,6 +165,22 @@ const DocViewer = ({
               title={title || 'เอกสาร'}
               className="absolute inset-0 h-full w-full border-0"
               referrerPolicy="no-referrer"
+            />
+          )}
+
+          {shouldBlockViewerShortcut && (
+            <div
+              aria-hidden="true"
+              className="absolute right-0 top-0 z-20 h-16 w-16 md:hidden"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              style={{ touchAction: 'none' }}
             />
           )}
 
