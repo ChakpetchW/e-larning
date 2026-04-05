@@ -395,35 +395,32 @@ const LessonPlayer = () => {
 
               {completed && (
                 <section className="mt-10 overflow-hidden rounded-[2.5rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.96),rgba(255,255,255,0.98),rgba(239,246,255,0.92))] shadow-[0_28px_70px_-42px_rgba(16,185,129,0.4)]">
-                  <div className="flex flex-col gap-6 p-6 md:p-8">
+                  <div className="flex flex-col gap-5 p-6 md:p-8">
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                       <div className="flex items-start gap-4">
                         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.75rem] bg-emerald-500 text-white shadow-[0_22px_45px_-24px_rgba(16,185,129,0.65)]">
                           <CheckCircle size={30} strokeWidth={2.2} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-black uppercase tracking-[0.26em] text-emerald-700">Lesson Complete</p>
+                          <p className="text-[11px] font-black uppercase tracking-[0.26em] text-emerald-700">Complete</p>
                           <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 md:text-[2rem]">
-                            เรียนจบบทนี้แล้ว ไปต่อได้แบบไม่สะดุด
+                            บทนี้เสร็จแล้ว
                           </h3>
-                          <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-600 md:text-[15px]">
-                            ระบบบันทึกความคืบหน้าให้แล้ว คุณสามารถไปบทถัดไปทันที หรือกลับไปดูภาพรวมของคอร์สก่อนก็ได้
-                          </p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3 self-start">
                         <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
-                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Progress</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">คืบหน้า</p>
                           <p className="mt-1 text-lg font-black tracking-tight text-slate-900">
                             {Math.min(completedLessonsCount, totalLessons)} / {totalLessons}
                           </p>
-                          <p className="text-xs font-bold text-slate-500">บทที่ผ่านแล้ว</p>
+                          <p className="text-xs font-bold text-slate-500">บท</p>
                         </div>
                         <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
-                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Current</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">ตอนนี้</p>
                           <p className="mt-1 text-lg font-black tracking-tight text-slate-900">{currentLessonIndex + 1}</p>
-                          <p className="text-xs font-bold text-slate-500">จาก {totalLessons} บท</p>
+                          <p className="text-xs font-bold text-slate-500">จาก {totalLessons}</p>
                         </div>
                       </div>
                     </div>
@@ -432,7 +429,7 @@ const LessonPlayer = () => {
                       {nextLesson ? (
                         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                           <div className="min-w-0">
-                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-primary">Up Next</p>
+                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-primary">บทถัดไป</p>
                             <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
                               {nextLesson.title}
                             </h4>
@@ -467,13 +464,10 @@ const LessonPlayer = () => {
                       ) : (
                         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                           <div className="min-w-0">
-                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-emerald-700">Course Progress</p>
+                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-emerald-700">ครบแล้ว</p>
                             <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
-                              บทเรียนนี้คือช่วงท้ายของคอร์สแล้ว
+                              จบบทสุดท้ายของคอร์สแล้ว
                             </h4>
-                            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
-                              กลับไปดูรายละเอียดคอร์สหรือทบทวนบทก่อนหน้าได้จากหน้าภาพรวม
-                            </p>
                           </div>
 
                           <button

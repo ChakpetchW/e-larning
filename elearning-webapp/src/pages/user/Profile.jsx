@@ -28,7 +28,6 @@ const Profile = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [courses, setCourses] = useState([]);
-  const [coursesLoading, setCoursesLoading] = useState(true);
 
   const editDialogRef = useRef(null);
   const editInputRef = useRef(null);
@@ -54,7 +53,6 @@ const Profile = () => {
         console.error('Fetch profile error:', error);
       } finally {
         setLoading(false);
-        setCoursesLoading(false);
       }
     };
 

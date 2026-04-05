@@ -1,5 +1,5 @@
-import React, { useId, useRef, useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect, useId, useRef, useState } from 'react';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Book,
@@ -18,7 +18,9 @@ import './AdminLayout.css';
 const AdminLayout = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const drawerRef = useRef(null);
+  const mainRef = useRef(null);
   const closeButtonRef = useRef(null);
   const drawerTitleId = useId();
 
@@ -31,6 +33,14 @@ const AdminLayout = () => {
     containerRef: drawerRef,
     initialFocusRef: closeButtonRef,
   });
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname, location.search]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -131,7 +141,7 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      <main className="admin-main">
+      <main ref={mainRef} className="admin-main">
         <div className="admin-content-wrapper">
           <Outlet />
         </div>
