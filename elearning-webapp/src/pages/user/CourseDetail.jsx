@@ -255,14 +255,9 @@ const CourseDetail = () => {
                   <FileText size={16} />
                   {documentLessons.length} เอกสาร
                 </span>
-                {course.isEnrolled && (
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-3.5 py-2 text-sm font-bold text-emerald-700 ring-1 ring-emerald-500/10">
-                    {completedDocumentCount}/{documentLessons.length} เปิดแล้ว
-                  </span>
-                )}
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="flex flex-col gap-3">
                 {documentLessons.map((lesson) => (
                   <button
                     key={lesson.id}
@@ -297,11 +292,6 @@ const CourseDetail = () => {
                           <h3 className="flex-1 text-[15px] font-extrabold leading-snug text-slate-800 transition-colors duration-300 group-hover:text-primary">
                             {lesson.title}
                           </h3>
-                          {lesson.isCompleted && (
-                            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-emerald-600/10">
-                              เปิดแล้ว
-                            </span>
-                          )}
                         </div>
 
                         <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-400">
