@@ -262,7 +262,7 @@ const CourseDetail = () => {
                 )}
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="flex flex-col gap-3">
                 {documentLessons.map((lesson) => (
                   <button
                     key={lesson.id}
