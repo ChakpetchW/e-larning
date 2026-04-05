@@ -9,6 +9,9 @@ Track here all reported bugs and UI/UX improvements to be addressed in the next 
 - [x] **DocViewer: PDF Viewing Experience**:
   - **Issue**: PDF toolbar and navigation panes sometimes visible even when requested off.
   - **Fix**: Updated viewer URL parameters (`pagemode=none&zoom=page-fit`) to ensure a cleaner, document-focused view by default on desktop.
+- [x] **Admin: Dashboard Chart Responsiveness**:
+  - **Issue**: Recharts components sometimes overflowing their containers or causing horizontal scroll on dashboard.
+  - **Fix**: Added `min-w-0` to flex/grid containers and explicitly set `minWidth={0}` on `ResponsiveContainer` to correctly trigger re-calculation on resize.
 
 ## 🟢 Completed (v1.0.4)
 - [x] **Accessibility: Visual Scrollbars**:

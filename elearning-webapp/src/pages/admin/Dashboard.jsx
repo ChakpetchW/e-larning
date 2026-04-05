@@ -75,9 +75,9 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Activity Chart */}
-        <div className="card p-6 lg:col-span-2 flex flex-col min-h-[400px]">
+        <div className="card flex min-w-0 flex-col p-6 lg:col-span-2">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
               <BarChart2 size={20} className="text-primary" />
@@ -89,9 +89,9 @@ const Dashboard = () => {
             </select>
           </div>
           
-          <div className="flex-1 w-full h-[300px] min-h-[300px] relative overflow-hidden">
+          <div className="relative h-[300px] w-full min-w-0 overflow-hidden">
             {stats && (
-              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+              <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
                 <BarChart data={stats?.weeklyActivity || []}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis 
@@ -118,15 +118,15 @@ const Dashboard = () => {
         </div>
 
         {/* Category Distribution */}
-        <div className="card p-6 flex flex-col min-h-[400px]">
+        <div className="card flex min-w-0 flex-col p-6">
           <div className="flex items-center gap-2 mb-6">
             <PieIcon size={20} className="text-warning" />
             <h3 className="text-lg font-bold">สัดส่วนคอร์สตามหมวดหมู่</h3>
           </div>
           
-          <div className="flex-1 w-full h-[250px] min-h-[250px] relative overflow-hidden">
+          <div className="relative h-[250px] w-full min-w-0 overflow-hidden">
             {stats && (
-              <ResponsiveContainer width="100%" height="100%" minHeight={250}>
+              <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={250}>
                 <PieChart>
                   <Pie
                     data={stats?.categoryDistribution || []}
