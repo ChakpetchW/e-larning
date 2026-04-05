@@ -21,6 +21,7 @@ const LessonPlayer = () => {
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDocViewer, setShowDocViewer] = useState(false);
+  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
 
   // Quiz State
   const [answers, setAnswers] = useState({});
@@ -29,6 +30,11 @@ const LessonPlayer = () => {
   useEffect(() => {
     const fetchLessonData = async () => {
       try {
+        setLoading(true);
+        setShowDocViewer(false);
+        setIsNavigatingAway(false);
+        setAnswers({});
+        setQuizResult(null);
         const response = await userAPI.getCourseDetails(courseId);
         setCourse(response.data);
 
@@ -116,14 +122,30 @@ const LessonPlayer = () => {
   const completedLessonsCount = course?.lessons?.filter((item) => item.isCompleted).length || 0;
   const lessonMediaUrl = getFullUrl(lesson.contentUrl?.trim());
   const hasResources = Array.isArray(lesson.resources) && lesson.resources.length > 0;
+  const showAchievementCard = course?.showAchievementCard === true;
+
+  const navigateToPath = (path, options = {}) => {
+    if (!path) return;
+
+    setShowDocViewer(false);
+    setIsNavigatingAway(true);
+
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
+    window.requestAnimationFrame(() => {
+      navigate(path, options);
+    });
+  };
 
   const handleNavigateToNextLesson = () => {
     if (!nextLessonId) return;
-    navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`);
+    navigateToPath(`/user/courses/${courseId}/lesson/${nextLessonId}`);
   };
 
   const handleReturnToCourse = () => {
-    navigate(`/user/courses/${courseId}`);
+    navigateToPath(`/user/courses/${courseId}`, { replace: true });
   };
 
   if (loading || !lesson) {
@@ -142,7 +164,7 @@ const LessonPlayer = () => {
         {/* Back Button Overlay - Floating Glass */}
         <div className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
           <button
-            onClick={() => navigate(`/user/courses/${courseId}`)}
+            onClick={handleReturnToCourse}
             className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur-xl transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
           >
             <ArrowLeft size={22} strokeWidth={2.5} />
@@ -152,17 +174,23 @@ const LessonPlayer = () => {
         {/* Media Content */}
         <div className={`${lesson.type === 'quiz' ? '' : 'aspect-video'} w-full`}>
           {lesson.type === 'video' ? (
-            <Suspense fallback={
-              <div className="w-full aspect-video bg-slate-900 flex items-center justify-center rounded-2xl">
-                <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            isNavigatingAway ? (
+              <div className="flex aspect-video w-full items-center justify-center bg-slate-950">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
               </div>
-            }>
-              <VideoPlayer
-                key={lessonMediaUrl}
-                url={lessonMediaUrl || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
-                onEnded={handleComplete}
-              />
-            </Suspense>
+            ) : (
+              <Suspense fallback={
+                <div className="w-full aspect-video bg-slate-900 flex items-center justify-center rounded-2xl">
+                  <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              }>
+                <VideoPlayer
+                  key={lessonMediaUrl}
+                  url={lessonMediaUrl || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
+                  onEnded={handleComplete}
+                />
+              </Suspense>
+            )
           ) : lesson.type === 'quiz' ? (
             <div className="relative flex flex-col items-center gap-6 overflow-hidden px-6 py-20 text-center text-white md:py-32">
               <div className="absolute inset-0 z-0 bg-[linear-gradient(135deg,#0f172a_0%,#111827_45%,#020617_100%)]"></div>
@@ -420,16 +448,16 @@ const LessonPlayer = () => {
                             </div>
                           </div>
 
-                          <div className="flex flex-col gap-3 sm:flex-row">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:flex-nowrap">
                             <button
                               onClick={handleReturnToCourse}
-                              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50"
+                              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-700 whitespace-nowrap transition-all hover:border-slate-300 hover:bg-slate-50"
                             >
                               กลับหน้าคอร์ส
                             </button>
                             <button
                               onClick={handleNavigateToNextLesson}
-                              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
+                              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
                             >
                               ไปบทถัดไป
                               <ArrowRight size={16} strokeWidth={2.6} />
@@ -450,7 +478,7 @@ const LessonPlayer = () => {
 
                           <button
                             onClick={handleReturnToCourse}
-                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
                           >
                             กลับหน้าคอร์ส
                             <ArrowRight size={16} strokeWidth={2.6} />
@@ -466,7 +494,7 @@ const LessonPlayer = () => {
             {hasResources && (
               <div className="lg:col-span-4 flex flex-col gap-8">
               {/* Achievement Card - "Exclusive Looking" */}
-              {false && completed && (
+              {showAchievementCard && completed && (
                 <div className="relative overflow-hidden rounded-[3rem] border border-slate-100 bg-white p-12 text-center shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] animate-celebrate">
                   <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[80px]"></div>
                   <div className="relative z-10 flex flex-col items-center">
@@ -478,14 +506,14 @@ const LessonPlayer = () => {
                     
                     {nextLessonId ? (
                       <button
-                        onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}
+                        onClick={handleNavigateToNextLesson}
                         className="w-full py-6 bg-slate-900 text-white rounded-[1.5rem] font-black text-base tracking-[0.2em] uppercase hover:bg-primary transition-all shadow-2xl shadow-slate-200 active:scale-95"
                       >
                         เรียนบทถัดไป →
                       </button>
                     ) : (
                       <button
-                        onClick={() => navigate(`/user/courses/${courseId}`)}
+                        onClick={handleReturnToCourse}
                         className="w-full py-6 bg-slate-100 text-slate-900 rounded-[1.5rem] font-black text-base tracking-[0.2em] uppercase hover:bg-slate-200 transition-all active:scale-95"
                       >
                         กลับสู่คอร์สเรียน
@@ -565,7 +593,7 @@ const LessonPlayer = () => {
           </button>
         ) : (
           <button
-            onClick={() => navigate(`/user/courses/${courseId}`)}
+            onClick={handleReturnToCourse}
             className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[13px] tracking-widest uppercase"
           >
             กลับสู่หน้ารายละเอียด

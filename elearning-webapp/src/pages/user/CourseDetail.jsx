@@ -149,8 +149,8 @@ const CourseDetail = () => {
   }
 
   return (
-    <div className="relative -mx-5 -mt-5 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
-      <section className="relative overflow-hidden bg-slate-950 px-5 pb-16 pt-10 text-white md:px-8 md:pb-28 md:pt-14 xl:px-0">
+    <div className="relative -mx-6 -mt-6 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
+      <section className="relative overflow-hidden bg-slate-950 px-4 pb-14 pt-8 text-white sm:px-5 md:px-8 md:pb-28 md:pt-14 xl:px-0">
         <div
           className="absolute inset-0 scale-110 bg-cover bg-center bg-no-repeat opacity-60 blur-[56px]"
           style={{ backgroundImage: `url("${course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}")` }}
@@ -158,7 +158,7 @@ const CourseDetail = () => {
         <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(2,6,23,0.92),rgba(15,23,42,0.86),rgba(15,23,42,0.48))]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(79,70,229,0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.12),transparent_26%)]" />
 
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8">
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-6 md:gap-8">
           <div className="flex items-center gap-4 text-sm font-bold text-slate-300">
             <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-1 transition-colors hover:text-white">
               <ArrowLeft size={16} /> กลับ
@@ -169,7 +169,7 @@ const CourseDetail = () => {
             </span>
           </div>
 
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
+          <div className="grid gap-8 md:gap-10 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
             <div className="max-w-3xl">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.28em] text-primary-light">
                 <BookOpen size={14} />
@@ -199,7 +199,7 @@ const CourseDetail = () => {
               </div>
             </div>
 
-            <div className="glass-card rounded-[2rem] p-5 ring-1 ring-white/10 lg:justify-self-end">
+            <div className="glass-card rounded-[1.75rem] p-4 sm:p-5 ring-1 ring-white/10 lg:justify-self-end">
               <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">แต้มสะสมเมื่อเรียนจบ</span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-black tracking-tighter text-slate-900">
@@ -215,9 +215,9 @@ const CourseDetail = () => {
         </div>
       </section>
 
-      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-6xl flex-col-reverse gap-8 px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-0">
-        <div className="flex w-full flex-col gap-8 lg:min-w-0 lg:flex-1">
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-6xl flex-col-reverse gap-6 px-4 sm:px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-0">
+        <div className="flex w-full flex-col gap-6 md:gap-8 lg:min-w-0 lg:flex-1">
+          <section className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:rounded-[2rem] md:p-8">
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">คุณจะได้เรียนรู้อะไรจากคอร์สนี้</h2>
@@ -241,18 +241,18 @@ const CourseDetail = () => {
           </section>
 
           {documentLessons.length > 0 && (
-            <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-              <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">เอกสารประกอบทั้งหมดในคอร์ส</h2>
-                  <p className="mt-1 text-sm font-medium text-slate-500">
-                    รวมเอกสารสำคัญไว้ก่อนสารบัญบทเรียน เพื่อให้กลับมาเปิดอ่านซ้ำหรือทบทวนหลังเรียนจบได้ง่ายขึ้น
-                  </p>
-                </div>
-                <span className="inline-flex items-center gap-2 self-start rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">
+            <section className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:rounded-[2rem] md:p-8">
+              <div className="mb-4 flex flex-wrap items-center gap-2.5 md:mb-5">
+                <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">เอกสารประกอบทั้งหมด</h2>
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3.5 py-2 text-sm font-bold text-slate-600">
                   <FileText size={16} />
                   {documentLessons.length} เอกสาร
                 </span>
+                {course.isEnrolled && (
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-3.5 py-2 text-sm font-bold text-emerald-700 ring-1 ring-emerald-500/10">
+                    {completedDocumentCount}/{documentLessons.length} เปิดแล้ว
+                  </span>
+                )}
               </div>
 
               <div className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_240px]">

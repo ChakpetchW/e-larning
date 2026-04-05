@@ -4,3 +4,4 @@
 - Maintain Thai language support in all UI and file content (UTF-8).
 - Prioritize high-end aesthetics (Glassmorphism, gradients, modern typography).
 - Verify design consistency across different screen sizes before completion.
+- When navigating from a lesson page back to its course detail page, use `navigate(courseDetailPath, { replace: true })` so the browser Back action returns to the course list instead of reopening the lesson.

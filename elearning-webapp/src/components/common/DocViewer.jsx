@@ -52,11 +52,12 @@ const DocViewer = ({
     const resolvedUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
     const normalizedUrl = resolvedUrl.toLowerCase().split('?')[0];
     const isPdf = normalizedUrl.endsWith('.pdf') || normalizedUrl.includes('/documents/');
+    const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
+    const encoded = encodeURIComponent(resolvedUrl);
 
-    if (isPdf) {
-      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&scrollbar=0`);
+    if (isPdf && !isMobileViewport) {
+      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`);
     } else {
-      const encoded = encodeURIComponent(resolvedUrl);
       setViewerUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
     }
 
@@ -73,12 +74,18 @@ const DocViewer = ({
 
     if (completionReady) {
       if (onNext) {
-        onNext();
+        onClose?.();
+        window.requestAnimationFrame(() => {
+          onNext();
+        });
         return;
       }
 
       if (onReturnToCourse) {
-        onReturnToCourse();
+        onClose?.();
+        window.requestAnimationFrame(() => {
+          onReturnToCourse();
+        });
         return;
       }
 
@@ -188,17 +195,17 @@ const DocViewer = ({
             {completionError && <p className="mt-2 text-xs font-medium text-red-400">{completionError}</p>}
           </div>
 
-          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+          <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-nowrap">
             <button
               onClick={onClose}
-              className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
+              className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white whitespace-nowrap transition-colors hover:bg-white/10"
             >
               ปิดเอกสาร
             </button>
             <button
               onClick={handleFinishReading}
               disabled={submitting}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-3 text-sm font-black uppercase tracking-[0.15em] text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-3 text-sm font-black uppercase tracking-[0.15em] text-white whitespace-nowrap shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
             >
               {submitting ? (
                 <>
