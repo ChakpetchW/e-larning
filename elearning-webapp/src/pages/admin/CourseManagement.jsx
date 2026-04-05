@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Edit2, Plus, Search, Trash2 } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
