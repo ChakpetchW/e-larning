@@ -402,7 +402,7 @@ const CourseManagement = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="category-modal-title"
-            className="card flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden bg-white p-6 shadow-xl"
+            className="card flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden bg-white p-6 shadow-xl"
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 id="category-modal-title" className="text-xl font-bold">จัดการหมวดหมู่</h3>
