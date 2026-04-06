@@ -79,6 +79,33 @@ const LessonPlayer = () => {
     });
   }, [lesson?.type, quizResult, shouldScrollToQuizResult]);
 
+  const syncCompletedLessonState = () => {
+    setLesson((currentLesson) => (
+      currentLesson ? { ...currentLesson, isCompleted: true } : currentLesson
+    ));
+
+    setCourse((currentCourse) => {
+      if (!currentCourse?.lessons?.length) {
+        return currentCourse;
+      }
+
+      const updatedLessons = currentCourse.lessons.map((item) => (
+        item.id === lessonId
+          ? { ...item, isCompleted: true, progress: { ...(item.progress || {}), progress: 100 } }
+          : item
+      ));
+
+      const completedCount = updatedLessons.filter((item) => item.isCompleted).length;
+      const progressPercent = Math.round((completedCount / updatedLessons.length) * 100);
+
+      return {
+        ...currentCourse,
+        lessons: updatedLessons,
+        progressPercent,
+      };
+    });
+  };
+
   const handleComplete = async () => {
     if (updating) return false;
     if (completed) return true;
@@ -87,6 +114,7 @@ const LessonPlayer = () => {
       setUpdating(true);
       await userAPI.updateProgress(lessonId, 100);
       setCompleted(true);
+      syncCompletedLessonState();
       return true;
     } catch (error) {
       console.error('Update progress error:', error);
@@ -109,6 +137,7 @@ const LessonPlayer = () => {
       setShouldScrollToQuizResult(true);
       if (res.data.isCompleted) {
         setCompleted(true);
+        syncCompletedLessonState();
       }
     } catch (err) {
       console.error(err);
