@@ -17,6 +17,7 @@ const LessonPlayer = lazy(() => import('./pages/user/LessonPlayer'));
 const Rewards = lazy(() => import('./pages/user/Rewards'));
 const PointsHistory = lazy(() => import('./pages/user/PointsHistory'));
 const Profile = lazy(() => import('./pages/user/Profile'));
+const OngoingCourses = lazy(() => import('./pages/user/OngoingCourses'));
 
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -62,6 +63,7 @@ function App() {
             <Route index element={<Navigate to="home" replace />} />
             <Route path="home" element={<Home />} />
             <Route path="courses" element={<CourseList />} />
+            <Route path="ongoing" element={<OngoingCourses />} />
             <Route path="completed" element={<CompletedCourses />} />
             <Route path="courses/:id" element={<CourseDetail />} />
             <Route path="courses/:id/lesson/:lessonId" element={<LessonPlayer />} />

@@ -27,6 +27,7 @@ export const filterCourses = (courses, { activeCat = 'All', searchQuery = '', st
 export const sortCourses = (courses, sortBy = 'newest') => {
   if (!courses) return [];
   const sorted = [...courses]; // Avoid mutating original array
+  const getDisplayPoints = (course) => course.totalPoints ?? course.points ?? 0;
   
   switch (sortBy) {
     case 'newest':
@@ -36,7 +37,7 @@ export const sortCourses = (courses, sortBy = 'newest') => {
     case 'a-z':
       return sorted.sort((a, b) => a.title.localeCompare(b.title));
     case 'points_desc':
-      return sorted.sort((a, b) => (b.points || 0) - (a.points || 0));
+      return sorted.sort((a, b) => getDisplayPoints(b) - getDisplayPoints(a));
     default:
       return sorted;
   }

@@ -8,7 +8,8 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
   const categoryLabel = course.category?.name || 'หมวดทั่วไป';
   const lessonCount = Array.isArray(course.lessons) ? course.lessons.length : 0;
   const progressPercent = Math.max(0, Math.min(100, Number(course.progressPercent) || 0));
-  const pointsSuffix = course.points > 0 ? 'แต้ม' : 'เรียน';
+  const displayPoints = course.totalPoints ?? course.points ?? 0;
+  const pointsSuffix = displayPoints > 0 ? 'แต้มรวม' : 'เรียน';
 
   const lessonDuration = course.lessons?.reduce(
     (total, lesson) => total + (parseInt(lesson.duration, 10) || 0),
@@ -46,13 +47,13 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-900/12 to-transparent" />
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
-          <span className="inline-flex max-w-[65%] rounded-full bg-white/92 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-700 shadow-sm">
+          <span className="inline-flex max-w-[65%] rounded-full bg-white/92 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm">
             {categoryLabel}
           </span>
 
           {course.isEnrolled && (
             <span
-              className={`inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] shadow-sm ${
+              className={`inline-flex rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
                 isCompleted
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-primary/10 text-primary'
@@ -65,7 +66,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
 
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 text-white">
           <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
+            <p className="text-[11px] font-bold tracking-[0.03em] text-white/85">
               {eyebrowLabel}
             </p>
             <p className="mt-1 text-sm font-semibold text-white/95">
@@ -80,7 +81,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
       </div>
 
       <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+        <p className="text-[11px] font-bold tracking-[0.03em] text-slate-500">
           {eyebrowLabel}
         </p>
 
@@ -91,7 +92,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
         {isInProgress && progressPercent > 0 && (
           <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+              <span className="text-[11px] font-bold tracking-[0.04em] text-slate-500">
                 Progress
               </span>
               <span className="text-sm font-black text-slate-800">{progressPercent}%</span>
@@ -122,9 +123,9 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
 
           <div className="text-right leading-none">
             <span className="text-[1.2rem] font-black tracking-tight text-slate-900">
-              {course.points > 0 ? course.points.toLocaleString() : 'FREE'}
+              {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
             </span>
-            <span className="mt-1 block text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
+            <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">
               {pointsSuffix}
             </span>
           </div>

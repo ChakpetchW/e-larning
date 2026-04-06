@@ -80,7 +80,7 @@ const Rewards = () => {
           <div className="flex justify-between items-start w-full">
             <div className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 backdrop-blur-md">
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-              <span className="text-xs font-bold text-white uppercase tracking-wider">แต้มของคุณ</span>
+              <span className="text-xs font-bold tracking-[0.04em] text-white">แต้มของคุณ</span>
             </div>
             <button 
               onClick={() => navigate('/user/points-history')}

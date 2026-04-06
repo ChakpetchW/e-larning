@@ -186,7 +186,7 @@ const Profile = () => {
             <h4 className={`w-full px-1 text-[1.15rem] font-black leading-tight ${stat.color}`}>
               {stat.value}
             </h4>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+            <p className="text-[11px] font-bold tracking-[0.04em] text-gray-500">
               {stat.label}
             </p>
           </div>
@@ -194,20 +194,20 @@ const Profile = () => {
       </div>
 
       <div className="mt-2 flex flex-col gap-1">
-        <h4 className="mb-2 pl-2 text-xs font-bold uppercase tracking-widest text-gray-400">
+        <h4 className="mb-2 pl-2 text-xs font-bold tracking-[0.04em] text-gray-500">
           กิจกรรมการเรียน
         </h4>
         
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <button
             type="button"
-            onClick={() => navigate('/user/home')}
+            onClick={() => navigate('/user/ongoing')}
             className="group relative flex flex-col items-start rounded-3xl border border-slate-100 bg-white p-5 text-left transition-all hover:shadow-xl hover:-translate-y-0.5"
           >
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/5 text-primary transition-transform group-hover:scale-110">
               <PlayCircle size={24} />
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">กำลังเรียนอยู่</p>
+            <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">กำลังเรียนอยู่</p>
             <div className="mt-1 flex w-full items-end justify-between">
               <h5 className="text-xl font-black text-slate-800">
                 {courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length} คอร์ส
@@ -226,7 +226,7 @@ const Profile = () => {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 transition-transform group-hover:scale-110">
               <CheckCircle size={24} />
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">เรียนจบแล้ว</p>
+            <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">เรียนจบแล้ว</p>
             <div className="mt-1 flex w-full items-end justify-between">
               <h5 className="text-xl font-black text-slate-800">
                 {courses.filter(c => c.enrollmentStatus === 'COMPLETED').length} คอร์ส
@@ -240,7 +240,7 @@ const Profile = () => {
       </div>
 
       <div className="mt-2 flex flex-col gap-1">
-        <h4 className="mb-2 pl-2 text-xs font-bold uppercase tracking-widest text-gray-400">
+        <h4 className="mb-2 pl-2 text-xs font-bold tracking-[0.04em] text-gray-500">
           การตั้งค่า
         </h4>
 

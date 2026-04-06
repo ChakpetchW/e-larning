@@ -151,6 +151,13 @@ const CourseDetail = () => {
     () => documentLessons.filter((lesson) => lesson.isCompleted).length,
     [documentLessons],
   );
+  const completionPoints = course?.completionPoints ?? course?.points ?? 0;
+  const quizPoints = course?.quizPoints ?? (
+    course?.lessons?.reduce((sum, lesson) => (
+      lesson.type === 'quiz' ? sum + (lesson.points || 0) : sum
+    ), 0) || 0
+  );
+  const totalRewardPoints = course?.totalPoints ?? (completionPoints + quizPoints);
 
   const handleReturnToCourseList = () => {
     navigate('/user/courses');
@@ -180,14 +187,14 @@ const CourseDetail = () => {
               <ArrowLeft size={16} /> กลับ
             </button>
             <span>/</span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 uppercase tracking-[0.24em] text-[10px] text-slate-200">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-bold tracking-[0.04em] text-slate-200">
               {course.category?.name || 'หมวดทั่วไป'}
             </span>
           </div>
 
           <div className="grid gap-8 md:gap-10 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
             <div className="max-w-3xl">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.28em] text-primary-light">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/12 px-4 py-1.5 text-[12px] font-black tracking-[0.05em] text-primary-light">
                 <BookOpen size={14} />
                 หลักสูตรแนะนำ
               </div>
@@ -207,7 +214,31 @@ const CourseDetail = () => {
             </div>
 
             <div className="rounded-[1.75rem] border border-white/10 bg-white/95 p-4 shadow-[0_24px_50px_-30px_rgba(15,23,42,0.45)] sm:p-5 lg:justify-self-end">
-              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">แต้มสะสมเมื่อเรียนจบ</span>
+              <span className="text-[11px] font-bold tracking-[0.04em] text-slate-600">แต้มรวมทั้งคอร์ส</span>
+              <div className="mt-2 flex items-end gap-2">
+                <span className="text-4xl font-black tracking-tighter text-slate-900">
+                  {totalRewardPoints > 0 ? totalRewardPoints.toLocaleString() : 'ฟรี'}
+                </span>
+                <span className="mb-1 text-sm font-bold text-slate-500">{totalRewardPoints > 0 ? 'แต้ม' : 'บทเรียน'}</span>
+              </div>
+              <div className="mt-3 grid gap-2 text-xs font-bold text-slate-500">
+                <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2">
+                  <span>เรียนจบคอร์ส</span>
+                  <span>{completionPoints.toLocaleString()} แต้ม</span>
+                </div>
+                {quizPoints > 0 && (
+                  <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2">
+                    <span>ผ่านแบบทดสอบ</span>
+                    <span>{quizPoints.toLocaleString()} แต้ม</span>
+                  </div>
+                )}
+              </div>
+              <p className="mt-3 text-sm font-medium text-slate-600">
+                {course.isEnrolled ? 'แต้มรวมนี้คำนวณจากแต้มเรียนจบและแต้มจากแบบทดสอบที่ผ่าน' : 'คอร์สนี้มีแต้มจากการเรียนจบและแต้มเพิ่มจากการผ่านแบบทดสอบ'}
+              </p>
+            </div>
+            <div className="hidden rounded-[1.75rem] border border-white/10 bg-white/95 p-4 shadow-[0_24px_50px_-30px_rgba(15,23,42,0.45)] sm:p-5 lg:justify-self-end">
+              <span className="text-[11px] font-bold tracking-[0.04em] text-slate-600">แต้มสะสมเมื่อเรียนจบ</span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-black tracking-tighter text-slate-900">
                   {course.points > 0 ? course.points.toLocaleString() : 'ฟรี'}
@@ -304,7 +335,7 @@ const CourseDetail = () => {
                     </div>
 
                     <div
-                      className={`inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-black tracking-[0.16em] transition-all duration-300 ${
+                      className={`inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[12px] font-black tracking-[0.04em] transition-all duration-300 ${
                         course.isEnrolled ? 'bg-slate-900 text-white group-hover:bg-primary' : 'bg-slate-200 text-slate-500'
                       }`}
                     >
@@ -373,7 +404,7 @@ const CourseDetail = () => {
                         {index + 1}. {lesson.title}
                       </h3>
                       {lesson.isCompleted && (
-                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 ring-1 ring-emerald-600/10 shadow-sm">
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black tracking-[0.04em] text-emerald-700 ring-1 ring-emerald-600/10 shadow-sm">
                           ผ่านแล้ว
                         </span>
                       )}
@@ -466,7 +497,7 @@ const CourseDetail = () => {
                     <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/40 bg-white/20 text-white shadow-xl backdrop-blur-md transition-colors duration-300 hover:bg-primary">
                       <PlayCircle size={32} className="ml-1" strokeWidth={2} />
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-[0.24em] text-white drop-shadow-md">ดูตัวอย่างคอร์สฟรี</span>
+                    <span className="text-[13px] font-bold tracking-[0.04em] text-white drop-shadow-md">ดูตัวอย่างคอร์สฟรี</span>
                   </button>
                 </>
               )}
@@ -474,7 +505,28 @@ const CourseDetail = () => {
 
             <div className="p-6 md:p-7">
               <div className="mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500 block mb-2">แต้มที่จะได้รับทั้งหมด</span>
+                <span className="mb-2 block text-[11px] font-bold tracking-[0.04em] text-slate-600">แต้มรวมสูงสุด</span>
+                <div className="flex items-end gap-2">
+                  <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">
+                    {totalRewardPoints > 0 ? totalRewardPoints.toLocaleString() : '0'}
+                  </span>
+                  <span className="mb-1 text-sm font-bold text-slate-500">แต้ม</span>
+                </div>
+                <div className="mt-3 space-y-2 text-xs font-bold text-slate-500">
+                  <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2">
+                    <span>เรียนจบคอร์ส</span>
+                    <span>{completionPoints.toLocaleString()} แต้ม</span>
+                  </div>
+                  {quizPoints > 0 && (
+                    <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2">
+                      <span>ผ่านแบบทดสอบ</span>
+                      <span>{quizPoints.toLocaleString()} แต้ม</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="hidden mb-4">
+                <span className="mb-2 block text-[11px] font-bold tracking-[0.04em] text-slate-600">แต้มที่จะได้รับทั้งหมด</span>
                 <div className="flex items-end gap-2">
                   <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">
                     {course.points > 0 ? course.points.toLocaleString() : '0'}

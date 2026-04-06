@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, CheckCircle2, ArrowRight, Trophy } from 'lucide-react';
+import { Search, Clock, ArrowRight, BookOpen, PlayCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import CourseCard from '../../components/common/CourseCard';
 
-const CompletedCourses = () => {
+const OngoingCourses = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,9 +15,10 @@ const CompletedCourses = () => {
       try {
         const response = await userAPI.getCourses();
         const coursesData = Array.isArray(response?.data) ? response.data : [];
-        setCourses(coursesData.filter((course) => course.enrollmentStatus === 'COMPLETED'));
+        // Filter for courses that are enrolled and in progress
+        setCourses(coursesData.filter((course) => course.isEnrolled && course.enrollmentStatus === 'IN_PROGRESS'));
       } catch (error) {
-        console.error('Fetch completed courses error:', error);
+        console.error('Fetch ongoing courses error:', error);
       } finally {
         setLoading(false);
       }
@@ -35,38 +36,40 @@ const CompletedCourses = () => {
 
   return (
     <div className="flex h-full flex-col gap-8 pb-24 pt-2 animate-fade-in md:pb-12">
+      {/* Premium Hero Section */}
       <section className="relative overflow-hidden rounded-[2rem] border border-white/70 mesh-bg-premium p-6 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.18)] md:rounded-[2.75rem] md:p-8">
         <div className="absolute right-0 top-0 h-full w-1/3 overflow-hidden opacity-40">
-          <div className="absolute right-[-10%] top-[-10%] h-[150%] w-[150%] rounded-full bg-gradient-to-br from-emerald-400/20 via-primary/10 to-transparent blur-[100px]"></div>
+          <div className="absolute right-[-10%] top-[-10%] h-[150%] w-[150%] rounded-full bg-gradient-to-br from-primary/20 via-amber-400/10 to-transparent blur-[100px]"></div>
         </div>
 
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-[12px] font-black tracking-[0.04em] text-emerald-700">
-              <Trophy size={14} />
-              สำเร็จแล้ว
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-[12px] font-black tracking-[0.04em] text-primary">
+              <Clock size={14} />
+              กำลังดำเนินการ
             </div>
             <h1 className="mb-3 text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
-              คอร์สที่คุณเรียนจบ
+              คอร์สที่กำลังเรียนอยู่
             </h1>
             <p className="max-w-xl text-sm font-medium leading-relaxed text-slate-600 md:text-base">
-              รวมผลงานการเรียนรู้ทั้งหมดไว้ในที่เดียว เพื่อย้อนกลับไปทบทวนบทเรียนที่สำเร็จแล้วและติดตามพัฒนาการของคุณ
+              พัฒนาทักษะของคุณอย่างต่อเนื่อง เรียนต่อจากจุดที่ค้างไว้เพื่อบรรลุเป้าหมายการเรียนรู้ของคุณ
             </p>
           </div>
 
           <div className="glass-card flex min-w-[180px] flex-col rounded-[1.75rem] p-5 text-left ring-1 ring-slate-900/5">
-            <span className="text-[11px] font-bold tracking-[0.04em] text-slate-600">คอร์สที่สำเร็จ</span>
+            <span className="text-[11px] font-bold tracking-[0.04em] text-slate-600">กำลังเรียน</span>
             <span className="mt-2 text-4xl font-black tracking-tighter text-slate-900">{courses.length}</span>
-            <span className="mt-1 text-sm font-medium text-slate-600">พร้อมกลับไปทบทวนได้ทุกเมื่อ</span>
+            <span className="mt-1 text-sm font-medium text-slate-600">คอร์สที่เปิดค้างไว้</span>
           </div>
         </div>
       </section>
 
+      {/* Search and Filters */}
       <section className="flex flex-col gap-5">
         <div className="flex flex-col gap-4 rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between md:p-6">
           <div>
-            <h2 className="text-lg font-black tracking-tight text-slate-900 md:text-xl">ค้นหาคอร์สที่เคยเรียนจบ</h2>
-            <p className="text-sm font-medium text-slate-500">พิมพ์ชื่อคอร์สเพื่อค้นหาและกลับเข้าไปดูรายละเอียดได้ทันที</p>
+            <h2 className="text-lg font-black tracking-tight text-slate-900 md:text-xl">ค้นหาคอร์สเรียนของคุณ</h2>
+            <p className="text-sm font-medium text-slate-500">พิมพ์ชื่อคอร์สเพื่อหาคอร์สที่คุณกำลังเรียนอยู่</p>
           </div>
 
           <div className="relative w-full md:max-w-md">
@@ -75,7 +78,7 @@ const CompletedCourses = () => {
             </div>
             <input
               type="text"
-              placeholder="ค้นหาจากชื่อคอร์สที่เรียนจบแล้ว"
+              placeholder="ค้นหาจากชื่อคอร์สที่กำลังเรียน..."
               className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 py-3.5 pl-11 pr-4 text-[15px] font-medium text-slate-900 transition-all placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
@@ -83,6 +86,7 @@ const CompletedCourses = () => {
           </div>
         </div>
 
+        {/* Course Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-14">
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
@@ -90,11 +94,11 @@ const CompletedCourses = () => {
         ) : courses.length === 0 ? (
           <div className="flex flex-col items-center rounded-[2rem] border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50">
-              <CheckCircle2 size={30} className="text-slate-300" />
+              <BookOpen size={30} className="text-slate-300" />
             </div>
-            <h3 className="text-xl font-black tracking-tight text-slate-900">ยังไม่มีคอร์สที่เรียนจบ</h3>
+            <h3 className="text-xl font-black tracking-tight text-slate-900">คุณยังไม่มีคอร์สที่กำลังเรียน</h3>
             <p className="mt-2 max-w-md text-sm font-medium leading-relaxed text-slate-500">
-              เริ่มเรียนคอร์สแรกของคุณ แล้วกลับมาสะสมผลงานที่หน้านี้ได้ทันทีเมื่อเรียนจบ
+              เลือกคอร์สที่คุณสนใจแล้วเริ่มเติมความรู้ใหม่ๆ ได้ทันทีที่คลังคอร์สเรียนของเรา
             </p>
             <button
               type="button"
@@ -119,7 +123,6 @@ const CompletedCourses = () => {
                 key={course.id}
                 course={course}
                 onClick={() => navigate(`/user/courses/${course.id}`)}
-                variant="completed"
               />
             ))}
           </div>
@@ -129,4 +132,4 @@ const CompletedCourses = () => {
   );
 };
 
-export default CompletedCourses;
+export default OngoingCourses;

@@ -132,7 +132,7 @@ const VideoPlayer = ({ url, onEnded }) => {
     return (
       <button
         type="button"
-        className="group relative w-full aspect-video cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.2)] md:rounded-[2.5rem]"
+        className="group relative w-full aspect-video cursor-pointer overflow-hidden bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.2)] md:rounded-[2.5rem]"
         onClick={() => {
           setPlaybackError('');
           setHasStarted(true);
@@ -165,7 +165,7 @@ const VideoPlayer = ({ url, onEnded }) => {
           </div>
         </div>
 
-        <div className="glass absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-white/20 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white opacity-80 shadow-xl transition-all group-hover:opacity-100 md:left-8 md:translate-x-0">
+        <div className="glass absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-white/20 px-5 py-2 text-[11px] font-bold tracking-[0.04em] text-white opacity-80 shadow-xl transition-all group-hover:opacity-100 md:left-8 md:translate-x-0">
           {platformLabel} • เริ่มเรียน
         </div>
       </button>
@@ -198,7 +198,7 @@ const VideoPlayer = ({ url, onEnded }) => {
   if (youtubeEmbedUrl || vimeoEmbedUrl) {
     return (
       <div
-        className="relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl"
+        className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-xl md:border md:border-white/10"
         onContextMenu={handleContextMenu}
       >
         <iframe
@@ -219,7 +219,7 @@ const VideoPlayer = ({ url, onEnded }) => {
   if (isDirectMedia) {
     return (
       <div
-        className="relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl"
+        className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-xl md:border md:border-white/10"
         onContextMenu={handleContextMenu}
       >
         <video
@@ -240,7 +240,7 @@ const VideoPlayer = ({ url, onEnded }) => {
 
   return (
     <div
-      className="relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl"
+      className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-xl md:border md:border-white/10"
       onContextMenu={handleContextMenu}
     >
       <ReactPlayer

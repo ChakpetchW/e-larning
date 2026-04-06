@@ -1,5 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, Edit, Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { 
+  ArrowDown, ArrowUp, Edit, Edit2, Plus, Search, Trash2, 
+  ChevronDown
+} from 'lucide-react';
+import { ICON_LIST } from '../../utils/icons';
 import { adminAPI } from '../../utils/api';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
@@ -34,6 +38,8 @@ const getDefaultLessonForm = (order = 0) => ({
 });
 
 const CourseManagement = () => {
+  const iconPickerRef = React.useRef(null);
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -62,6 +68,13 @@ const CourseManagement = () => {
 
   useEffect(() => {
     fetchData();
+    const handleClickOutside = (event) => {
+      if (iconPickerRef.current && !iconPickerRef.current.contains(event.target)) {
+        setShowIconPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchData = async () => {
@@ -439,27 +452,75 @@ const CourseManagement = () => {
                 )}
               </div>
 
-              <div className="flex flex-col gap-3 md:flex-row">
-                <input
-                  required
-                  type="text"
-                  placeholder="ชื่อหมวดหมู่..."
-                  className={`form-input flex-1 bg-white px-4 py-3 text-sm font-bold transition-all ${
-                    editingCategoryId ? 'border-primary/50 ring-2 ring-primary/10' : 'border-slate-200'
-                  }`}
-                  value={categoryForm.name}
-                  onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Lucide Icon (เช่น Zap, Brain)..."
-                  className={`form-input w-full md:w-56 bg-white px-4 py-3 text-sm font-bold transition-all ${
-                    editingCategoryId ? 'border-primary/50 ring-2 ring-primary/10' : 'border-slate-200'
-                  }`}
-                  value={categoryForm.icon}
-                  onChange={(event) => setCategoryForm({ ...categoryForm, icon: event.target.value })}
-                />
-                <button type="submit" className={`btn ${editingCategoryId ? 'bg-slate-900 text-white px-8' : 'btn-primary px-6'} text-xs font-black uppercase tracking-widest shadow-lg`}>
+              <div className="flex flex-col gap-3 md:flex-row md:items-end">
+                <div className="flex-1 space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">ชื่อหมวดหมู่</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="เช่น AI, Business, ..."
+                    className={`form-input w-full bg-white px-4 py-3 text-sm font-bold transition-all ${
+                      editingCategoryId ? 'border-primary/50 ring-2 ring-primary/10' : 'border-slate-200'
+                    }`}
+                    value={categoryForm.name}
+                    onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
+                  />
+                </div>
+
+                <div className="w-full md:w-56 space-y-1.5" ref={iconPickerRef}>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">ไอคอนแสดงผล</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowIconPicker(!showIconPicker)}
+                      className={`flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 text-sm font-bold transition-all ${
+                        showIconPicker ? 'border-primary ring-2 ring-primary/10' : editingCategoryId ? 'border-primary/50' : 'border-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-primary">
+                          {React.createElement(ICON_LIST[categoryForm.icon || 'LayoutGrid'] || ICON_LIST.LayoutGrid, { size: 18 })}
+                        </div>
+                        <span className="text-slate-900">{categoryForm.icon || 'LayoutGrid'}</span>
+                      </div>
+                      <ChevronDown size={14} className={`text-slate-400 transition-transform ${showIconPicker ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showIconPicker && (
+                      <div className="absolute left-0 right-0 top-full z-[100] mt-2 max-h-60 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 no-scrollbar">
+                        <div className="grid grid-cols-2 gap-1">
+                          {Object.keys(ICON_LIST).map((iconName) => {
+                            const Icon = ICON_LIST[iconName];
+                            const isSelected = (categoryForm.icon || 'LayoutGrid') === iconName;
+                            return (
+                              <button
+                                key={iconName}
+                                type="button"
+                                onClick={() => {
+                                  setCategoryForm({ ...categoryForm, icon: iconName });
+                                  setShowIconPicker(false);
+                                }}
+                                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+                                  isSelected 
+                                    ? 'bg-primary text-white' 
+                                    : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                <Icon size={18} />
+                                <span className="text-xs font-bold">{iconName}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className={`btn shrink-0 ${editingCategoryId ? 'bg-slate-900 text-white' : 'btn-primary'} h-[46px] px-8 text-xs font-black uppercase tracking-widest shadow-lg transition-transform active:scale-95`}
+                >
                   {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
                 </button>
               </div>
@@ -585,10 +646,14 @@ const CourseManagement = () => {
                           : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
                       }`}
                     >
-                      <div className="min-w-0 flex-1">
-                        <div className={`text-sm font-black tracking-tight ${isEditing ? 'text-primary' : 'text-slate-900 font-bold'}`}>
-                          {category.name}
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${isEditing ? 'border-primary/30 bg-primary/10 text-primary' : 'border-slate-100 bg-slate-50 text-slate-400'}`}>
+                          {React.createElement(ICON_LIST[category.icon] || LayoutGrid, { size: 18 })}
                         </div>
+                        <div className="min-w-0 flex-1">
+                          <div className={`text-sm font-black tracking-tight ${isEditing ? 'text-primary' : 'text-slate-900 font-bold'}`}>
+                            {category.name}
+                          </div>
                         <div className="mt-1 flex flex-wrap gap-1">
                           {category.visibleToAll !== false ? (
                             <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-700">ทุกคน</span>
@@ -607,6 +672,7 @@ const CourseManagement = () => {
                           )}
                         </div>
                       </div>
+                    </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
                         <div className="flex flex-col rounded-lg border border-slate-100 bg-slate-50 overflow-hidden shadow-sm">
                           <button

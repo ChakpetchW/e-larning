@@ -89,7 +89,7 @@ const CourseList = () => {
           </div>
           <button 
             onClick={() => setShowFilterModal(true)}
-            className="group relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-primary"
+            className="group relative flex h-[46px] w-[46px] sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-primary"
           >
             <Filter size={20} className="group-hover:text-primary" />
             {(activeCat !== 'All' || sortBy !== 'newest') && (
