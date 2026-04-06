@@ -434,6 +434,39 @@ const LessonPlayer = () => {
                 </div>
               )}
 
+              {!completed && lesson.type !== 'quiz' && (
+                <section className="mt-12 -mx-6 border-y border-slate-100 bg-slate-50/70 p-6 md:mx-0 md:rounded-[2.5rem] md:border md:bg-white md:p-8">
+                  <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-black uppercase tracking-[0.04em] text-slate-500">พร้อมไปต่อ</p>
+                      <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900">
+                        {lesson.type === 'video' ? 'ดูจบแล้วกดทำเครื่องหมายบทเรียนนี้' : 'อ่านจบแล้วกดทำเครื่องหมายบทเรียนนี้'}
+                      </h3>
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
+                        เมื่อทำบทเรียนนี้เสร็จ ระบบจะอัปเดตความคืบหน้าให้ และถ้ามีบทถัดไปจะแสดงปุ่มไปต่อทันที
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-nowrap">
+                      <button
+                        onClick={handleReturnToCourse}
+                        className="inline-flex items-center justify-center rounded-[1.25rem] border-2 border-slate-200 bg-white px-6 py-4 text-sm font-black text-slate-700 whitespace-nowrap transition-all hover:bg-slate-50 active:scale-95"
+                      >
+                        กลับหน้าคอร์ส
+                      </button>
+                      <button
+                        onClick={handleComplete}
+                        disabled={updating}
+                        className="inline-flex items-center justify-center gap-3 rounded-[1.25rem] bg-slate-900 px-7 py-4 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_40px_-10px_rgba(15,23,42,0.4)] transition-all hover:bg-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {updating ? 'กำลังบันทึก...' : 'ฉันเรียนเสร็จแล้ว'}
+                        <CheckCircle size={18} strokeWidth={2.6} />
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              )}
+
               {completed && (
                 <section className="mt-12 -mx-6 md:mx-0 md:rounded-[3rem] border-y md:border-x border-emerald-100 bg-emerald-50/40 md:bg-white p-8 md:p-12 transition-all duration-300 shadow-sm">
                   <div className="flex flex-col gap-6">
