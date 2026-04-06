@@ -583,12 +583,19 @@ const getCategories = async () => prisma.category.findMany({
     orderBy: { order: 'asc' }
 });
 
-const createCategory = async (data) => prisma.category.create({ data });
+const createCategory = async (data) => prisma.category.create({
+    data: {
+        name: data.name,
+        icon: data.icon || 'Grid',
+        order: parseInteger(data.order, 0)
+    }
+});
 
 const updateCategory = async (id, data) => prisma.category.update({
     where: { id },
     data: {
         name: data.name,
+        icon: data.icon,
         order: data.order
     }
 });
