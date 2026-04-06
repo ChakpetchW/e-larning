@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Play, CheckCircle, Clock, FileText, BookOpen, ChevronRight } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
@@ -26,6 +26,8 @@ const LessonPlayer = () => {
   // Quiz State
   const [answers, setAnswers] = useState({});
   const [quizResult, setQuizResult] = useState(null);
+  const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = useState(false);
+  const quizResultRef = useRef(null);
 
   useEffect(() => {
     const fetchLessonData = async () => {
@@ -65,6 +67,18 @@ const LessonPlayer = () => {
     fetchLessonData();
   }, [courseId, lessonId]);
 
+  useEffect(() => {
+    if (!shouldScrollToQuizResult || !quizResult || lesson?.type !== 'quiz') return;
+
+    window.requestAnimationFrame(() => {
+      quizResultRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+      setShouldScrollToQuizResult(false);
+    });
+  }, [lesson?.type, quizResult, shouldScrollToQuizResult]);
+
   const handleComplete = async () => {
     if (updating) return false;
     if (completed) return true;
@@ -92,10 +106,10 @@ const LessonPlayer = () => {
       setUpdating(true);
       const res = await userAPI.submitQuiz(lessonId, { answers });
       setQuizResult(res.data);
+      setShouldScrollToQuizResult(true);
       if (res.data.isCompleted) {
         setCompleted(true);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการส่งคำตอบ");
@@ -293,7 +307,7 @@ const LessonPlayer = () => {
                   )}
 
                   {quizResult && (
-                    <div className={`p-12 rounded-[3rem] border-2 transition-all duration-500 animate-celebrate shadow-2xl flex flex-col items-center gap-5 text-center ${
+                    <div ref={quizResultRef} className={`p-12 rounded-[3rem] border-2 transition-all duration-500 animate-celebrate shadow-2xl flex flex-col items-center gap-5 text-center ${
                       quizResult.passed ? 'bg-white border-emerald-100' : 'bg-red-50/30 border-red-100'
                     }`}>
                        <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center text-white shadow-2xl mb-2 ${quizResult.passed ? 'bg-emerald-500 shadow-emerald-200' : 'bg-red-500 shadow-red-200'}`}>
