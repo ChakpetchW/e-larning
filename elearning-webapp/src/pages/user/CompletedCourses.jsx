@@ -42,7 +42,7 @@ const CompletedCourses = () => {
 
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.28em] text-emerald-700">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-[12px] font-black tracking-[0.04em] text-emerald-700">
               <Trophy size={14} />
               สำเร็จแล้ว
             </div>
@@ -55,7 +55,7 @@ const CompletedCourses = () => {
           </div>
 
           <div className="glass-card flex min-w-[180px] flex-col rounded-[1.75rem] p-5 text-left ring-1 ring-slate-900/5">
-            <span className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">คอร์สที่สำเร็จ</span>
+            <span className="text-[11px] font-bold tracking-[0.04em] text-slate-600">คอร์สที่สำเร็จ</span>
             <span className="mt-2 text-4xl font-black tracking-tighter text-slate-900">{courses.length}</span>
             <span className="mt-1 text-sm font-medium text-slate-600">พร้อมกลับไปทบทวนได้ทุกเมื่อ</span>
           </div>

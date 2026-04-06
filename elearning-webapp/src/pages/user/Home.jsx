@@ -111,15 +111,15 @@ const Home = () => {
             
              <div className="flex flex-wrap justify-center lg:justify-start gap-x-8 gap-y-4 w-full pt-6 border-t border-slate-300/50">
                <div className="flex flex-col">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">กําลังเรียน</p>
+                  <p className="mb-1 text-[11px] font-semibold tracking-[0.04em] text-slate-500">กําลังเรียน</p>
                   <p className="text-2xl font-bold text-slate-800">{courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length}</p>
                </div>
                <div className="flex flex-col">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">เรียนจบแล้ว</p>
+                  <p className="mb-1 text-[11px] font-semibold tracking-[0.04em] text-slate-500">เรียนจบแล้ว</p>
                   <p className="text-2xl font-bold text-slate-800">{courses.filter(c => c.enrollmentStatus === 'COMPLETED').length}</p>
                </div>
                <div className="flex flex-col">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">คะแนนสะสม</p>
+                  <p className="mb-1 text-[11px] font-semibold tracking-[0.04em] text-slate-500">คะแนนสะสม</p>
                   <p className="text-2xl font-bold text-primary">
                     {pointsLoading ? '...' : points.toLocaleString()}
                   </p>
@@ -147,7 +147,7 @@ const Home = () => {
                        <PlayCircle size={24} />
                     </div>
                     <div className="max-w-[180px]">
-                       <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">เรียนต่อ</p>
+                       <p className="mb-1 text-[11px] font-bold tracking-[0.04em] text-primary">เรียนต่อ</p>
                        <h3 className="text-sm font-bold text-slate-800 truncate">{continueCourse.title}</h3>
                     </div>
                  </button>
@@ -160,7 +160,7 @@ const Home = () => {
                        <Target size={24} />
                     </div>
                     <div className="max-w-[180px]">
-                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">มาเริ่มกันเลย</p>
+                       <p className="mb-1 text-[11px] font-bold tracking-[0.04em] text-slate-500">มาเริ่มกันเลย</p>
                        <h3 className="text-sm font-bold text-slate-800">ค้นหาคอร์สที่ใช่</h3>
                     </div>
                  </button>
@@ -178,14 +178,14 @@ const Home = () => {
                className="w-full rounded-[1.9rem] border border-slate-900 bg-slate-900 p-6 text-white flex flex-col gap-4 shadow-xl active:scale-[0.98] transition-all"
            >
               <div className="flex justify-between items-center">
-                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">คอร์สปัจจุบัน</span>
+                 <span className="text-[11px] font-bold tracking-[0.04em] text-slate-400">คอร์สปัจจุบัน</span>
                  <span className="text-xs font-bold text-primary">{continueCourse.progressPercent}%</span>
               </div>
               <h3 className="text-lg font-bold text-left line-clamp-1">{continueCourse.title}</h3>
               <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
                  <div className="bg-primary h-full rounded-full" style={{ width: `${continueCourse.progressPercent}%` }}></div>
               </div>
-              <div className="flex items-center justify-center gap-2 pt-2 text-[10px] font-bold uppercase tracking-widest text-primary">
+              <div className="flex items-center justify-center gap-2 pt-2 text-[11px] font-bold tracking-[0.04em] text-primary">
                  เรียนต่อจากบทล่าสุด <ArrowRight size={14} />
               </div>
            </button>

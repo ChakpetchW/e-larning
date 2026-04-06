@@ -133,10 +133,10 @@ const DocViewer = ({
               <FileText size={18} strokeWidth={2} />
             </div>
             <div>
-              <p className="text-sm font-bold leading-tight text-white">{title || 'เอกสารบทเรียน'}</p>
+              <p className="text-sm font-bold leading-tight text-white">{title || 'เอกสารประกอบ'}</p>
               <div className="mt-0.5 flex items-center gap-1.5">
                 <ShieldAlert size={11} className="text-amber-400" />
-                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Protected • ห้ามดาวน์โหลด</p>
+                <p className="text-[11px] font-bold tracking-[0.04em] text-amber-300">Protected • ห้ามดาวน์โหลด</p>
               </div>
             </div>
           </div>

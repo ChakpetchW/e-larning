@@ -211,13 +211,15 @@ const LessonPlayer = () => {
                 <BookOpen size={40} strokeWidth={1.5} />
               </div>
               <div className="relative z-10 flex flex-col items-center gap-3">
-                <p className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-2">บทเรียนเอกสาร</p>
+                <p className="mb-2 inline-flex items-center rounded-full border border-primary/30 bg-primary/15 px-4 py-2 text-sm font-black tracking-[0.04em] text-primary-light shadow-[0_16px_32px_-24px_rgba(79,70,229,0.85)]">
+                  เอกสารประกอบ
+                </p>
                 {/* Primary: Open in secure in-app viewer */}
                 <button
                   onClick={() => setShowDocViewer(true)}
                   className="btn btn-primary rounded-2xl px-10 py-4 text-base shadow-[0_18px_36px_-18px_rgba(79,70,229,0.55)] hover:scale-[1.02] flex items-center gap-2"
                 >
-                  <FileText size={18} /> เปิดอ่านเอกสารบทเรียน
+                  <FileText size={18} /> เปิดเอกสารประกอบ
                 </button>
               </div>
             </div>
@@ -246,7 +248,7 @@ const LessonPlayer = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="flex-1">
               <div className="flex items-center gap-2.5 mb-5">
-                <span className="flex items-center gap-1.5 px-3 py-2 bg-primary/5 text-primary rounded-lg text-xs font-black uppercase tracking-[0.2em] border border-primary/10">
+                <span className="flex items-center gap-1.5 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-black tracking-[0.04em] text-primary">
                   {lesson.type === 'video' ? (
                     <Play size={14} fill="currentColor"/> 
                   ) : lesson.type === 'quiz' ? (
@@ -255,7 +257,7 @@ const LessonPlayer = () => {
                     <FileText size={14}/>
                   )} {getLessonTypeLabel(lesson.type)}
                 </span>
-                <span className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+                <span className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-black tracking-[0.04em] text-slate-600">
                   <Clock size={14}/> {lesson.duration || '10'}m
                 </span>
               </div>
@@ -267,7 +269,7 @@ const LessonPlayer = () => {
                 <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-200">
                   <CheckCircle size={14} strokeWidth={3} />
                 </div>
-                <span className="text-sm font-black text-emerald-700 uppercase tracking-wider">เรียนจบแล้ว</span>
+                <span className="text-sm font-black tracking-[0.04em] text-emerald-800">เรียนจบแล้ว</span>
               </div>
             )}
           </div>
@@ -301,13 +303,13 @@ const LessonPlayer = () => {
                          <h3 className={`text-4xl font-black tracking-tighter mb-2 ${quizResult.passed ? 'text-emerald-600' : 'text-red-700'}`}>
                            {quizResult.passed ? 'ยอดเยี่ยมมาก!' : 'เกือบผ่านแล้ว!'}
                          </h3>
-                         <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-xs">คะแนนของคุณ</p>
+                          <p className="text-xs font-bold tracking-[0.04em] text-slate-500">คะแนนของคุณ</p>
                        </div>
                        <div className="bg-slate-50 px-10 py-5 rounded-[2rem] border border-slate-100 mt-4">
                           <p className="text-7xl font-black text-slate-900 tracking-tighter">{quizResult.scorePercent}%</p>
                        </div>
                        
-                       <button onClick={() => { setQuizResult(null); setAnswers({}); }} className="mt-8 px-12 py-4.5 rounded-2xl font-black transition-all border border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 text-slate-600 text-base tracking-widest uppercase">
+                        <button onClick={() => { setQuizResult(null); setAnswers({}); }} className="mt-8 rounded-2xl border border-slate-200 px-12 py-4.5 text-base font-black tracking-[0.04em] text-slate-600 transition-all hover:border-slate-900 hover:bg-slate-900 hover:text-white">
                          {quizResult.passed ? 'ตรวจคำตอบ' : 'ทำควิซอีกครั้ง'}
                        </button>
                     </div>
@@ -378,7 +380,7 @@ const LessonPlayer = () => {
                       <button
                         onClick={handleQuizSubmit}
                         disabled={updating || Object.keys(answers).length < (lesson.questions?.length || 0)}
-                        className="w-full md:w-auto md:px-16 py-5 bg-primary text-white rounded-2xl font-black text-sm tracking-[0.2em] uppercase shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                        className="w-full rounded-2xl bg-primary py-5 text-sm font-black tracking-[0.04em] text-white shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 md:w-auto md:px-16"
                       >
                         {updating ? 'กำลังตรวจ...' : 'ส่งคำตอบควิซ →'}
                       </button>
@@ -410,14 +412,14 @@ const LessonPlayer = () => {
 
                       <div className="grid grid-cols-2 gap-3 self-start">
                         <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
-                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">คืบหน้า</p>
+                          <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">คืบหน้า</p>
                           <p className="mt-1 text-lg font-black tracking-tight text-slate-900">
                             {Math.min(completedLessonsCount, totalLessons)} / {totalLessons}
                           </p>
                           <p className="text-xs font-bold text-slate-500">บท</p>
                         </div>
                         <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
-                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">ตอนนี้</p>
+                          <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">ตอนนี้</p>
                           <p className="mt-1 text-lg font-black tracking-tight text-slate-900">{currentLessonIndex + 1}</p>
                           <p className="text-xs font-bold text-slate-500">จาก {totalLessons}</p>
                         </div>
@@ -428,7 +430,7 @@ const LessonPlayer = () => {
                       {nextLesson ? (
                         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                           <div className="min-w-0">
-                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-primary">บทถัดไป</p>
+                            <p className="text-[11px] font-black tracking-[0.04em] text-primary">บทถัดไป</p>
                             <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
                               {nextLesson.title}
                             </h4>
@@ -463,7 +465,7 @@ const LessonPlayer = () => {
                       ) : (
                         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                           <div className="min-w-0">
-                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-emerald-700">ครบแล้ว</p>
+                            <p className="text-[11px] font-black tracking-[0.04em] text-emerald-700">ครบแล้ว</p>
                             <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
                               จบบทสุดท้ายของคอร์สแล้ว
                             </h4>
@@ -500,14 +502,14 @@ const LessonPlayer = () => {
                     {nextLessonId ? (
                       <button
                         onClick={handleNavigateToNextLesson}
-                        className="w-full py-6 bg-slate-900 text-white rounded-[1.5rem] font-black text-base tracking-[0.2em] uppercase hover:bg-primary transition-all shadow-2xl shadow-slate-200 active:scale-95"
+                        className="w-full rounded-[1.5rem] bg-slate-900 py-6 text-base font-black tracking-[0.04em] text-white shadow-2xl shadow-slate-200 transition-all hover:bg-primary active:scale-95"
                       >
                         เรียนบทถัดไป →
                       </button>
                     ) : (
                       <button
                         onClick={handleReturnToCourse}
-                        className="w-full py-6 bg-slate-100 text-slate-900 rounded-[1.5rem] font-black text-base tracking-[0.2em] uppercase hover:bg-slate-200 transition-all active:scale-95"
+                        className="w-full rounded-[1.5rem] bg-slate-100 py-6 text-base font-black tracking-[0.04em] text-slate-900 transition-all hover:bg-slate-200 active:scale-95"
                       >
                         กลับสู่คอร์สเรียน
                       </button>
@@ -519,7 +521,7 @@ const LessonPlayer = () => {
               {/* Resources Column */}
               {lesson.resources && lesson.resources.length > 0 && (
                 <div className="sticky top-8 rounded-3xl border border-slate-100 bg-slate-50 p-8">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 flex items-center gap-2.5">
+                  <h4 className="mb-6 flex items-center gap-2.5 text-[11px] font-black tracking-[0.04em] text-slate-500">
                     <div className="w-2 h-2 bg-primary rounded-full"></div> เอกสารเสริม
                   </h4>
                   <div className="flex flex-col gap-3.5">
@@ -537,7 +539,7 @@ const LessonPlayer = () => {
                           </div>
                           <div>
                             <p className="text-sm font-black text-slate-800 line-clamp-1">{res.title}</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{res.size || 'ลิงก์ภายนอก'}</p>
+                            <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">{res.size || 'ลิงก์ภายนอก'}</p>
                           </div>
                         </div>
                         <ChevronRight size={16} className="text-slate-300 group-hover:text-primary transition-colors" />
@@ -557,7 +559,7 @@ const LessonPlayer = () => {
         {completed && nextLessonId ? (
           <button
             onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}
-            className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-[13px] tracking-widest uppercase shadow-xl"
+            className="flex-1 rounded-2xl bg-slate-900 py-4 text-[13px] font-black tracking-[0.04em] text-white shadow-xl"
           >
             เริ่มบทถัดไป
           </button>
@@ -565,7 +567,7 @@ const LessonPlayer = () => {
           <button
             onClick={handleQuizSubmit}
             disabled={updating || Object.keys(answers).length < (lesson.questions?.length || 0)}
-            className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-[13px] tracking-widest uppercase shadow-xl shadow-primary/20 disabled:opacity-50"
+            className="flex-1 rounded-2xl bg-primary py-4 text-[13px] font-black tracking-[0.04em] text-white shadow-xl shadow-primary/20 disabled:opacity-50"
           >
             {updating ? 'กำลังตรวจ...' : 'ส่งคำตอบ'}
           </button>
@@ -573,21 +575,21 @@ const LessonPlayer = () => {
           <button
             onClick={handleComplete}
             disabled={updating}
-            className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-[13px] tracking-widest uppercase shadow-xl shadow-primary/20 flex items-center justify-center gap-2"
+            className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-[13px] font-black tracking-[0.04em] text-white shadow-xl shadow-primary/20"
           >
             <CheckCircle size={18} strokeWidth={2.5} /> {updating ? 'กำลังบันทึก...' : 'เรียนจบแล้ว'}
           </button>
         ) : quizResult && !quizResult?.passed ? (
           <button
             onClick={() => { setQuizResult(null); setAnswers({}); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black text-[13px] tracking-widest uppercase shadow-xl"
+            className="flex-1 rounded-2xl bg-red-500 py-4 text-[13px] font-black tracking-[0.04em] text-white shadow-xl"
           >
             ลองทำใหม่อีกครั้ง
           </button>
         ) : (
           <button
             onClick={handleReturnToCourse}
-            className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[13px] tracking-widest uppercase"
+            className="flex-1 rounded-2xl bg-slate-100 py-4 text-[13px] font-black tracking-[0.04em] text-slate-600"
           >
             กลับสู่หน้ารายละเอียด
           </button>

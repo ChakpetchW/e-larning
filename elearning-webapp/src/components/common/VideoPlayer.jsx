@@ -165,7 +165,7 @@ const VideoPlayer = ({ url, onEnded }) => {
           </div>
         </div>
 
-        <div className="glass absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-white/20 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white opacity-80 shadow-xl transition-all group-hover:opacity-100 md:left-8 md:translate-x-0">
+        <div className="glass absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-white/20 px-5 py-2 text-[11px] font-bold tracking-[0.04em] text-white opacity-80 shadow-xl transition-all group-hover:opacity-100 md:left-8 md:translate-x-0">
           {platformLabel} • เริ่มเรียน
         </div>
       </button>
