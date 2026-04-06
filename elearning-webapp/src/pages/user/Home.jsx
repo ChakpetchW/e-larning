@@ -229,35 +229,51 @@ const Home = () => {
          </div>
       )}
 
-      {/* Stats & Actions Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 animate-slide-up" style={{ animationDelay: '400ms' }}>
-        {/* Weekly Goal Bento */}
-        <div className="group relative flex flex-col justify-between rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
-          <div className="flex items-center gap-5">
-            <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
-              <Target size={28} />
-            </div>
-            <div>
-              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Weekly Momentum</p>
-              <h3 className="text-xl font-bold text-slate-800 leading-none">{completedThisWeekCount}/{weeklyGoal} คอร์สที่จบแล้ว</h3>
-            </div>
-          </div>
-          <div className="mt-8 space-y-3">
-             <div className="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                <span>Progress</span>
-                <span className={completedThisWeekCount >= weeklyGoal ? 'text-emerald-500' : 'text-primary'}>
-                   {Math.round(Math.min(100, (completedThisWeekCount / weeklyGoal) * 100))}%
-                </span>
-             </div>
-             <div className="relative w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-               <div 
-                 className={`h-full transition-all duration-1000 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500' : 'bg-primary'}`}
-                 style={{ width: `${Math.min(100, (completedThisWeekCount / weeklyGoal) * 100)}%` }}
-               />
-             </div>
-          </div>
-        </div>
+      {/* Learning Activities Section */}
+      <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
+         <h3 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight mb-5 px-1 md:px-2">กิจกรรมการเรียน</h3>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
+            {/* Ongoing Courses Card */}
+            <button
+               onClick={() => navigate('/user/ongoing')}
+               className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 text-left"
+            >
+               <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/5 text-primary transition-transform group-hover:rotate-12 duration-500">
+                  <PlayCircle size={32} />
+               </div>
+               <div className="flex-1">
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">กำลังเรียนอยู่</p>
+                  <h3 className="text-2xl font-black text-slate-800 leading-none">
+                    {courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length} คอร์ส
+                  </h3>
+               </div>
+               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                  <ChevronRight size={20} />
+               </div>
+            </button>
 
+
+            {/* Weekly Goal Bento (Wait, let's keep it here instead of below) */}
+            <div className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+               <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
+                  <Target size={28} />
+               </div>
+               <div className="flex-1">
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Weekly Momentum</p>
+                  <h3 className="text-xl font-bold text-slate-800 leading-none mb-3">{completedThisWeekCount}/{weeklyGoal} คอร์สที่จบแล้ว</h3>
+                  <div className="relative w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                     <div 
+                        className={`h-full transition-all duration-1000 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500' : 'bg-primary'}`}
+                        style={{ width: `${Math.min(100, (completedThisWeekCount / weeklyGoal) * 100)}%` }}
+                     />
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      {/* Rewards & Other Actions Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 animate-slide-up" style={{ animationDelay: '400ms' }}>
         {/* Rewards Action Card */}
         <button
           type="button"
