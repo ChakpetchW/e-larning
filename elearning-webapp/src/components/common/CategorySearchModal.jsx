@@ -140,7 +140,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
               id={searchInputId}
               type="text"
               placeholder="พิมพ์ชื่อหมวดหมู่ที่ต้องการค้นหา..."
-              className="w-full rounded-2xl border border-slate-200 bg-white py-4.5 pl-14 pr-6 text-lg font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 px-4"
+              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-14 pr-6 text-lg font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
@@ -151,7 +151,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
           {filteredCategories.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
               {filteredCategories.map((category) => {
-                const Icon = getCategoryIcon(category.name);
+                const Icon = getCategoryIcon(category.icon, category.name);
                 const count = getCourseCount(category.id);
 
                 return (
