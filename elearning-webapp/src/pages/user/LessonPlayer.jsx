@@ -120,7 +120,7 @@ const LessonPlayer = () => {
 
   if (loading || !lesson) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0A0A0A]">
+      <div className="flex items-center justify-center min-h-[50vh] bg-[#0A0A0A]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -171,30 +171,30 @@ const LessonPlayer = () => {
   }
 
   return (
-    <div className="flex flex-col w-full max-w-5xl mx-auto md:px-4 md:py-6 relative min-h-screen pb-24 md:pb-12">
+    <div className="flex flex-col w-full max-w-5xl mx-auto md:px-4 md:py-6 relative min-h-screen pb-24 md:pb-12 bg-white md:bg-transparent">
       
-      {/* Immersive Header / Media Section */}
-      <div className="relative z-20 w-full overflow-hidden bg-slate-950 shadow-[0_34px_80px_-40px_rgba(15,23,42,0.8)] md:rounded-[2.5rem]">
-        {/* Back Button Overlay - Floating Glass */}
+      {/* Immersive Header / Media Section - Cinemascope Mode */}
+      <div className="relative z-20 w-full overflow-hidden bg-slate-950 shadow-[0_34px_80px_-40px_rgba(15,23,42,0.8)] md:rounded-[2.5rem] md:aspect-video">
+        {/* Back Button Overlay - Compact & Accessible */}
         <div className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
           <button
             onClick={handleReturnToCourse}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur-xl transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
+            className="flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur-xl transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
           >
-            <ArrowLeft size={22} strokeWidth={2.5} />
+            <ArrowLeft size={20} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Media Content */}
-        <div className={`${lesson.type === 'quiz' ? '' : 'aspect-video'} w-full`}>
+        <div className={`${lesson.type === 'quiz' ? '' : 'aspect-video'} w-full h-full`}>
           {lesson.type === 'video' ? (
             isNavigatingAway ? (
-              <div className="flex aspect-video w-full items-center justify-center bg-slate-950">
+              <div className="flex aspect-video w-full h-full items-center justify-center bg-slate-950">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
               </div>
             ) : (
               <Suspense fallback={
-                <div className="w-full aspect-video bg-slate-900 flex items-center justify-center rounded-2xl">
+                <div className="w-full aspect-video h-full bg-slate-900 flex items-center justify-center rounded-2xl">
                   <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
               }>
@@ -254,10 +254,10 @@ const LessonPlayer = () => {
         />
       )}
 
-      {/* Unified Content Container - Premium & Professional */}
-      <div className="relative z-30 -mt-8 overflow-hidden bg-white md:mt-8 md:rounded-[3rem] md:border md:border-slate-100 md:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">
+      {/* Unified Content Container - Proportions Optimized for Mobile */}
+      <div className="relative z-30 -mt-4 md:mt-8 overflow-hidden bg-white md:rounded-[3.5rem] md:border md:border-slate-100 md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.08)]">
         
-        <div className="px-6 py-10 md:p-12">
+        <div className="px-5 py-8 md:p-14">
           {/* Lesson Metadata & Title */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="flex-1">
@@ -275,7 +275,7 @@ const LessonPlayer = () => {
                   <Clock size={14}/> {lesson.duration || '10'}m
                 </span>
               </div>
-              <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">{lesson.title}</h1>
+              <h1 className="text-[22px] md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-[1.2]">{lesson.title}</h1>
             </div>
             
             {completed && (
@@ -568,8 +568,8 @@ const LessonPlayer = () => {
         </div>
       </div>
 
-      {/* Sticky Action Bar (Mobile Only) */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex gap-3 border-t border-slate-100 bg-white/90 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] backdrop-blur-xl animate-fade-in md:hidden">
+      {/* Sticky Action Bar (Mobile Only) - Premium Glassmorphism */}
+      <div className="fixed bottom-0 left-0 right-0 z-[60] flex gap-3 border-t border-slate-100/50 bg-white/80 p-5 pb-8 shadow-[0_-20px_50px_rgba(0,0,0,0.08)] backdrop-blur-2xl animate-slide-up md:hidden rounded-t-[2.5rem]">
         {completed && nextLessonId ? (
           <button
             onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}

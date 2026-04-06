@@ -132,7 +132,7 @@ const VideoPlayer = ({ url, onEnded }) => {
     return (
       <button
         type="button"
-        className="group relative w-full aspect-video cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.2)] md:rounded-[2.5rem]"
+        className="group relative w-full aspect-video cursor-pointer overflow-hidden bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.2)] md:rounded-[2.5rem]"
         onClick={() => {
           setPlaybackError('');
           setHasStarted(true);
@@ -198,7 +198,7 @@ const VideoPlayer = ({ url, onEnded }) => {
   if (youtubeEmbedUrl || vimeoEmbedUrl) {
     return (
       <div
-        className="relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl"
+        className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-xl md:border md:border-white/10"
         onContextMenu={handleContextMenu}
       >
         <iframe
@@ -219,7 +219,7 @@ const VideoPlayer = ({ url, onEnded }) => {
   if (isDirectMedia) {
     return (
       <div
-        className="relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl"
+        className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-xl md:border md:border-white/10"
         onContextMenu={handleContextMenu}
       >
         <video
@@ -240,7 +240,7 @@ const VideoPlayer = ({ url, onEnded }) => {
 
   return (
     <div
-      className="relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl"
+      className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-xl md:border md:border-white/10"
       onContextMenu={handleContextMenu}
     >
       <ReactPlayer
