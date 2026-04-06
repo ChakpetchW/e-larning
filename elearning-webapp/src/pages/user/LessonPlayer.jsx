@@ -413,27 +413,28 @@ const LessonPlayer = () => {
                 <section className="mt-12 -mx-6 md:mx-0 md:rounded-[3rem] border-y md:border-x border-emerald-100 bg-emerald-50/40 md:bg-white p-8 md:p-12 transition-all duration-300 shadow-sm">
                   <div className="flex flex-col gap-6">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="flex items-start gap-5">
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[2rem] bg-emerald-500 text-white shadow-[0_20px_40px_-10px_rgba(16,185,129,0.5)]">
-                          <CheckCircle className="h-8 w-8" strokeWidth={2.4} />
+                      <div className="flex items-center md:items-start gap-4 md:gap-5">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-[0_15px_30px_-8px_rgba(16,185,129,0.4)]">
+                          <CheckCircle className="h-6 w-6" strokeWidth={2.5} />
                         </div>
                         <div className="min-w-0">
-                          <h3 className="mt-2 text-3xl font-black tracking-tight text-slate-900 md:text-[2.25rem]">
+                          <h3 className="text-2xl font-black tracking-tight text-slate-900 md:text-[2.25rem]">
                             บทนี้เสร็จแล้ว
                           </h3>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-8 self-start">
-                        <div className="flex flex-col">
-                          <p className="text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">คืบหน้า</p>
+                      <div className="flex items-center justify-center gap-10 md:gap-8 self-center md:self-start w-full md:w-auto border-t border-emerald-100/50 pt-6 md:border-0 md:pt-0">
+                        <div className="flex flex-col items-center md:items-start">
+                          <p className="text-[10px] md:text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">คืบหน้า</p>
                           <div className="mt-1 flex items-baseline gap-1">
                              <span className="text-2xl font-black text-slate-900">{Math.min(completedLessonsCount, totalLessons)}</span>
                              <span className="text-sm font-bold text-slate-400">/ {totalLessons} บท</span>
                           </div>
                         </div>
-                        <div className="flex flex-col">
-                          <p className="text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">ตอนนี้</p>
+                        <div className="w-px h-8 bg-emerald-100/50 md:hidden"></div>
+                        <div className="flex flex-col items-center md:items-start">
+                          <p className="text-[10px] md:text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">ตอนนี้</p>
                           <div className="mt-1 flex items-baseline gap-1">
                              <span className="text-2xl font-black text-slate-900">{currentLessonIndex + 1}</span>
                              <span className="text-sm font-bold text-slate-400">/ {totalLessons}</span>
