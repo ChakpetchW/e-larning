@@ -112,17 +112,27 @@ const DocViewer = ({
     }
   };
 
+  useEffect(() => {
+    // Prevent body scroll when DocViewer is open
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
   const shouldBlockViewerShortcut = viewerUrl.includes('docs.google.com/viewer');
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex flex-col bg-black/80 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[80] flex flex-col bg-black/80 backdrop-blur-md animate-fade-in overflow-hidden"
       onContextMenu={(event) => event.preventDefault()}
     >
       <style>{`@media print { .doc-viewer-print-guard { display: none !important; } }`}</style>
 
-      <div className="doc-viewer-print-guard flex h-full w-full flex-col">
+      <div className="doc-viewer-print-guard flex h-full w-full flex-col overflow-hidden">
         <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-slate-900 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/20 text-primary">
@@ -170,7 +180,7 @@ const DocViewer = ({
           {shouldBlockViewerShortcut && (
             <div
               aria-hidden="true"
-              className="absolute right-0 top-0 z-20 h-16 w-16"
+              className="absolute right-0 top-0 z-20 h-[52px] w-[52px] bg-[#333] flex items-center justify-center"
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -180,7 +190,10 @@ const DocViewer = ({
                 event.stopPropagation();
               }}
               style={{ touchAction: 'none' }}
-            />
+            >
+               {/* Minimalist "safety icon" to cover Google icon visually */}
+               <ShieldAlert size={16} className="text-slate-500 opacity-50" />
+            </div>
           )}
 
           <div

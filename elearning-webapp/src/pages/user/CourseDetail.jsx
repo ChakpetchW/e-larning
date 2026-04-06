@@ -265,7 +265,7 @@ const CourseDetail = () => {
                     onClick={() => course.isEnrolled && navigate(`/user/courses/${course.id}/lesson/${lesson.id}`)}
                     disabled={!course.isEnrolled}
                     aria-label={course.isEnrolled ? `เปิดเอกสาร ${lesson.title}` : `เอกสาร ${lesson.title} ต้องลงทะเบียนก่อน`}
-                    className={`group relative flex w-full flex-col gap-3 overflow-hidden rounded-[1.35rem] border p-4 text-left transition-all duration-300 sm:flex-row sm:items-start sm:gap-4 sm:p-5 ${
+                    className={`group relative flex w-full flex-row items-center gap-3 overflow-hidden rounded-[1.35rem] border p-4 text-left transition-all duration-300 sm:gap-4 sm:p-5 ${
                       course.isEnrolled
                         ? 'bg-white hover:-translate-y-0.5 hover:border-primary/30'
                         : 'cursor-default border-slate-100 bg-slate-50 opacity-80'
@@ -274,7 +274,7 @@ const CourseDetail = () => {
                   >
                     <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(79,70,229,0.24),transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-                    <div className="flex items-start gap-3 sm:min-w-0 sm:flex-1 sm:gap-4">
+                    <div className="flex items-center gap-3 min-w-0 flex-1 sm:gap-4">
                       <div
                         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] transition-all duration-300 sm:h-12 sm:w-12 ${
                           lesson.isCompleted
@@ -288,13 +288,13 @@ const CourseDetail = () => {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-start gap-2">
-                          <h3 className="flex-1 text-[15px] font-extrabold leading-snug text-slate-800 transition-colors duration-300 group-hover:text-primary">
+                        <div className="flex items-start gap-2">
+                          <h3 className="flex-1 text-[15px] font-extrabold leading-tight text-slate-800 transition-colors duration-300 group-hover:text-primary line-clamp-1">
                             {lesson.title}
                           </h3>
                         </div>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-400">
+                        <div className="mt-1 flex items-center gap-3 text-xs font-bold text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <Clock size={14} className={course.isEnrolled ? 'group-hover:text-primary/70' : ''} />
                             {lesson.duration || '10'} นาที
@@ -304,7 +304,7 @@ const CourseDetail = () => {
                     </div>
 
                     <div
-                      className={`inline-flex shrink-0 items-center justify-center self-end rounded-full px-3 py-1.5 text-[11px] font-black tracking-[0.16em] transition-all duration-300 sm:mt-1 sm:self-start ${
+                      className={`inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-black tracking-[0.16em] transition-all duration-300 ${
                         course.isEnrolled ? 'bg-slate-900 text-white group-hover:bg-primary' : 'bg-slate-200 text-slate-500'
                       }`}
                     >
