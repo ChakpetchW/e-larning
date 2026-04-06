@@ -98,9 +98,8 @@ const CourseList = () => {
           </button>
         </div>
 
-        {/* Categories Horizontal Scroll */}
-        {/* Categories Horizontal Scroll */}
-        <div className="-mx-5 md:mx-0">
+        {/* Categories Horizontal Scroll - Desktop Only */}
+        <div className="hidden md:block">
           <CategoryPills 
             categories={categories}
             activeCat={activeCat}

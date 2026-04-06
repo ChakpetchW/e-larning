@@ -121,12 +121,11 @@ const DocViewer = ({
     };
   }, []);
 
-  const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
   const isGoogleViewer = viewerUrl.includes('docs.google.com/viewer');
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col bg-black animate-fade-in overflow-hidden h-screen"
+      className="fixed inset-0 z-[100] flex flex-col bg-black animate-fade-in overflow-hidden h-[100dvh]"
       onContextMenu={(event) => event.preventDefault()}
     >
       <style>{`@media print { .doc-viewer-print-guard { display: none !important; } }`}</style>
