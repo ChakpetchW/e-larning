@@ -395,14 +395,13 @@ const LessonPlayer = () => {
 
               {completed && (
                 <section className="mt-10 overflow-hidden rounded-[2.5rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.96),rgba(255,255,255,0.98),rgba(239,246,255,0.92))] shadow-[0_28px_70px_-42px_rgba(16,185,129,0.4)]">
-                  <div className="flex flex-col gap-5 p-6 md:p-8">
+                  <div className="flex flex-col gap-5 p-4 sm:p-6 md:p-8">
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                       <div className="flex items-start gap-4">
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.75rem] bg-emerald-500 text-white shadow-[0_22px_45px_-24px_rgba(16,185,129,0.65)]">
-                          <CheckCircle size={30} strokeWidth={2.2} />
+                        <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl sm:rounded-[1.75rem] bg-emerald-500 text-white shadow-[0_22px_45px_-24px_rgba(16,185,129,0.65)]">
+                          <CheckCircle className="h-7 w-7 sm:h-[30px] sm:w-[30px]" strokeWidth={2.2} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-black uppercase tracking-[0.26em] text-emerald-700">Complete</p>
                           <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 md:text-[2rem]">
                             บทนี้เสร็จแล้ว
                           </h3>
