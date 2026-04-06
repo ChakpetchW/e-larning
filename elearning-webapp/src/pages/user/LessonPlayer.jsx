@@ -419,7 +419,7 @@ const LessonPlayer = () => {
                         </div>
                         <div className="min-w-0">
                           <h3 className="text-2xl font-black tracking-tight text-slate-900 md:text-[2.25rem]">
-                            บทนี้เสร็จแล้ว
+                            เรียนบทนี้แล้ว
                           </h3>
                         </div>
                       </div>
