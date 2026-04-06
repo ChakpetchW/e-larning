@@ -113,21 +113,20 @@ const DocViewer = ({
   };
 
   useEffect(() => {
-    // Prevent body scroll when DocViewer is open
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
+    // Prevent body and main container scroll when DocViewer is open
+    document.body.classList.add('modal-open');
     
     return () => {
-      document.body.style.overflow = originalStyle;
+      document.body.classList.remove('modal-open');
     };
   }, []);
 
   const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
-  const shouldBlockViewerShortcut = viewerUrl.includes('docs.google.com/viewer');
+  const isGoogleViewer = viewerUrl.includes('docs.google.com/viewer');
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex flex-col bg-black/80 backdrop-blur-md animate-fade-in overflow-hidden"
+      className="fixed inset-0 z-[100] flex flex-col bg-black animate-fade-in overflow-hidden h-screen"
       onContextMenu={(event) => event.preventDefault()}
     >
       <style>{`@media print { .doc-viewer-print-guard { display: none !important; } }`}</style>
@@ -170,29 +169,27 @@ const DocViewer = ({
               </button>
             </div>
           ) : (
-            <iframe
-              src={viewerUrl}
-              title={title || 'เอกสาร'}
-              className="absolute inset-0 h-full w-full border-0"
-              referrerPolicy="no-referrer"
-            />
-          )}
-          {shouldBlockViewerShortcut && (
-            <div
-              aria-hidden="true"
-              className="absolute right-0 top-0 z-20 h-[52px] w-[52px] bg-[#333] flex items-center justify-center"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onPointerDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              style={{ touchAction: 'none' }}
-            >
-               {/* Minimalist "safety icon" to cover Google icon visually */}
-               <ShieldAlert size={16} className="text-slate-500 opacity-50" />
+            <div className="absolute inset-0 h-full w-full overflow-hidden bg-slate-800">
+              <iframe
+                src={viewerUrl}
+                title={title || 'เอกสาร'}
+                style={isGoogleViewer ? {
+                  position: 'absolute',
+                  top: '-50px', // Hide the Google toolbar
+                  left: 0,
+                  width: '100%',
+                  height: 'calc(100% + 50px)',
+                  border: 'none'
+                } : {
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
+                referrerPolicy="no-referrer"
+              />
             </div>
           )}
 

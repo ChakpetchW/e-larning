@@ -129,3 +129,16 @@
 }
 
 /* Desktop override to look like an app wrapper */
+
+/* Global Modal Overrides */
+body.modal-open {
+  overflow: hidden !important;
+}
+
+body.modal-open .bottom-nav {
+  display: none !important;
+}
+
+body.modal-open .user-main {
+  overflow: hidden !important;
+}

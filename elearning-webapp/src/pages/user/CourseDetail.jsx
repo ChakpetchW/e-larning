@@ -319,15 +319,15 @@ const CourseDetail = () => {
 
 
           <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">สารบัญบทเรียน</h2>
-                <p className="mt-1 text-sm font-medium text-slate-500">ดูภาพรวมของบทเรียนทั้งหมดก่อนเริ่มเรียน</p>
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">สารบัญบทเรียน</h2>
+                  <p className="mt-1 text-sm font-medium text-slate-500">ดูภาพรวมของบทเรียนทั้งหมดก่อนเริ่มเรียน</p>
+                </div>
+                <span className="shrink-0 rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 whitespace-nowrap">
+                  {course.lessons?.length || 0} บทเรียน
+                </span>
               </div>
-              <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">
-                {course.lessons?.length || 0} บทเรียน
-              </span>
-            </div>
 
             <div className="flex flex-col gap-3">
               {course.lessons?.map((lesson, index) => (
