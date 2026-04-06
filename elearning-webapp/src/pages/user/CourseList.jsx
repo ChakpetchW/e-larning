@@ -67,7 +67,7 @@ const CourseList = () => {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pt-2 relative pb-10">
-      <div className="sticky top-[-1.25rem] md:top-[-1px] z-40 -mx-5 px-5 md:-mx-0 md:px-0 bg-[#f8fafc]/95 backdrop-blur-md pt-5 md:pt-3 pb-2 md:pb-4 space-y-3 sm:space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
+      <div className="sticky top-0 md:top-[-1px] z-40 -mx-5 px-5 md:-mx-0 md:px-0 bg-[#f8fafc]/95 backdrop-blur-md pt-5 md:pt-3 pb-2 md:pb-4 space-y-3 sm:space-y-4 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none mb-2">
         <div className="flex items-center justify-between">
           <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
           <button 
@@ -98,9 +98,8 @@ const CourseList = () => {
           </button>
         </div>
 
-        {/* Categories Horizontal Scroll */}
-        {/* Categories Horizontal Scroll */}
-        <div className="-mx-5 md:mx-0">
+        {/* Categories Horizontal Scroll - Desktop Only */}
+        <div className="hidden md:block">
           <CategoryPills 
             categories={categories}
             activeCat={activeCat}

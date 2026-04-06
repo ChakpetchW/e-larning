@@ -69,6 +69,7 @@ model Course {
 model Category {
   id        String   @id @default(uuid())
   name      String   @unique
+  icon      String?  @default("Grid")
   order     Int      @default(0)
   createdAt DateTime @default(now())
 

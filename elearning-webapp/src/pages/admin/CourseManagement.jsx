@@ -409,7 +409,7 @@ const CourseManagement = () => {
               <button 
                 type="button"
                 aria-label="ปิดหน้าต่างจัดการหมวดหมู่"
-                onClick={() => { setShowCategoryModal(false); setEditingCategoryId(null); setCategoryForm({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }} 
+                onClick={() => { setShowCategoryModal(false); setEditingCategoryId(null); setCategoryForm({ name: '', icon: 'Grid', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }} 
                 className="text-muted hover:text-gray-800"
               >
                 ปิด
@@ -431,7 +431,7 @@ const CourseManagement = () => {
                 {editingCategoryId && (
                   <button 
                     type="button"
-                    onClick={() => { setEditingCategoryId(null); setCategoryForm({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }}
+                    onClick={() => { setEditingCategoryId(null); setCategoryForm({ name: '', icon: 'Grid', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }}
                     className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
                   >
                     ยกเลิกการแก้ไข
@@ -439,7 +439,7 @@ const CourseManagement = () => {
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-3 md:flex-row">
                 <input
                   required
                   type="text"
@@ -449,6 +449,15 @@ const CourseManagement = () => {
                   }`}
                   value={categoryForm.name}
                   onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Lucide Icon (เช่น Zap, Brain)..."
+                  className={`form-input w-full md:w-56 bg-white px-4 py-3 text-sm font-bold transition-all ${
+                    editingCategoryId ? 'border-primary/50 ring-2 ring-primary/10' : 'border-slate-200'
+                  }`}
+                  value={categoryForm.icon}
+                  onChange={(event) => setCategoryForm({ ...categoryForm, icon: event.target.value })}
                 />
                 <button type="submit" className={`btn ${editingCategoryId ? 'bg-slate-900 text-white px-8' : 'btn-primary px-6'} text-xs font-black uppercase tracking-widest shadow-lg`}>
                   {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
