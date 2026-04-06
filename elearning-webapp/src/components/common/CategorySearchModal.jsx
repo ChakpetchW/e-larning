@@ -130,8 +130,8 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
 
         <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 shrink-0 md:px-8">
           <div className="relative group">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-5 text-slate-400 pointer-events-none transition-colors group-focus-within:text-primary">
-              <Search size={22} />
+            <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 pointer-events-none transition-colors group-focus-within:text-primary">
+              <Search size={18} />
             </div>
             <label htmlFor={searchInputId} className="sr-only">
               ค้นหาหมวดหมู่
@@ -140,7 +140,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
               id={searchInputId}
               type="text"
               placeholder="พิมพ์ชื่อหมวดหมู่ที่ต้องการค้นหา..."
-              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-14 pr-6 text-lg font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
+              className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-12 pr-6 text-base font-medium shadow-sm transition-all placeholder-slate-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
