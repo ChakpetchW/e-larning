@@ -8,7 +8,8 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
   const categoryLabel = course.category?.name || 'หมวดทั่วไป';
   const lessonCount = Array.isArray(course.lessons) ? course.lessons.length : 0;
   const progressPercent = Math.max(0, Math.min(100, Number(course.progressPercent) || 0));
-  const pointsSuffix = course.points > 0 ? 'แต้ม' : 'เรียน';
+  const displayPoints = course.totalPoints ?? course.points ?? 0;
+  const pointsSuffix = displayPoints > 0 ? 'แต้มรวม' : 'เรียน';
 
   const lessonDuration = course.lessons?.reduce(
     (total, lesson) => total + (parseInt(lesson.duration, 10) || 0),
@@ -122,7 +123,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
 
           <div className="text-right leading-none">
             <span className="text-[1.2rem] font-black tracking-tight text-slate-900">
-              {course.points > 0 ? course.points.toLocaleString() : 'FREE'}
+              {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
             </span>
             <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">
               {pointsSuffix}

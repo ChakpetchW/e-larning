@@ -151,6 +151,13 @@ const CourseDetail = () => {
     () => documentLessons.filter((lesson) => lesson.isCompleted).length,
     [documentLessons],
   );
+  const completionPoints = course?.completionPoints ?? course?.points ?? 0;
+  const quizPoints = course?.quizPoints ?? (
+    course?.lessons?.reduce((sum, lesson) => (
+      lesson.type === 'quiz' ? sum + (lesson.points || 0) : sum
+    ), 0) || 0
+  );
+  const totalRewardPoints = course?.totalPoints ?? (completionPoints + quizPoints);
 
   const handleReturnToCourseList = () => {
     navigate('/user/courses');
@@ -207,6 +214,30 @@ const CourseDetail = () => {
             </div>
 
             <div className="rounded-[1.75rem] border border-white/10 bg-white/95 p-4 shadow-[0_24px_50px_-30px_rgba(15,23,42,0.45)] sm:p-5 lg:justify-self-end">
+              <span className="text-[11px] font-bold tracking-[0.04em] text-slate-600">แต้มรวมทั้งคอร์ส</span>
+              <div className="mt-2 flex items-end gap-2">
+                <span className="text-4xl font-black tracking-tighter text-slate-900">
+                  {totalRewardPoints > 0 ? totalRewardPoints.toLocaleString() : 'ฟรี'}
+                </span>
+                <span className="mb-1 text-sm font-bold text-slate-500">{totalRewardPoints > 0 ? 'แต้ม' : 'บทเรียน'}</span>
+              </div>
+              <div className="mt-3 grid gap-2 text-xs font-bold text-slate-500">
+                <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2">
+                  <span>เรียนจบคอร์ส</span>
+                  <span>{completionPoints.toLocaleString()} แต้ม</span>
+                </div>
+                {quizPoints > 0 && (
+                  <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2">
+                    <span>ผ่านแบบทดสอบ</span>
+                    <span>{quizPoints.toLocaleString()} แต้ม</span>
+                  </div>
+                )}
+              </div>
+              <p className="mt-3 text-sm font-medium text-slate-600">
+                {course.isEnrolled ? 'แต้มรวมนี้คำนวณจากแต้มเรียนจบและแต้มจากแบบทดสอบที่ผ่าน' : 'คอร์สนี้มีแต้มจากการเรียนจบและแต้มเพิ่มจากการผ่านแบบทดสอบ'}
+              </p>
+            </div>
+            <div className="hidden rounded-[1.75rem] border border-white/10 bg-white/95 p-4 shadow-[0_24px_50px_-30px_rgba(15,23,42,0.45)] sm:p-5 lg:justify-self-end">
               <span className="text-[11px] font-bold tracking-[0.04em] text-slate-600">แต้มสะสมเมื่อเรียนจบ</span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-black tracking-tighter text-slate-900">
@@ -474,6 +505,27 @@ const CourseDetail = () => {
 
             <div className="p-6 md:p-7">
               <div className="mb-4">
+                <span className="mb-2 block text-[11px] font-bold tracking-[0.04em] text-slate-600">แต้มรวมสูงสุด</span>
+                <div className="flex items-end gap-2">
+                  <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">
+                    {totalRewardPoints > 0 ? totalRewardPoints.toLocaleString() : '0'}
+                  </span>
+                  <span className="mb-1 text-sm font-bold text-slate-500">แต้ม</span>
+                </div>
+                <div className="mt-3 space-y-2 text-xs font-bold text-slate-500">
+                  <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2">
+                    <span>เรียนจบคอร์ส</span>
+                    <span>{completionPoints.toLocaleString()} แต้ม</span>
+                  </div>
+                  {quizPoints > 0 && (
+                    <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2">
+                      <span>ผ่านแบบทดสอบ</span>
+                      <span>{quizPoints.toLocaleString()} แต้ม</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="hidden mb-4">
                 <span className="mb-2 block text-[11px] font-bold tracking-[0.04em] text-slate-600">แต้มที่จะได้รับทั้งหมด</span>
                 <div className="flex items-end gap-2">
                   <span className="text-3xl font-black tracking-tighter text-slate-900 md:text-4xl">

@@ -137,6 +137,8 @@ const LessonPlayer = () => {
   const lessonMediaUrl = getFullUrl(lesson.contentUrl?.trim());
   const hasResources = Array.isArray(lesson.resources) && lesson.resources.length > 0;
   const showAchievementCard = course?.showAchievementCard === true;
+  const quizRewardPoints = Number(lesson?.points) || 0;
+  const canEarnQuizPoints = lesson?.type === 'quiz' && quizRewardPoints > 0;
 
   const navigateToPath = (path, options = {}) => {
     if (!path) return;
@@ -300,6 +302,11 @@ const LessonPlayer = () => {
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       <div className="w-10 h-10 bg-primary/20 text-primary rounded-xl flex items-center justify-center shrink-0 font-black border border-primary/20 relative z-10">i</div>
                       <div className="relative z-10">
+                        {canEarnQuizPoints && (
+                          <p className="mb-3 inline-flex rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-black tracking-[0.04em] text-amber-300">
+                            ผ่านครั้งแรก รับ {quizRewardPoints.toLocaleString()} แต้ม
+                          </p>
+                        )}
                         <p className="font-bold text-white mb-1">เกณฑ์การผ่าน</p>
                         <p className="text-sm text-slate-400 leading-relaxed font-medium">คุณต้องได้คะแนนอย่างน้อย {lesson.passScore || 60}% ({Math.ceil((lesson.passScore || 60)/100 * (lesson.questions?.length || 0))} ข้อ) จากทั้งหมด {lesson.questions?.length || 0} ข้อ เพื่อผ่านบทเรียนนี้</p>
                       </div>
@@ -323,6 +330,24 @@ const LessonPlayer = () => {
                           <p className="text-7xl font-black text-slate-900 tracking-tighter">{quizResult.scorePercent}%</p>
                        </div>
                        
+                       {quizResult.passed && (
+                         <div className="mt-2 flex flex-col items-center gap-2">
+                           {quizResult.earnedQuizPoints > 0 && (
+                             <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 ring-1 ring-emerald-100">
+                               +{quizResult.earnedQuizPoints.toLocaleString()} แต้มจากแบบทดสอบ
+                             </div>
+                           )}
+                           {quizResult.earnedCoursePoints > 0 && (
+                             <div className="rounded-full bg-primary/10 px-4 py-2 text-sm font-black text-primary ring-1 ring-primary/10">
+                               +{quizResult.earnedCoursePoints.toLocaleString()} แต้มจากการเรียนจบคอร์ส
+                             </div>
+                           )}
+                           {quizResult.earnedPoints === 0 && canEarnQuizPoints && (
+                             <p className="text-xs font-bold text-slate-400">แต้มแบบทดสอบจะได้รับเฉพาะตอนผ่านครั้งแรกเท่านั้น</p>
+                           )}
+                         </div>
+                       )}
+
                         <button onClick={() => { setQuizResult(null); setAnswers({}); }} className="mt-8 rounded-2xl border border-slate-200 px-12 py-4.5 text-sm font-black tracking-[0.04em] text-slate-600 transition-all hover:border-slate-900 hover:bg-slate-900 hover:text-white">
                          {quizResult.passed ? 'ตรวจคำตอบ' : 'ทำควิซอีกครั้ง'}
                        </button>

@@ -67,12 +67,37 @@ const getVisibleCourseQuery = async (userId) => {
     return buildCourseVisibilityWhere(userContext);
 };
 
+const getCourseRewardSummary = (course) => {
+    const completionPoints = Number(course?.points) || 0;
+    const quizPoints = Array.isArray(course?.lessons)
+        ? course.lessons.reduce((sum, lesson) => {
+            if (lesson?.type !== 'quiz') {
+                return sum;
+            }
+
+            return sum + (Number(lesson?.points) || 0);
+        }, 0)
+        : 0;
+
+    return {
+        completionPoints,
+        quizPoints,
+        totalPoints: completionPoints + quizPoints
+    };
+};
+
 const getCourses = async (userId) => {
     const visibilityWhere = await getVisibleCourseQuery(userId);
     const courses = await prisma.course.findMany({
         where: visibilityWhere,
         include: {
             category: true,
+            lessons: {
+                select: {
+                    type: true,
+                    points: true
+                }
+            },
             enrollments: {
                 where: { userId }
             }
@@ -81,14 +106,17 @@ const getCourses = async (userId) => {
 
     return courses.map((course) => {
         const enrollment = course.enrollments[0];
+        const rewardSummary = getCourseRewardSummary(course);
 
         return {
             ...course,
             enrollments: undefined,
+            lessons: undefined,
             isEnrolled: !!enrollment,
             enrollmentStatus: enrollment ? enrollment.status : null,
             progressPercent: enrollment ? enrollment.progressPercent : 0,
-            completedAt: enrollment ? enrollment.completedAt : null
+            completedAt: enrollment ? enrollment.completedAt : null,
+            ...rewardSummary
         };
     });
 };
@@ -170,6 +198,7 @@ const getCourseDetails = async (courseId, userId) => {
     }
 
     const enrollment = course.enrollments[0];
+    const rewardSummary = getCourseRewardSummary(course);
 
     return {
         ...course,
@@ -178,6 +207,7 @@ const getCourseDetails = async (courseId, userId) => {
         enrollmentStatus: enrollment ? enrollment.status : null,
         progressPercent: enrollment ? enrollment.progressPercent : 0,
         completedAt: enrollment ? enrollment.completedAt : null,
+        ...rewardSummary,
         lessons: course.lessons.map((lesson) => ({
             ...lesson,
             progress: lesson.progress[0] || null,
@@ -290,15 +320,25 @@ const updateLessonProgress = async (userId, lessonId, progress) => {
             updateData.completedAt = new Date();
 
             if (lesson.course.points > 0) {
-                await prisma.pointsLedger.create({
-                    data: {
+                const existingPoints = await prisma.pointsLedger.findFirst({
+                    where: {
                         userId,
                         sourceType: 'course',
-                        sourceId: lesson.courseId,
-                        points: lesson.course.points,
-                        note: `Completed course: ${lesson.course.title}`
+                        sourceId: lesson.courseId
                     }
                 });
+
+                if (!existingPoints) {
+                    await prisma.pointsLedger.create({
+                        data: {
+                            userId,
+                            sourceType: 'course',
+                            sourceId: lesson.courseId,
+                            points: lesson.course.points,
+                            note: `Completed course: ${lesson.course.title}`
+                        }
+                    });
+                }
             }
         }
 
@@ -368,6 +408,32 @@ const submitQuiz = async (userId, lessonId, answers) => {
     });
 
     const isCompleted = passed && !previousPass;
+    let earnedQuizPoints = 0;
+    let earnedCoursePoints = 0;
+
+    if (passed && lesson.points > 0) {
+        const existingQuizPoints = await prisma.pointsLedger.findFirst({
+            where: {
+                userId,
+                sourceType: 'quiz',
+                sourceId: lessonId
+            }
+        });
+
+        if (!existingQuizPoints) {
+            await prisma.pointsLedger.create({
+                data: {
+                    userId,
+                    sourceType: 'quiz',
+                    sourceId: lessonId,
+                    points: lesson.points,
+                    note: `Passed quiz: ${lesson.title}`
+                }
+            });
+
+            earnedQuizPoints = lesson.points;
+        }
+    }
 
     if (isCompleted) {
         await prisma.userLessonProgress.upsert({
@@ -437,6 +503,7 @@ const submitQuiz = async (userId, lessonId, answers) => {
                                 note: `Completed course: ${lesson.course.title}`
                             }
                         });
+                        earnedCoursePoints = lesson.course.points;
                     }
                 }
             }
@@ -448,7 +515,18 @@ const submitQuiz = async (userId, lessonId, answers) => {
         }
     }
 
-    return { attempt, score, scorePercent, passed, isCompleted, passScore, correctAnswers };
+    return {
+        attempt,
+        score,
+        scorePercent,
+        passed,
+        isCompleted,
+        passScore,
+        correctAnswers,
+        earnedQuizPoints,
+        earnedCoursePoints,
+        earnedPoints: earnedQuizPoints + earnedCoursePoints
+    };
 };
 
 const getPointsHistory = async (userId) => {

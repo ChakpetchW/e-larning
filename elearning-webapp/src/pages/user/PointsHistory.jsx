@@ -30,17 +30,29 @@ const PointsHistory = () => {
 
   const renderLogIcon = (type, points) => {
     if (points > 0) {
-      if (type === 'course') return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><CheckCircle size={20} /></div>;
-      if (type === 'admin_edit') return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-500"><TrendingUp size={20} /></div>;
+      if (type === 'course') {
+        return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><CheckCircle size={20} /></div>;
+      }
+      if (type === 'quiz') {
+        return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-cyan-500"><TrendingUp size={20} /></div>;
+      }
+      if (type === 'admin_edit') {
+        return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-500"><TrendingUp size={20} /></div>;
+      }
+
       return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-500"><TrendingUp size={20} /></div>;
     }
 
-    if (type === 'redeem') return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-500"><Gift size={20} /></div>;
+    if (type === 'redeem') {
+      return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-500"><Gift size={20} /></div>;
+    }
+
     return <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500"><TrendingDown size={20} /></div>;
   };
 
   const getHistoryActionLabel = (sourceType) => {
     if (sourceType === 'course') return 'เรียนจบและรับแต้ม';
+    if (sourceType === 'quiz') return 'ผ่านแบบทดสอบและรับแต้ม';
     if (sourceType === 'redeem') return 'ใช้แต้มแลกรางวัล';
     return 'ผู้ดูแลระบบปรับแต้ม';
   };
@@ -48,7 +60,14 @@ const PointsHistory = () => {
   const getHistoryTagLabel = (sourceType) => {
     if (sourceType === 'redeem') return 'แลกแต้ม';
     if (sourceType === 'course') return 'เรียนจบ';
+    if (sourceType === 'quiz') return 'ควิซ';
     return 'ปรับโดยแอดมิน';
+  };
+
+  const getHistoryFallbackName = (sourceType) => {
+    if (sourceType === 'course') return 'การเรียนรู้';
+    if (sourceType === 'quiz') return 'แบบทดสอบ';
+    return 'ของรางวัล';
   };
 
   const currentList = activeTab === 'earned' ? earnedLogs : usedLogs;
@@ -102,7 +121,7 @@ const PointsHistory = () => {
                 {renderLogIcon(log.sourceType, log.points)}
                 <div>
                   <h4 className="text-sm font-bold leading-tight text-slate-800 md:text-base">
-                    {getHistoryActionLabel(log.sourceType)}: {log.note ? log.note.split(': ').pop() : (log.sourceType === 'course' ? 'การเรียนรู้' : 'ของรางวัล')}
+                    {getHistoryActionLabel(log.sourceType)}: {log.note ? log.note.split(': ').pop() : getHistoryFallbackName(log.sourceType)}
                   </h4>
                   <p className="mt-1 text-xs font-medium text-slate-400">
                     {new Date(log.createdAt).toLocaleDateString()} {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
