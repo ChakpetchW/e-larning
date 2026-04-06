@@ -186,7 +186,7 @@ const LessonPlayer = () => {
         </div>
 
         {/* Media Content */}
-        <div className={`${lesson.type === 'quiz' ? '' : 'aspect-video'} w-full h-full`}>
+        <div className={`${lesson.type === 'video' ? 'aspect-video' : ''} w-full h-full`}>
           {lesson.type === 'video' ? (
             isNavigatingAway ? (
               <div className="flex aspect-video w-full h-full items-center justify-center bg-slate-950">
