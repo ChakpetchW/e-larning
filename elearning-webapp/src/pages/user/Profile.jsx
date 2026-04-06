@@ -201,7 +201,7 @@ const Profile = () => {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <button
             type="button"
-            onClick={() => navigate('/user/home')}
+            onClick={() => navigate('/user/ongoing')}
             className="group relative flex flex-col items-start rounded-3xl border border-slate-100 bg-white p-5 text-left transition-all hover:shadow-xl hover:-translate-y-0.5"
           >
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/5 text-primary transition-transform group-hover:scale-110">
