@@ -171,7 +171,7 @@ const LessonPlayer = () => {
   }
 
   return (
-    <div className="flex flex-col w-full max-w-5xl mx-auto md:px-4 md:py-6 relative min-h-screen pb-24 md:pb-12 bg-white md:bg-transparent">
+    <div className="flex flex-col w-full max-w-5xl mx-auto md:px-4 md:py-6 relative min-h-screen pb-12 bg-white md:bg-transparent">
       
       {/* Immersive Header / Media Section - Cinemascope Mode */}
       <div className="relative z-20 w-full overflow-hidden bg-slate-950 shadow-[0_34px_80px_-40px_rgba(15,23,42,0.8)] md:rounded-[2.5rem] md:aspect-video">
@@ -179,7 +179,7 @@ const LessonPlayer = () => {
         <div className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
           <button
             onClick={handleReturnToCourse}
-            className="flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur-xl transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
+            className="flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/20 bg-white/20 text-white shadow-[0_18px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur-xl transition-all hover:bg-white/30 hover:scale-105 active:scale-95"
           >
             <ArrowLeft size={20} strokeWidth={2.5} />
           </button>
@@ -254,10 +254,10 @@ const LessonPlayer = () => {
         />
       )}
 
-      {/* Unified Content Container - Proportions Optimized for Mobile */}
-      <div className="relative z-30 -mt-4 md:mt-8 overflow-hidden bg-white md:rounded-[3.5rem] md:border md:border-slate-100 md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.08)]">
+      {/* Flattened Content Container - Optimized for Content Flow */}
+      <div className="relative z-30 bg-white md:mt-8 md:overflow-hidden md:rounded-[3.5rem] md:border md:border-slate-100 md:shadow-[0_40px_100px_-20px_rgba(15,23,42,0.1)]">
         
-        <div className="px-5 py-8 md:p-14">
+        <div className="px-6 py-10 md:p-14">
           {/* Lesson Metadata & Title */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 md:mb-10">
             <div className="flex-1">
@@ -307,10 +307,10 @@ const LessonPlayer = () => {
                   )}
 
                   {quizResult && (
-                    <div ref={quizResultRef} className={`p-12 rounded-[3rem] border-2 transition-all duration-500 animate-celebrate shadow-2xl flex flex-col items-center gap-5 text-center ${
+                    <div ref={quizResultRef} className={`p-12 rounded-[3.5rem] border-2 transition-all duration-500 animate-celebrate shadow-2xl flex flex-col items-center gap-5 text-center ${
                       quizResult.passed ? 'bg-white border-emerald-100' : 'bg-red-50/30 border-red-100'
                     }`}>
-                       <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center text-white shadow-2xl mb-2 ${quizResult.passed ? 'bg-emerald-500 shadow-emerald-200' : 'bg-red-500 shadow-red-200'}`}>
+                       <div className={`w-24 h-24 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl mb-2 ${quizResult.passed ? 'bg-emerald-500 shadow-emerald-200' : 'bg-red-500 shadow-red-200'}`}>
                           {quizResult.passed ? <CheckCircle size={48} strokeWidth={2}/> : <div className="text-4xl font-black">!</div>}
                        </div>
                        <div>
@@ -319,11 +319,11 @@ const LessonPlayer = () => {
                          </h3>
                           <p className="text-xs font-bold tracking-[0.04em] text-slate-500">คะแนนของคุณ</p>
                        </div>
-                       <div className="bg-slate-50 px-10 py-5 rounded-[2rem] border border-slate-100 mt-4">
+                       <div className="bg-slate-50 px-10 py-5 rounded-[2.5rem] border border-slate-100 mt-4">
                           <p className="text-7xl font-black text-slate-900 tracking-tighter">{quizResult.scorePercent}%</p>
                        </div>
                        
-                        <button onClick={() => { setQuizResult(null); setAnswers({}); }} className="mt-8 rounded-2xl border border-slate-200 px-12 py-4.5 text-base font-black tracking-[0.04em] text-slate-600 transition-all hover:border-slate-900 hover:bg-slate-900 hover:text-white">
+                        <button onClick={() => { setQuizResult(null); setAnswers({}); }} className="mt-8 rounded-2xl border border-slate-200 px-12 py-4.5 text-sm font-black tracking-[0.04em] text-slate-600 transition-all hover:border-slate-900 hover:bg-slate-900 hover:text-white">
                          {quizResult.passed ? 'ตรวจคำตอบ' : 'ทำควิซอีกครั้ง'}
                        </button>
                     </div>
@@ -410,51 +410,53 @@ const LessonPlayer = () => {
               )}
 
               {completed && (
-                <section className="mt-10 overflow-hidden rounded-[2.5rem] border border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.96),rgba(255,255,255,0.98),rgba(239,246,255,0.92))] shadow-[0_28px_70px_-42px_rgba(16,185,129,0.4)]">
-                  <div className="flex flex-col gap-5 p-4 sm:p-6 md:p-8">
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl sm:rounded-[1.75rem] bg-emerald-500 text-white shadow-[0_22px_45px_-24px_rgba(16,185,129,0.65)]">
-                          <CheckCircle className="h-7 w-7 sm:h-[30px] sm:w-[30px]" strokeWidth={2.2} />
+                <section className="mt-12 -mx-6 md:mx-0 md:rounded-[3rem] border-y md:border-x border-emerald-100 bg-emerald-50/40 md:bg-white p-8 md:p-12 transition-all duration-300 shadow-sm">
+                  <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex items-start gap-5">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[2rem] bg-emerald-500 text-white shadow-[0_20px_40px_-10px_rgba(16,185,129,0.5)]">
+                          <CheckCircle className="h-8 w-8" strokeWidth={2.4} />
                         </div>
                         <div className="min-w-0">
-                          <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900 md:text-[2rem]">
+                          <h3 className="mt-2 text-3xl font-black tracking-tight text-slate-900 md:text-[2.25rem]">
                             บทนี้เสร็จแล้ว
                           </h3>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 self-start">
-                        <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
-                          <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">คืบหน้า</p>
-                          <p className="mt-1 text-lg font-black tracking-tight text-slate-900">
-                            {Math.min(completedLessonsCount, totalLessons)} / {totalLessons}
-                          </p>
-                          <p className="text-xs font-bold text-slate-500">บท</p>
+                      <div className="flex items-center gap-8 self-start">
+                        <div className="flex flex-col">
+                          <p className="text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">คืบหน้า</p>
+                          <div className="mt-1 flex items-baseline gap-1">
+                             <span className="text-2xl font-black text-slate-900">{Math.min(completedLessonsCount, totalLessons)}</span>
+                             <span className="text-sm font-bold text-slate-400">/ {totalLessons} บท</span>
+                          </div>
                         </div>
-                        <div className="min-w-[112px] rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm">
-                          <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">ตอนนี้</p>
-                          <p className="mt-1 text-lg font-black tracking-tight text-slate-900">{currentLessonIndex + 1}</p>
-                          <p className="text-xs font-bold text-slate-500">จาก {totalLessons}</p>
+                        <div className="flex flex-col">
+                          <p className="text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">ตอนนี้</p>
+                          <div className="mt-1 flex items-baseline gap-1">
+                             <span className="text-2xl font-black text-slate-900">{currentLessonIndex + 1}</span>
+                             <span className="text-sm font-bold text-slate-400">/ {totalLessons}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_45px_-35px_rgba(15,23,42,0.32)] backdrop-blur-sm md:p-6">
-                      {nextLesson ? (
-                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                    {nextLesson ? (
+                      <div className="mt-6 border-t border-emerald-100/50 pt-8">
+                        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                           <div className="min-w-0">
-                            <p className="text-[11px] font-black tracking-[0.04em] text-primary">บทถัดไป</p>
-                            <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
+                            <p className="text-[11px] font-black tracking-[0.04em] text-primary uppercase">บทถัดไป</p>
+                            <h4 className="mt-2 text-xl md:text-2xl font-black tracking-tight text-slate-900 leading-tight">
                               {nextLesson.title}
                             </h4>
-                            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5">
-                                <BookOpen size={14} />
+                            <div className="mt-4 flex flex-wrap items-center gap-4">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                                <BookOpen size={16} className="text-slate-400" />
                                 {getLessonTypeLabel(nextLesson.type)}
                               </span>
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5">
-                                <Clock size={14} />
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                                <Clock size={16} className="text-slate-400" />
                                 {nextLesson.duration || '10'} นาที
                               </span>
                             </div>
@@ -463,38 +465,40 @@ const LessonPlayer = () => {
                           <div className="flex flex-col gap-3 sm:flex-row sm:flex-nowrap">
                             <button
                               onClick={handleReturnToCourse}
-                              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-black text-slate-700 whitespace-nowrap transition-all hover:border-slate-300 hover:bg-slate-50"
+                              className="inline-flex items-center justify-center rounded-[1.25rem] border-2 border-slate-100 bg-white px-7 py-4 text-sm font-black text-slate-700 whitespace-nowrap transition-all hover:bg-slate-50 active:scale-95"
                             >
                               กลับหน้าคอร์ส
                             </button>
                             <button
                               onClick={handleNavigateToNextLesson}
-                              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
+                              className="inline-flex items-center justify-center gap-3 rounded-[1.25rem] bg-slate-900 px-7 py-4 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_40px_-10px_rgba(15,23,42,0.4)] transition-all hover:bg-primary active:scale-95"
                             >
                               ไปบทถัดไป
-                              <ArrowRight size={16} strokeWidth={2.6} />
+                              <ArrowRight size={18} strokeWidth={2.8} />
                             </button>
                           </div>
                         </div>
-                      ) : (
+                      </div>
+                    ) : (
+                      <div className="mt-6 border-t border-emerald-100/50 pt-8">
                         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                           <div className="min-w-0">
-                            <p className="text-[11px] font-black tracking-[0.04em] text-emerald-700">ครบแล้ว</p>
-                            <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">
-                              จบบทสุดท้ายของคอร์สแล้ว
+                            <p className="text-[11px] font-black tracking-[0.04em] text-emerald-700 uppercase">ครบแล้ว</p>
+                            <h4 className="mt-2 text-2xl font-black tracking-tight text-slate-900">
+                              จบหลักสูตรอย่างเป็นทางการแล้ว!
                             </h4>
                           </div>
 
                           <button
                             onClick={handleReturnToCourse}
-                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_44px_-24px_rgba(15,23,42,0.55)] transition-all hover:bg-primary active:scale-[0.98]"
+                            className="inline-flex items-center justify-center gap-3 rounded-[1.25rem] bg-slate-900 px-8 py-4 text-sm font-black text-white whitespace-nowrap shadow-[0_20px_40px_-10px_rgba(15,23,42,0.4)] transition-all hover:bg-primary active:scale-95"
                           >
                             กลับหน้าคอร์ส
-                            <ArrowRight size={16} strokeWidth={2.6} />
+                            <ArrowRight size={18} strokeWidth={2.8} />
                           </button>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </section>
               )}
@@ -502,28 +506,28 @@ const LessonPlayer = () => {
 
             {hasResources && (
               <div className="lg:col-span-4 flex flex-col gap-8">
-              {/* Achievement Card - "Exclusive Looking" */}
+              {/* Achievement Card - Redesigned to be less "boxed" */}
               {showAchievementCard && completed && (
-                <div className="relative overflow-hidden rounded-[3rem] border border-slate-100 bg-white p-12 text-center shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] animate-celebrate">
-                  <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[80px]"></div>
+                <div className="relative overflow-hidden rounded-[3rem] border border-slate-100 bg-white p-10 text-center shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] animate-celebrate">
+                  <div className="absolute top-[-10%] right-[-10%] w-full h-full bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.06),transparent_70%)]"></div>
                   <div className="relative z-10 flex flex-col items-center">
                     <div className="w-20 h-20 bg-emerald-500 text-white rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl shadow-emerald-200 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                      <CheckCircle size={40} strokeWidth={2} />
+                      <CheckCircle size={40} strokeWidth={2.4} />
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">ทำสำเร็จแล้ว!</h3>
-                    <p className="text-slate-400 text-sm font-medium leading-relaxed mb-10 px-2">คุณผ่านบทเรียนนี้อย่างยอดเยี่ยม พร้อมสำหรับความท้าทายถัดไปหรือยัง?</p>
+                    <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">คุณทำได้แล้ว!</h3>
+                    <p className="text-slate-400 text-sm font-medium leading-relaxed mb-10 px-4">ความพยายามของคุณเห็นผลแล้ว พร้อมก้าวต่อไปหรือยัง?</p>
                     
                     {nextLessonId ? (
                       <button
                         onClick={handleNavigateToNextLesson}
-                        className="w-full rounded-[1.5rem] bg-slate-900 py-6 text-base font-black tracking-[0.04em] text-white shadow-2xl shadow-slate-200 transition-all hover:bg-primary active:scale-95"
+                        className="w-full rounded-2xl bg-slate-900 py-5 text-base font-black tracking-[0.04em] text-white shadow-2xl shadow-slate-200 transition-all hover:bg-primary active:scale-95"
                       >
-                        เรียนบทถัดไป →
+                        ไปบทถัดไป →
                       </button>
                     ) : (
                       <button
                         onClick={handleReturnToCourse}
-                        className="w-full rounded-[1.5rem] bg-slate-100 py-6 text-base font-black tracking-[0.04em] text-slate-900 transition-all hover:bg-slate-200 active:scale-95"
+                        className="w-full rounded-2xl bg-slate-100 py-5 text-base font-black tracking-[0.04em] text-slate-900 transition-all hover:bg-slate-200 active:scale-95"
                       >
                         กลับสู่คอร์สเรียน
                       </button>
@@ -534,26 +538,26 @@ const LessonPlayer = () => {
 
               {/* Resources Column */}
               {lesson.resources && lesson.resources.length > 0 && (
-                <div className="sticky top-8 rounded-3xl border border-slate-100 bg-slate-50 p-8">
-                  <h4 className="mb-6 flex items-center gap-2.5 text-[11px] font-black tracking-[0.04em] text-slate-500">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div> เอกสารเสริม
+                <div className="sticky top-8 rounded-[2.5rem] border border-slate-100 bg-slate-50/50 p-8">
+                  <h4 className="mb-6 flex items-center gap-2.5 text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div> เอกสารเสริม
                   </h4>
-                  <div className="flex flex-col gap-3.5">
+                  <div className="flex flex-col gap-4">
                     {lesson.resources.map((res, i) => (
                       <a
                         key={i}
                         href={res.url || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl hover:border-primary hover:shadow-2xl hover:translate-y-[-2px] transition-all group"
+                        className="flex items-center justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-primary hover:shadow-2xl hover:-translate-y-1 transition-all group"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="p-3 bg-red-50 text-red-500 rounded-xl group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
-                            <FileText size={20} strokeWidth={2.5}/>
+                          <div className="p-3 bg-red-50 text-red-500 rounded-xl group-hover:bg-red-500 group-hover:text-white transition-all duration-300">
+                            <FileText size={18} strokeWidth={2.5}/>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm font-black text-slate-800 line-clamp-1">{res.title}</p>
-                            <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">{res.size || 'ลิงก์ภายนอก'}</p>
+                            <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500 uppercase">{res.size || 'Download'}</p>
                           </div>
                         </div>
                         <ChevronRight size={16} className="text-slate-300 group-hover:text-primary transition-colors" />
