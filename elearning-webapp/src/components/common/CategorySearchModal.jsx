@@ -2,19 +2,11 @@ import React, { useId, useMemo, useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   X,
-  Search,
   Grid,
-  Zap,
-  Code,
-  BarChart,
-  PenTool,
-  Layout,
-  Database,
-  Globe,
-  Cpu,
-  Hash,
+  Search,
   ArrowRight,
 } from 'lucide-react';
+import { ICON_LIST } from '../../utils/icons';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 
 const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect }) => {
@@ -23,29 +15,8 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
   const titleId = useId();
   const searchInputId = useId();
 
-  const categoryIconMap = {
-    AI: Zap,
-    'Artificial Intelligence': Zap,
-    Technology: Cpu,
-    IT: Cpu,
-    Business: BarChart,
-    Management: BarChart,
-    Design: PenTool,
-    Creative: PenTool,
-    Programming: Code,
-    Code,
-    Development: Code,
-    Marketing: Globe,
-    Data: Database,
-    Web: Layout,
-  };
-
-  const getCategoryIcon = (name) => {
-    const key = Object.keys(categoryIconMap).find((label) =>
-      name.toLowerCase().includes(label.toLowerCase())
-    );
-
-    return categoryIconMap[key] || Hash;
+  const getCategoryIcon = (iconName) => {
+    return ICON_LIST[iconName] || ICON_LIST.LayoutGrid;
   };
 
   const filteredCategories = useMemo(() => {
@@ -151,7 +122,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
           {filteredCategories.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
               {filteredCategories.map((category) => {
-                const Icon = getCategoryIcon(category.icon, category.name);
+                const Icon = getCategoryIcon(category.icon);
                 const count = getCourseCount(category.id);
 
                 return (

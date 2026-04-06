@@ -1,11 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { 
   ArrowDown, ArrowUp, Edit, Edit2, Plus, Search, Trash2, 
-  Zap, Brain, Monitor, Briefcase, Palette, Heart, Star, Smile, 
-  MessageSquare, FileText, Layers, Settings, Globe, Music, Code, 
-  Database, Cpu, Cloud, Lock, BookOpen, GraduationCap, Target, 
-  Users, Activity, Award, LayoutGrid, ChevronDown
+  ChevronDown
 } from 'lucide-react';
+import { ICON_LIST } from '../../utils/icons';
 import { adminAPI } from '../../utils/api';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
@@ -39,14 +37,9 @@ const getDefaultLessonForm = (order = 0) => ({
   questions: [],
 });
 
-const ICON_LIST = {
-  Zap, Brain, Monitor, Briefcase, Palette, Heart, Star, Smile, 
-  MessageSquare, FileText, Layers, Settings, Globe, Music, Code, 
-  Database, Cpu, Cloud, Lock, BookOpen, GraduationCap, Target, 
-  Users, Activity, Award, LayoutGrid
-};
-
 const CourseManagement = () => {
+  const iconPickerRef = React.useRef(null);
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -75,6 +68,13 @@ const CourseManagement = () => {
 
   useEffect(() => {
     fetchData();
+    const handleClickOutside = (event) => {
+      if (iconPickerRef.current && !iconPickerRef.current.contains(event.target)) {
+        setShowIconPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchData = async () => {
@@ -467,26 +467,53 @@ const CourseManagement = () => {
                   />
                 </div>
 
-                <div className="w-full md:w-56 space-y-1.5">
+                <div className="w-full md:w-56 space-y-1.5" ref={iconPickerRef}>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">ไอคอนแสดงผล</label>
-                  <div className="relative group/picker">
-                    <select
-                      className={`form-input w-full appearance-none bg-white pl-10 pr-10 py-3 text-sm font-bold transition-all cursor-pointer ${
-                        editingCategoryId ? 'border-primary/50 ring-2 ring-primary/10' : 'border-slate-200'
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowIconPicker(!showIconPicker)}
+                      className={`flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 text-sm font-bold transition-all ${
+                        showIconPicker ? 'border-primary ring-2 ring-primary/10' : editingCategoryId ? 'border-primary/50' : 'border-slate-200'
                       }`}
-                      value={categoryForm.icon || 'LayoutGrid'}
-                      onChange={(event) => setCategoryForm({ ...categoryForm, icon: event.target.value })}
                     >
-                      {Object.keys(ICON_LIST).map((iconName) => (
-                        <option key={iconName} value={iconName}>{iconName}</option>
-                      ))}
-                    </select>
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-primary">
-                      {React.createElement(ICON_LIST[categoryForm.icon || 'LayoutGrid'] || LayoutGrid, { size: 18 })}
-                    </div>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                      <ChevronDown size={14} />
-                    </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-primary">
+                          {React.createElement(ICON_LIST[categoryForm.icon || 'LayoutGrid'] || ICON_LIST.LayoutGrid, { size: 18 })}
+                        </div>
+                        <span className="text-slate-900">{categoryForm.icon || 'LayoutGrid'}</span>
+                      </div>
+                      <ChevronDown size={14} className={`text-slate-400 transition-transform ${showIconPicker ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showIconPicker && (
+                      <div className="absolute left-0 right-0 top-full z-[100] mt-2 max-h-60 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 no-scrollbar">
+                        <div className="grid grid-cols-2 gap-1">
+                          {Object.keys(ICON_LIST).map((iconName) => {
+                            const Icon = ICON_LIST[iconName];
+                            const isSelected = (categoryForm.icon || 'LayoutGrid') === iconName;
+                            return (
+                              <button
+                                key={iconName}
+                                type="button"
+                                onClick={() => {
+                                  setCategoryForm({ ...categoryForm, icon: iconName });
+                                  setShowIconPicker(false);
+                                }}
+                                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+                                  isSelected 
+                                    ? 'bg-primary text-white' 
+                                    : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                <Icon size={18} />
+                                <span className="text-xs font-bold">{iconName}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
