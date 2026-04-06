@@ -259,7 +259,7 @@ const LessonPlayer = () => {
         
         <div className="px-5 py-8 md:p-14">
           {/* Lesson Metadata & Title */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 md:mb-10">
             <div className="flex-1">
               <div className="flex items-center gap-2.5 mb-5">
                 <span className="flex items-center gap-1.5 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-black tracking-[0.04em] text-primary">
@@ -288,7 +288,7 @@ const LessonPlayer = () => {
             )}
           </div>
 
-          <div className="mb-12 h-px w-full bg-slate-100"></div>
+          <div className="mb-6 md:mb-12 h-px w-full bg-slate-100"></div>
 
           {/* Main Content Area Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -568,47 +568,6 @@ const LessonPlayer = () => {
         </div>
       </div>
 
-      {/* Sticky Action Bar (Mobile Only) - Premium Glassmorphism */}
-      <div className="fixed bottom-0 left-0 right-0 z-[60] flex gap-3 border-t border-slate-100/50 bg-white/80 p-5 pb-8 shadow-[0_-20px_50px_rgba(0,0,0,0.08)] backdrop-blur-2xl animate-slide-up md:hidden rounded-t-[2.5rem]">
-        {completed && nextLessonId ? (
-          <button
-            onClick={() => navigate(`/user/courses/${courseId}/lesson/${nextLessonId}`)}
-            className="flex-1 rounded-2xl bg-slate-900 py-4 text-[13px] font-black tracking-[0.04em] text-white shadow-xl"
-          >
-            เริ่มบทถัดไป
-          </button>
-        ) : false ? (
-          <button
-            onClick={handleQuizSubmit}
-            disabled={updating || Object.keys(answers).length < (lesson.questions?.length || 0)}
-            className="flex-1 rounded-2xl bg-primary py-4 text-[13px] font-black tracking-[0.04em] text-white shadow-xl shadow-primary/20 disabled:opacity-50"
-          >
-            {updating ? 'กำลังตรวจ...' : 'ส่งคำตอบ'}
-          </button>
-        ) : !completed && lesson.type !== 'quiz' ? (
-          <button
-            onClick={handleComplete}
-            disabled={updating}
-            className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-[13px] font-black tracking-[0.04em] text-white shadow-xl shadow-primary/20"
-          >
-            <CheckCircle size={18} strokeWidth={2.5} /> {updating ? 'กำลังบันทึก...' : 'เรียนจบแล้ว'}
-          </button>
-        ) : quizResult && !quizResult?.passed ? (
-          <button
-            onClick={() => { setQuizResult(null); setAnswers({}); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="flex-1 rounded-2xl bg-red-500 py-4 text-[13px] font-black tracking-[0.04em] text-white shadow-xl"
-          >
-            ลองทำใหม่อีกครั้ง
-          </button>
-        ) : (
-          <button
-            onClick={handleReturnToCourse}
-            className="flex-1 rounded-2xl bg-slate-100 py-4 text-[13px] font-black tracking-[0.04em] text-slate-600"
-          >
-            กลับสู่หน้ารายละเอียด
-          </button>
-        )}
-      </div>
     </div>
   );
 };
