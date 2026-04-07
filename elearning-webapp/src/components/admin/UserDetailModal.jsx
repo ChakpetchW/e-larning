@@ -95,7 +95,7 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
                   </div>
                   <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">แผนก / ระดับ</div>
                   <div className="mt-2 text-lg font-black text-slate-900">{detail.department || '-'}</div>
-                  <div className="mt-1 text-sm text-slate-500">{detail.tier || 'ยังไม่ได้กำหนดระดับ'}</div>
+                  <div className="mt-1 text-sm text-slate-500">{detail.tier?.name || detail.tier || 'ยังไม่ได้กำหนดระดับ'}</div>
                 </div>
 
                 <div className="rounded-3xl border border-slate-100 bg-slate-50/70 p-5">

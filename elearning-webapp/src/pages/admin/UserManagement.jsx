@@ -367,7 +367,7 @@ const UserManagement = () => {
               </td>
               <td className="p-4 text-sm text-muted">{getRoleLabel(user)}</td>
               <td className="p-4 text-sm text-muted">{user.department || '-'}</td>
-              <td className="p-4 text-sm text-muted">{user.tier || '-'}</td>
+              <td className="p-4 text-sm text-muted">{user.tier?.name || user.tier || '-'}</td>
               <td className="p-4 text-sm text-muted">
                 {user.employmentDate ? new Date(user.employmentDate).toLocaleDateString('th-TH') : '-'}
               </td>
