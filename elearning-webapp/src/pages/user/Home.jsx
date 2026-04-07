@@ -307,13 +307,13 @@ const Home = () => {
               title={category.name}
               onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
             />
-            <div className="flex items-stretch md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
+            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
               {category.courses.map(course => (
                 <CourseCard 
                   key={course.id} 
                   course={course} 
                   onClick={() => navigate(`/user/courses/${course.id}`)}
-                  className="w-[300px] h-full md:w-full snap-center md:snap-none shrink-0"
+                  className="snap-center md:snap-none"
                 />
               ))}
             </div>
@@ -324,13 +324,13 @@ const Home = () => {
         {uncategorized.length > 0 && (
           <section className="animate-slide-up" style={{ animationDelay: '800ms' }}>
             <SectionHeader title="คอร์สแนะนำสำหรับคุณ" showViewAll={false} />
-            <div className="flex items-stretch md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none">
+            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
               {uncategorized.map(course => (
                 <CourseCard 
                   key={course.id} 
                   course={course} 
                   onClick={() => navigate(`/user/courses/${course.id}`)}
-                  className="w-[300px] h-full md:w-full snap-center md:snap-none shrink-0"
+                  className="snap-center md:snap-none"
                 />
               ))}
             </div>
