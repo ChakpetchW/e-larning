@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
-const { verifyToken, verifyAdmin, verifyAdminPanelAccess } = require('../middleware/auth');
+const { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminPanelAccess } = require('../middleware/auth');
 
 router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access the admin panel
 
