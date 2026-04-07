@@ -128,7 +128,7 @@ const Profile = () => {
     },
     {
       label: 'บทบาท',
-      value: getRoleLabel(user?.role),
+      value: getRoleLabel(user),
       icon: <UserIcon size={18} className="text-success" />,
       color: 'text-success',
       bg: 'bg-green-50',

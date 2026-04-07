@@ -19,7 +19,7 @@ const Login = () => {
     if (token && userStr) {
       const user = JSON.parse(userStr);
 
-      if (canAccessAdminPanel(user.role)) {
+      if (canAccessAdminPanel(user)) {
         navigate('/admin/dashboard');
       } else {
         navigate('/user/home');
@@ -39,7 +39,7 @@ const Login = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      if (canAccessAdminPanel(response.data.user.role)) {
+      if (canAccessAdminPanel(response.data.user)) {
         navigate('/admin/dashboard');
       } else {
         navigate('/user/home');

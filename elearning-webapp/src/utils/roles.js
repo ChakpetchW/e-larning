@@ -1,9 +1,12 @@
-export const canAccessAdminPanel = (role) => ['admin', 'manager'].includes(role);
+export const canAccessAdminPanel = (user) => {
+  if (!user) return false;
+  return ['admin', 'manager'].includes(user.role) || user.tier?.accessAdmin === true;
+};
 
 export const canEditAdminUsers = (role) => role === 'admin';
 
-export const getRoleLabel = (role) => {
-  if (role === 'admin') return 'Admin';
-  if (role === 'manager') return 'Manager';
+export const getRoleLabel = (user) => {
+  if (user?.role === 'admin') return 'Admin';
+  if (user?.role === 'manager' || user?.tier?.accessAdmin) return 'Manager';
   return 'User';
 };

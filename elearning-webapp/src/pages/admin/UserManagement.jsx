@@ -299,6 +299,7 @@ const UserManagement = () => {
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onDelete={handleTierDelete}
+            showAccessToggle={true}
           />
         </>
       )}
@@ -364,7 +365,7 @@ const UserManagement = () => {
                 <div className="font-medium text-sm">{user.name}</div>
                 <div className="mt-0.5 text-xs text-muted">{user.email}</div>
               </td>
-              <td className="p-4 text-sm text-muted">{getRoleLabel(user.role)}</td>
+              <td className="p-4 text-sm text-muted">{getRoleLabel(user)}</td>
               <td className="p-4 text-sm text-muted">{user.department || '-'}</td>
               <td className="p-4 text-sm text-muted">{user.tier || '-'}</td>
               <td className="p-4 text-sm text-muted">

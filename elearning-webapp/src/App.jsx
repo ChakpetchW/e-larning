@@ -49,7 +49,7 @@ function App() {
         {/* Root Redirect - Check for existing session */}
         <Route path="/" element={
           localStorage.getItem('token') ? (
-            canAccessAdminPanel(JSON.parse(localStorage.getItem('user'))?.role)
+            canAccessAdminPanel(JSON.parse(localStorage.getItem('user')))
               ? <Navigate to="/admin/dashboard" replace /> 
               : <Navigate to="/user/home" replace />
           ) : <Navigate to="/login" replace />

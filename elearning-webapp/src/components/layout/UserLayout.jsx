@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Gift, User, BookMarked, LogOut } from 'lucide-react';
+import { Home, BookOpen, Gift, User, BookMarked, LogOut, Settings } from 'lucide-react';
 import { userAPI } from '../../utils/api';
+import { canAccessAdminPanel } from '../../utils/roles';
 import './UserLayout.css';
 
 const UserLayout = () => {
@@ -78,6 +79,12 @@ const UserLayout = () => {
           <NavLink to="/user/profile" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
             <User size={20} /> <span className="font-bold">โปรไฟล์</span>
           </NavLink>
+
+          {canAccessAdminPanel(user) && (
+            <NavLink to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 text-rose-500 hover:bg-rose-50 hover:translate-x-1 mt-auto border border-dashed border-rose-200 bg-rose-50/30">
+              <Settings size={20} /> <span className="font-bold">จัดการระบบ</span>
+            </NavLink>
+          )}
         </nav>
         
         <div className="p-4 border-t border-gray-100 shrink-0">
@@ -141,6 +148,13 @@ const UserLayout = () => {
               <div className="nav-icon-wrapper"><User size={22} /></div>
               <span>โปรไฟล์</span>
             </NavLink>
+
+            {canAccessAdminPanel(user) && (
+              <NavLink to="/admin/dashboard" className="nav-item text-rose-500">
+                <div className="nav-icon-wrapper !bg-rose-50"><Settings size={22} /></div>
+                <span>จัดการ</span>
+              </NavLink>
+            )}
           </div>
         </nav>
       </div>

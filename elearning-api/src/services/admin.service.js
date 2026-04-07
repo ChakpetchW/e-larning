@@ -108,7 +108,11 @@ const mapUserRecord = (user) => {
         departmentId: departmentRef?.id || rest.departmentId || null,
         department: departmentRef?.name || rest.department || null,
         tierId: tier?.id || rest.tierId || null,
-        tier: tier?.name || null,
+        tier: tier ? {
+            id: tier.id,
+            name: tier.name,
+            accessAdmin: tier.accessAdmin
+        } : null,
         employmentDate: rest.employmentDate || rest.createdAt
     };
 };
@@ -157,11 +161,20 @@ const getActorContext = async (authUser) => {
         }
     });
 
-    if (!actor || !ADMIN_PANEL_ROLES.includes(actor.role)) {
+    const roleWithTierAccess = actor.role === 'admin'
+        ? 'admin'
+        : (actor.role === 'manager' || actor.tier?.accessAdmin)
+            ? 'manager'
+            : 'user';
+
+    if (!actor || !ADMIN_PANEL_ROLES.includes(roleWithTierAccess)) {
         throw new Error('Admin panel access required');
     }
 
-    const mappedActor = mapUserRecord(actor);
+    const mappedActor = {
+        ...mapUserRecord(actor),
+        role: roleWithTierAccess // Override role for internal scoping if granted via tier
+    };
 
     if (mappedActor.role === 'manager' && !mappedActor.departmentId) {
         throw new Error('Manager account must belong to a department');
@@ -854,14 +867,16 @@ const getTiers = async (authUser) => {
 
 const createTier = async (data) => prisma.tier.create({
     data: {
-        name: sanitizeName(data.name, 'Tier')
+        name: sanitizeName(data.name, 'Tier'),
+        accessAdmin: Boolean(data.accessAdmin)
     }
 });
 
 const updateTier = async (id, data) => prisma.tier.update({
     where: { id },
     data: {
-        name: sanitizeName(data.name, 'Tier')
+        name: sanitizeName(data.name, 'Tier'),
+        accessAdmin: Boolean(data.accessAdmin)
     }
 });
 

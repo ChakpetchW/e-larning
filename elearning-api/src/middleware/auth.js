@@ -26,11 +26,29 @@ const verifyAdmin = (req, res, next) => {
   }
 };
 
-const verifyAdminPanelAccess = (req, res, next) => {
-  if (req.user && ['admin', 'manager'].includes(req.user.role)) {
-    next();
-  } else {
-    res.status(403).json({ message: 'Admin panel access required' });
+const prisma = require('../utils/prisma');
+
+const verifyAdminPanelAccess = async (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      include: { tier: true }
+    });
+
+    if (user && (['admin', 'manager'].includes(user.role) || user.tier?.accessAdmin)) {
+      // Update req.user with latest data for downstream use
+      req.user.role = user.role;
+      req.user.tier = user.tier;
+      next();
+    } else {
+      res.status(403).json({ message: 'Admin panel access required' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error verifying permissions' });
   }
 };
 

@@ -13,7 +13,10 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
   const user = JSON.parse(userStr);
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    return canAccessAdminPanel(user.role)
+    if (adminOnly && !canAccessAdminPanel(user)) {
+      return <Navigate to="/profile" replace />;
+    }
+    return canAccessAdminPanel(user)
       ? <Navigate to="/admin/dashboard" replace />
       : <Navigate to="/user/home" replace />;
   }

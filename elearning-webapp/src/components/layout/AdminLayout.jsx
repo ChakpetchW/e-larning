@@ -138,7 +138,7 @@ const AdminLayout = () => {
         <nav className="sidebar-nav" aria-label="เมนูผู้ดูแลระบบ">
           <div className="nav-group">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-              {getRoleLabel(user?.role)}
+              {getRoleLabel(user)}
             </p>
             <p className="nav-group-title">เมนูหลัก</p>
             {menuItems.map((item) => (
