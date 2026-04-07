@@ -49,7 +49,7 @@ const UserManagement = () => {
   const [selectedUserDetail, setSelectedUserDetail] = useState(null);
 
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
-  const canEditUsers = canEditAdminUsers(currentUser?.role);
+  const canEditUsers = canEditAdminUsers(currentUser);
   const isManagerView = !canEditUsers;
 
   useEffect(() => {

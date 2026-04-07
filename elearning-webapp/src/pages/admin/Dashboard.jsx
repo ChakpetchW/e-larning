@@ -15,7 +15,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
-  const isFullAdmin = canEditAdminUsers(currentUser?.role);
+  const isFullAdmin = canEditAdminUsers(currentUser);
 
   useEffect(() => {
     const fetchStats = async () => {

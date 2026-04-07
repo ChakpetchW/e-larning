@@ -55,30 +55,28 @@ const AdminLayout = () => {
     navigate('/login');
   };
 
-  const isFullAdmin = canEditAdminUsers(user?.role);
+  const isFullAdmin = canEditAdminUsers(user);
 
   const menuItems = [
     { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
-    ...(isFullAdmin
-      ? [{ path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' }]
-      : []),
+    { path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' },
     {
       path: '/admin/users',
       icon: <Users size={20} />,
       label: isFullAdmin ? 'ผู้ใช้งานระบบ' : 'พนักงานในแผนก',
     },
+    { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
+    { path: '/admin/redeems', icon: <Target size={20} />, label: 'รายการ Redeem' },
+    { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงาน' },
     ...(isFullAdmin
       ? [
-          { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
-          { path: '/admin/redeems', icon: <Target size={20} />, label: 'รายการ Redeem' },
-          { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงาน' },
+          {
+            path: '/admin/settings',
+            icon: <Settings size={20} />,
+            label: 'ตั้งค่าระบบ',
+          },
         ]
       : []),
-    {
-      path: '/admin/settings',
-      icon: <Settings size={20} />,
-      label: isFullAdmin ? 'ตั้งค่าระบบ' : 'Weekly Goal ของแผนก',
-    },
   ];
 
   return (

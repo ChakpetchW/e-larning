@@ -22,9 +22,11 @@ const verifyAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
-    res.status(403).json({ message: 'Admin access required' });
+    res.status(403).json({ message: 'Superadmin access required' });
   }
 };
+
+const verifySuperAdmin = verifyAdmin;
 
 const prisma = require('../utils/prisma');
 
@@ -55,5 +57,6 @@ const verifyAdminPanelAccess = async (req, res, next) => {
 module.exports = {
   verifyToken,
   verifyAdmin,
+  verifySuperAdmin,
   verifyAdminPanelAccess
 };

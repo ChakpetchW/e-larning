@@ -14,7 +14,7 @@ const SystemSettings = () => {
   const [message, setMessage] = useState(null);
 
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
-  const isFullAdmin = canEditAdminUsers(currentUser?.role);
+  const isFullAdmin = canEditAdminUsers(currentUser);
 
   useEffect(() => {
     const fetchSettings = async () => {
