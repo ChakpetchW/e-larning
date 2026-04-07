@@ -19,13 +19,27 @@ const getUserVisibilityContext = async (userId) => prisma.user.findUnique({
     where: { id: userId },
     select: {
         departmentId: true,
-        tierId: true
+        tierId: true,
+        tier: {
+            select: {
+                name: true
+            }
+        }
     }
 });
 
-const buildCourseVisibilityWhere = (userContext) => {
+const normalizeTierName = (value) => String(value || '').trim().toLowerCase();
+
+const TIER_RANK_MAP = {
+    supervisor: 1,
+    manager: 2,
+    director: 3
+};
+
+const getTierRank = (tierName) => TIER_RANK_MAP[normalizeTierName(tierName)] || 0;
+
+const buildCategoryVisibilityWhere = (userContext) => {
     const departmentConditions = [{ departmentAccess: { none: {} } }];
-    const tierConditions = [{ tierAccess: { none: {} } }];
 
     if (userContext?.departmentId) {
         departmentConditions.push({
@@ -37,11 +51,25 @@ const buildCourseVisibilityWhere = (userContext) => {
         });
     }
 
-    if (userContext?.tierId) {
-        tierConditions.push({
-            tierAccess: {
+    return {
+        OR: [
+            { visibleToAll: true },
+            {
+                visibleToAll: false,
+                AND: [{ OR: departmentConditions }]
+            }
+        ]
+    };
+};
+
+const buildCourseVisibilityWhere = (userContext) => {
+    const departmentConditions = [{ departmentAccess: { none: {} } }];
+
+    if (userContext?.departmentId) {
+        departmentConditions.push({
+            departmentAccess: {
                 some: {
-                    tierId: userContext.tierId
+                    departmentId: userContext.departmentId
                 }
             }
         });
@@ -53,18 +81,60 @@ const buildCourseVisibilityWhere = (userContext) => {
             { visibleToAll: true },
             {
                 visibleToAll: false,
-                AND: [
-                    { OR: departmentConditions },
-                    { OR: tierConditions }
-                ]
+                AND: [{ OR: departmentConditions }]
             }
         ]
     };
 };
 
 const getVisibleCourseQuery = async (userId) => {
-    const userContext = await getUserVisibilityContext(userId);
-    return buildCourseVisibilityWhere(userContext);
+    return getUserVisibilityContext(userId);
+};
+
+const canAccessByDepartment = (course, userContext) => {
+    const departmentAccess = Array.isArray(course.departmentAccess) ? course.departmentAccess : [];
+
+    if (departmentAccess.length === 0) {
+        return true;
+    }
+
+    if (!userContext?.departmentId) {
+        return false;
+    }
+
+    return departmentAccess.some((entry) => entry.departmentId === userContext.departmentId);
+};
+
+const canAccessByTierHierarchy = (entity, userContext) => {
+    const tierAccess = Array.isArray(entity.tierAccess) ? entity.tierAccess : [];
+
+    if (tierAccess.length === 0) {
+        return true;
+    }
+
+    const userTierName = userContext?.tier?.name || '';
+    const userRank = getTierRank(userTierName);
+    const tierNames = tierAccess.map((entry) => entry.tier?.name).filter(Boolean);
+    const tierRanks = tierNames.map((name) => getTierRank(name)).filter(Boolean);
+
+    if (tierRanks.length > 0) {
+        return userRank >= Math.min(...tierRanks);
+    }
+
+    return tierNames.some((name) => normalizeTierName(name) === normalizeTierName(userTierName));
+};
+
+const canAccessScopedEntity = (entity, userContext) => {
+    if (!entity || entity.visibleToAll) {
+        return true;
+    }
+
+    return canAccessByDepartment(entity, userContext) && canAccessByTierHierarchy(entity, userContext);
+};
+
+const canAccessCourse = (course, userContext) => {
+    const category = course?.category;
+    return canAccessScopedEntity(category, userContext) && canAccessScopedEntity(course, userContext);
 };
 
 const getCourseRewardSummary = (course) => {
@@ -87,11 +157,34 @@ const getCourseRewardSummary = (course) => {
 };
 
 const getCourses = async (userId) => {
-    const visibilityWhere = await getVisibleCourseQuery(userId);
+    const userContext = await getVisibleCourseQuery(userId);
     const courses = await prisma.course.findMany({
-        where: visibilityWhere,
+        where: buildCourseVisibilityWhere(userContext),
         include: {
-            category: true,
+            category: {
+                include: {
+                    departmentAccess: {
+                        include: {
+                            department: true
+                        }
+                    },
+                    tierAccess: {
+                        include: {
+                            tier: true
+                        }
+                    }
+                }
+            },
+            departmentAccess: {
+                include: {
+                    department: true
+                }
+            },
+            tierAccess: {
+                include: {
+                    tier: true
+                }
+            },
             lessons: {
                 select: {
                     type: true,
@@ -104,13 +197,24 @@ const getCourses = async (userId) => {
         }
     });
 
-    return courses.map((course) => {
+    return courses
+        .filter((course) => canAccessCourse(course, userContext))
+        .map((course) => {
         const enrollment = course.enrollments[0];
         const rewardSummary = getCourseRewardSummary(course);
 
         return {
             ...course,
             enrollments: undefined,
+            departmentAccess: undefined,
+            tierAccess: undefined,
+            category: course.category
+                ? {
+                    ...course.category,
+                    departmentAccess: undefined,
+                    tierAccess: undefined
+                }
+                : null,
             lessons: undefined,
             isEnrolled: !!enrollment,
             enrollmentStatus: enrollment ? enrollment.status : null,
@@ -161,14 +265,37 @@ const updateProfile = async (userId, data) => {
 };
 
 const getCourseDetails = async (courseId, userId) => {
-    const visibilityWhere = await getVisibleCourseQuery(userId);
+    const userContext = await getVisibleCourseQuery(userId);
     const course = await prisma.course.findFirst({
         where: {
             id: courseId,
-            ...visibilityWhere
+            ...buildCourseVisibilityWhere(userContext)
         },
         include: {
-            category: true,
+            category: {
+                include: {
+                    departmentAccess: {
+                        include: {
+                            department: true
+                        }
+                    },
+                    tierAccess: {
+                        include: {
+                            tier: true
+                        }
+                    }
+                }
+            },
+            departmentAccess: {
+                include: {
+                    department: true
+                }
+            },
+            tierAccess: {
+                include: {
+                    tier: true
+                }
+            },
             lessons: {
                 orderBy: { order: 'asc' },
                 include: {
@@ -193,7 +320,7 @@ const getCourseDetails = async (courseId, userId) => {
         }
     });
 
-    if (!course) {
+    if (!course || !canAccessCourse(course, userContext)) {
         return null;
     }
 
@@ -203,6 +330,15 @@ const getCourseDetails = async (courseId, userId) => {
     return {
         ...course,
         enrollments: undefined,
+        departmentAccess: undefined,
+        tierAccess: undefined,
+        category: course.category
+            ? {
+                ...course.category,
+                departmentAccess: undefined,
+                tierAccess: undefined
+            }
+            : null,
         isEnrolled: !!enrollment,
         enrollmentStatus: enrollment ? enrollment.status : null,
         progressPercent: enrollment ? enrollment.progressPercent : 0,
@@ -221,18 +357,33 @@ const getCourseDetails = async (courseId, userId) => {
 };
 
 const enrollCourse = async (userId, courseId) => {
-    const visibilityWhere = await getVisibleCourseQuery(userId);
+    const userContext = await getVisibleCourseQuery(userId);
     const course = await prisma.course.findFirst({
         where: {
             id: courseId,
-            ...visibilityWhere
+            ...buildCourseVisibilityWhere(userContext)
         },
-        select: {
-            id: true
+        include: {
+            category: {
+                include: {
+                    departmentAccess: true,
+                    tierAccess: {
+                        include: {
+                            tier: true
+                        }
+                    }
+                }
+            },
+            departmentAccess: true,
+            tierAccess: {
+                include: {
+                    tier: true
+                }
+            }
         }
     });
 
-    if (!course) {
+    if (!course || !canAccessCourse(course, userContext)) {
         throw new Error('Course not found');
     }
 
@@ -642,9 +793,33 @@ const requestRedeem = async (userId, rewardId) => {
     });
 };
 
-const getCategories = async () => prisma.category.findMany({
-    orderBy: { order: 'asc' }
-});
+const getCategories = async (userId) => {
+    const userContext = await getVisibleCourseQuery(userId);
+    const categories = await prisma.category.findMany({
+        where: buildCategoryVisibilityWhere(userContext),
+        include: {
+            departmentAccess: {
+                include: {
+                    department: true
+                }
+            },
+            tierAccess: {
+                include: {
+                    tier: true
+                }
+            }
+        },
+        orderBy: { order: 'asc' }
+    });
+
+    return categories
+        .filter((category) => canAccessScopedEntity(category, userContext))
+        .map((category) => ({
+            ...category,
+            departmentAccess: undefined,
+            tierAccess: undefined
+        }));
+};
 
 // Fetch quiz questions for a specific lesson (called only from LessonPlayer)
 const getLessonQuestions = async (lessonId) => {

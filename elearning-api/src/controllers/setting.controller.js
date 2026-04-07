@@ -3,7 +3,7 @@ const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 
 const getSettings = asyncHandler(async (req, res) => {
-  const settingsMap = await SettingService.getSettings();
+  const settingsMap = await SettingService.getSettings(req.user);
   res.json({ success: true, data: settingsMap });
 });
 
@@ -15,7 +15,7 @@ const updateSetting = asyncHandler(async (req, res) => {
     throw new ErrorResponse('Value is required', 400);
   }
 
-  const setting = await SettingService.updateSetting(key, value);
+  const setting = await SettingService.updateSetting(key, value, req.user);
   res.json({ success: true, data: setting });
 });
 

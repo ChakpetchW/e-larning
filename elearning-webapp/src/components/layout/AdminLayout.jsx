@@ -11,12 +11,15 @@ import {
   X,
   LogOut,
   Settings,
+  GraduationCap,
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
+import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const drawerRef = useRef(null);
@@ -35,6 +38,10 @@ const AdminLayout = () => {
   });
 
   useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem('user') || 'null'));
+  }, []);
+
+  useEffect(() => {
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
@@ -48,14 +55,30 @@ const AdminLayout = () => {
     navigate('/login');
   };
 
+  const isFullAdmin = canEditAdminUsers(user?.role);
+
   const menuItems = [
     { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
-    { path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' },
-    { path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งานระบบ' },
-    { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
-    { path: '/admin/redeems', icon: <Target size={20} />, label: 'รายการ Redeem' },
-    { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงาน' },
-    { path: '/admin/settings', icon: <Settings size={20} />, label: 'ตั้งค่าระบบ' },
+    ...(isFullAdmin
+      ? [{ path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' }]
+      : []),
+    {
+      path: '/admin/users',
+      icon: <Users size={20} />,
+      label: isFullAdmin ? 'ผู้ใช้งานระบบ' : 'พนักงานในแผนก',
+    },
+    ...(isFullAdmin
+      ? [
+          { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
+          { path: '/admin/redeems', icon: <Target size={20} />, label: 'รายการ Redeem' },
+          { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงาน' },
+        ]
+      : []),
+    {
+      path: '/admin/settings',
+      icon: <Settings size={20} />,
+      label: isFullAdmin ? 'ตั้งค่าระบบ' : 'Weekly Goal ของแผนก',
+    },
   ];
 
   return (
@@ -72,7 +95,7 @@ const AdminLayout = () => {
         >
           <Menu size={24} />
         </button>
-        <h1 className="text-lg font-bold">Admin Panel</h1>
+        <h1 className="text-lg font-bold">{isFullAdmin ? 'Admin Panel' : 'Manager Panel'}</h1>
         <div style={{ width: 24 }} />
       </header>
 
@@ -98,7 +121,7 @@ const AdminLayout = () => {
           <div className="flex items-center gap-2 text-primary">
             <LayoutDashboard size={24} />
             <h2 id={drawerTitleId} className="font-bold text-xl">
-              LMS Admin
+              {isFullAdmin ? 'LMS Admin' : 'LMS Manager'}
             </h2>
           </div>
           <button
@@ -114,6 +137,9 @@ const AdminLayout = () => {
 
         <nav className="sidebar-nav" aria-label="เมนูผู้ดูแลระบบ">
           <div className="nav-group">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+              {getRoleLabel(user?.role)}
+            </p>
             <p className="nav-group-title">เมนูหลัก</p>
             {menuItems.map((item) => (
               <NavLink
@@ -130,6 +156,14 @@ const AdminLayout = () => {
         </nav>
 
         <div className="sidebar-footer">
+          <button
+            type="button"
+            onClick={() => navigate('/user/home')}
+            className="sidebar-link w-full justify-start"
+          >
+            <GraduationCap size={20} />
+            <span>ไปหน้า User</span>
+          </button>
           <button
             type="button"
             onClick={handleLogout}

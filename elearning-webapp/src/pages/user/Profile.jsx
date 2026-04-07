@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
+import { getRoleLabel } from '../../utils/roles';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -127,7 +128,7 @@ const Profile = () => {
     },
     {
       label: 'บทบาท',
-      value: user?.role === 'admin' ? 'Admin' : 'User',
+      value: getRoleLabel(user?.role),
       icon: <UserIcon size={18} className="text-success" />,
       color: 'text-success',
       bg: 'bg-green-50',

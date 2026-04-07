@@ -6,11 +6,13 @@ import AdminTable from '../../components/admin/AdminTable';
 import UserModal from '../../components/admin/UserModal';
 import ReferenceDataModal from '../../components/admin/ReferenceDataModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
+import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
 
 const getDefaultFormData = () => ({
   name: '',
   email: '',
   password: '',
+  role: 'user',
   departmentId: '',
   tierId: '',
   employmentDate: '',
@@ -45,6 +47,10 @@ const UserManagement = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [selectedUserDetail, setSelectedUserDetail] = useState(null);
+
+  const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
+  const canEditUsers = canEditAdminUsers(currentUser?.role);
+  const isManagerView = !canEditUsers;
 
   useEffect(() => {
     const bootstrap = async () => {
@@ -91,10 +97,10 @@ const UserManagement = () => {
 
       if (editingUser) {
         await adminAPI.updateUser(editingUser.id, payload);
-        alert('อัปเดตข้อมูลพนักงานเรียบร้อย');
+        alert('อัปเดตข้อมูลผู้ใช้งานเรียบร้อย');
       } else {
         await adminAPI.createUser(payload);
-        alert('เพิ่มพนักงานเรียบร้อย');
+        alert('เพิ่มผู้ใช้งานเรียบร้อย');
       }
 
       setShowUserModal(false);
@@ -103,12 +109,12 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       console.error('Save user error:', error);
-      alert(error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลผู้ใช้ได้');
+      alert(error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลผู้ใช้งานได้');
     }
   };
 
   const handleDeleteUser = async (id, name) => {
-    if (!window.confirm(`ต้องการลบผู้ใช้ "${name}" ใช่หรือไม่?`)) {
+    if (!window.confirm(`ต้องการลบผู้ใช้งาน "${name}" ใช่หรือไม่?`)) {
       return;
     }
 
@@ -117,7 +123,7 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       console.error('Delete user error:', error);
-      alert(error.response?.data?.message || 'ลบผู้ใช้ไม่สำเร็จ');
+      alert(error.response?.data?.message || 'ลบผู้ใช้งานไม่สำเร็จ');
     }
   };
 
@@ -148,6 +154,7 @@ const UserManagement = () => {
       name: user.name,
       email: user.email,
       password: '',
+      role: user.role || 'user',
       departmentId: user.departmentId || '',
       tierId: user.tierId || '',
       employmentDate: formatDateForInput(user.employmentDate),
@@ -171,7 +178,7 @@ const UserManagement = () => {
   };
 
   const handleTierDelete = async (id, name) => {
-    if (!window.confirm(`ต้องการลบระดับผู้ใช้งาน "${name}" ใช่หรือไม่?`)) {
+    if (!window.confirm(`ต้องการลบระดับ "${name}" ใช่หรือไม่?`)) {
       return;
     }
 
@@ -180,7 +187,7 @@ const UserManagement = () => {
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete tier error:', error);
-      alert(error.response?.data?.message || 'ลบระดับผู้ใช้งานไม่สำเร็จ');
+      alert(error.response?.data?.message || 'ลบระดับไม่สำเร็จ');
     }
   };
 
@@ -203,9 +210,10 @@ const UserManagement = () => {
   ), [searchTerm, selectedDepartment, selectedTier, users]);
 
   const columns = [
-    { label: 'พนักงาน' },
+    { label: 'ผู้ใช้งาน' },
+    { label: 'Role ระบบ' },
     { label: 'แผนก' },
-    { label: 'ระดับ' },
+    { label: 'ระดับผู้เรียน' },
     { label: 'เริ่มงาน' },
     { label: 'คอร์สที่จบ', className: 'text-center' },
     { label: 'แต้มสะสม', className: 'text-right' },
@@ -215,22 +223,28 @@ const UserManagement = () => {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title="ผู้ใช้งานระบบ"
-        subtitle="เพิ่มพนักงาน จัดการแผนกและระดับผู้ใช้งาน และดูประวัติการเรียนรายบุคคลได้จากหน้านี้"
+        title={isManagerView ? 'พนักงานในแผนก' : 'ผู้ใช้งานระบบ'}
+        subtitle={isManagerView
+          ? `ดูข้อมูลผู้ใช้งานเฉพาะแผนก ${currentUser?.department || 'ของคุณ'} และตรวจสอบประวัติการเรียนกับ Point ได้ในที่เดียว`
+          : 'เพิ่มผู้ใช้งาน จัดการแผนก/ระดับ และดูประวัติการเรียนกับ Point รายบุคคล'}
         actions={(
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => setShowDepartmentModal(true)} className="btn btn-outline">
-              <Settings2 size={18} />
-              จัดการแผนก
-            </button>
-            <button onClick={() => setShowTierModal(true)} className="btn btn-outline">
-              <Sparkles size={18} />
-              จัดการระดับผู้ใช้งาน
-            </button>
-            <button onClick={openAddUser} className="btn btn-primary">
-              <Plus size={18} />
-              เพิ่มผู้ใช้งาน
-            </button>
+            {canEditUsers && (
+              <>
+                <button type="button" onClick={() => setShowDepartmentModal(true)} className="btn btn-outline">
+                  <Settings2 size={18} />
+                  จัดการแผนก
+                </button>
+                <button type="button" onClick={() => setShowTierModal(true)} className="btn btn-outline">
+                  <Sparkles size={18} />
+                  จัดการระดับผู้เรียน
+                </button>
+                <button type="button" onClick={openAddUser} className="btn btn-primary">
+                  <Plus size={18} />
+                  เพิ่มผู้ใช้งาน
+                </button>
+              </>
+            )}
           </div>
         )}
       />
@@ -244,45 +258,50 @@ const UserManagement = () => {
         setFormData={setFormData}
         departments={departments}
         tiers={tiers}
+        canEditRole={canEditUsers}
       />
 
-      <ReferenceDataModal
-        isOpen={showDepartmentModal}
-        title="จัดการแผนก"
-        description="เพิ่ม แก้ไข หรือลบแผนกที่ใช้กับการมองเห็นคอร์สและการสร้างผู้ใช้งาน"
-        itemLabel="แผนก"
-        items={departments}
-        loading={referenceLoading}
-        onClose={() => setShowDepartmentModal(false)}
-        onCreate={async (payload) => {
-          await adminAPI.createDepartment(payload);
-          await Promise.all([fetchReferenceData(), fetchUsers()]);
-        }}
-        onUpdate={async (id, payload) => {
-          await adminAPI.updateDepartment(id, payload);
-          await Promise.all([fetchReferenceData(), fetchUsers()]);
-        }}
-        onDelete={handleDepartmentDelete}
-      />
+      {canEditUsers && (
+        <>
+          <ReferenceDataModal
+            isOpen={showDepartmentModal}
+            title="จัดการแผนก"
+            description="เพิ่ม แก้ไข หรือลบแผนกที่ใช้กับการกำหนดผู้ใช้งานและขอบเขตการมองเห็นคอร์ส"
+            itemLabel="แผนก"
+            items={departments}
+            loading={referenceLoading}
+            onClose={() => setShowDepartmentModal(false)}
+            onCreate={async (payload) => {
+              await adminAPI.createDepartment(payload);
+              await Promise.all([fetchReferenceData(), fetchUsers()]);
+            }}
+            onUpdate={async (id, payload) => {
+              await adminAPI.updateDepartment(id, payload);
+              await Promise.all([fetchReferenceData(), fetchUsers()]);
+            }}
+            onDelete={handleDepartmentDelete}
+          />
 
-      <ReferenceDataModal
-        isOpen={showTierModal}
-        title="จัดการระดับผู้ใช้งาน"
-        description="กำหนดระดับผู้ใช้งาน เช่น ทั้งหมด Supervisor Manager และเพิ่มได้ตามโครงสร้างองค์กร"
-        itemLabel="ระดับ"
-        items={tiers}
-        loading={referenceLoading}
-        onClose={() => setShowTierModal(false)}
-        onCreate={async (payload) => {
-          await adminAPI.createTier(payload);
-          await Promise.all([fetchReferenceData(), fetchUsers()]);
-        }}
-        onUpdate={async (id, payload) => {
-          await adminAPI.updateTier(id, payload);
-          await Promise.all([fetchReferenceData(), fetchUsers()]);
-        }}
-        onDelete={handleTierDelete}
-      />
+          <ReferenceDataModal
+            isOpen={showTierModal}
+            title="จัดการระดับผู้เรียน"
+            description="ระดับผู้เรียนจะถูกใช้แบบลำดับขั้น เช่น ตั้งแต่ Supervisor จะครอบคลุม Manager และ Director ที่สูงกว่า"
+            itemLabel="ระดับ"
+            items={tiers}
+            loading={referenceLoading}
+            onClose={() => setShowTierModal(false)}
+            onCreate={async (payload) => {
+              await adminAPI.createTier(payload);
+              await Promise.all([fetchReferenceData(), fetchUsers()]);
+            }}
+            onUpdate={async (id, payload) => {
+              await adminAPI.updateTier(id, payload);
+              await Promise.all([fetchReferenceData(), fetchUsers()]);
+            }}
+            onDelete={handleTierDelete}
+          />
+        </>
+      )}
 
       <UserDetailModal
         isOpen={showDetailModal}
@@ -345,6 +364,7 @@ const UserManagement = () => {
                 <div className="font-medium text-sm">{user.name}</div>
                 <div className="mt-0.5 text-xs text-muted">{user.email}</div>
               </td>
+              <td className="p-4 text-sm text-muted">{getRoleLabel(user.role)}</td>
               <td className="p-4 text-sm text-muted">{user.department || '-'}</td>
               <td className="p-4 text-sm text-muted">{user.tier || '-'}</td>
               <td className="p-4 text-sm text-muted">
@@ -366,20 +386,25 @@ const UserManagement = () => {
                     <Eye size={14} />
                     ดูประวัติ
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => openEditUser(user)}
-                    className="text-sm font-medium text-gray-600 hover:underline"
-                  >
-                    แก้ไข
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteUser(user.id, user.name)}
-                    className="text-sm font-medium text-red-500 hover:underline"
-                  >
-                    ลบ
-                  </button>
+                  {canEditUsers && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => openEditUser(user)}
+                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:underline"
+                      >
+                        <Edit size={14} />
+                        แก้ไข
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteUser(user.id, user.name)}
+                        className="text-sm font-medium text-red-500 hover:underline"
+                      >
+                        ลบ
+                      </button>
+                    </>
+                  )}
                 </div>
               </td>
             </tr>

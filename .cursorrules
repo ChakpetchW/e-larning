@@ -7,3 +7,6 @@
 - When navigating from a lesson page back to its course detail page, use `navigate(courseDetailPath, { replace: true })` so the browser Back action returns to the course list instead of reopening the lesson.
 - The top back button on course detail pages must always navigate statically to `/user/courses`, never use `navigate(-1)` or browser history.
 - When the route changes, reset the active scroll container and `window` back to top so each new page starts at the top of the content.
+- **Large Desktop Layout**: Maintain a responsive sidebar (`md:260px / xl:280px / 2xl:300px`) and use wider containers (`max-w-[1450px]` - `1600px`) for ultra-wide displays.
+- **Container Gutters**: Ensure all main content sections have internal padding (e.g., `xl:px-10 2xl:px-12`) so content never "sticks" to the edges of its max-width container on high-resolution monitors.
+- **Document Viewer**: Simplify the desktop UI by hiding the bottom footer bar; integrate the "Mark as Complete" logic into the top close button so closing the viewer automatically saves progress.

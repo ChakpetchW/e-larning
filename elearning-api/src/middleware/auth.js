@@ -26,7 +26,16 @@ const verifyAdmin = (req, res, next) => {
   }
 };
 
+const verifyAdminPanelAccess = (req, res, next) => {
+  if (req.user && ['admin', 'manager'].includes(req.user.role)) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Admin panel access required' });
+  }
+};
+
 module.exports = {
   verifyToken,
-  verifyAdmin
+  verifyAdmin,
+  verifyAdminPanelAccess
 };

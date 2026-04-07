@@ -71,9 +71,12 @@ model Category {
   name      String   @unique
   icon      String?  @default("Grid")
   order     Int      @default(0)
+  visibleToAll Boolean @default(true)
   createdAt DateTime @default(now())
 
   courses Course[]
+  departmentAccess CategoryDepartmentAccess[]
+  tierAccess       CategoryTierAccess[]
 }
 
 model Department {
@@ -84,6 +87,7 @@ model Department {
 
   users        User[]                 @relation("DepartmentUsers")
   courseAccess CourseDepartmentAccess[]
+  categoryAccess CategoryDepartmentAccess[]
 }
 
 model Tier {
@@ -94,6 +98,29 @@ model Tier {
 
   users        User[]
   courseAccess CourseTierAccess[]
+  categoryAccess CategoryTierAccess[]
+}
+
+model CategoryDepartmentAccess {
+  categoryId   String
+  departmentId String
+  createdAt    DateTime @default(now())
+
+  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@id([categoryId, departmentId])
+}
+
+model CategoryTierAccess {
+  categoryId String
+  tierId     String
+  createdAt  DateTime @default(now())
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tier     Tier     @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@id([categoryId, tierId])
 }
 
 model CourseDepartmentAccess {
