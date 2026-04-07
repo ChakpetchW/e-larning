@@ -81,32 +81,34 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
       </div>
 
       <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-        <p className="text-[11px] font-bold tracking-[0.03em] text-slate-500">
-          {eyebrowLabel}
-        </p>
-
-        <h3 className="mt-2 line-clamp-2 min-h-[3.15rem] text-[1.05rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-primary">
-          {course.title}
-        </h3>
-
-        {isInProgress && progressPercent > 0 && (
-          <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <span className="text-[11px] font-bold tracking-[0.04em] text-slate-500">
-                Progress
-              </span>
-              <span className="text-sm font-black text-slate-800">{progressPercent}%</span>
+        <div className="flex-1">
+          <p className="text-[11px] font-bold tracking-[0.03em] text-slate-500">
+            {eyebrowLabel}
+          </p>
+  
+          <h3 className="mt-2 line-clamp-2 min-h-[3.15rem] text-[1.05rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-primary">
+            {course.title}
+          </h3>
+  
+          {isInProgress && progressPercent > 0 && (
+            <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <span className="text-[11px] font-bold tracking-[0.04em] text-slate-500">
+                  Progress
+                </span>
+                <span className="text-sm font-black text-slate-800">{progressPercent}%</span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-primary transition-[width] duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="h-full rounded-full bg-primary transition-[width] duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        <div className="mt-auto flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
+        <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-slate-500">
             <span className="inline-flex items-center gap-1.5">
               <Clock size={13} strokeWidth={2.3} />
