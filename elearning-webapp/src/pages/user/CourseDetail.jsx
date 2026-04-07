@@ -181,7 +181,7 @@ const CourseDetail = () => {
         <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(2,6,23,0.92),rgba(15,23,42,0.86),rgba(15,23,42,0.48))]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(79,70,229,0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.12),transparent_26%)]" />
 
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-6 md:gap-8">
+        <div className="relative z-10 mx-auto flex max-w-[1300px] flex-col gap-6 md:gap-8">
           <div className="flex items-center gap-4 text-sm font-bold text-slate-300">
             <button type="button" onClick={handleReturnToCourseList} className="flex items-center gap-1 transition-colors hover:text-white">
               <ArrowLeft size={16} /> กลับ
@@ -192,7 +192,7 @@ const CourseDetail = () => {
             </span>
           </div>
 
-          <div className="grid gap-8 md:gap-10 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
+          <div className="grid gap-8 md:gap-10 lg:grid-cols-[minmax(0,1.5fr)_280px] lg:items-end">
             <div className="max-w-3xl">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/12 px-4 py-1.5 text-[12px] font-black tracking-[0.05em] text-primary-light">
                 <BookOpen size={14} />
@@ -253,7 +253,7 @@ const CourseDetail = () => {
         </div>
       </section>
 
-      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-6xl flex-col-reverse gap-6 px-4 sm:px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-0">
+      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-[1300px] flex-col-reverse gap-6 px-4 sm:px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-0">
         <div className="flex w-full flex-col gap-6 md:gap-8 lg:min-w-0 lg:flex-1">
           <section className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:rounded-[2rem] md:p-8">
             <div className="mb-6 flex items-center justify-between gap-4">
@@ -464,7 +464,7 @@ const CourseDetail = () => {
           </section>
         </div>
 
-        <aside className="w-full shrink-0 lg:w-[360px]">
+        <aside className="w-full shrink-0 lg:w-[320px]">
           <div 
             className={`sticky top-24 overflow-hidden rounded-[2rem] border bg-white transition-transform duration-500 ${isScrolled ? 'lg:-translate-y-3' : ''}`}
             style={{ borderColor: 'rgba(226, 232, 240, 0.5)', boxShadow: 'var(--shadow-card-hover)' }}
