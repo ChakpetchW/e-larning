@@ -9,6 +9,8 @@ import {
   TrendingUp,
   User2,
   X,
+  FileDown,
+  Filter,
 } from 'lucide-react';
 
 const formatDate = (value, options = {}) => {
@@ -25,10 +27,21 @@ const formatDate = (value, options = {}) => {
 
 const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
   const [activeTab, setActiveTab] = useState('learning');
+  const [filterMonth, setFilterMonth] = useState('ALL');
+  const [filterYear, setFilterYear] = useState('ALL');
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  const months = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  ];
 
   useEffect(() => {
     if (isOpen) {
       setActiveTab('learning');
+      setFilterMonth('ALL');
+      setFilterYear('ALL');
     }
   }, [isOpen, detail?.id]);
 
@@ -38,6 +51,69 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
 
   const enrollments = detail?.enrollments || [];
   const pointsHistory = detail?.pointsHistory || [];
+
+  const filteredEnrollments = enrollments.filter(e => {
+    const date = new Date(e.startedAt);
+    const monthMatch = filterMonth === 'ALL' || date.getMonth() === parseInt(filterMonth);
+    const yearMatch = filterYear === 'ALL' || date.getFullYear() === parseInt(filterYear);
+    return monthMatch && yearMatch;
+  });
+
+  const filteredPointsHistory = pointsHistory.filter(e => {
+    const date = new Date(e.createdAt);
+    const monthMatch = filterMonth === 'ALL' || date.getMonth() === parseInt(filterMonth);
+    const yearMatch = filterYear === 'ALL' || date.getFullYear() === parseInt(filterYear);
+    return monthMatch && yearMatch;
+  });
+
+  const handleExport = () => {
+    const data = activeTab === 'learning' ? filteredEnrollments : filteredPointsHistory;
+    if (data.length === 0) {
+      alert('ไม่มีข้อมูลสำหรับการส่งออก');
+      return;
+    }
+
+    // UTF-8 BOM for Thai characters support in Excel
+    let csvContent = "\uFEFF"; 
+    
+    // Table Headers and Info
+    csvContent += `ประวัติผู้ใช้งานรายบุคคล (${activeTab === 'learning' ? 'ประวัติการเรียน' : 'ประวัติ Point'})\n`;
+    csvContent += `พนักงาน,${detail.name}\n`;
+    csvContent += `อีเมล,${detail.email}\n`;
+    csvContent += `แผนก,${detail.department || '-'}\n`;
+    csvContent += `ระดับ,${detail.tier?.name || detail.tier || '-'}\n`;
+    csvContent += `แต้มคงเหลือ,${detail.pointsBalance || 0}\n`;
+    csvContent += `วันที่ส่งออก,${new Date().toLocaleString('th-TH')}\n\n`;
+
+    if (activeTab === 'learning') {
+      csvContent += `คอร์ส,หมวดหมู่,เริ่มเรียน,เรียนจบ,ความคืบหน้า,สถานะ\n`;
+      data.forEach(item => {
+        const started = item.startedAt ? new Date(item.startedAt).toLocaleString('th-TH') : '-';
+        const completed = item.completedAt ? new Date(item.completedAt).toLocaleString('th-TH') : '-';
+        const status = item.status === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน';
+        csvContent += `"${item.course.title}","${item.course.categoryName || '-'}","${started}","${completed}","${Math.round(item.progressPercent || 0)}%","${status}"\n`;
+      });
+    } else {
+      csvContent += `ประเภท,ที่มา/การใช้งาน,หมายเหตุ,Point,เวลา\n`;
+      data.forEach(item => {
+        const time = item.createdAt ? new Date(item.createdAt).toLocaleString('th-TH') : '-';
+        const type = item.points >= 0 ? 'ได้รับแต้ม' : 'ใช้แต้ม';
+        csvContent += `"${type}","${item.sourceLabel}","${item.note || '-'}","${item.points}","${time}"\n`;
+      });
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    const fileName = `Export_${activeTab === 'learning' ? 'Learning' : 'Points'}_${detail.name}_${new Date().toLocaleDateString('th-TH')}.csv`;
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
@@ -112,33 +188,71 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
 
               <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
                 <div className="border-b border-slate-100 px-5 py-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                       <h4 className="text-base font-black text-slate-900">ข้อมูลย้อนหลัง</h4>
                       <p className="mt-1 text-sm text-slate-500">สลับดูประวัติการเรียนหรือประวัติ Point ได้ตามต้องการ</p>
                     </div>
-                    <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* Filter Controls */}
+                      <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary/20">
+                        <Filter size={14} className="text-slate-400" />
+                        <select 
+                          className="bg-transparent text-xs font-bold text-slate-600 outline-none"
+                          value={filterMonth}
+                          onChange={(e) => setFilterMonth(e.target.value)}
+                        >
+                          <option value="ALL">ทุกเดือน</option>
+                          {months.map((m, i) => (
+                            <option key={i} value={i}>{m}</option>
+                          ))}
+                        </select>
+                        <div className="h-4 w-[1px] bg-slate-200" />
+                        <select 
+                          className="bg-transparent text-xs font-bold text-slate-600 outline-none"
+                          value={filterYear}
+                          onChange={(e) => setFilterYear(e.target.value)}
+                        >
+                          <option value="ALL">ทุกปี</option>
+                          {years.map(y => (
+                            <option key={y} value={y}>{y}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('learning')}
+                          className={`rounded-2xl px-4 py-2 text-sm font-bold transition-colors ${activeTab === 'learning' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
+                        >
+                          ประวัติการเรียน
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('points')}
+                          className={`rounded-2xl px-4 py-2 text-sm font-bold transition-colors ${activeTab === 'points' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
+                        >
+                          ประวัติ Point
+                        </button>
+                      </div>
+
                       <button
                         type="button"
-                        onClick={() => setActiveTab('learning')}
-                        className={`rounded-2xl px-4 py-2 text-sm font-bold transition-colors ${activeTab === 'learning' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
+                        onClick={handleExport}
+                        className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-600 transition-all hover:bg-emerald-100 active:scale-95"
                       >
-                        ประวัติการเรียน
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('points')}
-                        className={`rounded-2xl px-4 py-2 text-sm font-bold transition-colors ${activeTab === 'points' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
-                      >
-                        ประวัติ Point
+                        <FileDown size={18} />
+                        <span>Export Excel</span>
                       </button>
                     </div>
                   </div>
                 </div>
 
                 {activeTab === 'learning' ? (
-                  enrollments.length === 0 ? (
-                    <div className="px-5 py-12 text-center text-sm text-slate-500">ยังไม่มีประวัติการลงเรียน</div>
+                  filteredEnrollments.length === 0 ? (
+                    <div className="px-5 py-12 text-center text-sm text-slate-500">ไม่พบประวัติการลงเรียนตามเงื่อนไขที่เลือก</div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[760px] border-collapse text-left">
@@ -153,7 +267,7 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {enrollments.map((enrollment) => (
+                          {filteredEnrollments.map((enrollment) => (
                             <tr key={enrollment.id} className="border-b border-slate-100 last:border-b-0">
                               <td className="px-5 py-4">
                                 <div className="font-bold text-slate-900">{enrollment.course.title}</div>
@@ -202,8 +316,8 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
                       </table>
                     </div>
                   )
-                ) : pointsHistory.length === 0 ? (
-                  <div className="px-5 py-12 text-center text-sm text-slate-500">ยังไม่มีประวัติ Point</div>
+                ) : filteredPointsHistory.length === 0 ? (
+                  <div className="px-5 py-12 text-center text-sm text-slate-500">ไม่พบประวัติ Point ตามเงื่อนไขที่เลือก</div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] border-collapse text-left">
@@ -217,7 +331,7 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {pointsHistory.map((entry) => (
+                        {filteredPointsHistory.map((entry) => (
                           <tr key={entry.id} className="border-b border-slate-100 last:border-b-0">
                             <td className="px-5 py-4">
                               <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold ${
