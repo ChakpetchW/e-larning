@@ -81,6 +81,29 @@ const DocViewer = ({
     };
   }, [url]);
 
+  const handleClose = async () => {
+    if (submitting) return;
+
+    // If already completed, just close
+    if (completionReady) {
+      onClose();
+      return;
+    }
+
+    // Try to mark as complete on close for Desktop (where footer is hidden)
+    // or if the user clicks X on mobile
+    try {
+      setSubmitting(true);
+      await onComplete?.();
+      onClose();
+    } catch (err) {
+      console.error('Auto-complete on close error:', err);
+      onClose(); // Still close even if completion fails
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleFinishReading = async () => {
     if (submitting) return;
 
@@ -141,10 +164,11 @@ const DocViewer = ({
             </div>
           </div>
           <button
-            onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20 active:scale-95"
+            onClick={handleClose}
+            disabled={submitting}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20 active:scale-95 disabled:opacity-50"
           >
-            <X size={18} />
+            {submitting ? <Loader2 size={16} className="animate-spin" /> : <X size={18} />}
           </button>
         </div>
 
@@ -235,8 +259,8 @@ const DocViewer = ({
           />
         </div>
 
-        {/* Footer - Compact Single Button */}
-        <div className="flex shrink-0 flex-col border-t border-white/10 bg-slate-950 p-6 pb-8 md:p-8">
+        {/* Footer - Compact Single Button (Mobile Only) */}
+        <div className="flex md:hidden shrink-0 flex-col border-t border-white/10 bg-slate-950 p-6 pb-8 md:p-8">
           <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
              {completionError && <p className="text-center text-xs font-medium text-red-400">{completionError}</p>}
              

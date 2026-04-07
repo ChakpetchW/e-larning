@@ -43,12 +43,12 @@ const UserLayout = () => {
     <div className="user-layout flex flex-col md:flex-row bg-transparent">
       
       {/* Desktop Sidebar (Hidden on mobile) */}
-      <aside className="hidden md:flex w-[280px] flex-col bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-gray-100/80 my-5 ml-5 h-[calc(100vh-2.5rem)] z-20 overflow-hidden shrink-0">
+      <aside className="hidden md:flex w-[260px] xl:w-[280px] 2xl:w-[300px] flex-col bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-gray-100/80 my-5 ml-5 h-[calc(100vh-2.5rem)] z-20 overflow-hidden shrink-0">
         <div className="p-6 flex items-center gap-3 border-b border-gray-100 shrink-0">
           <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm">
             <BookMarked size={20} strokeWidth={2.5}/>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-gray-900">LMS Connect</h1>
+          <h1 className="text-xl font-bold tracking-tight text-gray-900 leading-none">LMS Connect</h1>
         </div>
         
         <div className="p-4 border-b border-gray-100 shrink-0">
@@ -56,32 +56,32 @@ const UserLayout = () => {
             <Gift size={16} strokeWidth={3} />
             <span className="text-sm">{points.toLocaleString()} แต้ม</span>
           </div>
-          <div className="mt-3 text-center">
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">ผู้ใช้งาน</p>
-            <p className="font-bold text-sm text-gray-800 truncate">{user?.name || 'Loading...'}</p>
+          <div className="mt-3 text-center px-2">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.08em] mb-0.5">ผู้ใช้งาน</p>
+            <p className="font-extrabold text-[15px] text-gray-900 tracking-tight truncate">{user?.name || 'Loading...'}</p>
           </div>
         </div>
 
         <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto no-scrollbar">
-          <NavLink to="/user/home" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 group-hover:scale-105'}`}>
-            <Home size={20} /> <span>หน้าแรก</span>
+          <NavLink to="/user/home" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
+            <Home size={20} /> <span className="font-bold">หน้าแรก</span>
           </NavLink>
           
-          <NavLink to="/user/courses" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 group-hover:scale-105'}`}>
-            <BookOpen size={20} /> <span>คอร์สเรียน</span>
+          <NavLink to="/user/courses" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
+            <BookOpen size={20} /> <span className="font-bold">คอร์สเรียน</span>
           </NavLink>
           
-          <NavLink to="/user/rewards" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 group-hover:scale-105'}`}>
-            <Gift size={20} /> <span>ของรางวัล</span>
+          <NavLink to="/user/rewards" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
+            <Gift size={20} /> <span className="font-bold">ของรางวัล</span>
           </NavLink>
           
-          <NavLink to="/user/profile" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 group-hover:scale-105'}`}>
-            <User size={20} /> <span>โปรไฟล์</span>
+          <NavLink to="/user/profile" className={({isActive}) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
+            <User size={20} /> <span className="font-bold">โปรไฟล์</span>
           </NavLink>
         </nav>
         
         <div className="p-4 border-t border-gray-100 shrink-0">
-          <button onClick={handleLogout} className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-red-500 hover:bg-red-50 w-full transition-colors border border-transparent hover:border-red-100">
+          <button onClick={handleLogout} className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-red-500 hover:bg-red-50 w-full transition-all border border-transparent hover:border-red-100 active:scale-95">
             <LogOut size={18} /> <span>ออกจากระบบ</span>
           </button>
         </div>
@@ -114,7 +114,7 @@ const UserLayout = () => {
 
         {/* Main Content Area */}
         <main ref={mainRef} className="user-main flex-1 min-h-0 no-scrollbar bg-transparent w-full">
-          <div className="user-main-inner md:!max-w-[1400px] md:!px-12 md:!pt-12 md:!pb-12">
+          <div className="user-main-inner md:!max-w-[1600px] md:!px-8 lg:!px-12 md:!pt-12 md:!pb-12">
             <Outlet />
           </div>
         </main>
