@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { adminAPI } from '../../utils/api';
 import { Save, Settings, Target, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { canEditAdminUsers } from '../../utils/roles';
+import { isSuperAdmin } from '../../utils/roles';
 
 const SystemSettings = () => {
   const [settings, setSettings] = useState({
@@ -14,7 +14,15 @@ const SystemSettings = () => {
   const [message, setMessage] = useState(null);
 
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
-  const isFullAdmin = canEditAdminUsers(currentUser);
+  
+  if (!isSuperAdmin(currentUser)) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
+        <h2 className="text-2xl font-black mb-2">เข้าถึงไม่ได้</h2>
+        <p className="text-muted">คุณไม่มีสิทธิ์ในการตั้งค่าระบบ</p>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const fetchSettings = async () => {

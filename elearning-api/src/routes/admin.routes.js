@@ -34,10 +34,10 @@ router.put('/categories/reorder', adminController.reorderCategories);
 router.put('/categories/:id', adminController.updateCategory);
 router.delete('/categories/:id', adminController.deleteCategory);
 
-router.get('/rewards', adminController.getAdminRewards);
-router.post('/rewards', adminController.createReward);
-router.put('/rewards/:id', adminController.updateReward);
-router.delete('/rewards/:id', adminController.deleteReward);
+router.get('/rewards', verifySuperAdmin, adminController.getAdminRewards);
+router.post('/rewards', verifySuperAdmin, adminController.createReward);
+router.put('/rewards/:id', verifySuperAdmin, adminController.updateReward);
+router.delete('/rewards/:id', verifySuperAdmin, adminController.deleteReward);
 
 router.get('/redeems', adminController.getRedeemRequests);
 router.put('/redeems/:id/status', adminController.updateRedeemStatus);

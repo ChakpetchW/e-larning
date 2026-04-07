@@ -65,11 +65,11 @@ const AdminLayout = () => {
       icon: <Users size={20} />,
       label: isFullAdmin ? 'ผู้ใช้งานระบบ' : 'พนักงานในแผนก',
     },
-    { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
     { path: '/admin/redeems', icon: <Target size={20} />, label: 'รายการ Redeem' },
     { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงาน' },
     ...(isFullAdmin
       ? [
+          { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
           {
             path: '/admin/settings',
             icon: <Settings size={20} />,

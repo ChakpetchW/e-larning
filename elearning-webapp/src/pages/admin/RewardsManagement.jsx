@@ -3,10 +3,25 @@ import { Plus, Edit, Trash2, ImageIcon } from 'lucide-react';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import RewardModal from '../../components/admin/RewardModal';
+import { isSuperAdmin } from '../../utils/roles';
 
 const RewardsManagement = () => {
   const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+  
+  if (!isSuperAdmin(currentUser)) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
+        <div className="bg-red-50 text-red-500 p-4 rounded-2xl mb-4">
+          <Plus size={48} className="rotate-45" />
+        </div>
+        <h2 className="text-2xl font-black mb-2">เข้าถึงไม่ได้</h2>
+        <p className="text-muted max-w-md">คุณไม่มีสิทธิ์ในการจัดการของรางวัลในระบบ กรุณาติดต่อ Superadmin</p>
+      </div>
+    );
+  }
   
   // Modal State
   const [showModal, setShowModal] = useState(false);
