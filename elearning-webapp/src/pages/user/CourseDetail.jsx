@@ -173,7 +173,7 @@ const CourseDetail = () => {
 
   return (
     <div className="relative -mx-6 -mt-6 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
-      <section className="relative overflow-hidden bg-slate-950 px-4 pb-14 pt-8 text-white sm:px-5 md:px-8 md:pb-28 md:pt-14 xl:px-0">
+      <section className="relative overflow-hidden bg-slate-950 px-4 pb-14 pt-8 text-white sm:px-5 md:px-8 md:pb-28 md:pt-14 xl:px-10 2xl:px-12">
         <div
           className="absolute inset-0 scale-110 bg-cover bg-center bg-no-repeat opacity-60 blur-[56px]"
           style={{ backgroundImage: `url("${course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}")` }}
@@ -181,7 +181,7 @@ const CourseDetail = () => {
         <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(2,6,23,0.92),rgba(15,23,42,0.86),rgba(15,23,42,0.48))]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(79,70,229,0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.12),transparent_26%)]" />
 
-        <div className="relative z-10 mx-auto flex max-w-[1300px] flex-col gap-6 md:gap-8">
+        <div className="relative z-10 mx-auto flex max-w-[1450px] flex-col gap-6 md:gap-8">
           <div className="flex items-center gap-4 text-sm font-bold text-slate-300">
             <button type="button" onClick={handleReturnToCourseList} className="flex items-center gap-1 transition-colors hover:text-white">
               <ArrowLeft size={16} /> กลับ
@@ -253,7 +253,7 @@ const CourseDetail = () => {
         </div>
       </section>
 
-      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-[1300px] flex-col-reverse gap-6 px-4 sm:px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-0">
+      <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-[1450px] flex-col-reverse gap-6 px-4 sm:px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-10 2xl:px-12">
         <div className="flex w-full flex-col gap-6 md:gap-8 lg:min-w-0 lg:flex-1">
           <section className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:rounded-[2rem] md:p-8">
             <div className="mb-6 flex items-center justify-between gap-4">
