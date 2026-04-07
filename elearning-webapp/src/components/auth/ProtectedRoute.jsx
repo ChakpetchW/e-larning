@@ -11,11 +11,15 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
   }
 
   const user = JSON.parse(userStr);
+  const isAdminRoute = allowedRoles.includes('admin') || allowedRoles.includes('manager');
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    if (adminOnly && !canAccessAdminPanel(user)) {
-      return <Navigate to="/profile" replace />;
+    // Check if user has Tier-based admin access for admin routes
+    if (isAdminRoute && canAccessAdminPanel(user)) {
+      return <Outlet />;
     }
+
+    // Redirect to appropriate home page based on overall access
     return canAccessAdminPanel(user)
       ? <Navigate to="/admin/dashboard" replace />
       : <Navigate to="/user/home" replace />;
