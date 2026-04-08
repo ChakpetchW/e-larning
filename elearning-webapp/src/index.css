@@ -41,25 +41,17 @@
     font-size: 18px !important;
   }
 
-  button,
-  [role="button"],
-  [role="dialog"],
-  a,
-  input,
-  select,
-  textarea,
-  div,
-  span,
-  section,
-  [tabindex] {
+  /* The Ultimate Focus Reset - Kill all default rings/outlines everywhere */
+  *:focus,
+  *:focus-visible,
+  *:focus-within {
     outline: none !important;
     box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent;
   }
 
-  /* Custom focus state only for keyboard users */
+  /* Branded focus ring ONLY for keyboard navigation */
   :focus-visible {
-    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.2) !important;
   }
 }
 
