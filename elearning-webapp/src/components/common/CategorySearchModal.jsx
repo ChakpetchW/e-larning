@@ -120,33 +120,52 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar bg-slate-50/30 overscroll-contain">
           {filteredCategories.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
-              {filteredCategories.map((category) => {
-                const Icon = getCategoryIcon(category.icon);
-                const count = getCourseCount(category.id);
+            <div className="space-y-10">
+              {[
+                { key: 'LEADERSHIP', label: 'Leadership', icon: '👔', color: 'indigo' },
+                { key: 'FUNCTION', label: 'Function', icon: '⚙️', color: 'slate' },
+                { key: 'INNOVATION', label: 'Innovation', icon: '💡', color: 'amber' },
+              ].map((group) => {
+                const groupCategories = filteredCategories.filter(cat => (cat.type || 'FUNCTION') === group.key);
+                if (groupCategories.length === 0) return null;
 
                 return (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() => {
-                      onSelect(category.name);
-                      handleClose();
-                    }}
-                    className="group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-[2rem] border border-slate-100 bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                  >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/10 group-hover:text-primary">
-                      <Icon size={24} />
+                  <div key={group.key} className="space-y-4">
+                    <div className="flex items-center gap-2 px-1">
+                      <span className="text-lg">{group.icon}</span>
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">{group.label}</h3>
                     </div>
-                    <div className="min-w-0 w-full flex-1">
-                      <h4 className="break-words text-sm md:text-base font-black leading-tight text-slate-900 transition-colors group-hover:text-primary line-clamp-2">
-                        {category.name}
-                      </h4>
-                      <p className="mt-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                        {count} Courses
-                      </p>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
+                      {groupCategories.map((category) => {
+                        const Icon = getCategoryIcon(category.icon);
+                        const count = getCourseCount(category.id);
+
+                        return (
+                          <button
+                            key={category.id}
+                            type="button"
+                            onClick={() => {
+                              onSelect(category.name);
+                              handleClose();
+                            }}
+                            className="group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-[2rem] border border-slate-100 bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                          >
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/10 group-hover:text-primary">
+                              <Icon size={24} />
+                            </div>
+                            <div className="min-w-0 w-full flex-1">
+                              <h4 className="break-words text-sm md:text-base font-black leading-tight text-slate-900 transition-colors group-hover:text-primary line-clamp-2">
+                                {category.name}
+                              </h4>
+                              <p className="mt-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                {count} Courses
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

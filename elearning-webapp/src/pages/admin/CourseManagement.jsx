@@ -62,7 +62,7 @@ const CourseManagement = () => {
   const [lessonForm, setLessonForm] = useState(getDefaultLessonForm());
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [categoryForm, setCategoryForm] = useState({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] });
+  const [categoryForm, setCategoryForm] = useState({ name: '', icon: 'Grid', type: 'FUNCTION', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] });
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [uploading, setUploading] = useState(false);
 
@@ -422,7 +422,7 @@ const CourseManagement = () => {
               <button 
                 type="button"
                 aria-label="ปิดหน้าต่างจัดการหมวดหมู่"
-                onClick={() => { setShowCategoryModal(false); setEditingCategoryId(null); setCategoryForm({ name: '', icon: 'Grid', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }} 
+                onClick={() => { setShowCategoryModal(false); setEditingCategoryId(null); setCategoryForm({ name: '', icon: 'Grid', type: 'FUNCTION', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }} 
                 className="text-muted hover:text-gray-800"
               >
                 ปิด
@@ -444,12 +444,37 @@ const CourseManagement = () => {
                 {editingCategoryId && (
                   <button 
                     type="button"
-                    onClick={() => { setEditingCategoryId(null); setCategoryForm({ name: '', icon: 'Grid', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }}
+                    onClick={() => { setEditingCategoryId(null); setCategoryForm({ name: '', icon: 'Grid', type: 'FUNCTION', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }}
                     className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
                   >
                     ยกเลิกการแก้ไข
                   </button>
                 )}
+              </div>
+
+              {/* Major Group Selection */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">กลุ่มหลัก (Major Group)</label>
+                <div className="flex gap-2 p-1 bg-white border border-slate-100 rounded-2xl w-fit">
+                  {[
+                    { value: 'LEADERSHIP', label: 'Leadership', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+                    { value: 'FUNCTION', label: 'Function', color: 'text-slate-600 bg-slate-50 border-slate-200' },
+                    { value: 'INNOVATION', label: 'Innovation', color: 'text-amber-600 bg-amber-50 border-amber-200' }
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setCategoryForm({ ...categoryForm, type: opt.value })}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                        categoryForm.type === opt.value
+                          ? opt.color + ' border shadow-sm scale-105'
+                          : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex flex-col gap-3 md:flex-row md:items-end">
@@ -657,7 +682,18 @@ const CourseManagement = () => {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className={`text-sm font-black tracking-tight ${isEditing ? 'text-primary' : 'text-slate-900 font-bold'}`}>
-                            {category.name}
+                            <div className="flex items-center gap-2">
+                              {category.name}
+                              {category.type && (
+                                <span className={`rounded-md px-1.5 py-0.5 text-[8px] font-black uppercase ring-1 ring-inset ${
+                                  category.type === 'LEADERSHIP' ? 'text-indigo-600 bg-indigo-50 ring-indigo-200' :
+                                  category.type === 'INNOVATION' ? 'text-amber-600 bg-amber-50 ring-amber-200' :
+                                  'text-slate-500 bg-slate-50 ring-slate-200'
+                                }`}>
+                                  {category.type}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         <div className="mt-1 flex flex-wrap gap-1">
                           {category.visibleToAll !== false ? (
@@ -704,6 +740,8 @@ const CourseManagement = () => {
                               setEditingCategoryId(category.id);
                               setCategoryForm({
                                 name: category.name,
+                                icon: category.icon || 'Grid',
+                                type: category.type || 'FUNCTION',
                                 order: category.order,
                                 visibleToAll: category.visibleToAll ?? true,
                                 visibleDepartmentIds: category.visibleDepartmentIds || [],
