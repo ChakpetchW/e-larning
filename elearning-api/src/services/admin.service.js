@@ -161,13 +161,17 @@ const getActorContext = async (authUser) => {
         }
     });
 
+    if (!actor) {
+        throw new Error('User not found');
+    }
+
     const roleWithTierAccess = actor.role === 'admin'
         ? 'admin'
         : (actor.role === 'manager' || actor.tier?.accessAdmin)
             ? 'manager'
             : 'user';
 
-    if (!actor || !ADMIN_PANEL_ROLES.includes(roleWithTierAccess)) {
+    if (!ADMIN_PANEL_ROLES.includes(roleWithTierAccess)) {
         throw new Error('Admin panel access required');
     }
 

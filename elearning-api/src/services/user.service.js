@@ -26,21 +26,12 @@ const getUserVisibilityContext = async (userId) => prisma.user.findUnique({
         tierId: true,
         tier: {
             select: {
-                name: true
+                name: true,
+                order: true
             }
         }
     }
 });
-
-const normalizeTierName = (value) => String(value || '').trim().toLowerCase();
-
-const TIER_RANK_MAP = {
-    supervisor: 1,
-    manager: 2,
-    director: 3
-};
-
-const getTierRank = (tierName) => TIER_RANK_MAP[normalizeTierName(tierName)] || 0;
 
 const buildCategoryVisibilityWhere = (userContext) => {
     const departmentConditions = [{ departmentAccess: { none: {} } }];
@@ -116,16 +107,19 @@ const canAccessByTierHierarchy = (entity, userContext) => {
         return true;
     }
 
-    const userTierName = userContext?.tier?.name || '';
-    const userRank = getTierRank(userTierName);
-    const tierNames = tierAccess.map((entry) => entry.tier?.name).filter(Boolean);
-    const tierRanks = tierNames.map((name) => getTierRank(name)).filter(Boolean);
+    const userTierOrder = userContext?.tier?.order ?? 999;
+    const requiredOrders = tierAccess
+        .map((entry) => entry.tier?.order)
+        .filter((order) => order !== undefined && order !== null);
 
-    if (tierRanks.length > 0) {
-        return userRank >= Math.min(...tierRanks);
+    if (requiredOrders.length > 0) {
+        // Hierarchy logic: A user with lower order value (higher rank)
+        // can see anything that requires their rank OR anything that ranks lower (higher order value).
+        // e.g. Manager (0) can see anything requiring Officer (2) because 0 <= 2.
+        return userTierOrder <= Math.max(...requiredOrders);
     }
 
-    return tierNames.some((name) => normalizeTierName(name) === normalizeTierName(userTierName));
+    return false;
 };
 
 const canAccessScopedEntity = (entity, userContext) => {
