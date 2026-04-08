@@ -224,20 +224,40 @@ const CourseModal = ({
             </div>
           ) : activeTab === 'basic' ? (
             <form onSubmit={onSaveCourse} className="flex flex-col gap-4">
-              <div>
-                <label className="text-sm font-bold text-gray-700 block mb-1">ชื่อคอร์ส</label>
-                <input required type="text" className="form-input w-full" value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} />
+              <div className="space-y-1.5">
+                <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">ชื่อคอร์ส</label>
+                <div className="relative group">
+                  <Book className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+                  <input 
+                    required 
+                    type="text" 
+                    className="form-input w-full pl-12" 
+                    placeholder="ตั้งชื่อคอร์สให้ดึงดูดใจ..."
+                    value={courseForm.title} 
+                    onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} 
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700 block mb-1">หมวดหมู่</label>
-                <select required className="form-input w-full" value={courseForm.categoryId} onChange={(e) => setCourseForm({ ...courseForm, categoryId: e.target.value })}>
-                  <option value="">เลือกหมวดหมู่</option>
-                  {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700 block mb-1">แต้มรางวัล (Points)</label>
-                <input type="number" className="form-input w-full" value={courseForm.points} onChange={(e) => setCourseForm({ ...courseForm, points: parseInt(e.target.value) })} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">หมวดหมู่</label>
+                  <select required className="form-input w-full" value={courseForm.categoryId} onChange={(e) => setCourseForm({ ...courseForm, categoryId: e.target.value })}>
+                    <option value="">เลือกหมวดหมู่</option>
+                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">แต้มรางวัล (Points)</label>
+                  <div className="relative group">
+                    <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber-500 transition-colors" size={18} />
+                    <input 
+                      type="number" 
+                      className="form-input w-full pl-12" 
+                      value={courseForm.points} 
+                      onChange={(e) => setCourseForm({ ...courseForm, points: parseInt(e.target.value) })} 
+                    />
+                  </div>
+                </div>
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700 block mb-1">รูปหน้าปกคอร์ส</label>
@@ -282,9 +302,18 @@ const CourseModal = ({
                   </button>
                 )}
               </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700 block mb-1">รายละเอียด (Description)</label>
-                <textarea rows={3} className="form-input w-full" value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} placeholder="คำอธิบายสั้นๆ ของคอร์สนี้..." />
+              <div className="space-y-1.5">
+                <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">รายละเอียด (Description)</label>
+                <div className="relative group">
+                  <FileText className="absolute left-4 top-4 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+                  <textarea 
+                    rows={4} 
+                    className="form-input w-full pl-12 resize-none" 
+                    value={courseForm.description} 
+                    onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} 
+                    placeholder="เขียนรายละเอียดหลักสูตร ให้พนักงานอยากเรียน..." 
+                  />
+                </div>
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
@@ -400,29 +429,35 @@ const CourseModal = ({
                   <div className="space-y-4 p-5 bg-slate-50 rounded-xl border border-slate-100">
                     <p className="text-xs font-black text-slate-400 uppercase mb-2 flex items-center gap-2">ข้อมูลผู้สอน</p>
                     <div>
-                      <label className="text-xs font-bold text-slate-500 block mb-1">ชื่อผู้สอน</label>
-                      <input type="text" placeholder="ชื่อ-นามสกุล" className="form-input w-full bg-white text-base py-2.5" value={courseForm.instructorName} onChange={(e) => setCourseForm({ ...courseForm, instructorName: e.target.value })} />
+                      <label className="text-xs font-black text-slate-500 block mb-1.5 ml-1">ชื่อผู้สอน</label>
+                      <div className="relative group">
+                        <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={16} />
+                        <input type="text" placeholder="ระบุชื่อ-นามสกุล..." className="form-input w-full bg-white text-sm py-2.5 pl-10" value={courseForm.instructorName} onChange={(e) => setCourseForm({ ...courseForm, instructorName: e.target.value })} />
+                      </div>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-500 block mb-1">ตำแหน่ง (Role)</label>
-                      <input type="text" placeholder="เช่น Enterprise Instructor" className="form-input w-full bg-white text-base py-2.5" value={courseForm.instructorRole} onChange={(e) => setCourseForm({ ...courseForm, instructorRole: e.target.value })} />
+                      <label className="text-xs font-black text-slate-500 block mb-1.5 ml-1">ตำแหน่ง (Role)</label>
+                      <div className="relative group">
+                        <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={16} />
+                        <input type="text" placeholder="เช่น ผู้เชี่ยวชาญด้าน..." className="form-input w-full bg-white text-sm py-2.5 pl-10" value={courseForm.instructorRole} onChange={(e) => setCourseForm({ ...courseForm, instructorRole: e.target.value })} />
+                      </div>
                     </div>
                   </div>
 
                   <div className="space-y-4 p-6 bg-slate-50 rounded-xl border border-slate-100">
                     <p className="text-sm font-black text-slate-400 uppercase mb-3">สื่อและสถิติหลักสูตร</p>
                     <div>
-                      <label className="text-sm font-bold text-slate-600 block mb-1.5">วิดีโอตัวอย่าง (YouTube URL)</label>
-                      <div className="flex items-center gap-2">
-                        <Video size={18} className="text-slate-400" />
-                        <input type="text" placeholder="https://youtube.com/..." className="form-input flex-1 bg-white text-base py-3" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} />
+                      <label className="text-sm font-black text-slate-600 block mb-2 ml-1">วิดีโอตัวอย่าง (YouTube URL)</label>
+                      <div className="relative group">
+                        <Video size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
+                        <input type="text" placeholder="https://youtube.com/..." className="form-input w-full bg-white text-sm py-3 pl-10" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} />
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-bold text-slate-600 block mb-1.5">ความยาวคอร์สทั้งหมด</label>
-                      <div className="flex items-center gap-2">
-                        <Clock size={18} className="text-slate-400" />
-                        <input type="text" placeholder="เช่น 24 ชั่วโมง หรือ 120 นาที" className="form-input flex-1 bg-white text-base py-3" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
+                      <label className="text-sm font-black text-slate-600 block mb-2 ml-1">ความยาวคอร์สทั้งหมด</label>
+                      <div className="relative group">
+                        <Clock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
+                        <input type="text" placeholder="เช่น 24 ชั่วโมง หรือ 120 นาที" className="form-input w-full bg-white text-sm py-3 pl-10" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
                       </div>
                     </div>
                   </div>
@@ -451,9 +486,13 @@ const CourseModal = ({
                 </div>
               </div>
 
-              <div className="flex gap-2 mt-6">
-                <button type="button" onClick={onClose} className="btn btn-outline flex-1">ยกเลิก</button>
-                <button type="submit" className="btn btn-primary flex-1">บันทึกข้อมูลคอร์ส</button>
+              <div className="flex gap-4 mt-8 pt-6 border-t border-slate-100">
+                <button type="button" onClick={onClose} className="btn border-2 border-slate-200 bg-white px-8 text-xs font-black uppercase tracking-[0.15em] text-slate-500 hover:bg-slate-50 transition-all flex-1">
+                  ยกเลิก
+                </button>
+                <button type="submit" className="btn btn-primary px-8 text-xs font-black uppercase tracking-[0.15em] shadow-xl flex-1">
+                  บันทึกข้อมูลคอร์ส
+                </button>
               </div>
             </form>
           ) : (
