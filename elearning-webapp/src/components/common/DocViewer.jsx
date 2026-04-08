@@ -175,7 +175,7 @@ const DocViewer = ({
         {/* Content Area */}
         <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-slate-900">
           {loading && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-slate-950/80 backdrop-blur-sm transition-opacity">
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-slate-950/80 backdrop-blur-md transition-opacity">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
               <p className="text-sm font-medium animate-pulse text-white/80">กำลังเตรียมเอกสารแบบปลอดภัย...</p>
             </div>

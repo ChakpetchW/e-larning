@@ -335,7 +335,7 @@ const Profile = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setShowEditModal(false)}
             aria-label="ปิดหน้าต่างเปลี่ยนรหัสผ่าน"
           />
@@ -414,7 +414,7 @@ const Profile = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setShowPolicyModal(false)}
             aria-label="ปิดหน้าต่างนโยบายความเป็นส่วนตัว"
           />

@@ -212,7 +212,7 @@ const GoalManagement = () => {
 
             {/* Create Goal Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-slide-up">
                         <div className="p-6 border-b border-border flex justify-between items-center">
                             <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
@@ -367,7 +367,7 @@ const GoalManagement = () => {
 
             {/* Report Modal */}
             {reportGoal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden animate-slide-up h-[85vh] flex flex-col">
                         <div className="p-6 border-b border-border flex justify-between items-center bg-slate-50">
                             <div>
