@@ -205,7 +205,7 @@ const LessonPlayer = () => {
     <div className="flex flex-col w-full max-w-5xl mx-auto md:px-4 md:py-6 relative min-h-screen pb-12 bg-white md:bg-transparent">
       
       {/* Immersive Header / Media Section - Cinemascope Mode */}
-      <div className="relative z-20 w-full overflow-hidden shadow-[0_34px_80px_-40px_rgba(15,23,42,0.8)] md:rounded-[2.5rem] md:aspect-video">
+      <div className="relative w-full overflow-hidden shadow-[0_34px_80px_-40px_rgba(15,23,42,0.8)] md:rounded-[2.5rem] md:aspect-video">
         {/* Back Button Overlay - Compact & Accessible */}
         <div className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
           <button
@@ -286,7 +286,7 @@ const LessonPlayer = () => {
       )}
 
       {/* Flattened Content Container - Optimized for Content Flow */}
-      <div className="relative z-30 bg-white md:mt-8 md:overflow-hidden md:rounded-[3.5rem] md:border md:border-slate-100 md:shadow-[0_40px_100px_-20px_rgba(15,23,42,0.1)]">
+      <div className="bg-white md:mt-8 md:overflow-hidden md:rounded-[3.5rem] md:border md:border-slate-100 md:shadow-[0_40px_100px_-20px_rgba(15,23,42,0.1)]">
         
         <div className="px-6 py-10 md:p-14">
           {/* Lesson Metadata & Title */}

@@ -199,6 +199,7 @@ const VideoPlayer = ({ url, onEnded }) => {
           options={{
             autoplay: true,
             iconUrl: plyrSprite,
+            fullscreen: { iosNative: true },
             controls: [
               'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'
             ],
