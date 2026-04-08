@@ -7,17 +7,24 @@ const createGoal = async (data, authUser) => {
     let finalScope = scope || 'GLOBAL';
     let finalDeptId = departmentId || null;
 
-    const user = await prisma.user.findUnique({
-        where: { id: authUser.userId },
-        select: { departmentId: true }
-    });
-
-    if (user && user.departmentId) {
-        finalScope = 'DEPARTMENT';
-        finalDeptId = user.departmentId;
-    } else {
-        finalScope = 'GLOBAL';
-        finalDeptId = null;
+    // Normal behavior for Managers: Locked to their own department
+    if (authUser.role === 'manager') {
+        const user = await prisma.user.findUnique({
+            where: { id: authUser.userId },
+            select: { departmentId: true }
+        });
+        
+        if (user && user.departmentId) {
+            finalScope = 'DEPARTMENT';
+            finalDeptId = user.departmentId;
+        } else {
+            finalScope = 'GLOBAL';
+            finalDeptId = null;
+        }
+    } else if (authUser.role === 'admin') {
+        // Admin can choose scope and department
+        finalScope = scope || 'GLOBAL';
+        finalDeptId = finalScope === 'GLOBAL' ? null : departmentId;
     }
 
     return await prisma.$transaction(async (tx) => {
@@ -77,6 +84,47 @@ const getGoals = async (authUser) => {
         },
         orderBy: { createdAt: 'desc' }
     });
+};
+
+const getGoalDetails = async (id, authUser) => {
+    const user = await prisma.user.findUnique({
+        where: { id: authUser.userId },
+        select: { departmentId: true }
+    });
+
+    const goal = await prisma.learningGoal.findUnique({
+        where: { id },
+        include: {
+            courses: {
+                include: {
+                    course: {
+                        select: {
+                            id: true,
+                            title: true,
+                            description: true,
+                            thumbnail: true,
+                            difficulty: true,
+                            categoryId: true,
+                            category: { select: { name: true } }
+                        }
+                    }
+                }
+            },
+            department: {
+                select: { name: true }
+            }
+        }
+    });
+
+    if (!goal || goal.status !== 'ACTIVE') {
+        throw new Error('Goal not found or inactive');
+    }
+
+    if (goal.scope === 'DEPARTMENT' && goal.departmentId !== user.departmentId) {
+        throw new Error('Not authorized to view this goal');
+    }
+
+    return goal;
 };
 
 const deleteGoal = async (id, authUser) => {
@@ -181,6 +229,7 @@ const getGoalReport = async (goalId, authUser) => {
 module.exports = {
     createGoal,
     getGoals,
+    getGoalDetails,
     deleteGoal,
     getGoalReport
 };

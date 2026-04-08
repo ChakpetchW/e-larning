@@ -97,7 +97,8 @@ export const userAPI = {
     });
   },
   getSettings: () => api.get('/settings'),
-  getGoals: () => api.get('/goals')
+  getGoals: () => api.get('/goals'),
+  getGoalDetails: (id) => api.get(`/goals/${id}`)
 };
 
 // Admin Endpoints

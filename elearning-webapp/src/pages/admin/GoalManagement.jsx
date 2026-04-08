@@ -12,6 +12,8 @@ const GoalManagement = () => {
     const [reportGoal, setReportGoal] = useState(null);
     const [reportData, setReportData] = useState(null);
     const [reportLoading, setReportLoading] = useState(false);
+    const [departments, setDepartments] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
     
     // Form state
     const [formData, setFormData] = useState({
@@ -19,6 +21,8 @@ const GoalManagement = () => {
         type: 'ANY', // ANY, SPECIFIC
         targetCount: 1,
         expiryDate: '',
+        scope: 'GLOBAL',
+        departmentId: '',
         courseIds: []
     });
     const [courseSearch, setCourseSearch] = useState('');
@@ -30,12 +34,17 @@ const GoalManagement = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [goalsRes, coursesRes] = await Promise.all([
+            const user = JSON.parse(localStorage.getItem('user'));
+            setCurrentUser(user);
+
+            const [goalsRes, coursesRes, deptsRes] = await Promise.all([
                 adminAPI.getGoals(),
-                adminAPI.getCourses()
+                adminAPI.getCourses(),
+                adminAPI.getDepartments()
             ]);
             setGoals(goalsRes.data || []);
             setCourses(coursesRes.data || []);
+            setDepartments(deptsRes.data || []);
         } catch (err) {
             console.error('Failed to fetch data', err);
         } finally {
@@ -53,6 +62,8 @@ const GoalManagement = () => {
                 type: 'ANY',
                 targetCount: 1,
                 expiryDate: '',
+                scope: 'GLOBAL',
+                departmentId: '',
                 courseIds: []
             });
             fetchData();
@@ -216,6 +227,41 @@ const GoalManagement = () => {
                                     onChange={e => setFormData({...formData, title: e.target.value})}
                                 />
                             </div>
+
+                            {currentUser?.role === 'admin' && (
+                                <div className="space-y-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">การขยายผล (Scope)</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-slate-500">ขอบเขตเป้าหมาย</label>
+                                            <select 
+                                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium"
+                                                value={formData.scope}
+                                                onChange={e => setFormData({...formData, scope: e.target.value})}
+                                            >
+                                                <option value="GLOBAL">ทั้งองค์กร (Global)</option>
+                                                <option value="DEPARTMENT">เฉพาะแผนก (Department)</option>
+                                            </select>
+                                        </div>
+                                        {formData.scope === 'DEPARTMENT' && (
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-slate-500">ระบุแผนก</label>
+                                                <select 
+                                                    required
+                                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium"
+                                                    value={formData.departmentId}
+                                                    onChange={e => setFormData({...formData, departmentId: e.target.value})}
+                                                >
+                                                    <option value="">-- เลือกแผนก --</option>
+                                                    {departments.map(dept => (
+                                                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">

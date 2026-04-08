@@ -7,6 +7,7 @@ const { verifyToken, verifyAdminPanelAccess } = require('../middleware/auth');
 router.use(verifyToken);
 
 router.get('/', goalController.getGoals);
+router.get('/:id', goalController.getGoalDetails);
 
 // Routes below require Admin/Manager access
 router.use(verifyAdminPanelAccess);

@@ -18,6 +18,14 @@ const getGoals = asyncHandler(async (req, res) => {
     });
 });
 
+const getGoalDetails = asyncHandler(async (req, res) => {
+    const goal = await goalService.getGoalDetails(req.params.id, req.user);
+    res.json({
+        success: true,
+        data: goal
+    });
+});
+
 const deleteGoal = asyncHandler(async (req, res) => {
     await goalService.deleteGoal(req.params.id, req.user);
     res.json({
@@ -37,6 +45,7 @@ const getGoalReport = asyncHandler(async (req, res) => {
 module.exports = {
     createGoal,
     getGoals,
+    getGoalDetails,
     deleteGoal,
     getGoalReport
 };

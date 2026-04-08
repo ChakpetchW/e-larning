@@ -14,7 +14,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [points, setPoints] = useState(0);
-  const [activeGoal, setActiveGoal] = useState(null);
+  const [activeGoals, setActiveGoals] = useState([]);
   const [pointsLoading, setPointsLoading] = useState(true);
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
 
@@ -35,8 +35,7 @@ const Home = () => {
         setPoints(pointsRes?.data?.balance || 0);
         
         const goals = Array.isArray(goalsRes?.data) ? goalsRes.data : [];
-        const priorityGoal = goals.find(g => g.scope === 'DEPARTMENT') || goals[0] || null;
-        setActiveGoal(priorityGoal);
+        setActiveGoals(goals); // Store all active goals
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -66,37 +65,42 @@ const Home = () => {
     return courses.filter(c => !c.categoryId);
   }, [courses]);
 
-  const goalProgress = React.useMemo(() => {
-    if (!activeGoal || !Array.isArray(courses)) return { current: 0, target: 1 };
+  // Calculate progress for each goal
+  const goalsProgress = React.useMemo(() => {
+    if (!Array.isArray(activeGoals) || !Array.isArray(courses)) return [];
     
-    const windowStart = new Date(activeGoal.createdAt);
-    const windowEnd = activeGoal.expiryDate ? new Date(activeGoal.expiryDate) : new Date(2100, 0, 1);
-    
-    let completed;
-    if (activeGoal.type === 'ANY') {
-      completed = courses.filter(c => 
-        c.enrollmentStatus === 'COMPLETED' && 
-        c.completedAt && 
-        new Date(c.completedAt) >= windowStart && 
-        new Date(c.completedAt) <= windowEnd
-      );
-    } else {
-      const specificIds = activeGoal.courses.map(gc => gc.courseId);
-      completed = courses.filter(c => 
-        specificIds.includes(c.id) &&
-        c.enrollmentStatus === 'COMPLETED' && 
-        c.completedAt && 
-        new Date(c.completedAt) >= windowStart && 
-        new Date(c.completedAt) <= windowEnd
-      );
-    }
-    
-    return {
-      current: completed.length,
-      target: activeGoal.targetCount,
-      title: activeGoal.title
-    };
-  }, [activeGoal, courses]);
+    return activeGoals.map(goal => {
+      const windowStart = new Date(goal.createdAt);
+      const windowEnd = goal.expiryDate ? new Date(goal.expiryDate) : new Date(2100, 0, 1);
+      
+      let completed;
+      if (goal.type === 'ANY') {
+        completed = courses.filter(c => 
+          c.enrollmentStatus === 'COMPLETED' && 
+          c.completedAt && 
+          new Date(c.completedAt) >= windowStart && 
+          new Date(c.completedAt) <= windowEnd
+        );
+      } else {
+        const specificIds = goal.courses.map(gc => gc.courseId);
+        completed = courses.filter(c => 
+          specificIds.includes(c.id) &&
+          c.enrollmentStatus === 'COMPLETED' && 
+          c.completedAt && 
+          new Date(c.completedAt) >= windowStart && 
+          new Date(c.completedAt) <= windowEnd
+        );
+      }
+      
+      return {
+        id: goal.id,
+        current: completed.length,
+        target: goal.targetCount,
+        title: goal.title,
+        scope: goal.scope
+      };
+    });
+  }, [activeGoals, courses]);
 
   if (loading) {
     return (
@@ -277,21 +281,46 @@ const Home = () => {
             </button>
 
 
-            {/* Weekly Goal Bento (Wait, let's keep it here instead of below) */}
-             <div className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
-               <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${goalProgress.current >= goalProgress.target ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
-                  <Target size={28} />
-               </div>
-               <div className="flex-1">
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">{goalProgress.title || 'Learning Momentum'}</p>
-                  <h3 className="text-xl font-bold text-slate-800 leading-none mb-3">{goalProgress.current}/{goalProgress.target} คอร์สที่จบแล้ว</h3>
-                  <div className="relative w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                     <div 
-                        className={`h-full transition-all duration-1000 ${goalProgress.current >= goalProgress.target ? 'bg-emerald-500' : 'bg-primary'}`}
-                        style={{ width: `${Math.min(100, (goalProgress.current / goalProgress.target) * 100)}%` }}
-                     />
+            {/* Learning Goals Bento */}
+            <div className="flex flex-col gap-4">
+               {goalsProgress.length > 0 ? (
+                  goalsProgress.map((gp) => (
+                     <button 
+                         key={gp.id} 
+                         onClick={() => navigate(`/user/goals/${gp.id}`)}
+                         className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-6 border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 w-full text-left"
+                     >
+                        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${gp.current >= gp.target ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
+                           <Target size={24} />
+                        </div>
+                        <div className="flex-1">
+                           <div className="flex items-center gap-2 mb-1">
+                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{gp.title}</p>
+                              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded border ${gp.scope === 'DEPARTMENT' ? 'border-amber-200 text-amber-600 bg-amber-50' : 'border-blue-200 text-blue-600 bg-blue-50'}`}>
+                                 {gp.scope === 'DEPARTMENT' ? 'แผนก' : 'องค์กร'}
+                              </span>
+                           </div>
+                           <h3 className="text-lg font-bold text-slate-800 leading-none mb-2">{gp.current}/{gp.target} คอร์ส</h3>
+                           <div className="relative w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                              <div 
+                                 className={`h-full transition-all duration-1000 ${gp.current >= gp.target ? 'bg-emerald-500' : 'bg-primary'}`}
+                                 style={{ width: `${Math.min(100, (gp.current / gp.target) * 100)}%` }}
+                              />
+                           </div>
+                        </div>
+                     </button>
+                  ))
+               ) : (
+                  <div className="group relative flex items-center gap-6 rounded-[2.5rem] bg-slate-50 p-8 border border-dashed border-slate-200 opacity-60">
+                     <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-200 text-slate-400 shrink-0">
+                        <Target size={28} />
+                     </div>
+                     <div className="flex-1">
+                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">No Active Goals</p>
+                        <h3 className="text-xl font-bold text-slate-400 leading-none">ยังไม่มีเป้าหมายในขณะนี้</h3>
+                     </div>
                   </div>
-               </div>
+               )}
             </div>
          </div>
       </div>

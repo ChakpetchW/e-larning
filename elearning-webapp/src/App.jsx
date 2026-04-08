@@ -19,6 +19,7 @@ const Rewards = lazy(() => import('./pages/user/Rewards'));
 const PointsHistory = lazy(() => import('./pages/user/PointsHistory'));
 const Profile = lazy(() => import('./pages/user/Profile'));
 const OngoingCourses = lazy(() => import('./pages/user/OngoingCourses'));
+const GoalDetail = lazy(() => import('./pages/user/GoalDetail'));
 
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -69,6 +70,7 @@ function App() {
             <Route path="completed" element={<CompletedCourses />} />
             <Route path="courses/:id" element={<CourseDetail />} />
             <Route path="courses/:id/lesson/:lessonId" element={<LessonPlayer />} />
+            <Route path="goals/:id" element={<GoalDetail />} />
             <Route path="rewards" element={<Rewards />} />
             <Route path="points-history" element={<PointsHistory />} />
             <Route path="profile" element={<Profile />} />
