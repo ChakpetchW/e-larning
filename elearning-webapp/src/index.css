@@ -43,15 +43,19 @@
 
   button,
   [role="button"],
+  [role="dialog"],
   a,
   input,
   select,
-  textarea {
-    outline: none;
+  textarea,
+  div {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
   }
 
   button:focus-visible,
   [role="button"]:focus-visible,
+  [role="dialog"]:focus-visible,
   a:focus-visible,
   input:focus-visible,
   select:focus-visible,

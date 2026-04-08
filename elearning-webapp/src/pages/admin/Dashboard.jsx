@@ -276,8 +276,8 @@ const Dashboard = () => {
 
       {/* Group Detail Modal */}
       {selectedGroup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md animate-fade-in">
-           <div className="card w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-slide-up shadow-2xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md animate-fade-in focus:outline-none outline-none">
+           <div className="card w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-slide-up shadow-2xl focus:outline-none outline-none">
               <div className="flex items-center justify-between p-6 border-b border-slate-100">
                  <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg" style={{ backgroundColor: TYPE_COLORS[selectedGroup.name.toUpperCase()] || '#4f46e5' }}>
