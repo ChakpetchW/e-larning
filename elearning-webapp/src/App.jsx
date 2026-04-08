@@ -19,6 +19,7 @@ const Rewards = lazy(() => import('./pages/user/Rewards'));
 const PointsHistory = lazy(() => import('./pages/user/PointsHistory'));
 const Profile = lazy(() => import('./pages/user/Profile'));
 const OngoingCourses = lazy(() => import('./pages/user/OngoingCourses'));
+const GoalDetail = lazy(() => import('./pages/user/GoalDetail'));
 
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -27,7 +28,7 @@ const AdminUsers = lazy(() => import('./pages/admin/UserManagement'));
 const AdminRewards = lazy(() => import('./pages/admin/RewardsManagement'));
 const AdminRedeems = lazy(() => import('./pages/admin/RedeemRequests'));
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
-const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'));
+const AdminGoals = lazy(() => import('./pages/admin/GoalManagement'));
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -68,6 +69,7 @@ function App() {
             <Route path="completed" element={<CompletedCourses />} />
             <Route path="courses/:id" element={<CourseDetail />} />
             <Route path="courses/:id/lesson/:lessonId" element={<LessonPlayer />} />
+            <Route path="goals/:id" element={<GoalDetail />} />
             <Route path="rewards" element={<Rewards />} />
             <Route path="points-history" element={<PointsHistory />} />
             <Route path="profile" element={<Profile />} />
@@ -84,7 +86,7 @@ function App() {
             <Route path="rewards" element={<AdminRewards />} />
             <Route path="redeems" element={<AdminRedeems />} />
             <Route path="reports" element={<AdminReports />} />
-            <Route path="settings" element={<SystemSettings />} />
+            <Route path="goals" element={<AdminGoals />} />
           </Route>
         </Route>
 

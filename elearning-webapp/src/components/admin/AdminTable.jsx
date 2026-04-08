@@ -29,7 +29,7 @@ const AdminTable = ({
                   </div>
                 </td>
               </tr>
-            ) : data.length === 0 ? (
+            ) : (!Array.isArray(data) || data.length === 0) ? (
               <tr>
                 <td colSpan={columns.length} className="p-12 text-center text-muted">
                   {emptyMessage}

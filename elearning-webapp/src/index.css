@@ -153,6 +153,10 @@
   .glass-dark {
     @apply bg-slate-800/80 backdrop-blur-md border border-slate-700/50 shadow-sm text-white;
   }
+  .form-input {
+    @apply rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-bold transition-all;
+    @apply outline-none focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 text-slate-900;
+  }
 }
 
 .no-scrollbar {

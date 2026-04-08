@@ -14,7 +14,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [points, setPoints] = useState(0);
-  const [weeklyGoal, setWeeklyGoal] = useState(1);
+  const [activeGoals, setActiveGoals] = useState([]);
   const [pointsLoading, setPointsLoading] = useState(true);
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
 
@@ -24,16 +24,18 @@ const Home = () => {
         const userData = JSON.parse(localStorage.getItem('user'));
         setUser(userData);
         
-        const [courseRes, catRes, pointsRes, settingsRes] = await Promise.all([
+        const [courseRes, catRes, pointsRes, goalsRes] = await Promise.all([
           userAPI.getCourses(),
           userAPI.getCategories(),
           userAPI.getPoints(),
-          userAPI.getSettings()
+          userAPI.getGoals()
         ]);
         setCourses(Array.isArray(courseRes?.data) ? courseRes.data : []);
         setCategories(Array.isArray(catRes?.data) ? catRes.data : []);
         setPoints(pointsRes?.data?.balance || 0);
-        setWeeklyGoal(parseInt(settingsRes?.data?.weekly_goal) || 1);
+        
+        const goals = Array.isArray(goalsRes?.data) ? goalsRes.data : [];
+        setActiveGoals(goals); // Store all active goals
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -63,16 +65,43 @@ const Home = () => {
     return courses.filter(c => !c.categoryId);
   }, [courses]);
 
-  const completedThisWeekCount = React.useMemo(() => {
-    if (!Array.isArray(courses)) return 0;
-    return courses.filter(c => {
-      if (c.enrollmentStatus !== 'COMPLETED' || !c.completedAt) return false;
-      const completedDate = new Date(c.completedAt);
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      return completedDate >= oneWeekAgo;
-    }).length;
-  }, [courses]);
+  // Calculate progress for each goal
+  const goalsProgress = React.useMemo(() => {
+    if (!Array.isArray(activeGoals) || !Array.isArray(courses)) return [];
+    
+    return activeGoals.map(goal => {
+      const windowStart = new Date(goal.createdAt);
+      const windowEnd = goal.expiryDate ? new Date(goal.expiryDate) : new Date(2100, 0, 1);
+      
+      let completed;
+      if (goal.type === 'ANY') {
+        completed = courses.filter(c => 
+          c.enrollmentStatus === 'COMPLETED' && 
+          c.completedAt && 
+          new Date(c.completedAt) >= windowStart && 
+          new Date(c.completedAt) <= windowEnd
+        );
+      } else {
+        const specificIds = goal.courses.map(gc => gc.courseId);
+        completed = courses.filter(c => 
+          specificIds.includes(c.id) &&
+          c.enrollmentStatus === 'COMPLETED' && 
+          c.completedAt && 
+          new Date(c.completedAt) >= windowStart && 
+          new Date(c.completedAt) <= windowEnd
+        );
+      }
+      
+      return {
+        id: goal.id,
+        current: completed.length,
+        target: goal.targetCount,
+        title: goal.title,
+        scope: goal.scope,
+        deptName: goal.department?.name
+      };
+    });
+  }, [activeGoals, courses]);
 
   if (loading) {
     return (
@@ -232,7 +261,7 @@ const Home = () => {
       {/* Learning Activities Section */}
       <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
          <h3 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight mb-5 px-1 md:px-2">กิจกรรมการเรียน</h3>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 items-stretch">
             {/* Ongoing Courses Card */}
             <button
                onClick={() => navigate('/user/ongoing')}
@@ -253,21 +282,46 @@ const Home = () => {
             </button>
 
 
-            {/* Weekly Goal Bento (Wait, let's keep it here instead of below) */}
-            <div className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
-               <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
-                  <Target size={28} />
-               </div>
-               <div className="flex-1">
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Weekly Momentum</p>
-                  <h3 className="text-xl font-bold text-slate-800 leading-none mb-3">{completedThisWeekCount}/{weeklyGoal} คอร์สที่จบแล้ว</h3>
-                  <div className="relative w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                     <div 
-                        className={`h-full transition-all duration-1000 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500' : 'bg-primary'}`}
-                        style={{ width: `${Math.min(100, (completedThisWeekCount / weeklyGoal) * 100)}%` }}
-                     />
+            {/* Learning Goals Bento */}
+            <div className="flex flex-col gap-4">
+               {goalsProgress.length > 0 ? (
+                  goalsProgress.map((gp) => (
+                     <button 
+                         key={gp.id} 
+                         onClick={() => navigate(`/user/goals/${gp.id}`)}
+                         className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 w-full text-left h-full"
+                     >
+                        <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${gp.current >= gp.target ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
+                           <Target size={28} />
+                        </div>
+                        <div className="flex-1">
+                           <div className="flex items-center gap-2 mb-1">
+                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">{gp.title}</p>
+                              <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border leading-none ${gp.scope === 'DEPARTMENT' ? 'border-amber-200 text-amber-600 bg-amber-50' : 'border-blue-200 text-blue-600 bg-blue-50'}`}>
+                                 {gp.scope === 'DEPARTMENT' ? (gp.deptName || 'แผนก') : 'องค์กร'}
+                              </span>
+                           </div>
+                           <h3 className="text-xl font-bold text-slate-800 leading-none mb-3">{gp.current}/{gp.target} คอร์ส</h3>
+                           <div className="relative w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                              <div 
+                                 className={`h-full transition-all duration-1000 ${gp.current >= gp.target ? 'bg-emerald-500' : 'bg-primary'}`}
+                                 style={{ width: `${Math.min(100, (gp.current / gp.target) * 100)}%` }}
+                              />
+                           </div>
+                        </div>
+                     </button>
+                  ))
+               ) : (
+                  <div className="group relative flex items-center gap-6 rounded-[2.5rem] bg-slate-50 p-8 border border-dashed border-slate-200 opacity-60">
+                     <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-200 text-slate-400 shrink-0">
+                        <Target size={28} />
+                     </div>
+                     <div className="flex-1">
+                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">No Active Goals</p>
+                        <h3 className="text-xl font-bold text-slate-400 leading-none">ยังไม่มีเป้าหมายในขณะนี้</h3>
+                     </div>
                   </div>
-               </div>
+               )}
             </div>
          </div>
       </div>

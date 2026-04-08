@@ -8,6 +8,7 @@ const userRoutes = require('./routes/user.routes');
 const adminRoutes = require('./routes/admin.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const settingRoutes = require('./routes/setting.routes');
+const goalRoutes = require('./routes/goal.routes');
 const errorHandler = require('./middleware/error');
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingRoutes);
+app.use('/api/goals', goalRoutes);
 
 // Error Handling Middleware (Centralized)
 app.use(errorHandler);

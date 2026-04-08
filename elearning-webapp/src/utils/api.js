@@ -96,7 +96,9 @@ export const userAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
-  getSettings: () => api.get('/settings')
+  getSettings: () => api.get('/settings'),
+  getGoals: () => api.get('/goals'),
+  getGoalDetails: (id) => api.get(`/goals/${id}`)
 };
 
 // Admin Endpoints
@@ -159,7 +161,13 @@ export const adminAPI = {
 
   // System Settings
   getSettings: () => api.get('/settings'),
-  updateSetting: (key, value) => api.patch(`/settings/${key}`, { value })
+  updateSetting: (key, value) => api.patch(`/settings/${key}`, { value }),
+  
+  // Goals
+  getGoals: () => api.get('/goals'),
+  createGoal: (data) => api.post('/goals', data),
+  deleteGoal: (id) => api.delete(`/goals/${id}`),
+  getGoalReport: (id) => api.get(`/goals/${id}/report`),
 };
 
 export default api;

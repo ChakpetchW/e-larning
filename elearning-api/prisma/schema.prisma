@@ -64,6 +64,7 @@ model Course {
   enrollments UserCourse[]
   departmentAccess CourseDepartmentAccess[]
   tierAccess       CourseTierAccess[]
+  learningGoals    GoalCourse[]
 }
 
 model Category {
@@ -88,6 +89,7 @@ model Department {
   users        User[]                 @relation("DepartmentUsers")
   courseAccess CourseDepartmentAccess[]
   categoryAccess CategoryDepartmentAccess[]
+  learningGoals  LearningGoal[]
 }
 
 model Tier {
@@ -266,6 +268,32 @@ model RedeemRequest {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+}
+
+model LearningGoal {
+  id           String   @id @default(uuid())
+  title        String
+  type         String   // "ANY" | "SPECIFIC"
+  targetCount  Int      @default(1)
+  expiryDate   DateTime?
+  scope        String   @default("GLOBAL") // "GLOBAL" | "DEPARTMENT"
+  departmentId String?
+  status       String   @default("ACTIVE") // "ACTIVE" | "ARCHIVED"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  courses      GoalCourse[]
+}
+
+model GoalCourse {
+  goalId   String
+  courseId String
+
+  goal   LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, courseId])
 }
 
 model SystemSetting {
