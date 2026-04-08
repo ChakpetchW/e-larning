@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Play, Edit, GripVertical } from 'lucide-react';
+import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Play, Edit, GripVertical, Book, Trophy, Users, GraduationCap } from 'lucide-react';
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
