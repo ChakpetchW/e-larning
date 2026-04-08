@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
+import ModalPortal from '../../components/common/ModalPortal';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { getRoleLabel } from '../../utils/roles';
 
@@ -169,8 +170,8 @@ const Profile = () => {
             </div>
           </div>
 
-          <h3 className="mt-3 text-xl font-bold text-gray-900">{user?.name || 'User'}</h3>
-          <p className="mb-1 text-sm font-medium text-gray-500">{user?.email}</p>
+          <h3 className="mt-3 text-xl font-bold text-gray-900 text-center truncate w-full px-4">{user?.name || 'User'}</h3>
+          <p className="mb-1 text-sm font-medium text-gray-500 text-center break-all w-full px-4">{user?.email}</p>
           <div className="badge mt-2 flex items-center gap-1 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-bold text-primary">
             {user?.department || 'พนักงาน'}
           </div>
@@ -203,14 +204,14 @@ const Profile = () => {
           <button
             type="button"
             onClick={() => navigate('/user/ongoing')}
-            className="group relative flex flex-col items-start rounded-3xl border border-slate-100 bg-white p-5 text-left transition-all hover:shadow-xl hover:-translate-y-0.5"
+            className="group relative flex flex-col items-start rounded-3xl border border-slate-100 bg-white p-4 md:p-5 text-left transition-all hover:shadow-xl hover:-translate-y-0.5 focus:outline-none"
           >
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/5 text-primary transition-transform group-hover:scale-110">
-              <PlayCircle size={24} />
+            <div className="mb-4 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-2xl bg-primary/5 text-primary transition-transform group-hover:scale-110">
+              <PlayCircle size={22} className="md:w-6 md:h-6" />
             </div>
-            <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">กำลังเรียนอยู่</p>
+            <p className="text-[10px] md:text-[11px] font-bold tracking-[0.04em] text-slate-500">กำลังเรียนอยู่</p>
             <div className="mt-1 flex w-full items-end justify-between">
-              <h5 className="text-xl font-black text-slate-800">
+              <h5 className="text-lg md:text-xl font-black text-slate-800">
                 {courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length} คอร์ส
               </h5>
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-50 opacity-0 transition-opacity group-hover:opacity-100">
@@ -222,14 +223,14 @@ const Profile = () => {
           <button
             type="button"
             onClick={() => navigate('/user/completed')}
-            className="group relative flex flex-col items-start rounded-3xl border border-slate-100 bg-white p-5 text-left transition-all hover:shadow-xl hover:-translate-y-0.5"
+            className="group relative flex flex-col items-start rounded-3xl border border-slate-100 bg-white p-4 md:p-5 text-left transition-all hover:shadow-xl hover:-translate-y-0.5 focus:outline-none"
           >
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 transition-transform group-hover:scale-110">
-              <CheckCircle size={24} />
+            <div className="mb-4 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 transition-transform group-hover:scale-110">
+              <CheckCircle size={22} className="md:w-6 md:h-6" />
             </div>
-            <p className="text-[11px] font-bold tracking-[0.04em] text-slate-500">เรียนจบแล้ว</p>
+            <p className="text-[10px] md:text-[11px] font-bold tracking-[0.04em] text-slate-500">เรียนจบแล้ว</p>
             <div className="mt-1 flex w-full items-end justify-between">
-              <h5 className="text-xl font-black text-slate-800">
+              <h5 className="text-lg md:text-xl font-black text-slate-800">
                 {courses.filter(c => c.enrollmentStatus === 'COMPLETED').length} คอร์ส
               </h5>
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-50 opacity-0 transition-opacity group-hover:opacity-100">
@@ -332,10 +333,11 @@ const Profile = () => {
       </div>
 
       {showEditModal && (
+        <ModalPortal>
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
             onClick={() => setShowEditModal(false)}
             aria-label="ปิดหน้าต่างเปลี่ยนรหัสผ่าน"
           />
@@ -345,7 +347,7 @@ const Profile = () => {
             aria-modal="true"
             aria-labelledby={passwordDialogTitleId}
             tabIndex={-1}
-            className="relative flex w-full max-w-sm flex-col items-center rounded-[2rem] bg-white p-6 shadow-2xl animate-fade-in md:p-8"
+            className="relative flex w-[calc(100%-2rem)] max-w-xl flex-col items-center rounded-[2.25rem] bg-white/95 p-6 shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)] animate-fade-in focus:outline-none outline-none md:p-8"
           >
             <h3 id={passwordDialogTitleId} className="mb-6 w-full text-center text-2xl font-black text-slate-800">
               เปลี่ยนรหัสผ่าน
@@ -408,13 +410,15 @@ const Profile = () => {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {showPolicyModal && (
+        <ModalPortal>
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
             onClick={() => setShowPolicyModal(false)}
             aria-label="ปิดหน้าต่างนโยบายความเป็นส่วนตัว"
           />
@@ -424,7 +428,7 @@ const Profile = () => {
             aria-modal="true"
             aria-labelledby={policyDialogTitleId}
             tabIndex={-1}
-            className="relative flex h-[80vh] w-full max-w-md flex-col rounded-[2rem] bg-white p-6 shadow-2xl animate-fade-in"
+            className="relative flex h-[80vh] w-[calc(100%-2rem)] max-w-xl flex-col rounded-[2.25rem] bg-white/95 p-6 shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)] animate-fade-in focus:outline-none outline-none"
           >
             <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
               <h3 id={policyDialogTitleId} className="flex items-center gap-2 text-xl font-black text-slate-800">
@@ -471,6 +475,7 @@ const Profile = () => {
             </button>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

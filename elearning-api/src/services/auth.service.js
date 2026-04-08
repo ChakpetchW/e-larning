@@ -30,16 +30,16 @@ const login = async (email, password) => {
     });
 
     if (!user) {
-        throw new Error('Invalid credentials');
+        throw new Error('อีเมล หรือ รหัสผ่านไม่ถูกต้อง');
     }
 
     if (user.status !== 'ACTIVE') {
-        throw new Error('Account is inactive');
+        throw new Error('บัญชีนี้ถูกระงับการใช้งาน');
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-        throw new Error('Invalid credentials');
+        throw new Error('อีเมล หรือ รหัสผ่านไม่ถูกต้อง');
     }
 
     const token = jwt.sign(

@@ -41,22 +41,17 @@
     font-size: 18px !important;
   }
 
-  button,
-  [role="button"],
-  a,
-  input,
-  select,
-  textarea {
-    outline: none;
+  /* The Ultimate Focus Reset - Kill all default rings/outlines everywhere */
+  *:focus,
+  *:focus-visible,
+  *:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
   }
 
-  button:focus-visible,
-  [role="button"]:focus-visible,
-  a:focus-visible,
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible {
-    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15);
+  /* Branded focus ring ONLY for keyboard navigation */
+  :focus-visible {
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.2) !important;
   }
 }
 

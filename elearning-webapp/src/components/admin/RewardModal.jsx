@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { X, Upload, ImageIcon } from 'lucide-react';
 import { getFullUrl } from '../../utils/api';
+import ModalPortal from '../common/ModalPortal';
 
 const RewardModal = ({ 
   isOpen, 
@@ -17,7 +18,8 @@ const RewardModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+    <ModalPortal isOpen={isOpen}>
+      <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fade-in">
       <div className="card bg-white w-full max-w-md p-0 shadow-xl overflow-hidden rounded-2xl">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10 rounded-t-2xl">
           <h3 className="text-xl font-bold">{isEditing ? 'แก้ไขของรางวัล' : 'เพิ่มของรางวัลใหม่'}</h3>
@@ -115,7 +117,8 @@ const RewardModal = ({
           </form>
         </div>
       </div>
-    </div>
+      </div>
+    </ModalPortal>
   );
 };
 

@@ -121,7 +121,7 @@ const UserLayout = () => {
 
         {/* Main Content Area */}
         <main ref={mainRef} className="user-main flex-1 min-h-0 no-scrollbar bg-transparent w-full">
-          <div className="user-main-inner md:!max-w-[1600px] md:!px-8 lg:!px-12 md:!pt-12 md:!pb-12">
+          <div className="user-main-inner px-4 md:!max-w-[1600px] md:!px-8 lg:!px-12 md:!pt-12 md:!pb-12">
             <Outlet />
           </div>
         </main>

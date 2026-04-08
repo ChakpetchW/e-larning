@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Edit2, Plus, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
+import ModalPortal from '../common/ModalPortal';
 
 const ReferenceDataModal = ({
   isOpen,
@@ -14,9 +15,16 @@ const ReferenceDataModal = ({
   onDelete,
   onReorder = null,
   showAccessToggle = false,
+  showTypeSelection = false,
+  typeOptions = [
+    { value: 'LEADERSHIP', label: 'Leadership', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+    { value: 'FUNCTION', label: 'Function', color: 'text-slate-600 bg-slate-50 border-slate-200' },
+    { value: 'INNOVATION', label: 'Innovation', color: 'text-amber-600 bg-amber-50 border-amber-200' }
+  ]
 }) => {
   const [draftName, setDraftName] = useState('');
   const [accessAdmin, setAccessAdmin] = useState(false);
+  const [draftType, setDraftType] = useState('FUNCTION');
   const [editingItem, setEditingItem] = useState(null);
 
   const handleMove = async (index, direction) => {
@@ -47,6 +55,7 @@ const ReferenceDataModal = ({
   const resetForm = () => {
     setDraftName('');
     setAccessAdmin(false);
+    setDraftType('FUNCTION');
     setEditingItem(null);
   };
 
@@ -62,6 +71,7 @@ const ReferenceDataModal = ({
       const payload = {
         name,
         ...(showAccessToggle ? { accessAdmin } : {}),
+        ...(showTypeSelection ? { type: draftType } : {}),
       };
 
       if (editingItem) {
@@ -83,11 +93,24 @@ const ReferenceDataModal = ({
     if (showAccessToggle) {
       setAccessAdmin(item.accessAdmin || false);
     }
+    if (showTypeSelection) {
+      setDraftType(item.type || 'FUNCTION');
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
-      <div className="card flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
+    <ModalPortal isOpen={isOpen}>
+      <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 backdrop-blur-md">
+        <button
+          type="button"
+          className="absolute inset-0 bg-slate-950/65"
+          onClick={() => {
+            resetForm();
+            onClose();
+          }}
+          aria-label={`ปิดหน้าต่าง${title}`}
+        />
+      <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-[2.5rem] bg-white/95 shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)]">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div>
             <h3 className="text-xl font-black text-slate-900">{title}</h3>
@@ -137,6 +160,24 @@ const ReferenceDataModal = ({
                 }`}
                 required
               />
+              {showTypeSelection && (
+                <div className="flex gap-1.5 p-1 bg-white border border-slate-100 rounded-2xl">
+                  {typeOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setDraftType(opt.value)}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                        draftType === opt.value
+                          ? opt.color + ' border shadow-sm scale-105'
+                          : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
               {showAccessToggle && (
                 <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50">
                   <input
@@ -211,6 +252,13 @@ const ReferenceDataModal = ({
                         <div className={`font-black tracking-tight ${isEditing ? 'text-primary' : 'text-slate-900 font-bold'}`}>
                           <div className="flex items-center gap-2">
                             {item.name}
+                            {showTypeSelection && item.type && (
+                              <span className={`rounded-md px-1.5 py-0.5 text-[8px] font-black uppercase ring-1 ring-inset ${
+                                typeOptions.find(o => o.value === item.type)?.color || 'bg-slate-50 text-slate-500 ring-slate-200'
+                              }`}>
+                                {item.type}
+                              </span>
+                            )}
                             {showAccessToggle && item.accessAdmin && (
                               <span className="rounded-md bg-rose-50 px-1.5 py-0.5 text-[9px] font-black uppercase text-rose-500 ring-1 ring-inset ring-rose-200">
                                 ADMIN
@@ -280,7 +328,8 @@ const ReferenceDataModal = ({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </ModalPortal>
   );
 };
 

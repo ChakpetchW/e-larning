@@ -3,6 +3,7 @@ import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Pla
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
+import ModalPortal from '../common/ModalPortal';
 import {
   DndContext,
   closestCenter,
@@ -135,7 +136,8 @@ const CourseModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 lg:p-8 backdrop-blur-sm animate-fade-in overflow-hidden">
+    <ModalPortal isOpen={isOpen}>
+      <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 lg:p-8 backdrop-blur-md animate-fade-in overflow-hidden">
       <div className="card bg-white w-full max-w-6xl h-full overflow-hidden shadow-xl flex flex-col m-auto border border-gray-100">
         {/* Header & Tabs */}
         <div className="p-4 border-b border-border bg-gray-50 flex justify-between items-center">
@@ -541,7 +543,8 @@ const CourseModal = ({
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </ModalPortal>
   );
 };
 

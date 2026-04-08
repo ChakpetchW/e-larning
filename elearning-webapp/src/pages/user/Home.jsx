@@ -353,7 +353,7 @@ const Home = () => {
         </button>
       </div>
 
-      {/* Main Course Feed */}
+      {/* Main Course Feed - Individual Category Sections */}
       <div className="space-y-16 md:space-y-24 mt-4">
         {categorizedCourses.map((category, idx) => (
           <section key={category.id} className="animate-slide-up" style={{ animationDelay: `${500 + idx * 100}ms` }}>
