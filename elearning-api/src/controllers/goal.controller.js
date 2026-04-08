@@ -4,6 +4,7 @@ const asyncHandler = require('../middleware/async');
 const createGoal = asyncHandler(async (req, res) => {
     const goal = await goalService.createGoal(req.body, req.user);
     res.status(201).json({
+        success: true,
         message: 'Goal created successfully',
         data: goal
     });
@@ -12,6 +13,7 @@ const createGoal = asyncHandler(async (req, res) => {
 const getGoals = asyncHandler(async (req, res) => {
     const goals = await goalService.getGoals(req.user);
     res.json({
+        success: true,
         data: goals
     });
 });
@@ -19,6 +21,7 @@ const getGoals = asyncHandler(async (req, res) => {
 const deleteGoal = asyncHandler(async (req, res) => {
     await goalService.deleteGoal(req.params.id, req.user);
     res.json({
+        success: true,
         message: 'Goal archived successfully'
     });
 });
@@ -26,6 +29,7 @@ const deleteGoal = asyncHandler(async (req, res) => {
 const getGoalReport = asyncHandler(async (req, res) => {
     const report = await goalService.getGoalReport(req.params.id, req.user);
     res.json({
+        success: true,
         data: report
     });
 });

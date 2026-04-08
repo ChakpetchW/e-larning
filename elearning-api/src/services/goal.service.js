@@ -7,13 +7,17 @@ const createGoal = async (data, authUser) => {
     let finalScope = scope || 'GLOBAL';
     let finalDeptId = departmentId || null;
 
-    if (authUser.role === 'manager') {
-        const user = await prisma.user.findUnique({
-            where: { id: authUser.userId },
-            select: { departmentId: true }
-        });
+    const user = await prisma.user.findUnique({
+        where: { id: authUser.userId },
+        select: { departmentId: true }
+    });
+
+    if (user && user.departmentId) {
         finalScope = 'DEPARTMENT';
         finalDeptId = user.departmentId;
+    } else {
+        finalScope = 'GLOBAL';
+        finalDeptId = null;
     }
 
     return await prisma.$transaction(async (tx) => {
@@ -43,23 +47,19 @@ const createGoal = async (data, authUser) => {
 };
 
 const getGoals = async (authUser) => {
-    let where = { status: 'ACTIVE' };
-
-    if (authUser.role === 'manager' || authUser.role === 'user') {
-        const user = await prisma.user.findUnique({
-            where: { id: authUser.userId },
-            select: { departmentId: true }
-        });
-        
-        // Managers and users see their department's goals AND global goals
-        where = {
-            OR: [
-                { scope: 'GLOBAL' },
-                { AND: [{ scope: 'DEPARTMENT' }, { departmentId: user?.departmentId || null }] }
-            ],
-            status: 'ACTIVE'
-        };
-    }
+    const user = await prisma.user.findUnique({
+        where: { id: authUser.userId },
+        select: { departmentId: true }
+    });
+    
+    // All users (Admin, Manager, User) see their department's goals AND global goals
+    let where = {
+        OR: [
+            { scope: 'GLOBAL' },
+            { AND: [{ scope: 'DEPARTMENT' }, { departmentId: user?.departmentId || null }] }
+        ],
+        status: 'ACTIVE'
+    };
 
     return await prisma.learningGoal.findMany({
         where,
@@ -83,7 +83,12 @@ const deleteGoal = async (id, authUser) => {
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
     if (!goal) throw new Error('Goal not found');
 
-    if (authUser.role === 'manager' && goal.departmentId !== authUser.departmentId) {
+    const user = await prisma.user.findUnique({
+        where: { id: authUser.userId },
+        select: { departmentId: true }
+    });
+
+    if (goal.departmentId !== null && goal.departmentId !== user.departmentId) {
         throw new Error('Not authorized to delete this goal');
     }
 

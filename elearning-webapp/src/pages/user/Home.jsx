@@ -34,7 +34,7 @@ const Home = () => {
         setCategories(Array.isArray(catRes?.data) ? catRes.data : []);
         setPoints(pointsRes?.data?.balance || 0);
         
-        const goals = goalsRes?.data || [];
+        const goals = Array.isArray(goalsRes?.data) ? goalsRes.data : [];
         const priorityGoal = goals.find(g => g.scope === 'DEPARTMENT') || goals[0] || null;
         setActiveGoal(priorityGoal);
       } catch (error) {
