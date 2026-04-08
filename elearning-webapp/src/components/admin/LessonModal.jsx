@@ -111,7 +111,7 @@ const LessonModal = ({
                             อัปโหลด
                           </button>
                         </div>
-                        {lessonForm.contentUrl && lessonForm.contentUrl.startsWith('/uploads') && (
+                        {lessonForm.contentUrl && (
                           <p className="text-[10px] text-green-600 font-bold flex items-center gap-1">
                             <FileText size={12} /> อัปโหลดไฟล์แล้ว
                           </p>

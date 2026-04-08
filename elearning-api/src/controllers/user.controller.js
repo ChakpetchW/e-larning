@@ -1,4 +1,5 @@
 const UserService = require('../services/user.service');
+const { Readable } = require('stream');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 
@@ -71,6 +72,29 @@ const getLessonQuestions = asyncHandler(async (req, res) => {
   res.json({ success: true, data: questions });
 });
 
+const getLessonDocumentAccess = asyncHandler(async (req, res) => {
+  const documentAccess = await UserService.getLessonDocumentAccess(req.user.userId, req.params.id);
+  res.json({ success: true, data: documentAccess });
+});
+
+const getLessonDocumentStream = asyncHandler(async (req, res) => {
+  const { upstreamResponse, fileName } = await UserService.getLessonDocumentStream(req.params.id, req.query.token);
+  const contentType = upstreamResponse.headers.get('content-type') || 'application/octet-stream';
+  const contentLength = upstreamResponse.headers.get('content-length');
+  const sanitizedFileName = JSON.stringify(fileName || 'document');
+
+  res.setHeader('Content-Type', contentType);
+  res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+  res.setHeader('Content-Disposition', `inline; filename=${sanitizedFileName}`);
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+
+  if (contentLength) {
+    res.setHeader('Content-Length', contentLength);
+  }
+
+  Readable.fromWeb(upstreamResponse.body).pipe(res);
+});
+
 module.exports = {
   getCourses,
   getCourseDetails,
@@ -82,5 +106,7 @@ module.exports = {
   getCategories,
   submitQuiz,
   updateProfile,
-  getLessonQuestions
+  getLessonQuestions,
+  getLessonDocumentAccess,
+  getLessonDocumentStream
 };

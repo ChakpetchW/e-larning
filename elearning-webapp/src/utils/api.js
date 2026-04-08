@@ -87,6 +87,7 @@ export const userAPI = {
   requestRedeem: (rewardId) => api.post(`/user/redeem/${rewardId}`),
   submitQuiz: (lessonId, data) => api.post(`/user/lessons/${lessonId}/quiz`, data),
   getLessonQuestions: (lessonId) => api.get(`/user/lessons/${lessonId}/questions`),
+  getLessonDocumentAccess: (lessonId) => api.get(`/user/lessons/${lessonId}/document-access`),
   updateProfile: (data) => api.put('/user/profile', data),
   getPointsHistory: () => api.get('/user/points'), // Alias for clarity
   uploadFile: (file) => {

@@ -21,6 +21,8 @@ const LessonPlayer = () => {
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDocViewer, setShowDocViewer] = useState(false);
+  const [documentAccessUrl, setDocumentAccessUrl] = useState('');
+  const [openingDocument, setOpeningDocument] = useState(false);
   const [isNavigatingAway, setIsNavigatingAway] = useState(false);
 
   // Quiz State
@@ -34,6 +36,7 @@ const LessonPlayer = () => {
       try {
         setLoading(true);
         setShowDocViewer(false);
+        setDocumentAccessUrl('');
         setIsNavigatingAway(false);
         setAnswers({});
         setQuizResult(null);
@@ -168,6 +171,7 @@ const LessonPlayer = () => {
   const showAchievementCard = course?.showAchievementCard === true;
   const quizRewardPoints = Number(lesson?.points) || 0;
   const canEarnQuizPoints = lesson?.type === 'quiz' && quizRewardPoints > 0;
+  const hasProtectedDocument = lesson?.hasDocument === true;
 
   const navigateToPath = (path, options = {}) => {
     if (!path) return;
@@ -191,6 +195,39 @@ const LessonPlayer = () => {
 
   const handleReturnToCourse = () => {
     navigateToPath(`/user/courses/${courseId}`, { replace: true });
+  };
+
+  const requestDocumentAccess = async () => {
+    if (!hasProtectedDocument || openingDocument) {
+      return '';
+    }
+
+    try {
+      setOpeningDocument(true);
+      const response = await userAPI.getLessonDocumentAccess(lessonId);
+      const accessUrl = response?.data?.accessUrl || response?.accessUrl || '';
+
+      if (!accessUrl) {
+        throw new Error('Document access URL was not returned');
+      }
+
+      setDocumentAccessUrl(accessUrl);
+      return accessUrl;
+    } catch (error) {
+      console.error('Fetch document access error:', error);
+      alert('ไม่สามารถเปิดเอกสารได้ในขณะนี้ กรุณาลองอีกครั้ง');
+      return '';
+    } finally {
+      setOpeningDocument(false);
+    }
+  };
+
+  const handleOpenDocument = async () => {
+    const accessUrl = await requestDocumentAccess();
+
+    if (accessUrl) {
+      setShowDocViewer(true);
+    }
   };
 
   if (loading || !lesson) {
@@ -263,8 +300,9 @@ const LessonPlayer = () => {
                 </p>
                 {/* Primary: Open in secure in-app viewer */}
                 <button
-                  onClick={() => setShowDocViewer(true)}
-                  className="btn btn-primary rounded-2xl px-10 py-4 text-base shadow-[0_18px_36px_-18px_rgba(79,70,229,0.55)] hover:scale-[1.02] flex items-center gap-2"
+                  onClick={handleOpenDocument}
+                  disabled={openingDocument || !hasProtectedDocument}
+                  className="btn btn-primary rounded-2xl px-10 py-4 text-base shadow-[0_18px_36px_-18px_rgba(79,70,229,0.55)] hover:scale-[1.02] flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
                 >
                   <FileText size={18} /> เปิดเอกสารประกอบ
                 </button>
@@ -275,12 +313,13 @@ const LessonPlayer = () => {
       </div>
 
       {/* Secure Doc Viewer Modal */}
-      {showDocViewer && lesson?.contentUrl && (
+      {showDocViewer && documentAccessUrl && (
         <DocViewer
-          url={lessonMediaUrl}
+          url={documentAccessUrl}
           title={lesson.title}
           onClose={() => setShowDocViewer(false)}
           onComplete={handleComplete}
+          onRefreshUrl={requestDocumentAccess}
           isCompleted={completed}
           onNext={nextLessonId ? handleNavigateToNextLesson : undefined}
           onReturnToCourse={handleReturnToCourse}

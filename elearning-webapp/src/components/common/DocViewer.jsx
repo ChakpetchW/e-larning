@@ -11,6 +11,7 @@ const DocViewer = ({
   title,
   onClose,
   onComplete,
+  onRefreshUrl,
   isCompleted = false,
 }) => {
   const overlayRef = useRef(null);
@@ -133,6 +134,31 @@ const DocViewer = ({
     }
   };
 
+  const handleRetryLoad = async () => {
+    setHasTimedOut(false);
+    setIframeLoaded(false);
+    setError(null);
+
+    if (typeof onRefreshUrl === 'function') {
+      setLoading(true);
+
+      try {
+        const refreshedUrl = await onRefreshUrl();
+
+        if (!refreshedUrl) {
+          setLoading(false);
+          setError('ไม่สามารถเชื่อมต่อเอกสารได้ในขณะนี้');
+        }
+      } catch (refreshError) {
+        console.error('Refresh document access error:', refreshError);
+        setLoading(false);
+        setError('ไม่สามารถเชื่อมต่อเอกสารได้ในขณะนี้');
+      }
+    } else {
+      setViewerUrl((currentUrl) => currentUrl);
+    }
+  };
+
   useEffect(() => {
     document.body.classList.add('modal-open');
     return () => {
@@ -196,19 +222,18 @@ const DocViewer = ({
                   </div>
                   <div className="flex gap-3">
                     <button 
-                      onClick={() => window.location.reload()}
+                      onClick={handleRetryLoad}
                       className="rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold text-white hover:bg-white/10"
                     >
                       ลองโหลดใหม่
                     </button>
-                    <a 
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-lg"
+                    <button
+                      onClick={handleClose}
+                      className="relative rounded-xl bg-primary px-4 py-2 text-xs font-bold text-transparent shadow-lg"
                     >
+                      <span className="absolute inset-0 flex items-center justify-center text-white">ปิดเอกสาร</span>
                       เปิดไฟล์โดยตรง
-                    </a>
+                    </button>
                   </div>
                 </div>
               )}
