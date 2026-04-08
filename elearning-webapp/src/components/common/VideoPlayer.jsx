@@ -1,6 +1,43 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Plyr } from 'plyr-react';
-import 'plyr-react/plyr.css';
+import 'plyr/dist/plyr.css';
+
+// Custom CSS to fix invisible icons and match branding
+const plyrCustomStyles = `
+  .plyr {
+    --plyr-color-main: #4f46e5;
+    --plyr-video-control-color: #ffffff;
+    --plyr-video-control-color-hover: #ffffff;
+    --plyr-control-icon-size: 18px;
+    border-radius: 2rem;
+  }
+  .plyr__control svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  /* Fix for Play/Pause and other controls */
+  .plyr__control--overlaid svg {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .plyr__control--overlaid {
+    background: rgba(79, 70, 229, 0.9) !important;
+    padding: 20px !important;
+  }
+  .plyr--video .plyr__control.plyr__tab-focus,
+  .plyr--video .plyr__control:hover,
+  .plyr--video .plyr__control[aria-expanded=true] {
+    background: rgba(79, 70, 229, 1) !important;
+  }
+  /* Ensure speed/settings menu icons are also visible */
+  .plyr__menu__container svg {
+    fill: #475569 !important;
+  }
+`;
 import { Play, AlertCircle, ExternalLink, Shield } from 'lucide-react';
 
 const ensureAbsoluteUrl = (url) => {
@@ -152,6 +189,7 @@ const VideoPlayer = ({ url, onEnded }) => {
       className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-[2rem] border border-white/10 group/player"
       onContextMenu={handleContextMenu}
     >
+      <style>{plyrCustomStyles}</style>
       {/* Click Shield Layers - These cover parts of the player where titles/logos usually hide */}
       {/* Top Shield: Covers the header/title area */}
       <div className="absolute top-0 left-0 right-0 h-16 z-20 pointer-events-auto bg-transparent" />
