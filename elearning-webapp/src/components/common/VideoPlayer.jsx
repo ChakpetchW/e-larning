@@ -157,7 +157,7 @@ const VideoPlayer = ({ url, onEnded }) => {
             <Play size={44} fill="currentColor" />
           </div>
         </div>
-        <div className="absolute bottom-6 left-8 glass rounded-full border border-white/20 px-5 py-2 text-[11px] font-black tracking-[0.04em] text-white flex items-center gap-2">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 md:bottom-6 md:left-8 md:translate-x-0 glass rounded-full border border-white/20 px-4 md:px-5 py-1.5 md:py-2 text-[10px] md:text-[11px] font-black tracking-[0.04em] text-white flex items-center gap-2 whitespace-nowrap">
           <Shield size={12} className="text-primary-light" />
           {platformLabel} • SECURE PLAYER
         </div>

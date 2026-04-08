@@ -81,7 +81,7 @@ const UserLayout = () => {
           </NavLink>
 
           {canAccessAdminPanel(user) && (
-            <NavLink to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 text-rose-500 hover:bg-rose-50 hover:translate-x-1 mt-auto border border-dashed border-rose-200 bg-rose-50/30">
+            <NavLink to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 text-rose-500 hover:bg-rose-50 hover:translate-x-1 mt-auto bg-rose-50/30">
               <Settings size={20} /> <span className="font-bold">จัดการระบบ</span>
             </NavLink>
           )}
@@ -150,8 +150,8 @@ const UserLayout = () => {
             </NavLink>
 
             {canAccessAdminPanel(user) && (
-              <NavLink to="/admin/dashboard" className="nav-item text-rose-500">
-                <div className="nav-icon-wrapper !bg-rose-50"><Settings size={22} /></div>
+              <NavLink to="/admin/dashboard" className={({isActive}) => `nav-item text-rose-500 ${isActive ? 'active' : ''}`}>
+                <div className="nav-icon-wrapper"><Settings size={22} /></div>
                 <span>จัดการ</span>
               </NavLink>
             )}
