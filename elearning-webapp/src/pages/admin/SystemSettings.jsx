@@ -14,15 +14,7 @@ const SystemSettings = () => {
   const [message, setMessage] = useState(null);
 
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
-  
-  if (!isSuperAdmin(currentUser)) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
-        <h2 className="text-2xl font-black mb-2">เข้าถึงไม่ได้</h2>
-        <p className="text-muted">คุณไม่มีสิทธิ์ในการตั้งค่าระบบ</p>
-      </div>
-    );
-  }
+  const isFullAdmin = isSuperAdmin(currentUser);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -35,8 +27,13 @@ const SystemSettings = () => {
         setLoading(false);
       }
     };
-    fetchSettings();
-  }, []);
+    
+    if (isFullAdmin) {
+      fetchSettings();
+    } else {
+      setLoading(false);
+    }
+  }, [isFullAdmin]);
 
   const handleSave = async (key, value) => {
     setSaving(true);
@@ -58,6 +55,16 @@ const SystemSettings = () => {
       setTimeout(() => setMessage(null), 3000);
     }
   };
+
+  if (!isFullAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
+        <h2 className="text-2xl font-black mb-2">เข้าถึงไม่ได้</h2>
+        <p className="text-muted">คุณไม่มีสิทธิ์ในการตั้งค่าระบบ</p>
+      </div>
+    );
+  }
+
 
   if (loading) {
     return (

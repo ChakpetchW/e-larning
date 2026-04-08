@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Edit2, Plus, Trash2, X } from 'lucide-react';
+import { Edit2, Plus, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
 
 const ReferenceDataModal = ({
   isOpen,
@@ -12,11 +12,28 @@ const ReferenceDataModal = ({
   onCreate,
   onUpdate,
   onDelete,
+  onReorder = null,
   showAccessToggle = false,
 }) => {
   const [draftName, setDraftName] = useState('');
   const [accessAdmin, setAccessAdmin] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+
+  const handleMove = async (index, direction) => {
+    if (!onReorder) return;
+    
+    const reordered = [...items];
+    if (direction === -1 && index > 0) {
+      [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
+    } else if (direction === 1 && index < reordered.length - 1) {
+      [reordered[index + 1], reordered[index]] = [reordered[index], reordered[index + 1]];
+    } else {
+      return;
+    }
+
+    await onReorder(reordered);
+  };
+
 
   const submitLabel = useMemo(
     () => (editingItem ? `บันทึกการแก้ไข` : `เพิ่ม${itemLabel}ใหม่`),
@@ -165,7 +182,7 @@ const ReferenceDataModal = ({
                 ยังไม่มี{itemLabel}ในระบบ
               </div>
             ) : (
-              items.map((item) => {
+              items.map((item, index) => {
                 const isEditing = editingItem?.id === item.id;
                 return (
                   <div
@@ -176,7 +193,7 @@ const ReferenceDataModal = ({
                         : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
                     }`}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 text-left">
                       {isEditing && (
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white shadow-lg shadow-primary/20 animate-pulse">
                           <Edit2 size={14} />
@@ -198,25 +215,47 @@ const ReferenceDataModal = ({
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      {!isEditing && (
+                    <div className="flex items-center gap-2">
+                      {onReorder && (
+                        <div className="flex flex-col rounded-lg border border-slate-100 bg-slate-50 overflow-hidden shadow-sm mr-2 shrink-0">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => handleMove(index, -1)}
+                            className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all border-b border-slate-100"
+                          >
+                            <ArrowUp size={14} strokeWidth={3} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === items.length - 1}
+                            onClick={() => handleMove(index, 1)}
+                            className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all"
+                          >
+                            <ArrowDown size={14} strokeWidth={3} />
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        {!isEditing && (
+                          <button
+                            type="button"
+                            onClick={() => handleEdit(item)}
+                            className="rounded-xl bg-slate-50 p-2.5 text-primary transition-all hover:bg-primary hover:text-white"
+                            aria-label={`แก้ไข${itemLabel} ${item.name}`}
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => handleEdit(item)}
-                          className="rounded-xl bg-slate-50 p-2.5 text-primary transition-all hover:bg-primary hover:text-white"
-                          aria-label={`แก้ไข${itemLabel} ${item.name}`}
+                          onClick={() => onDelete(item.id, item.name)}
+                          className="rounded-xl bg-slate-50 p-2.5 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
+                          aria-label={`ลบ${itemLabel} ${item.name}`}
                         >
-                          <Edit2 size={16} />
+                          <Trash2 size={16} />
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => onDelete(item.id, item.name)}
-                        className="rounded-xl bg-slate-50 p-2.5 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
-                        aria-label={`ลบ${itemLabel} ${item.name}`}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      </div>
                     </div>
                   </div>
                 );

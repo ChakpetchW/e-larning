@@ -191,6 +191,19 @@ const UserManagement = () => {
     }
   };
 
+  const handleTierReorder = async (reorderedItems) => {
+    try {
+      const tierIds = reorderedItems.map(item => item.id);
+      setTiers(reorderedItems); // Optimistic update
+      await adminAPI.reorderTiers(tierIds);
+    } catch (error) {
+      console.error('Reorder tiers error:', error);
+      alert('ไม่สามารถบันทึกลำดับได้');
+      fetchReferenceData(); // Rollback
+    }
+  };
+
+
   const filteredUsers = useMemo(() => (
     users.filter((user) => {
       const keyword = searchTerm.trim().toLowerCase();
@@ -299,6 +312,7 @@ const UserManagement = () => {
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onDelete={handleTierDelete}
+            onReorder={handleTierReorder}
             showAccessToggle={true}
           />
         </>

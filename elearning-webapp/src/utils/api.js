@@ -118,6 +118,8 @@ export const adminAPI = {
   createTier: (data) => api.post('/admin/tiers', data),
   updateTier: (id, data) => api.put(`/admin/tiers/${id}`, data),
   deleteTier: (id) => api.delete(`/admin/tiers/${id}`),
+  reorderTiers: (tierIds) => api.put('/admin/tiers/reorder', { tierIds }),
+
 
   getCourses: () => api.get('/admin/courses'),
   createCourse: (data) => api.post('/admin/courses', data),

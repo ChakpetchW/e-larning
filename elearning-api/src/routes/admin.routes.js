@@ -20,6 +20,7 @@ router.delete('/departments/:id', verifySuperAdmin, adminController.deleteDepart
 
 router.get('/tiers', adminController.getTiers);
 router.post('/tiers', verifySuperAdmin, adminController.createTier);
+router.put('/tiers/reorder', verifySuperAdmin, adminController.reorderTiers);
 router.put('/tiers/:id', verifySuperAdmin, adminController.updateTier);
 router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 

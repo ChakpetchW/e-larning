@@ -93,6 +93,7 @@ model Department {
 model Tier {
   id        String   @id @default(uuid())
   name      String   @unique
+  order     Int      @default(0)
   accessAdmin Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
