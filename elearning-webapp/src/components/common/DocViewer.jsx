@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, FileText, ShieldAlert, Loader2, CheckCircle2 } from 'lucide-react';
 import ModalPortal from './ModalPortal';
+import PdfCanvasViewer from './PdfCanvasViewer';
 
 /**
  * SecureDocViewer - แสดงเอกสารภายในแอป โดยหลีกเลี่ยงการสร้าง blob URL
@@ -32,6 +33,15 @@ const DocViewer = ({
   const normalizedFileName = String(fileName || '').toLowerCase();
   const normalizedExtension = String(extension || '').toLowerCase();
   const effectiveViewerType = String(viewerType || '').toLowerCase();
+  const isMobileViewport = typeof window !== 'undefined'
+    ? window.matchMedia('(max-width: 767px)').matches
+    : false;
+  const isIosDevice = typeof window !== 'undefined'
+    ? /iPad|iPhone|iPod/i.test(window.navigator.userAgent)
+    : false;
+  const isPdfDocument = effectiveViewerType === 'pdf' || normalizedExtension === 'pdf' || normalizedFileName.endsWith('.pdf');
+  const isIosMobilePdf = isIosDevice && isMobileViewport && isPdfDocument;
+  const shouldUsePdfCanvasViewer = isPdfDocument && isMobileViewport;
 
   useEffect(() => {
     setCompletionReady(Boolean(isCompleted));
@@ -67,14 +77,17 @@ const DocViewer = ({
       || normalizedFileName.endsWith('.pdf')
       || normalizedUrl.endsWith('.pdf')
       || normalizedUrl.includes('/documents/');
-    const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
     const encoded = encodeURIComponent(resolvedUrl);
 
     autoRetryAttemptedRef.current = false;
     setIsRetrying(false);
 
     if (isPdf) {
-      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`);
+      setViewerUrl(
+        shouldUsePdfCanvasViewer || isIosMobilePdf
+          ? resolvedUrl
+          : `${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`
+      );
     } else {
       setViewerUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
     }
@@ -96,7 +109,7 @@ const DocViewer = ({
       document.removeEventListener('keydown', handleKeyDown, true);
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     };
-  }, [url, effectiveViewerType, normalizedExtension, normalizedFileName]);
+  }, [url, effectiveViewerType, normalizedExtension, normalizedFileName, isIosMobilePdf, isMobileViewport, shouldUsePdfCanvasViewer]);
 
   const handleClose = async () => {
     if (submitting) return;
@@ -236,7 +249,7 @@ const DocViewer = ({
         </div>
 
         {/* Content Area */}
-        <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-slate-900">
+        <div className={`relative flex flex-1 items-center justify-center ${shouldUsePdfCanvasViewer || isIosMobilePdf ? 'overflow-auto bg-white' : 'overflow-hidden bg-slate-900'}`}>
           {loading && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-slate-950/80 backdrop-blur-md transition-opacity">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -286,17 +299,42 @@ const DocViewer = ({
                 ปิดหน้าต่าง
               </button>
             </div>
+          ) : shouldUsePdfCanvasViewer ? (
+            <div className={`relative h-full w-full transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
+              <PdfCanvasViewer
+                url={viewerUrl}
+                onLoad={() => {
+                  setIframeLoaded(true);
+                  if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+                }}
+                onError={(message) => {
+                  setError(message);
+                  setLoading(false);
+                  setHasTimedOut(false);
+                }}
+              />
+            </div>
           ) : (
-            <div className={`absolute inset-0 h-full w-full overflow-hidden transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
+            <div className={`${isIosMobilePdf ? 'relative h-full w-full overflow-auto bg-white' : 'absolute inset-0 h-full w-full overflow-hidden'} transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
               <iframe
                 key={viewerUrl}
                 src={viewerUrl}
+                scrolling={isIosMobilePdf ? 'yes' : 'auto'}
                 onLoad={() => {
                   setIframeLoaded(true);
                   if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
                 }}
                 title={title || 'เอกสาร'}
-                style={isGoogleViewer ? {
+                style={isIosMobilePdf ? {
+                  display: 'block',
+                  width: '100%',
+                  height: '100%',
+                  minHeight: '100%',
+                  border: 'none',
+                  background: '#ffffff',
+                  overflow: 'auto',
+                  WebkitOverflowScrolling: 'touch'
+                } : isGoogleViewer ? {
                   position: 'absolute',
                   top: '-50px',
                   left: 0,
@@ -325,7 +363,7 @@ const DocViewer = ({
         </div>
 
         {/* Footer - Compact Single Button (Mobile Only) */}
-        <div className="flex md:hidden shrink-0 flex-col border-t border-white/10 bg-slate-950 p-6 pb-8 md:p-8">
+        <div className={`${shouldUsePdfCanvasViewer ? 'hidden' : 'flex md:hidden'} shrink-0 flex-col border-t border-white/10 bg-slate-950 p-6 pb-8 md:p-8`}>
           <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
              {completionError && <p className="text-center text-xs font-medium text-red-400">{completionError}</p>}
              
