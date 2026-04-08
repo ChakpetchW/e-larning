@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const goalController = require('../controllers/goal.controller');
-const { verifyToken, verifyAdmin } = require('../middleware/auth');
+const { verifyToken, verifyAdminPanelAccess } = require('../middleware/auth');
 
 // All goal routes require admin or manager access
 router.use(verifyToken);

@@ -1,5 +1,5 @@
 const goalService = require('../services/goal.service');
-const asyncHandler = require('../utils/handlers').asyncHandler;
+const asyncHandler = require('../middleware/async');
 
 const createGoal = asyncHandler(async (req, res) => {
     const goal = await goalService.createGoal(req.body, req.user);
