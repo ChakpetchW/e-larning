@@ -62,19 +62,13 @@ const AdminLayout = () => {
   const menuItems = [
     { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
     { path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' },
-    {
-      path: '/admin/users',
-      icon: <Users size={20} />,
-      label: isFullAdmin ? 'ผู้ใช้งานระบบ' : 'พนักงานในแผนก',
-    },
-    { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
-    { path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' },
-    { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงาน' },
     ...(isFullAdmin
-      ? [
-          { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
-        ]
+      ? [{ path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' }]
       : []),
+    { path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' },
+    { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
+    { path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายงาน Redeem' },
+    { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงานและการส่งออก' },
   ];
 
   return (
