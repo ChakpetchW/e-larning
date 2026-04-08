@@ -10,7 +10,7 @@ const plyrCustomStyles = `
     --plyr-video-control-color: #ffffff;
     --plyr-video-control-color-hover: #ffffff;
     --plyr-control-icon-size: 18px;
-    border-radius: 2rem;
+    border-radius: inherit;
   }
   .plyr__control svg {
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
@@ -181,7 +181,7 @@ const VideoPlayer = ({ url, onEnded }) => {
 
   return (
     <div 
-      className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-[2rem] border border-white/10 group/player"
+      className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl rounded-[1.5rem] md:rounded-[2rem] border border-white/10 group/player"
       onContextMenu={handleContextMenu}
     >
       <style>{plyrCustomStyles}</style>
