@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import Plyr from 'plyr-react';
-import 'plyr-react/dist/plyr.css';
+import { Plyr } from 'plyr-react';
+import 'plyr-react/plyr.css';
 import { Play, AlertCircle, ExternalLink, Shield } from 'lucide-react';
 
 const ensureAbsoluteUrl = (url) => {
