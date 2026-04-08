@@ -14,7 +14,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [points, setPoints] = useState(0);
-  const [weeklyGoal, setWeeklyGoal] = useState(1);
+  const [activeGoal, setActiveGoal] = useState(null);
   const [pointsLoading, setPointsLoading] = useState(true);
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
 
@@ -24,16 +24,19 @@ const Home = () => {
         const userData = JSON.parse(localStorage.getItem('user'));
         setUser(userData);
         
-        const [courseRes, catRes, pointsRes, settingsRes] = await Promise.all([
+        const [courseRes, catRes, pointsRes, goalsRes] = await Promise.all([
           userAPI.getCourses(),
           userAPI.getCategories(),
           userAPI.getPoints(),
-          userAPI.getSettings()
+          userAPI.getGoals()
         ]);
         setCourses(Array.isArray(courseRes?.data) ? courseRes.data : []);
         setCategories(Array.isArray(catRes?.data) ? catRes.data : []);
         setPoints(pointsRes?.data?.balance || 0);
-        setWeeklyGoal(parseInt(settingsRes?.data?.weekly_goal) || 1);
+        
+        const goals = goalsRes?.data || [];
+        const priorityGoal = goals.find(g => g.scope === 'DEPARTMENT') || goals[0] || null;
+        setActiveGoal(priorityGoal);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -63,16 +66,37 @@ const Home = () => {
     return courses.filter(c => !c.categoryId);
   }, [courses]);
 
-  const completedThisWeekCount = React.useMemo(() => {
-    if (!Array.isArray(courses)) return 0;
-    return courses.filter(c => {
-      if (c.enrollmentStatus !== 'COMPLETED' || !c.completedAt) return false;
-      const completedDate = new Date(c.completedAt);
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      return completedDate >= oneWeekAgo;
-    }).length;
-  }, [courses]);
+  const goalProgress = React.useMemo(() => {
+    if (!activeGoal || !Array.isArray(courses)) return { current: 0, target: 1 };
+    
+    const windowStart = new Date(activeGoal.createdAt);
+    const windowEnd = activeGoal.expiryDate ? new Date(activeGoal.expiryDate) : new Date(2100, 0, 1);
+    
+    let completed;
+    if (activeGoal.type === 'ANY') {
+      completed = courses.filter(c => 
+        c.enrollmentStatus === 'COMPLETED' && 
+        c.completedAt && 
+        new Date(c.completedAt) >= windowStart && 
+        new Date(c.completedAt) <= windowEnd
+      );
+    } else {
+      const specificIds = activeGoal.courses.map(gc => gc.courseId);
+      completed = courses.filter(c => 
+        specificIds.includes(c.id) &&
+        c.enrollmentStatus === 'COMPLETED' && 
+        c.completedAt && 
+        new Date(c.completedAt) >= windowStart && 
+        new Date(c.completedAt) <= windowEnd
+      );
+    }
+    
+    return {
+      current: completed.length,
+      target: activeGoal.targetCount,
+      title: activeGoal.title
+    };
+  }, [activeGoal, courses]);
 
   if (loading) {
     return (
@@ -254,17 +278,17 @@ const Home = () => {
 
 
             {/* Weekly Goal Bento (Wait, let's keep it here instead of below) */}
-            <div className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
-               <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
+             <div className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+               <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${goalProgress.current >= goalProgress.target ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
                   <Target size={28} />
                </div>
                <div className="flex-1">
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Weekly Momentum</p>
-                  <h3 className="text-xl font-bold text-slate-800 leading-none mb-3">{completedThisWeekCount}/{weeklyGoal} คอร์สที่จบแล้ว</h3>
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">{goalProgress.title || 'Learning Momentum'}</p>
+                  <h3 className="text-xl font-bold text-slate-800 leading-none mb-3">{goalProgress.current}/{goalProgress.target} คอร์สที่จบแล้ว</h3>
                   <div className="relative w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                      <div 
-                        className={`h-full transition-all duration-1000 ${completedThisWeekCount >= weeklyGoal ? 'bg-emerald-500' : 'bg-primary'}`}
-                        style={{ width: `${Math.min(100, (completedThisWeekCount / weeklyGoal) * 100)}%` }}
+                        className={`h-full transition-all duration-1000 ${goalProgress.current >= goalProgress.target ? 'bg-emerald-500' : 'bg-primary'}`}
+                        style={{ width: `${Math.min(100, (goalProgress.current / goalProgress.target) * 100)}%` }}
                      />
                   </div>
                </div>

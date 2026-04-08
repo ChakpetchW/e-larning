@@ -12,6 +12,8 @@ import {
   LogOut,
   Settings,
   GraduationCap,
+  Trophy,
+  ClipboardList,
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
@@ -65,7 +67,8 @@ const AdminLayout = () => {
       icon: <Users size={20} />,
       label: isFullAdmin ? 'ผู้ใช้งานระบบ' : 'พนักงานในแผนก',
     },
-    { path: '/admin/redeems', icon: <Target size={20} />, label: 'รายการ Redeem' },
+    { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
+    { path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' },
     { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงาน' },
     ...(isFullAdmin
       ? [

@@ -182,7 +182,15 @@ const ReferenceDataModal = ({
                 ยังไม่มี{itemLabel}ในระบบ
               </div>
             ) : (
-              items.map((item, index) => {
+              <>
+                {onReorder && (
+                  <div className="flex items-center gap-2 mb-2 px-1">
+                    <div className="h-[2px] flex-1 bg-gradient-to-r from-primary/30 to-transparent"></div>
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">ตำแหน่งสูงสุด</span>
+                    <div className="h-[2px] w-4 bg-primary/30"></div>
+                  </div>
+                )}
+                {items.map((item, index) => {
                 const isEditing = editingItem?.id === item.id;
                 return (
                   <div
@@ -259,7 +267,15 @@ const ReferenceDataModal = ({
                     </div>
                   </div>
                 );
-              })
+              })}
+              {onReorder && items.length > 1 && (
+                <div className="flex items-center gap-2 mt-2 px-1">
+                  <div className="h-[2px] flex-1 bg-gradient-to-r from-slate-200 to-transparent"></div>
+                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">ตำแหน่งเริ่มต้น</span>
+                  <div className="h-[2px] w-4 bg-slate-200"></div>
+                </div>
+              )}
+              </>
             )}
           </div>
         </div>
