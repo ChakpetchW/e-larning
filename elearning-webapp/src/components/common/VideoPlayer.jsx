@@ -203,6 +203,7 @@ const VideoPlayer = ({ url, onEnded }) => {
           source={plyrSource}
           options={{
             autoplay: true,
+            iconUrl: 'https://cdn.plyr.io/3.7.8/plyr.svg',
             controls: [
               'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
             ],
@@ -213,6 +214,7 @@ const VideoPlayer = ({ url, onEnded }) => {
           onEnd={onEnded}
           onError={() => setPlaybackError('error')}
         />
+
       </div>
 
       {/* Subtle Protection indicator */}
