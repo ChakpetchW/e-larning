@@ -45,7 +45,7 @@ const Login = () => {
         navigate('/user/home');
       }
     } catch (loginError) {
-      setError(loginError.response?.data?.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบอีเมลและรหัสผ่านอีกครั้ง');
+      setError(loginError.response?.data?.message || 'อีเมล หรือ รหัสผ่านไม่ถูกต้อง');
     } finally {
       setLoading(false);
     }
@@ -78,13 +78,13 @@ const Login = () => {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor={emailInputId} className="text-sm font-bold text-slate-700">
-              อีเมล / รหัสพนักงาน
+              อีเมล
             </label>
             <input
               id={emailInputId}
               type="text"
               className="w-full rounded-xl border border-slate-200 bg-slate-50/80 p-3 text-sm font-medium text-slate-900 transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
-              placeholder="employee@company.com"
+              placeholder="example@company.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required

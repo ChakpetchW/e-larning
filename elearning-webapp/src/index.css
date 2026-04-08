@@ -48,19 +48,18 @@
   input,
   select,
   textarea,
-  div {
+  div,
+  span,
+  section,
+  [tabindex] {
     outline: none !important;
+    box-shadow: none !important;
     -webkit-tap-highlight-color: transparent;
   }
 
-  button:focus-visible,
-  [role="button"]:focus-visible,
-  [role="dialog"]:focus-visible,
-  a:focus-visible,
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible {
-    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15);
+  /* Custom focus state only for keyboard users */
+  :focus-visible {
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15) !important;
   }
 }
 
