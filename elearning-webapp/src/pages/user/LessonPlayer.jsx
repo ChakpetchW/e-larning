@@ -205,7 +205,13 @@ const LessonPlayer = () => {
     <div className="flex flex-col w-full max-w-5xl mx-auto md:px-4 md:py-6 relative min-h-screen pb-12 bg-white md:bg-transparent">
       
       {/* Immersive Header / Media Section - Cinemascope Mode */}
-      <div className={`relative w-full overflow-hidden shadow-[0_34px_80px_-40px_rgba(15,23,42,0.8)] md:rounded-[2.5rem] md:aspect-video ${lesson.type !== 'video' ? 'bg-slate-950' : ''}`}>
+      <div className={`relative w-full overflow-hidden shadow-[0_34px_80px_-40px_rgba(15,23,42,0.8)] md:rounded-[2.5rem] md:aspect-video ${lesson.type !== 'video' ? 'bg-[#060912]' : ''}`}>
+        {lesson.type !== 'video' && (
+          <>
+            <div className="absolute inset-0 z-0 bg-[linear-gradient(135deg,#0f172a_0%,#111827_45%,#020617_100%)]"></div>
+            <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,_rgba(79,70,229,0.22),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(20,184,166,0.14),_transparent_26%)]"></div>
+          </>
+        )}
         {/* Back Button Overlay - Compact & Accessible */}
         <div className="absolute top-4 left-4 md:top-6 md:left-6 z-50">
           <button
@@ -237,10 +243,7 @@ const LessonPlayer = () => {
               </Suspense>
             )
           ) : lesson.type === 'quiz' ? (
-            <div className="relative flex flex-col items-center gap-6 overflow-hidden px-6 py-20 text-center text-white md:py-32">
-              <div className="absolute inset-0 z-0 bg-[linear-gradient(135deg,#0f172a_0%,#111827_45%,#020617_100%)]"></div>
-              <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,_rgba(79,70,229,0.22),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(20,184,166,0.14),_transparent_26%)]"></div>
-              
+            <div className="relative flex min-h-full flex-col items-center justify-center gap-6 px-6 py-20 text-center text-white md:py-32">
               <div className="relative z-10 flex h-24 w-24 items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/10 text-primary shadow-[0_24px_60px_-32px_rgba(79,70,229,0.45)] backdrop-blur-2xl">
                  <FileText size={48} strokeWidth={1} />
               </div>
@@ -250,8 +253,7 @@ const LessonPlayer = () => {
               </div>
             </div>
           ) : (
-            <div className="relative flex flex-col items-center gap-8 overflow-hidden bg-slate-950 py-20 text-center md:py-32">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(79,70,229,0.15),_transparent_35%)]"></div>
+            <div className="relative flex min-h-full flex-col items-center justify-center gap-8 py-20 text-center md:py-32">
               <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/5 text-primary shadow-[0_24px_60px_-32px_rgba(79,70,229,0.45)] backdrop-blur-xl">
                 <BookOpen size={40} strokeWidth={1.5} />
               </div>
