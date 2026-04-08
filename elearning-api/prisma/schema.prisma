@@ -71,6 +71,7 @@ model Category {
   id        String   @id @default(uuid())
   name      String   @unique
   icon      String?  @default("Grid")
+  type      String?  @default("FUNCTION") // LEADERSHIP | FUNCTION | INNOVATION
   order     Int      @default(0)
   visibleToAll Boolean @default(true)
   createdAt DateTime @default(now())

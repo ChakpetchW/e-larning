@@ -141,7 +141,8 @@ const mapCategoryRecord = (category) => {
         visibleDepartments,
         visibleDepartmentIds: visibleDepartments.map((department) => department.id),
         visibleTiers,
-        visibleTierIds: visibleTiers.map((tier) => tier.id)
+        visibleTierIds: visibleTiers.map((tier) => tier.id),
+        type: rest.type || 'FUNCTION'
     };
 };
 
@@ -501,6 +502,7 @@ const buildCategoryMutationPayload = async (tx, input) => {
         data: {
             name: sanitizeName(input.name, 'Category'),
             icon: input.icon || 'Grid',
+            type: input.type || 'FUNCTION',
             order: parseInteger(input.order, 0),
             visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true
         },
