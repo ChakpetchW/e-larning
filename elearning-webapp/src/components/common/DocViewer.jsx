@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, FileText, ShieldAlert, Loader2, CheckCircle2 } from 'lucide-react';
 import ModalPortal from './ModalPortal';
+import PdfCanvasViewer from './PdfCanvasViewer';
 
 /**
  * SecureDocViewer - แสดงเอกสารภายในแอป โดยหลีกเลี่ยงการสร้าง blob URL
@@ -8,9 +9,13 @@ import ModalPortal from './ModalPortal';
  */
 const DocViewer = ({
   url,
+  fileName,
+  viewerType,
+  extension,
   title,
   onClose,
   onComplete,
+  onRefreshUrl,
   isCompleted = false,
 }) => {
   const overlayRef = useRef(null);
@@ -22,7 +27,21 @@ const DocViewer = ({
   const [completionError, setCompletionError] = useState('');
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
   const loadTimeoutRef = useRef(null);
+  const autoRetryAttemptedRef = useRef(false);
+  const normalizedFileName = String(fileName || '').toLowerCase();
+  const normalizedExtension = String(extension || '').toLowerCase();
+  const effectiveViewerType = String(viewerType || '').toLowerCase();
+  const isMobileViewport = typeof window !== 'undefined'
+    ? window.matchMedia('(max-width: 767px)').matches
+    : false;
+  const isIosDevice = typeof window !== 'undefined'
+    ? /iPad|iPhone|iPod/i.test(window.navigator.userAgent)
+    : false;
+  const isPdfDocument = effectiveViewerType === 'pdf' || normalizedExtension === 'pdf' || normalizedFileName.endsWith('.pdf');
+  const isIosMobilePdf = isIosDevice && isMobileViewport && isPdfDocument;
+  const shouldUsePdfCanvasViewer = isPdfDocument && isMobileViewport;
 
   useEffect(() => {
     setCompletionReady(Boolean(isCompleted));
@@ -53,12 +72,22 @@ const DocViewer = ({
 
     const resolvedUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
     const normalizedUrl = resolvedUrl.toLowerCase().split('?')[0];
-    const isPdf = normalizedUrl.endsWith('.pdf') || normalizedUrl.includes('/documents/');
-    const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
+    const isPdf = effectiveViewerType === 'pdf'
+      || normalizedExtension === 'pdf'
+      || normalizedFileName.endsWith('.pdf')
+      || normalizedUrl.endsWith('.pdf')
+      || normalizedUrl.includes('/documents/');
     const encoded = encodeURIComponent(resolvedUrl);
 
-    if (isPdf && !isMobileViewport) {
-      setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`);
+    autoRetryAttemptedRef.current = false;
+    setIsRetrying(false);
+
+    if (isPdf) {
+      setViewerUrl(
+        shouldUsePdfCanvasViewer || isIosMobilePdf
+          ? resolvedUrl
+          : `${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`
+      );
     } else {
       setViewerUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
     }
@@ -74,13 +103,13 @@ const DocViewer = ({
       if (!iframeLoaded) {
         setHasTimedOut(true);
       }
-    }, 10000); // 10 seconds timeout
+    }, isPdf && isMobileViewport ? 12000 : 10000);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     };
-  }, [url]);
+  }, [url, effectiveViewerType, normalizedExtension, normalizedFileName, isIosMobilePdf, isMobileViewport, shouldUsePdfCanvasViewer]);
 
   const handleClose = async () => {
     if (submitting) return;
@@ -133,12 +162,57 @@ const DocViewer = ({
     }
   };
 
+  const handleRetryLoad = async ({ silent = false } = {}) => {
+    setHasTimedOut(false);
+    setIframeLoaded(false);
+    setError(null);
+    setIsRetrying(true);
+
+    if (typeof onRefreshUrl === 'function') {
+      if (!silent) {
+        setLoading(true);
+      }
+
+      try {
+        const refreshedUrl = await onRefreshUrl();
+
+        if (!refreshedUrl) {
+          setLoading(false);
+          setError('ไม่สามารถเชื่อมต่อเอกสารได้ในขณะนี้');
+        }
+      } catch (refreshError) {
+        console.error('Refresh document access error:', refreshError);
+        setLoading(false);
+        setError('ไม่สามารถเชื่อมต่อเอกสารได้ในขณะนี้');
+      }
+    } else {
+      setViewerUrl((currentUrl) => currentUrl);
+    }
+
+    setIsRetrying(false);
+  };
+
   useEffect(() => {
     document.body.classList.add('modal-open');
     return () => {
       document.body.classList.remove('modal-open');
     };
   }, []);
+
+  useEffect(() => {
+    if (!hasTimedOut || autoRetryAttemptedRef.current || typeof onRefreshUrl !== 'function') {
+      return;
+    }
+
+    autoRetryAttemptedRef.current = true;
+    const retryTimer = window.setTimeout(() => {
+      handleRetryLoad({ silent: true });
+    }, 400);
+
+    return () => {
+      window.clearTimeout(retryTimer);
+    };
+  }, [hasTimedOut, onRefreshUrl]);
 
   const isGoogleViewer = viewerUrl.includes('docs.google.com/viewer');
 
@@ -175,7 +249,7 @@ const DocViewer = ({
         </div>
 
         {/* Content Area */}
-        <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-slate-900">
+        <div className={`relative flex flex-1 items-center justify-center ${shouldUsePdfCanvasViewer || isIosMobilePdf ? 'overflow-auto bg-white' : 'overflow-hidden bg-slate-900'}`}>
           {loading && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-slate-950/80 backdrop-blur-md transition-opacity">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -186,7 +260,9 @@ const DocViewer = ({
           {!iframeLoaded && !loading && (
             <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 transition-opacity ${hasTimedOut ? 'bg-slate-950/50' : ''}`}>
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-sm font-medium animate-pulse text-white/80">กำลังโหลดเอกสาร...</p>
+              <p className="text-sm font-medium animate-pulse text-white/80">
+                {isRetrying ? 'กำลังลองเชื่อมต่อเอกสารอีกครั้ง...' : 'กำลังโหลดเอกสาร...'}
+              </p>
               
               {hasTimedOut && (
                 <div className="mt-8 flex flex-col items-center gap-4 animate-in fade-in zoom-in slide-in-from-bottom-4 duration-500">
@@ -196,19 +272,18 @@ const DocViewer = ({
                   </div>
                   <div className="flex gap-3">
                     <button 
-                      onClick={() => window.location.reload()}
+                      onClick={handleRetryLoad}
                       className="rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold text-white hover:bg-white/10"
                     >
                       ลองโหลดใหม่
                     </button>
-                    <a 
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-lg"
+                    <button
+                      onClick={handleClose}
+                      className="relative rounded-xl bg-primary px-4 py-2 text-xs font-bold text-transparent shadow-lg"
                     >
+                      <span className="absolute inset-0 flex items-center justify-center text-white">ปิดเอกสาร</span>
                       เปิดไฟล์โดยตรง
-                    </a>
+                    </button>
                   </div>
                 </div>
               )}
@@ -224,16 +299,42 @@ const DocViewer = ({
                 ปิดหน้าต่าง
               </button>
             </div>
+          ) : shouldUsePdfCanvasViewer ? (
+            <div className={`relative h-full w-full transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
+              <PdfCanvasViewer
+                url={viewerUrl}
+                onLoad={() => {
+                  setIframeLoaded(true);
+                  if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+                }}
+                onError={(message) => {
+                  setError(message);
+                  setLoading(false);
+                  setHasTimedOut(false);
+                }}
+              />
+            </div>
           ) : (
-            <div className={`absolute inset-0 h-full w-full overflow-hidden transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
+            <div className={`${isIosMobilePdf ? 'relative h-full w-full overflow-auto bg-white' : 'absolute inset-0 h-full w-full overflow-hidden'} transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
               <iframe
+                key={viewerUrl}
                 src={viewerUrl}
+                scrolling={isIosMobilePdf ? 'yes' : 'auto'}
                 onLoad={() => {
                   setIframeLoaded(true);
                   if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
                 }}
                 title={title || 'เอกสาร'}
-                style={isGoogleViewer ? {
+                style={isIosMobilePdf ? {
+                  display: 'block',
+                  width: '100%',
+                  height: '100%',
+                  minHeight: '100%',
+                  border: 'none',
+                  background: '#ffffff',
+                  overflow: 'auto',
+                  WebkitOverflowScrolling: 'touch'
+                } : isGoogleViewer ? {
                   position: 'absolute',
                   top: '-50px',
                   left: 0,
@@ -262,7 +363,7 @@ const DocViewer = ({
         </div>
 
         {/* Footer - Compact Single Button (Mobile Only) */}
-        <div className="flex md:hidden shrink-0 flex-col border-t border-white/10 bg-slate-950 p-6 pb-8 md:p-8">
+        <div className={`${shouldUsePdfCanvasViewer ? 'hidden' : 'flex md:hidden'} shrink-0 flex-col border-t border-white/10 bg-slate-950 p-6 pb-8 md:p-8`}>
           <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
              {completionError && <p className="text-center text-xs font-medium text-red-400">{completionError}</p>}
              

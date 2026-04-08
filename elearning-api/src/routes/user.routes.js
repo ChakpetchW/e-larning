@@ -3,6 +3,8 @@ const router = express.Router();
 const userController = require('../controllers/user.controller');
 const { verifyToken } = require('../middleware/auth');
 
+router.get('/lessons/:id/document-stream', userController.getLessonDocumentStream);
+
 router.use(verifyToken); // All user routes require authentication
 
 router.get('/courses', userController.getCourses);
@@ -12,6 +14,7 @@ router.post('/courses/:id/enroll', userController.enrollCourse);
 router.put('/lessons/:id/progress', userController.updateLessonProgress);
 router.post('/lessons/:id/quiz', userController.submitQuiz);
 router.get('/lessons/:id/questions', userController.getLessonQuestions);
+router.get('/lessons/:id/document-access', userController.getLessonDocumentAccess);
 router.get('/points', userController.getPointsHistory);
 router.get('/rewards', userController.getRewards);
 router.get('/categories', userController.getCategories);

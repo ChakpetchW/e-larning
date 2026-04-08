@@ -66,14 +66,18 @@ router.post('/', upload.single('file'), async (req, res) => {
 
         if (error) throw error;
 
-        // Get Public URL
+        // Images can stay public for rendering.
+        // Documents return only a storage key so the app can request a short-lived signed URL later.
         const { data: { publicUrl } } = supabase.storage
             .from(bucketName)
             .getPublicUrl(fileName);
 
+        const fileUrl = isImage ? publicUrl : fileName;
+
         res.json({
             message: 'Upload successful!',
-            fileUrl: publicUrl,
+            fileUrl,
+            fileKey: fileName,
             fileName: fileName
         });
 
