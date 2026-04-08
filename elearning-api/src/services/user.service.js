@@ -116,6 +116,25 @@ const getDocumentFilename = (documentRef) => {
     }
 };
 
+const getDocumentPreviewMeta = (documentRef) => {
+    const fileName = getDocumentFilename(documentRef);
+    const lowerFileName = fileName.toLowerCase();
+    const extensionMatch = lowerFileName.match(/\.([a-z0-9]+)$/i);
+    const extension = extensionMatch?.[1] || '';
+    const pdfExtensions = ['pdf'];
+    const officeExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+
+    return {
+        fileName,
+        extension,
+        viewerType: pdfExtensions.includes(extension)
+            ? 'pdf'
+            : officeExtensions.includes(extension)
+                ? 'office'
+                : 'document'
+    };
+};
+
 const getDocumentUpstreamResponse = async (documentAccessPayload) => {
     const { bucket, path: storagePath, sourceUrl } = documentAccessPayload || {};
     let upstreamUrl = '';
@@ -563,11 +582,13 @@ const getLessonDocumentAccess = async (userId, lessonId) => {
         lessonId: lesson.id,
         contentUrl: lesson.contentUrl
     });
+    const previewMeta = getDocumentPreviewMeta(lesson.contentUrl);
 
     return {
         lessonId: lesson.id,
         accessUrl: `/api/user/lessons/${lesson.id}/document-stream?token=${encodeURIComponent(token)}`,
-        expiresIn: DOCUMENT_ACCESS_TOKEN_TTL_SECONDS
+        expiresIn: DOCUMENT_ACCESS_TOKEN_TTL_SECONDS,
+        ...previewMeta
     };
 };
 

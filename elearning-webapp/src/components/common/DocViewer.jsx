@@ -8,6 +8,9 @@ import ModalPortal from './ModalPortal';
  */
 const DocViewer = ({
   url,
+  fileName,
+  viewerType,
+  extension,
   title,
   onClose,
   onComplete,
@@ -23,7 +26,12 @@ const DocViewer = ({
   const [completionError, setCompletionError] = useState('');
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
   const loadTimeoutRef = useRef(null);
+  const autoRetryAttemptedRef = useRef(false);
+  const normalizedFileName = String(fileName || '').toLowerCase();
+  const normalizedExtension = String(extension || '').toLowerCase();
+  const effectiveViewerType = String(viewerType || '').toLowerCase();
 
   useEffect(() => {
     setCompletionReady(Boolean(isCompleted));
@@ -54,11 +62,18 @@ const DocViewer = ({
 
     const resolvedUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
     const normalizedUrl = resolvedUrl.toLowerCase().split('?')[0];
-    const isPdf = normalizedUrl.endsWith('.pdf') || normalizedUrl.includes('/documents/');
+    const isPdf = effectiveViewerType === 'pdf'
+      || normalizedExtension === 'pdf'
+      || normalizedFileName.endsWith('.pdf')
+      || normalizedUrl.endsWith('.pdf')
+      || normalizedUrl.includes('/documents/');
     const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
     const encoded = encodeURIComponent(resolvedUrl);
 
-    if (isPdf && !isMobileViewport) {
+    autoRetryAttemptedRef.current = false;
+    setIsRetrying(false);
+
+    if (isPdf) {
       setViewerUrl(`${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`);
     } else {
       setViewerUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
@@ -75,13 +90,13 @@ const DocViewer = ({
       if (!iframeLoaded) {
         setHasTimedOut(true);
       }
-    }, 10000); // 10 seconds timeout
+    }, isPdf && isMobileViewport ? 12000 : 10000);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     };
-  }, [url]);
+  }, [url, effectiveViewerType, normalizedExtension, normalizedFileName]);
 
   const handleClose = async () => {
     if (submitting) return;
@@ -134,13 +149,16 @@ const DocViewer = ({
     }
   };
 
-  const handleRetryLoad = async () => {
+  const handleRetryLoad = async ({ silent = false } = {}) => {
     setHasTimedOut(false);
     setIframeLoaded(false);
     setError(null);
+    setIsRetrying(true);
 
     if (typeof onRefreshUrl === 'function') {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
 
       try {
         const refreshedUrl = await onRefreshUrl();
@@ -157,6 +175,8 @@ const DocViewer = ({
     } else {
       setViewerUrl((currentUrl) => currentUrl);
     }
+
+    setIsRetrying(false);
   };
 
   useEffect(() => {
@@ -165,6 +185,21 @@ const DocViewer = ({
       document.body.classList.remove('modal-open');
     };
   }, []);
+
+  useEffect(() => {
+    if (!hasTimedOut || autoRetryAttemptedRef.current || typeof onRefreshUrl !== 'function') {
+      return;
+    }
+
+    autoRetryAttemptedRef.current = true;
+    const retryTimer = window.setTimeout(() => {
+      handleRetryLoad({ silent: true });
+    }, 400);
+
+    return () => {
+      window.clearTimeout(retryTimer);
+    };
+  }, [hasTimedOut, onRefreshUrl]);
 
   const isGoogleViewer = viewerUrl.includes('docs.google.com/viewer');
 
@@ -212,7 +247,9 @@ const DocViewer = ({
           {!iframeLoaded && !loading && (
             <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 transition-opacity ${hasTimedOut ? 'bg-slate-950/50' : ''}`}>
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-sm font-medium animate-pulse text-white/80">กำลังโหลดเอกสาร...</p>
+              <p className="text-sm font-medium animate-pulse text-white/80">
+                {isRetrying ? 'กำลังลองเชื่อมต่อเอกสารอีกครั้ง...' : 'กำลังโหลดเอกสาร...'}
+              </p>
               
               {hasTimedOut && (
                 <div className="mt-8 flex flex-col items-center gap-4 animate-in fade-in zoom-in slide-in-from-bottom-4 duration-500">
@@ -252,6 +289,7 @@ const DocViewer = ({
           ) : (
             <div className={`absolute inset-0 h-full w-full overflow-hidden transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
               <iframe
+                key={viewerUrl}
                 src={viewerUrl}
                 onLoad={() => {
                   setIframeLoaded(true);

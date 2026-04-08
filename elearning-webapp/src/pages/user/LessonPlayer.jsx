@@ -21,7 +21,7 @@ const LessonPlayer = () => {
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDocViewer, setShowDocViewer] = useState(false);
-  const [documentAccessUrl, setDocumentAccessUrl] = useState('');
+  const [documentAccess, setDocumentAccess] = useState(null);
   const [openingDocument, setOpeningDocument] = useState(false);
   const [isNavigatingAway, setIsNavigatingAway] = useState(false);
 
@@ -36,7 +36,7 @@ const LessonPlayer = () => {
       try {
         setLoading(true);
         setShowDocViewer(false);
-        setDocumentAccessUrl('');
+        setDocumentAccess(null);
         setIsNavigatingAway(false);
         setAnswers({});
         setQuizResult(null);
@@ -206,12 +206,20 @@ const LessonPlayer = () => {
       setOpeningDocument(true);
       const response = await userAPI.getLessonDocumentAccess(lessonId);
       const accessUrl = response?.data?.accessUrl || response?.accessUrl || '';
+      const fileName = response?.data?.fileName || response?.fileName || '';
+      const viewerType = response?.data?.viewerType || response?.viewerType || '';
+      const extension = response?.data?.extension || response?.extension || '';
 
       if (!accessUrl) {
         throw new Error('Document access URL was not returned');
       }
 
-      setDocumentAccessUrl(accessUrl);
+      setDocumentAccess({
+        accessUrl,
+        fileName,
+        viewerType,
+        extension,
+      });
       return accessUrl;
     } catch (error) {
       console.error('Fetch document access error:', error);
@@ -313,9 +321,12 @@ const LessonPlayer = () => {
       </div>
 
       {/* Secure Doc Viewer Modal */}
-      {showDocViewer && documentAccessUrl && (
+      {showDocViewer && documentAccess?.accessUrl && (
         <DocViewer
-          url={documentAccessUrl}
+          url={documentAccess.accessUrl}
+          fileName={documentAccess.fileName}
+          viewerType={documentAccess.viewerType}
+          extension={documentAccess.extension}
           title={lesson.title}
           onClose={() => setShowDocViewer(false)}
           onComplete={handleComplete}
