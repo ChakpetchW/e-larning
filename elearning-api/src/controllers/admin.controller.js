@@ -80,6 +80,13 @@ const deleteTier = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Tier deleted successfully' });
 });
 
+const reorderTiers = asyncHandler(async (req, res) => {
+  const { tierIds } = req.body;
+  await AdminService.reorderTiers(tierIds);
+  res.json({ success: true, message: 'Tiers reordered successfully' });
+});
+
+
 // COURSES
 const getAdminCourses = asyncHandler(async (req, res) => {
   const courses = await AdminService.getAdminCourses();
@@ -226,6 +233,7 @@ module.exports = {
   createTier,
   updateTier,
   deleteTier,
+  reorderTiers,
   getCourseLessons,
   createLesson,
   updateLesson,
