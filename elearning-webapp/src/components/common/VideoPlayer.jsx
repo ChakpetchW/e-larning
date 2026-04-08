@@ -203,7 +203,7 @@ const VideoPlayer = ({ url, onEnded }) => {
           source={plyrSource}
           options={{
             autoplay: true,
-            iconUrl: 'https://cdn.plyr.io/3.7.8/plyr.svg',
+            iconUrl: '/plyr.svg',
             controls: [
               'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
             ],
