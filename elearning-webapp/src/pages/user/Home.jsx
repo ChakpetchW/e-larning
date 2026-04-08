@@ -353,52 +353,26 @@ const Home = () => {
         </button>
       </div>
 
-      {/* Main Course Feed - Grouped by Major Type */}
-      <div className="space-y-20 md:space-y-32 mt-4">
-        {[
-          { key: 'LEADERSHIP', label: 'Leadership', icon: '👔', color: 'indigo' },
-          { key: 'FUNCTION', label: 'Function', icon: '⚙️', color: 'slate' },
-          { key: 'INNOVATION', label: 'Innovation', icon: '💡', color: 'amber' },
-        ].map((group) => {
-          const groupCategories = categorizedCourses.filter(cat => (cat.type || 'FUNCTION') === group.key);
-          if (groupCategories.length === 0) return null;
-
-          return (
-            <section key={group.key} className="space-y-12">
-              <div className="flex items-center gap-4 px-1 md:px-2">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-${group.color}-600 text-white shadow-xl shadow-${group.color}-600/20 text-xl`}>
-                  {group.icon}
-                </div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none uppercase">{group.label}</h2>
-                  <p className="text-sm font-medium text-slate-400 mt-1 uppercase tracking-widest">Master your {group.label.toLowerCase()} skills</p>
-                </div>
-                <div className="flex-1 h-[2px] bg-slate-100/80 ml-4 hidden md:block"></div>
-              </div>
-
-              <div className="space-y-16 md:space-y-20">
-                {groupCategories.map((category, idx) => (
-                  <div key={category.id} className="animate-slide-up" style={{ animationDelay: `${idx * 100}ms` }}>
-                    <SectionHeader 
-                      title={category.name}
-                      onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
-                    />
-                    <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
-                      {category.courses.map(course => (
-                        <CourseCard 
-                          key={course.id} 
-                          course={course} 
-                          onClick={() => navigate(`/user/courses/${course.id}`)}
-                          className="snap-center md:snap-none"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          );
-        })}
+      {/* Main Course Feed - Individual Category Sections */}
+      <div className="space-y-16 md:space-y-24 mt-4">
+        {categorizedCourses.map((category, idx) => (
+          <section key={category.id} className="animate-slide-up" style={{ animationDelay: `${500 + idx * 100}ms` }}>
+            <SectionHeader 
+              title={category.name}
+              onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
+            />
+            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
+              {category.courses.map(course => (
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onClick={() => navigate(`/user/courses/${course.id}`)}
+                  className="snap-center md:snap-none"
+                />
+              ))}
+            </div>
+          </section>
+        ))}
 
         {/* Uncategorized Fallback */}
         {uncategorized.length > 0 && (

@@ -648,6 +648,48 @@ const getDashboardStats = async (authUser) => {
         });
     }
 
+    const coursesByType = await prisma.course.findMany({
+        where: visibleCourseWhere,
+        include: {
+            category: true,
+            _count: {
+                select: {
+                    enrollments: isManager
+                        ? {
+                            where: {
+                                user: {
+                                    departmentId: actor.departmentId,
+                                    role: 'user'
+                                }
+                            }
+                        }
+                        : true
+                }
+            }
+        }
+    });
+
+    const typeMap = {
+        'LEADERSHIP': { name: 'Leadership', value: 0, enrollmentCount: 0, courses: [] },
+        'FUNCTION': { name: 'Function', value: 0, enrollmentCount: 0, courses: [] },
+        'INNOVATION': { name: 'Innovation', value: 0, enrollmentCount: 0, courses: [] }
+    };
+
+    coursesByType.forEach(course => {
+        const typeKey = course.category?.type || 'FUNCTION';
+        const group = typeMap[typeKey] || typeMap['FUNCTION'];
+        
+        group.value += 1;
+        group.enrollmentCount += course._count.enrollments;
+        group.courses.push({
+            id: course.id,
+            title: course.title,
+            students: course._count.enrollments
+        });
+    });
+
+    const typeDistribution = Object.values(typeMap).filter(t => t.value > 0);
+
     return {
         totalUsers,
         activeCourses,
@@ -660,6 +702,7 @@ const getDashboardStats = async (authUser) => {
                 value: category._count.courses
             }))
             .filter((category) => category.value > 0),
+        typeDistribution,
         scope: isManager ? 'department' : 'global',
         department: isManager ? actor.department || null : null
     };
