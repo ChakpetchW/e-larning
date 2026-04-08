@@ -14,9 +14,6 @@ const plyrCustomStyles = `
   }
   .plyr__control svg {
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
   }
   /* Fix for Play/Pause and other controls */
   .plyr__control--overlaid svg {
