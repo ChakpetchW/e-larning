@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Plyr } from 'plyr-react';
 import 'plyr/dist/plyr.css';
+import plyrSprite from 'plyr/dist/plyr.svg?url';
 
 // Custom CSS to fix invisible icons and match branding
 const plyrCustomStyles = `
@@ -12,8 +13,6 @@ const plyrCustomStyles = `
     border-radius: 2rem;
   }
   .plyr__control svg {
-    fill: #ffffff !important;
-    color: #ffffff !important;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
     display: block !important;
     opacity: 1 !important;
@@ -21,21 +20,20 @@ const plyrCustomStyles = `
   }
   /* Fix for Play/Pause and other controls */
   .plyr__control--overlaid svg {
-    width: 40px !important;
-    height: 40px !important;
+    width: 44px !important;
+    height: 44px !important;
   }
   .plyr__control--overlaid {
     background: rgba(79, 70, 229, 0.9) !important;
-    padding: 20px !important;
+    padding: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   .plyr--video .plyr__control.plyr__tab-focus,
   .plyr--video .plyr__control:hover,
   .plyr--video .plyr__control[aria-expanded=true] {
     background: rgba(79, 70, 229, 1) !important;
-  }
-  /* Ensure speed/settings menu icons are also visible */
-  .plyr__menu__container svg {
-    fill: #475569 !important;
   }
 `;
 import { Play, AlertCircle, ExternalLink, Shield } from 'lucide-react';
@@ -203,7 +201,7 @@ const VideoPlayer = ({ url, onEnded }) => {
           source={plyrSource}
           options={{
             autoplay: true,
-            iconUrl: '/plyr.svg',
+            iconUrl: plyrSprite,
             controls: [
               'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
             ],
