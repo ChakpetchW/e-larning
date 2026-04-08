@@ -487,8 +487,8 @@ const CourseManagement = () => {
                     </button>
 
                     {showIconPicker && (
-                      <div className="absolute left-0 right-0 top-full z-[100] mt-2 max-h-60 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 no-scrollbar">
-                        <div className="grid grid-cols-2 gap-1">
+                      <div className="absolute left-0 lg:left-auto lg:right-0 top-full z-[100] mt-3 w-72 sm:w-80 max-h-80 overflow-y-auto rounded-3xl border border-slate-100 bg-white p-3 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                        <div className="grid grid-cols-3 gap-2">
                           {Object.keys(ICON_LIST).map((iconName) => {
                             const Icon = ICON_LIST[iconName];
                             const isSelected = (categoryForm.icon || 'LayoutGrid') === iconName;
@@ -496,18 +496,23 @@ const CourseManagement = () => {
                               <button
                                 key={iconName}
                                 type="button"
+                                title={iconName}
                                 onClick={() => {
                                   setCategoryForm({ ...categoryForm, icon: iconName });
                                   setShowIconPicker(false);
                                 }}
-                                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+                                className={`flex flex-col items-center justify-center gap-2 rounded-2xl p-3 transition-all duration-300 ${
                                   isSelected 
-                                    ? 'bg-primary text-white' 
-                                    : 'text-slate-600 hover:bg-slate-50'
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/25 scale-105 z-10' 
+                                    : 'text-slate-500 hover:bg-slate-50 hover:text-primary hover:scale-105'
                                 }`}
                               >
-                                <Icon size={18} />
-                                <span className="text-xs font-bold">{iconName}</span>
+                                <div className={`${isSelected ? 'text-white' : 'text-slate-600'}`}>
+                                  <Icon size={20} />
+                                </div>
+                                <span className={`text-[8px] font-black uppercase tracking-tighter truncate w-full text-center ${isSelected ? 'text-white/90' : 'text-slate-400'}`}>
+                                  {iconName}
+                                </span>
                               </button>
                             );
                           })}
