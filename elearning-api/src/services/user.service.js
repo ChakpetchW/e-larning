@@ -22,6 +22,7 @@ const mapPublicUser = (user) => ({
 const getUserVisibilityContext = async (userId) => prisma.user.findUnique({
     where: { id: userId },
     select: {
+        role: true,
         departmentId: true,
         tierId: true,
         tier: {
@@ -34,6 +35,10 @@ const getUserVisibilityContext = async (userId) => prisma.user.findUnique({
 });
 
 const buildCategoryVisibilityWhere = (userContext) => {
+    if (userContext?.role === 'admin') {
+        return {};
+    }
+
     const departmentConditions = [{ departmentAccess: { none: {} } }];
 
     if (userContext?.departmentId) {
@@ -58,6 +63,10 @@ const buildCategoryVisibilityWhere = (userContext) => {
 };
 
 const buildCourseVisibilityWhere = (userContext) => {
+    if (userContext?.role === 'admin') {
+        return { status: 'PUBLISHED' };
+    }
+
     const departmentConditions = [{ departmentAccess: { none: {} } }];
 
     if (userContext?.departmentId) {
@@ -123,6 +132,10 @@ const canAccessByTierHierarchy = (entity, userContext) => {
 };
 
 const canAccessScopedEntity = (entity, userContext) => {
+    if (userContext?.role === 'admin') {
+        return true;
+    }
+
     if (!entity || entity.visibleToAll) {
         return true;
     }
