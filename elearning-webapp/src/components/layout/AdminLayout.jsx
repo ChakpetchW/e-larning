@@ -67,7 +67,7 @@ const AdminLayout = () => {
       : []),
     { path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' },
     { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
-    { path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายงาน Redeem' },
+    { path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' },
     { path: '/admin/reports', icon: <FileText size={20} />, label: 'รายงานและการส่งออก' },
   ];
 
