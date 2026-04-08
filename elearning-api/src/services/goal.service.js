@@ -7,13 +7,16 @@ const createGoal = async (data, authUser) => {
     let finalScope = scope || 'GLOBAL';
     let finalDeptId = departmentId || null;
 
-    // Normal behavior for Managers: Locked to their own department
-    if (authUser.role === 'manager') {
-        const user = await prisma.user.findUnique({
-            where: { id: authUser.userId },
-            select: { departmentId: true }
-        });
-        
+    const user = await prisma.user.findUnique({
+        where: { id: authUser.userId },
+        select: { departmentId: true }
+    });
+
+    if (authUser.role === 'admin') {
+        finalScope = scope || (user?.departmentId ? 'DEPARTMENT' : 'GLOBAL');
+        finalDeptId = finalScope === 'GLOBAL' ? null : (departmentId || user?.departmentId);
+    } else {
+        // Manager or other fallback
         if (user && user.departmentId) {
             finalScope = 'DEPARTMENT';
             finalDeptId = user.departmentId;
@@ -21,10 +24,6 @@ const createGoal = async (data, authUser) => {
             finalScope = 'GLOBAL';
             finalDeptId = null;
         }
-    } else if (authUser.role === 'admin') {
-        // Admin can choose scope and department
-        finalScope = scope || 'GLOBAL';
-        finalDeptId = finalScope === 'GLOBAL' ? null : departmentId;
     }
 
     return await prisma.$transaction(async (tx) => {

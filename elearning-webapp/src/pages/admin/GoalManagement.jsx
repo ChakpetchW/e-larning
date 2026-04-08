@@ -21,7 +21,7 @@ const GoalManagement = () => {
         type: 'ANY', // ANY, SPECIFIC
         targetCount: 1,
         expiryDate: '',
-        scope: 'GLOBAL',
+        scope: 'DEPARTMENT',
         departmentId: '',
         courseIds: []
     });
@@ -45,6 +45,15 @@ const GoalManagement = () => {
             setGoals(goalsRes.data || []);
             setCourses(coursesRes.data || []);
             setDepartments(deptsRes.data || []);
+
+            // Intelligent default: if user has a department, set it as the default scope
+            if (user?.departmentId) {
+                setFormData(prev => ({
+                    ...prev,
+                    scope: 'DEPARTMENT',
+                    departmentId: user.departmentId
+                }));
+            }
         } catch (err) {
             console.error('Failed to fetch data', err);
         } finally {
@@ -62,8 +71,8 @@ const GoalManagement = () => {
                 type: 'ANY',
                 targetCount: 1,
                 expiryDate: '',
-                scope: 'GLOBAL',
-                departmentId: '',
+                scope: currentUser?.departmentId ? 'DEPARTMENT' : 'GLOBAL',
+                departmentId: currentUser?.departmentId || '',
                 courseIds: []
             });
             fetchData();
