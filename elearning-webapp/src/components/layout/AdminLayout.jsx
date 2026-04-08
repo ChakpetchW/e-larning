@@ -73,11 +73,6 @@ const AdminLayout = () => {
     ...(isFullAdmin
       ? [
           { path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' },
-          {
-            path: '/admin/settings',
-            icon: <Settings size={20} />,
-            label: 'ตั้งค่าระบบ',
-          },
         ]
       : []),
   ];

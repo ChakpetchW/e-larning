@@ -29,7 +29,6 @@ const AdminRewards = lazy(() => import('./pages/admin/RewardsManagement'));
 const AdminRedeems = lazy(() => import('./pages/admin/RedeemRequests'));
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
 const AdminGoals = lazy(() => import('./pages/admin/GoalManagement'));
-const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'));
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -88,7 +87,6 @@ function App() {
             <Route path="redeems" element={<AdminRedeems />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="goals" element={<AdminGoals />} />
-            <Route path="settings" element={<SystemSettings />} />
           </Route>
         </Route>
 
