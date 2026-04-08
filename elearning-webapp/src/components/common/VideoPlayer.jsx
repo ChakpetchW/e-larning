@@ -10,7 +10,7 @@ const plyrCustomStyles = `
     --plyr-video-control-color: #ffffff;
     --plyr-video-control-color-hover: #ffffff;
     --plyr-control-icon-size: 18px;
-    border-radius: 2rem;
+    border-radius: inherit;
   }
   .plyr__control svg {
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
@@ -157,7 +157,7 @@ const VideoPlayer = ({ url, onEnded }) => {
             <Play size={44} fill="currentColor" />
           </div>
         </div>
-        <div className="absolute bottom-6 left-8 glass rounded-full border border-white/20 px-5 py-2 text-[11px] font-black tracking-[0.04em] text-white flex items-center gap-2">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 md:bottom-6 md:left-8 md:translate-x-0 glass rounded-full border border-white/20 px-4 md:px-5 py-1.5 md:py-2 text-[10px] md:text-[11px] font-black tracking-[0.04em] text-white flex items-center gap-2 whitespace-nowrap">
           <Shield size={12} className="text-primary-light" />
           {platformLabel} • SECURE PLAYER
         </div>
@@ -181,7 +181,7 @@ const VideoPlayer = ({ url, onEnded }) => {
 
   return (
     <div 
-      className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl md:rounded-[2rem] border border-white/10 group/player"
+      className="relative w-full aspect-video overflow-hidden bg-black shadow-2xl rounded-[1.5rem] md:rounded-[2rem] border border-white/10 group/player"
       onContextMenu={handleContextMenu}
     >
       <style>{plyrCustomStyles}</style>
@@ -199,6 +199,7 @@ const VideoPlayer = ({ url, onEnded }) => {
           options={{
             autoplay: true,
             iconUrl: plyrSprite,
+            fullscreen: { iosNative: true },
             controls: [
               'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'
             ],
