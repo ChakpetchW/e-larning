@@ -1,27 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
-const { verifyToken, verifyAdmin } = require('../middleware/auth');
+const { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminPanelAccess } = require('../middleware/auth');
 
-router.use(verifyToken, verifyAdmin); // All admin routes require token AND admin role
+router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access the admin panel
 
 router.get('/dashboard', adminController.getDashboardStats);
 
 router.get('/users', adminController.getUsers);
 router.get('/users/:id/details', adminController.getUserDetails);
-router.post('/users', adminController.createUser);
-router.put('/users/:id', adminController.updateUser);
-router.delete('/users/:id', adminController.deleteUser);
+router.post('/users', verifySuperAdmin, adminController.createUser);
+router.put('/users/:id', verifySuperAdmin, adminController.updateUser);
+router.delete('/users/:id', verifySuperAdmin, adminController.deleteUser);
 
 router.get('/departments', adminController.getDepartments);
-router.post('/departments', adminController.createDepartment);
-router.put('/departments/:id', adminController.updateDepartment);
-router.delete('/departments/:id', adminController.deleteDepartment);
+router.post('/departments', verifySuperAdmin, adminController.createDepartment);
+router.put('/departments/:id', verifySuperAdmin, adminController.updateDepartment);
+router.delete('/departments/:id', verifySuperAdmin, adminController.deleteDepartment);
 
 router.get('/tiers', adminController.getTiers);
-router.post('/tiers', adminController.createTier);
-router.put('/tiers/:id', adminController.updateTier);
-router.delete('/tiers/:id', adminController.deleteTier);
+router.post('/tiers', verifySuperAdmin, adminController.createTier);
+router.put('/tiers/:id', verifySuperAdmin, adminController.updateTier);
+router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 
 router.get('/courses', adminController.getAdminCourses);
 router.post('/courses', adminController.createCourse);
@@ -34,10 +34,10 @@ router.put('/categories/reorder', adminController.reorderCategories);
 router.put('/categories/:id', adminController.updateCategory);
 router.delete('/categories/:id', adminController.deleteCategory);
 
-router.get('/rewards', adminController.getAdminRewards);
-router.post('/rewards', adminController.createReward);
-router.put('/rewards/:id', adminController.updateReward);
-router.delete('/rewards/:id', adminController.deleteReward);
+router.get('/rewards', verifySuperAdmin, adminController.getAdminRewards);
+router.post('/rewards', verifySuperAdmin, adminController.createReward);
+router.put('/rewards/:id', verifySuperAdmin, adminController.updateReward);
+router.delete('/rewards/:id', verifySuperAdmin, adminController.deleteReward);
 
 router.get('/redeems', adminController.getRedeemRequests);
 router.put('/redeems/:id/status', adminController.updateRedeemStatus);
@@ -49,6 +49,7 @@ router.post('/lessons', adminController.createLesson);
 router.put('/lessons/:id', adminController.updateLesson);
 router.delete('/lessons/:id', adminController.deleteLesson);
 
+// Quiz Reports
 // Quiz Reports
 router.get('/courses/:courseId/quiz-reports', adminController.getCourseQuizAttempts);
 

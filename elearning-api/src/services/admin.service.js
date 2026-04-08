@@ -35,6 +35,19 @@ const userInclude = {
     }
 };
 
+const categoryInclude = {
+    departmentAccess: {
+        include: {
+            department: true
+        }
+    },
+    tierAccess: {
+        include: {
+            tier: true
+        }
+    }
+};
+
 const parseInteger = (value, fallback = 0) => {
     if (value === undefined || value === null || value === '') {
         return fallback;
@@ -95,7 +108,11 @@ const mapUserRecord = (user) => {
         departmentId: departmentRef?.id || rest.departmentId || null,
         department: departmentRef?.name || rest.department || null,
         tierId: tier?.id || rest.tierId || null,
-        tier: tier?.name || null,
+        tier: tier ? {
+            id: tier.id,
+            name: tier.name,
+            accessAdmin: tier.accessAdmin
+        } : null,
         employmentDate: rest.employmentDate || rest.createdAt
     };
 };
@@ -112,6 +129,207 @@ const mapCourseRecord = (course) => {
         visibleTiers,
         visibleTierIds: visibleTiers.map((tier) => tier.id)
     };
+};
+
+const mapCategoryRecord = (category) => {
+    const { departmentAccess, tierAccess, ...rest } = category;
+    const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
+    const visibleTiers = tierAccess?.map((item) => item.tier) || [];
+
+    return {
+        ...rest,
+        visibleDepartments,
+        visibleDepartmentIds: visibleDepartments.map((department) => department.id),
+        visibleTiers,
+        visibleTierIds: visibleTiers.map((tier) => tier.id)
+    };
+};
+
+const ADMIN_PANEL_ROLES = ['admin', 'manager'];
+const MANAGED_USER_ROLES = ['user', 'manager'];
+
+const getActorContext = async (authUser) => {
+    if (!authUser?.userId) {
+        throw new Error('Authentication required');
+    }
+
+    const actor = await prisma.user.findUnique({
+        where: { id: authUser.userId },
+        include: {
+            departmentRef: true,
+            tier: true
+        }
+    });
+
+    const roleWithTierAccess = actor.role === 'admin'
+        ? 'admin'
+        : (actor.role === 'manager' || actor.tier?.accessAdmin)
+            ? 'manager'
+            : 'user';
+
+    if (!actor || !ADMIN_PANEL_ROLES.includes(roleWithTierAccess)) {
+        throw new Error('Admin panel access required');
+    }
+
+    const mappedActor = {
+        ...mapUserRecord(actor),
+        role: roleWithTierAccess // Override role for internal scoping if granted via tier
+    };
+
+    if (mappedActor.role === 'manager' && !mappedActor.departmentId) {
+        throw new Error('Manager account must belong to a department');
+    }
+
+    return mappedActor;
+};
+
+const buildAdminManagedUsersWhere = (actor, extraWhere = {}) => {
+    if (actor.role === 'manager') {
+        return {
+            role: 'user',
+            departmentId: actor.departmentId,
+            ...extraWhere
+        };
+    }
+
+    return {
+        role: {
+            in: MANAGED_USER_ROLES
+        },
+        ...extraWhere
+    };
+};
+
+const buildDepartmentVisibleCourseWhere = (departmentId) => ({
+    status: 'PUBLISHED',
+    OR: [
+        { visibleToAll: true },
+        {
+            visibleToAll: false,
+            AND: [
+                {
+                    OR: [
+                        { departmentAccess: { none: {} } },
+                        {
+                            departmentAccess: {
+                                some: {
+                                    departmentId
+                                }
+                            }
+                        }
+                    ]
+                },
+                { tierAccess: { none: {} } }
+            ]
+        }
+    ]
+});
+
+const buildScopedUserWhere = async (actor, targetUserId) => {
+    if (actor.role === 'manager') {
+        return {
+            id: targetUserId,
+            role: 'user',
+            departmentId: actor.departmentId
+        };
+    }
+
+    return {
+        id: targetUserId,
+        role: {
+            in: MANAGED_USER_ROLES
+        }
+    };
+};
+
+const buildPointsHistory = async (userId) => {
+    const ledger = await prisma.pointsLedger.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' }
+    });
+
+    if (ledger.length === 0) {
+        return [];
+    }
+
+    const courseIds = [...new Set(ledger
+        .filter((entry) => entry.sourceType === 'course' && entry.sourceId)
+        .map((entry) => entry.sourceId))];
+    const lessonIds = [...new Set(ledger
+        .filter((entry) => entry.sourceType === 'quiz' && entry.sourceId)
+        .map((entry) => entry.sourceId))];
+    const redeemIds = [...new Set(ledger
+        .filter((entry) => ['redeem', 'reward_adjust'].includes(entry.sourceType) && entry.sourceId)
+        .map((entry) => entry.sourceId))];
+
+    const [courses, lessons, redeems] = await Promise.all([
+        courseIds.length
+            ? prisma.course.findMany({
+                where: { id: { in: courseIds } },
+                select: { id: true, title: true }
+            })
+            : Promise.resolve([]),
+        lessonIds.length
+            ? prisma.lesson.findMany({
+                where: { id: { in: lessonIds } },
+                select: { id: true, title: true }
+            })
+            : Promise.resolve([]),
+        redeemIds.length
+            ? prisma.redeemRequest.findMany({
+                where: { id: { in: redeemIds } },
+                include: {
+                    reward: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            })
+            : Promise.resolve([])
+    ]);
+
+    const courseMap = Object.fromEntries(courses.map((course) => [course.id, course]));
+    const lessonMap = Object.fromEntries(lessons.map((lesson) => [lesson.id, lesson]));
+    const redeemMap = Object.fromEntries(redeems.map((redeem) => [redeem.id, redeem]));
+
+    return ledger.map((entry) => {
+        let sourceLabel = entry.note || 'Point activity';
+
+        if (entry.sourceType === 'course') {
+            sourceLabel = courseMap[entry.sourceId]?.title
+                ? `Completed course: ${courseMap[entry.sourceId].title}`
+                : (entry.note || 'Completed course');
+        }
+
+        if (entry.sourceType === 'quiz') {
+            sourceLabel = lessonMap[entry.sourceId]?.title
+                ? `Passed quiz: ${lessonMap[entry.sourceId].title}`
+                : (entry.note || 'Passed quiz');
+        }
+
+        if (entry.sourceType === 'redeem') {
+            sourceLabel = redeemMap[entry.sourceId]?.reward?.name
+                ? `Redeemed reward: ${redeemMap[entry.sourceId].reward.name}`
+                : (entry.note || 'Redeemed reward');
+        }
+
+        if (entry.sourceType === 'reward_adjust') {
+            sourceLabel = redeemMap[entry.sourceId]?.reward?.name
+                ? `Reward adjustment: ${redeemMap[entry.sourceId].reward.name}`
+                : (entry.note || 'Reward adjustment');
+        }
+
+        if (entry.sourceType === 'admin_edit') {
+            sourceLabel = entry.note || 'Admin adjusted points';
+        }
+
+        return {
+            ...entry,
+            direction: entry.points >= 0 ? 'earned' : 'spent',
+            sourceLabel
+        };
+    });
 };
 
 const ensureReferenceName = async (tx, modelName, id) => {
@@ -162,6 +380,9 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
     }
 
     if (baseData.role !== undefined) {
+        if (!['user', 'manager', 'admin'].includes(baseData.role)) {
+            throw new Error('Invalid role');
+        }
         data.role = baseData.role;
     }
 
@@ -265,55 +486,158 @@ const saveCourseVisibility = async (tx, courseId, visibleToAll, visibleDepartmen
     }
 };
 
+const buildCategoryMutationPayload = async (tx, input) => {
+    const visibleDepartmentIds = normalizeIdArray(input.visibleDepartmentIds);
+    const visibleTierIds = normalizeIdArray(input.visibleTierIds);
+
+    await ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds);
+    await ensureReferenceIdsExist(tx, 'tier', visibleTierIds);
+
+    return {
+        data: {
+            name: sanitizeName(input.name, 'Category'),
+            icon: input.icon || 'Grid',
+            order: parseInteger(input.order, 0),
+            visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true
+        },
+        visibleDepartmentIds,
+        visibleTierIds
+    };
+};
+
+const saveCategoryVisibility = async (tx, categoryId, visibleToAll, visibleDepartmentIds, visibleTierIds) => {
+    await tx.categoryDepartmentAccess.deleteMany({ where: { categoryId } });
+    await tx.categoryTierAccess.deleteMany({ where: { categoryId } });
+
+    if (visibleToAll) {
+        return;
+    }
+
+    if (visibleDepartmentIds.length > 0) {
+        await tx.categoryDepartmentAccess.createMany({
+            data: visibleDepartmentIds.map((departmentId) => ({
+                categoryId,
+                departmentId
+            }))
+        });
+    }
+
+    if (visibleTierIds.length > 0) {
+        await tx.categoryTierAccess.createMany({
+            data: visibleTierIds.map((tierId) => ({
+                categoryId,
+                tierId
+            }))
+        });
+    }
+};
+
 // DASHBOARD
-const getDashboardStats = async () => {
+const getDashboardStats = async (authUser) => {
+    const actor = await getActorContext(authUser);
+    const isManager = actor.role === 'manager';
+    const managedUsersWhere = buildAdminManagedUsersWhere(actor);
+    const visibleCourseWhere = isManager
+        ? buildDepartmentVisibleCourseWhere(actor.departmentId)
+        : { status: 'PUBLISHED' };
+
     const [totalUsers, activeCourses, totalEnrollments, categories] = await Promise.all([
-        prisma.user.count({ where: { role: 'user' } }),
-        prisma.course.count({ where: { status: 'PUBLISHED' } }),
-        prisma.userCourse.count(),
-        prisma.category.findMany({ include: { _count: { select: { courses: true } } } })
+        prisma.user.count({ where: managedUsersWhere }),
+        prisma.course.count({ where: visibleCourseWhere }),
+        prisma.userCourse.count({
+            where: isManager
+                ? {
+                    user: {
+                        departmentId: actor.departmentId,
+                        role: 'user'
+                    }
+                }
+                : undefined
+        }),
+        prisma.category.findMany({
+            include: {
+                _count: {
+                    select: {
+                        courses: {
+                            where: visibleCourseWhere
+                        }
+                    }
+                }
+            }
+        })
     ]);
 
     const popularCoursesRaw = await prisma.course.findMany({
-        include: { _count: { select: { enrollments: true } } },
-        orderBy: { enrollments: { _count: 'desc' } },
-        take: 5
+        where: visibleCourseWhere,
+        include: {
+            _count: {
+                select: {
+                    enrollments: isManager
+                        ? {
+                            where: {
+                                user: {
+                                    departmentId: actor.departmentId,
+                                    role: 'user'
+                                }
+                            }
+                        }
+                        : true
+                }
+            }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20
     });
 
-    const popularCourses = popularCoursesRaw.map((course) => ({
-        id: course.id,
-        title: course.title,
-        students: course._count.enrollments,
-        completionRate: '85%'
-    }));
+    const popularCourses = popularCoursesRaw
+        .map((course) => ({
+            id: course.id,
+            title: course.title,
+            students: course._count.enrollments,
+            completionRate: '85%'
+        }))
+        .sort((left, right) => right.students - left.students)
+        .slice(0, 5);
 
-    // Single query for all 7 days instead of 7 separate queries
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - 6);
     weekStart.setHours(0, 0, 0, 0);
 
-    const weeklyRaw = await prisma.$queryRaw`
-        SELECT DATE("startedAt") as day, COUNT(*)::int as count
-        FROM "UserCourse"
-        WHERE "startedAt" >= ${weekStart}
-        GROUP BY DATE("startedAt")
-        ORDER BY day ASC
-    `;
+    const weeklyEnrollments = await prisma.userCourse.findMany({
+        where: {
+            startedAt: {
+                gte: weekStart
+            },
+            ...(isManager
+                ? {
+                    user: {
+                        departmentId: actor.departmentId,
+                        role: 'user'
+                    }
+                }
+                : {})
+        },
+        select: {
+            startedAt: true
+        }
+    });
 
     const countMap = {};
-    weeklyRaw.forEach(row => {
-        const key = new Date(row.day).toISOString().slice(0, 10);
-        countMap[key] = row.count;
+    weeklyEnrollments.forEach((enrollment) => {
+        const day = new Date(enrollment.startedAt);
+        day.setHours(0, 0, 0, 0);
+        const key = day.toISOString().slice(0, 10);
+        countMap[key] = (countMap[key] || 0) + 1;
     });
 
     const weeklyActivity = [];
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        d.setHours(0, 0, 0, 0);
-        const key = d.toISOString().slice(0, 10);
+    for (let i = 6; i >= 0; i -= 1) {
+        const day = new Date();
+        day.setDate(day.getDate() - i);
+        day.setHours(0, 0, 0, 0);
+        const key = day.toISOString().slice(0, 10);
         weeklyActivity.push({
-            date: d.toLocaleDateString('th-TH', { weekday: 'short' }),
+            date: day.toLocaleDateString('th-TH', { weekday: 'short' }),
             count: countMap[key] || 0
         });
     }
@@ -324,27 +648,55 @@ const getDashboardStats = async () => {
         totalEnrollments,
         popularCourses,
         weeklyActivity,
-        categoryDistribution: categories.map((category) => ({
-            name: category.name,
-            value: category._count.courses
-        }))
+        categoryDistribution: categories
+            .map((category) => ({
+                name: category.name,
+                value: category._count.courses
+            }))
+            .filter((category) => category.value > 0),
+        scope: isManager ? 'department' : 'global',
+        department: isManager ? actor.department || null : null
     };
 };
 
 // USERS
-const getUsers = async () => {
+const getUsers = async (authUser) => {
+    const actor = await getActorContext(authUser);
     const users = await prisma.user.findMany({
-        where: { role: 'user' },
+        where: buildAdminManagedUsersWhere(actor),
         include: userInclude,
-        orderBy: { pointsBalance: 'desc' }
+        orderBy: [
+            { role: 'asc' },
+            { pointsBalance: 'desc' }
+        ]
     });
 
-    return users.map(mapUserRecord);
+    const balances = await prisma.pointsLedger.groupBy({
+        by: ['userId'],
+        where: {
+            userId: {
+                in: users.map((user) => user.id)
+            }
+        },
+        _sum: {
+            points: true
+        }
+    });
+
+    const balanceMap = Object.fromEntries(
+        balances.map((item) => [item.userId, item._sum.points || 0])
+    );
+
+    return users.map((user) => ({
+        ...mapUserRecord(user),
+        pointsBalance: balanceMap[user.id] ?? 0
+    }));
 };
 
-const getUserDetails = async (id) => {
-    const user = await prisma.user.findUnique({
-        where: { id },
+const getUserDetails = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const user = await prisma.user.findFirst({
+        where: await buildScopedUserWhere(actor, id),
         include: {
             departmentRef: true,
             tier: true,
@@ -371,9 +723,12 @@ const getUserDetails = async (id) => {
     }
 
     const mappedUser = mapUserRecord(user);
+    const pointsHistory = await buildPointsHistory(user.id);
+    const actualPointsBalance = pointsHistory.reduce((sum, entry) => sum + entry.points, 0);
 
     return {
         ...mappedUser,
+        pointsBalance: actualPointsBalance,
         enrollments: user.enrollments.map((enrollment) => ({
             id: enrollment.id,
             status: enrollment.status,
@@ -386,7 +741,8 @@ const getUserDetails = async (id) => {
                 categoryName: enrollment.course.category?.name || null,
                 points: enrollment.course.points
             }
-        }))
+        })),
+        pointsHistory
     };
 };
 
@@ -472,9 +828,16 @@ const updateUser = async (id, inputData) => prisma.$transaction(async (tx) => {
 const deleteUser = async (id) => prisma.user.delete({ where: { id } });
 
 // DEPARTMENTS
-const getDepartments = async () => prisma.department.findMany({
-    orderBy: { name: 'asc' }
-});
+const getDepartments = async (authUser) => {
+    const actor = await getActorContext(authUser);
+
+    return prisma.department.findMany({
+        where: actor.role === 'manager' && actor.departmentId
+            ? { id: actor.departmentId }
+            : undefined,
+        orderBy: { name: 'asc' }
+    });
+};
 
 const createDepartment = async (data) => prisma.department.create({
     data: {
@@ -494,20 +857,26 @@ const deleteDepartment = async (id) => prisma.department.delete({
 });
 
 // TIERS
-const getTiers = async () => prisma.tier.findMany({
-    orderBy: { name: 'asc' }
-});
+const getTiers = async (authUser) => {
+    await getActorContext(authUser);
+
+    return prisma.tier.findMany({
+        orderBy: { name: 'asc' }
+    });
+};
 
 const createTier = async (data) => prisma.tier.create({
     data: {
-        name: sanitizeName(data.name, 'Tier')
+        name: sanitizeName(data.name, 'Tier'),
+        accessAdmin: Boolean(data.accessAdmin)
     }
 });
 
 const updateTier = async (id, data) => prisma.tier.update({
     where: { id },
     data: {
-        name: sanitizeName(data.name, 'Tier')
+        name: sanitizeName(data.name, 'Tier'),
+        accessAdmin: Boolean(data.accessAdmin)
     }
 });
 
@@ -579,25 +948,48 @@ const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
 const deleteCourse = async (id) => prisma.course.delete({ where: { id } });
 
 // CATEGORIES
-const getCategories = async () => prisma.category.findMany({
-    orderBy: { order: 'asc' }
+const getCategories = async () => {
+    const categories = await prisma.category.findMany({
+        include: categoryInclude,
+        orderBy: { order: 'asc' }
+    });
+
+    return categories.map(mapCategoryRecord);
+};
+
+const createCategory = async (input) => prisma.$transaction(async (tx) => {
+    const { data, visibleDepartmentIds, visibleTierIds } = await buildCategoryMutationPayload(tx, input);
+
+    const category = await tx.category.create({
+        data
+    });
+
+    await saveCategoryVisibility(tx, category.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+
+    const createdCategory = await tx.category.findUnique({
+        where: { id: category.id },
+        include: categoryInclude
+    });
+
+    return mapCategoryRecord(createdCategory);
 });
 
-const createCategory = async (data) => prisma.category.create({
-    data: {
-        name: data.name,
-        icon: data.icon || 'Grid',
-        order: parseInteger(data.order, 0)
-    }
-});
+const updateCategory = async (id, input) => prisma.$transaction(async (tx) => {
+    const { data, visibleDepartmentIds, visibleTierIds } = await buildCategoryMutationPayload(tx, input);
 
-const updateCategory = async (id, data) => prisma.category.update({
-    where: { id },
-    data: {
-        name: data.name,
-        icon: data.icon,
-        order: data.order
-    }
+    await tx.category.update({
+        where: { id },
+        data
+    });
+
+    await saveCategoryVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+
+    const updatedCategory = await tx.category.findUnique({
+        where: { id },
+        include: categoryInclude
+    });
+
+    return mapCategoryRecord(updatedCategory);
 });
 
 const deleteCategory = async (id) => prisma.category.delete({

@@ -12,8 +12,10 @@ const ReferenceDataModal = ({
   onCreate,
   onUpdate,
   onDelete,
+  showAccessToggle = false,
 }) => {
   const [draftName, setDraftName] = useState('');
+  const [accessAdmin, setAccessAdmin] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
   const submitLabel = useMemo(
@@ -27,6 +29,7 @@ const ReferenceDataModal = ({
 
   const resetForm = () => {
     setDraftName('');
+    setAccessAdmin(false);
     setEditingItem(null);
   };
 
@@ -39,10 +42,15 @@ const ReferenceDataModal = ({
     }
 
     try {
+      const payload = {
+        name,
+        ...(showAccessToggle ? { accessAdmin } : {}),
+      };
+
       if (editingItem) {
-        await onUpdate(editingItem.id, { name });
+        await onUpdate(editingItem.id, payload);
       } else {
-        await onCreate({ name });
+        await onCreate(payload);
       }
 
       resetForm();
@@ -55,11 +63,14 @@ const ReferenceDataModal = ({
   const handleEdit = (item) => {
     setEditingItem(item);
     setDraftName(item.name);
+    if (showAccessToggle) {
+      setAccessAdmin(item.accessAdmin || false);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
-      <div className="card flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
+      <div className="card flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div>
             <h3 className="text-xl font-black text-slate-900">{title}</h3>
@@ -109,6 +120,20 @@ const ReferenceDataModal = ({
                 }`}
                 required
               />
+              {showAccessToggle && (
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50">
+                  <input
+                    type="checkbox"
+                    checked={accessAdmin}
+                    onChange={(event) => setAccessAdmin(event.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-slate-700">สิทธิ์ Manager Access</span>
+                    <span className="text-[10px] text-slate-400">อนุญาตการใช้งานหน้าหลังบ้าน</span>
+                  </div>
+                </label>
+              )}
               <div className="flex gap-2">
                 {editingItem && (
                   <button
@@ -159,7 +184,14 @@ const ReferenceDataModal = ({
                       )}
                       <div>
                         <div className={`font-black tracking-tight ${isEditing ? 'text-primary' : 'text-slate-900 font-bold'}`}>
-                          {item.name}
+                          <div className="flex items-center gap-2">
+                            {item.name}
+                            {showAccessToggle && item.accessAdmin && (
+                              <span className="rounded-md bg-rose-50 px-1.5 py-0.5 text-[9px] font-black uppercase text-rose-500 ring-1 ring-inset ring-rose-200">
+                                ADMIN
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
                           #{item.id.slice(-4)} • สร้างเมื่อ {item.createdAt ? new Date(item.createdAt).toLocaleDateString('th-TH') : 'ไม่ระบุ'}

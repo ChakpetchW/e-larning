@@ -61,7 +61,7 @@ const requestRedeem = asyncHandler(async (req, res) => {
 
 // Get all categories for filtering
 const getCategories = asyncHandler(async (req, res) => {
-  const categories = await UserService.getCategories();
+  const categories = await UserService.getCategories(req.user.userId);
   res.json({ success: true, data: categories });
 });
 

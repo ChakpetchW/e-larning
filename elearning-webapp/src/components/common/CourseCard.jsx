@@ -25,113 +25,120 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
       : 'คอร์สแนะนำ';
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={`เปิดคอร์ส ${course.title}`}
-      className={`group flex h-full self-stretch flex-col overflow-hidden rounded-[1.8rem] border border-slate-200/80 bg-white text-left transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-[0_26px_55px_-34px_rgba(15,23,42,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${className}`}
-      style={{
-        boxShadow: '0 22px 45px -36px rgba(15, 23, 42, 0.24)',
-      }}
-    >
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
-        <img
-          src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}
-          alt={course.title}
-          loading="lazy"
-          width={400}
-          height={250}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-900/12 to-transparent" />
-
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
-          <span className="inline-flex max-w-[65%] rounded-full bg-white/92 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm">
-            {categoryLabel}
-          </span>
-
-          {course.isEnrolled && (
-            <span
-              className={`inline-flex rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
-                isCompleted
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-primary/10 text-primary'
-              }`}
-            >
-              {statusLabel}
+    <div className={`group h-full self-stretch ${className}`}>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={`เปิดคอร์ส ${course.title}`}
+        className="flex h-full w-full flex-col overflow-hidden rounded-[1.8rem] border border-slate-200/80 bg-white text-left transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-[0_26px_55px_-34px_rgba(15,23,42,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        style={{
+          boxShadow: '0 22px 45px -36px rgba(15, 23, 42, 0.24)',
+        }}
+      >
+        <div 
+          className="relative w-full overflow-hidden bg-slate-100"
+          style={{ aspectRatio: '16/10' }}
+        >
+          <img
+            src={course.image ? getFullUrl(course.image) : DEFAULT_COURSE_IMAGE}
+            alt={course.title}
+            loading="lazy"
+            width={400}
+            height={250}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+          />
+  
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-900/12 to-transparent" />
+  
+          <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
+            <span className="inline-flex max-w-[65%] rounded-full bg-white/92 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm">
+              {categoryLabel}
             </span>
-          )}
-        </div>
-
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 text-white">
-          <div className="min-w-0">
-            <p className="text-[11px] font-bold tracking-[0.03em] text-white/85">
-              {eyebrowLabel}
-            </p>
-            <p className="mt-1 text-sm font-semibold text-white/95">
-              {isCompleted ? 'กลับมาเปิดเมื่อไรก็ได้' : isInProgress ? 'ไปต่อจากจุดเดิมได้เลย' : 'เปิดดูรายละเอียดคอร์ส'}
-            </p>
-          </div>
-
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/12 text-white transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:bg-white/18">
-            {isCompleted ? <CheckCircle2 size={18} strokeWidth={2.4} /> : <ArrowUpRight size={18} strokeWidth={2.4} />}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-        <p className="text-[11px] font-bold tracking-[0.03em] text-slate-500">
-          {eyebrowLabel}
-        </p>
-
-        <h3 className="mt-2 line-clamp-2 min-h-[3.15rem] text-[1.05rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-primary">
-          {course.title}
-        </h3>
-
-        {isInProgress && progressPercent > 0 && (
-          <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <span className="text-[11px] font-bold tracking-[0.04em] text-slate-500">
-                Progress
-              </span>
-              <span className="text-sm font-black text-slate-800">{progressPercent}%</span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="h-full rounded-full bg-primary transition-[width] duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="mt-auto flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-slate-500">
-            <span className="inline-flex items-center gap-1.5">
-              <Clock size={13} strokeWidth={2.3} />
-              <span>{durationLabel}</span>
-            </span>
-
-            {lessonCount > 0 && (
-              <span className="inline-flex items-center gap-1.5">
-                <Layers3 size={13} strokeWidth={2.3} />
-                <span>{lessonCount} บท</span>
+  
+            {course.isEnrolled && (
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
+                  isCompleted
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-primary/10 text-primary'
+                }`}
+              >
+                {statusLabel}
               </span>
             )}
           </div>
-
-          <div className="text-right leading-none">
-            <span className="text-[1.2rem] font-black tracking-tight text-slate-900">
-              {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
-            </span>
-            <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">
-              {pointsSuffix}
+  
+          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 text-white">
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold tracking-[0.03em] text-white/85">
+                {eyebrowLabel}
+              </p>
+              <p className="mt-1 text-sm font-semibold text-white/95">
+                {isCompleted ? 'กลับมาเปิดเมื่อไรก็ได้' : isInProgress ? 'ไปต่อจากจุดเดิมได้เลย' : 'เปิดดูรายละเอียดคอร์ส'}
+              </p>
+            </div>
+  
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/12 text-white transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:bg-white/18">
+              {isCompleted ? <CheckCircle2 size={18} strokeWidth={2.4} /> : <ArrowUpRight size={18} strokeWidth={2.4} />}
             </span>
           </div>
         </div>
-      </div>
-    </button>
+  
+        <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
+          <div className="flex-1">
+            <p className="text-[11px] font-bold tracking-[0.03em] text-slate-500">
+              {eyebrowLabel}
+            </p>
+    
+            <h3 className="mt-2 line-clamp-2 min-h-[3.15rem] text-[1.05rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-primary">
+              {course.title}
+            </h3>
+    
+            {isInProgress && progressPercent > 0 && (
+              <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-bold tracking-[0.04em] text-slate-500">
+                    Progress
+                  </span>
+                  <span className="text-sm font-black text-slate-800">{progressPercent}%</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width] duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+  
+          <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-slate-500">
+              <span className="inline-flex items-center gap-1.5">
+                <Clock size={13} strokeWidth={2.3} />
+                <span>{durationLabel}</span>
+              </span>
+  
+              {lessonCount > 0 && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Layers3 size={13} strokeWidth={2.3} />
+                  <span>{lessonCount} บท</span>
+                </span>
+              )}
+            </div>
+  
+            <div className="text-right leading-none">
+              <span className="text-[1.2rem] font-black tracking-tight text-slate-900">
+                {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
+              </span>
+              <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">
+                {pointsSuffix}
+              </span>
+            </div>
+          </div>
+        </div>
+      </button>
+    </div>
   );
 };
 

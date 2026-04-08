@@ -10,6 +10,7 @@ const UserModal = ({
   setFormData,
   departments,
   tiers,
+  canEditRole = true,
 }) => {
   if (!isOpen) {
     return null;
@@ -21,17 +22,17 @@ const UserModal = ({
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div>
             <h3 className="text-xl font-black text-slate-900">
-              {editingUser ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}
+              {editingUser ? 'แก้ไขข้อมูลผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่'}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              เลือกแผนกและระดับผู้ใช้งานจากข้อมูลกลางของระบบเพื่อให้จัดสิทธิ์คอร์สได้แม่นยำ
+              กำหนดแผนก ระดับผู้เรียน และสิทธิ์การใช้งานของบัญชีนี้
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-            aria-label="ปิดหน้าต่างจัดการพนักงาน"
+            aria-label="ปิดหน้าต่างจัดการผู้ใช้งาน"
           >
             <X size={18} />
           </button>
@@ -78,6 +79,20 @@ const UserModal = ({
               />
             </div>
 
+            {canEditRole && (
+              <div>
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">สิทธิ์ระบบ</label>
+                <select
+                  className="form-input w-full"
+                  value={formData.role}
+                  onChange={(event) => setFormData({ ...formData, role: event.target.value })}
+                >
+                  <option value="user">User</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </div>
+            )}
+
             <div className="grid gap-5 md:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-sm font-bold text-slate-700">แผนก</label>
@@ -86,7 +101,7 @@ const UserModal = ({
                   value={formData.departmentId}
                   onChange={(event) => setFormData({ ...formData, departmentId: event.target.value })}
                 >
-                  <option value="">ยังไม่กำหนดแผนก</option>
+                  <option value="">ยังไม่ได้กำหนดแผนก</option>
                   {departments.map((department) => (
                     <option key={department.id} value={department.id}>
                       {department.name}
@@ -96,13 +111,13 @@ const UserModal = ({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">ระดับผู้ใช้งาน</label>
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">ระดับผู้เรียน</label>
                 <select
                   className="form-input w-full"
                   value={formData.tierId}
                   onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
                 >
-                  <option value="">ยังไม่กำหนดระดับ</option>
+                  <option value="">ยังไม่ได้กำหนดระดับ</option>
                   {tiers.map((tier) => (
                     <option key={tier.id} value={tier.id}>
                       {tier.name}
@@ -110,6 +125,10 @@ const UserModal = ({
                   ))}
                 </select>
               </div>
+            </div>
+
+            <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-700">
+              การมองเห็นคอร์สแบบลำดับขั้นจะอิงจาก "ระดับผู้เรียน" เช่น ถ้าเปิดให้เริ่มจาก Supervisor ผู้ที่อยู่ระดับสูงกว่าอย่าง Manager และ Director จะเห็นด้วย
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">

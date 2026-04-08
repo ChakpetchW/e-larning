@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
+import { canAccessAdminPanel } from '../../utils/roles';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const Login = () => {
     if (token && userStr) {
       const user = JSON.parse(userStr);
 
-      if (user.role === 'admin') {
+      if (canAccessAdminPanel(user)) {
         navigate('/admin/dashboard');
       } else {
         navigate('/user/home');
@@ -38,7 +39,7 @@ const Login = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      if (response.data.user.role === 'admin') {
+      if (canAccessAdminPanel(response.data.user)) {
         navigate('/admin/dashboard');
       } else {
         navigate('/user/home');

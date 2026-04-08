@@ -4,18 +4,18 @@ const ErrorResponse = require('../utils/errorResponse');
 
 // DASHBOARD
 const getDashboardStats = asyncHandler(async (req, res) => {
-  const stats = await AdminService.getDashboardStats();
+  const stats = await AdminService.getDashboardStats(req.user);
   res.json({ success: true, data: stats });
 });
 
 // USERS
 const getUsers = asyncHandler(async (req, res) => {
-  const users = await AdminService.getUsers();
+  const users = await AdminService.getUsers(req.user);
   res.json({ success: true, data: users });
 });
 
 const getUserDetails = asyncHandler(async (req, res) => {
-  const user = await AdminService.getUserDetails(req.params.id);
+  const user = await AdminService.getUserDetails(req.params.id, req.user);
   res.json({ success: true, data: user });
 });
 
@@ -40,7 +40,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 // DEPARTMENTS
 const getDepartments = asyncHandler(async (req, res) => {
-  const departments = await AdminService.getDepartments();
+  const departments = await AdminService.getDepartments(req.user);
   res.json({ success: true, data: departments });
 });
 
@@ -61,7 +61,7 @@ const deleteDepartment = asyncHandler(async (req, res) => {
 
 // TIERS
 const getTiers = asyncHandler(async (req, res) => {
-  const tiers = await AdminService.getTiers();
+  const tiers = await AdminService.getTiers(req.user);
   res.json({ success: true, data: tiers });
 });
 

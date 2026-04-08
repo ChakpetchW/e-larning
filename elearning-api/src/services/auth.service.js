@@ -13,7 +13,11 @@ const mapPublicUser = (user) => ({
     departmentId: user.departmentRef?.id || user.departmentId || null,
     department: user.departmentRef?.name || user.department || null,
     tierId: user.tier?.id || user.tierId || null,
-    tier: user.tier?.name || null
+    tier: user.tier ? {
+        id: user.tier.id,
+        name: user.tier.name,
+        accessAdmin: user.tier.accessAdmin
+    } : null
 });
 
 const login = async (email, password) => {

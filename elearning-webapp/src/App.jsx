@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { canAccessAdminPanel } from './utils/roles';
 
 // Layouts
 const UserLayout = lazy(() => import('./components/layout/UserLayout'));
@@ -48,7 +49,7 @@ function App() {
         {/* Root Redirect - Check for existing session */}
         <Route path="/" element={
           localStorage.getItem('token') ? (
-            JSON.parse(localStorage.getItem('user'))?.role === 'admin' 
+            canAccessAdminPanel(JSON.parse(localStorage.getItem('user')))
               ? <Navigate to="/admin/dashboard" replace /> 
               : <Navigate to="/user/home" replace />
           ) : <Navigate to="/login" replace />
@@ -58,7 +59,7 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         {/* User Area */}
-        <Route element={<ProtectedRoute allowedRoles={['user', 'admin']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['user', 'admin', 'manager']} />}>
           <Route path="/user" element={<UserLayout />}>
             <Route index element={<Navigate to="home" replace />} />
             <Route path="home" element={<Home />} />
@@ -74,7 +75,7 @@ function App() {
         </Route>
 
         {/* Admin Area */}
-        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
