@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
+import ModalPortal from '../../components/common/ModalPortal';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { getRoleLabel } from '../../utils/roles';
 
@@ -332,10 +333,11 @@ const Profile = () => {
       </div>
 
       {showEditModal && (
+        <ModalPortal>
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
             onClick={() => setShowEditModal(false)}
             aria-label="ปิดหน้าต่างเปลี่ยนรหัสผ่าน"
           />
@@ -345,7 +347,7 @@ const Profile = () => {
             aria-modal="true"
             aria-labelledby={passwordDialogTitleId}
             tabIndex={-1}
-            className="relative flex w-[calc(100%-2rem)] max-w-sm flex-col items-center rounded-[2rem] bg-white p-6 shadow-2xl animate-fade-in focus:outline-none outline-none md:p-8"
+            className="relative flex w-[calc(100%-2rem)] max-w-xl flex-col items-center rounded-[2.25rem] bg-white/95 p-6 shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)] animate-fade-in focus:outline-none outline-none md:p-8"
           >
             <h3 id={passwordDialogTitleId} className="mb-6 w-full text-center text-2xl font-black text-slate-800">
               เปลี่ยนรหัสผ่าน
@@ -408,13 +410,15 @@ const Profile = () => {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {showPolicyModal && (
+        <ModalPortal>
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
             onClick={() => setShowPolicyModal(false)}
             aria-label="ปิดหน้าต่างนโยบายความเป็นส่วนตัว"
           />
@@ -424,7 +428,7 @@ const Profile = () => {
             aria-modal="true"
             aria-labelledby={policyDialogTitleId}
             tabIndex={-1}
-            className="relative flex h-[80vh] w-[calc(100%-2rem)] max-w-md flex-col rounded-[2rem] bg-white p-6 shadow-2xl animate-fade-in focus:outline-none outline-none"
+            className="relative flex h-[80vh] w-[calc(100%-2rem)] max-w-xl flex-col rounded-[2.25rem] bg-white/95 p-6 shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)] animate-fade-in focus:outline-none outline-none"
           >
             <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
               <h3 id={policyDialogTitleId} className="flex items-center gap-2 text-xl font-black text-slate-800">
@@ -471,6 +475,7 @@ const Profile = () => {
             </button>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

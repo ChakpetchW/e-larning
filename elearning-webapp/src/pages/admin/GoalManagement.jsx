@@ -3,6 +3,7 @@ import { Target, Plus, Trash2, Calendar, BookOpen, ChevronRight, User, CheckCirc
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import AdminTable from '../../components/admin/AdminTable';
+import ModalPortal from '../../components/common/ModalPortal';
 
 const GoalManagement = () => {
     const [goals, setGoals] = useState([]);
@@ -212,6 +213,7 @@ const GoalManagement = () => {
 
             {/* Create Goal Modal */}
             {isModalOpen && (
+                <ModalPortal>
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-slide-up">
                         <div className="p-6 border-b border-border flex justify-between items-center">
@@ -363,10 +365,12 @@ const GoalManagement = () => {
                         </form>
                     </div>
                 </div>
+                </ModalPortal>
             )}
 
             {/* Report Modal */}
             {reportGoal && (
+                <ModalPortal>
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
                     <div className="bg-white rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden animate-slide-up h-[85vh] flex flex-col">
                         <div className="p-6 border-b border-border flex justify-between items-center bg-slate-50">
@@ -456,6 +460,7 @@ const GoalManagement = () => {
                         </div>
                     </div>
                 </div>
+                </ModalPortal>
             )}
         </div>
     );

@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { X, Upload, FileText, Play } from 'lucide-react';
 import QuizBuilder from './QuizBuilder';
+import ModalPortal from '../common/ModalPortal';
 
 const LessonModal = ({ 
   isOpen, 
@@ -22,7 +23,8 @@ const LessonModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 lg:p-8 backdrop-blur-md animate-fade-in overflow-hidden">
+    <ModalPortal isOpen={isOpen}>
+      <div className="fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 lg:p-8 backdrop-blur-md animate-fade-in overflow-hidden">
       <div className="card bg-white w-full max-w-6xl h-full p-0 shadow-2xl overflow-hidden flex flex-col border border-gray-100">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <h4 className="text-lg font-bold">{isEditing ? 'แก้ไขบทเรียน' : 'เพิ่มบทเรียนใหม่'}</h4>
@@ -172,7 +174,8 @@ const LessonModal = ({
           </div>
         </form>
       </div>
-    </div>
+      </div>
+    </ModalPortal>
   );
 };
 

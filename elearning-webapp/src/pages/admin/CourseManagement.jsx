@@ -7,6 +7,7 @@ import { ICON_LIST } from '../../utils/icons';
 import { adminAPI } from '../../utils/api';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
+import ModalPortal from '../../components/common/ModalPortal';
 
 const getDefaultCourseForm = () => ({
   title: '',
@@ -410,6 +411,7 @@ const CourseManagement = () => {
       />
 
       {showCategoryModal && (
+        <ModalPortal>
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div 
             role="dialog"
@@ -768,6 +770,7 @@ const CourseManagement = () => {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       <div className="card overflow-hidden">

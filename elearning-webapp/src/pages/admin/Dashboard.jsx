@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
+import ModalPortal from '../../components/common/ModalPortal';
 import { canEditAdminUsers } from '../../utils/roles';
 
 const COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
@@ -276,8 +277,15 @@ const Dashboard = () => {
 
       {/* Group Detail Modal */}
       {selectedGroup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md animate-fade-in focus:outline-none outline-none">
-           <div className="card w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-slide-up shadow-2xl focus:outline-none outline-none">
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in focus:outline-none outline-none">
+            <button
+              type="button"
+              className="absolute inset-0 bg-slate-950/65"
+              onClick={() => setSelectedGroup(null)}
+              aria-label="ปิดรายละเอียดกลุ่มคอร์ส"
+            />
+           <div className="relative flex w-full max-w-4xl max-h-[88vh] flex-col overflow-hidden rounded-[2.5rem] bg-white/95 animate-slide-up shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)] focus:outline-none outline-none">
               <div className="flex items-center justify-between p-6 border-b border-slate-100">
                  <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg" style={{ backgroundColor: TYPE_COLORS[selectedGroup.name.toUpperCase()] || '#4f46e5' }}>
@@ -288,20 +296,21 @@ const Dashboard = () => {
                        <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">ข้อมูลสถิติแยกตามรายคอร์ส</p>
                     </div>
                  </div>
-                 <button 
+                 <button
+                   type="button"
                    onClick={() => setSelectedGroup(null)}
-                   className="p-2.5 rounded-xl border border-slate-100 bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"
+                   className="p-2.5 rounded-xl bg-slate-100/90 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-all"
                  >
                     <X size={20} />
                  </button>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 p-6 bg-slate-50/50 border-b border-slate-100">
-                 <div className="card p-4 bg-white border-slate-100 shadow-sm flex flex-col gap-1 text-center">
+              <div className="grid grid-cols-2 gap-4 border-b border-slate-100 bg-slate-50/60 p-6">
+                 <div className="flex flex-col gap-1 rounded-[1.75rem] bg-white p-4 text-center shadow-sm">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">คอร์สทั้งหมด</p>
                     <p className="text-2xl font-black text-slate-800 leading-none">{selectedGroup.value}</p>
                  </div>
-                 <div className="card p-4 bg-white border-slate-100 shadow-sm flex flex-col gap-1 text-center">
+                 <div className="flex flex-col gap-1 rounded-[1.75rem] bg-white p-4 text-center shadow-sm">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">จำนวนผู้เรียนรวม</p>
                     <p className="text-2xl font-black text-primary leading-none">{selectedGroup.enrollmentCount.toLocaleString()}</p>
                  </div>
@@ -311,7 +320,7 @@ const Dashboard = () => {
                  <h4 className="mb-4 text-xs font-black text-slate-400 uppercase tracking-widest">รายชื่อคอร์สในกลุ่มนี้</h4>
                  <div className="space-y-3">
                     {selectedGroup.courses && [...selectedGroup.courses].sort((a,b) => b.students - a.students).map((course, idx) => (
-                      <div key={course.id} className="flex items-center justify-between p-4 rounded-[1.5rem] bg-white border border-slate-100 hover:border-primary/20 hover:shadow-md transition-all group">
+                      <div key={course.id} className="flex items-center justify-between rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-slate-100 transition-all group hover:shadow-md hover:ring-primary/20">
                          <div className="flex items-center gap-4">
                             <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 text-xs font-black group-hover:bg-primary/5 group-hover:text-primary transition-colors">
                                #{idx + 1}
@@ -333,7 +342,8 @@ const Dashboard = () => {
                  </div>
               </div>
            </div>
-        </div>
+          </div>
+        </ModalPortal>
       )}
     </div>
   );
