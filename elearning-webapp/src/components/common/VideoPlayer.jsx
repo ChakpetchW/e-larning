@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Plyr } from 'plyr-react';
-import 'plyr/dist/plyr.css';
-import plyrSprite from 'plyr/dist/plyr.svg?url';
+import 'plyr-react/plyr.css';
+import plyrSprite from '../../assets/plyr.svg?url';
 
 // Custom CSS to fix invisible icons and match branding
 const plyrCustomStyles = `
