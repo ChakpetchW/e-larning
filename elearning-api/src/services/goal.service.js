@@ -98,13 +98,7 @@ const getGoalDetails = async (id, authUser) => {
             courses: {
                 include: {
                     course: {
-                        select: {
-                            id: true,
-                            title: true,
-                            description: true,
-                            thumbnail: true,
-                            difficulty: true,
-                            categoryId: true,
+                        include: {
                             category: { select: { name: true } }
                         }
                     }

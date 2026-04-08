@@ -97,7 +97,8 @@ const Home = () => {
         current: completed.length,
         target: goal.targetCount,
         title: goal.title,
-        scope: goal.scope
+        scope: goal.scope,
+        deptName: goal.department?.name
       };
     });
   }, [activeGoals, courses]);
@@ -260,7 +261,7 @@ const Home = () => {
       {/* Learning Activities Section */}
       <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
          <h3 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight mb-5 px-1 md:px-2">กิจกรรมการเรียน</h3>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 items-stretch">
             {/* Ongoing Courses Card */}
             <button
                onClick={() => navigate('/user/ongoing')}
@@ -288,20 +289,20 @@ const Home = () => {
                      <button 
                          key={gp.id} 
                          onClick={() => navigate(`/user/goals/${gp.id}`)}
-                         className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-6 border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 w-full text-left"
+                         className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 w-full text-left h-full"
                      >
-                        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${gp.current >= gp.target ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
-                           <Target size={24} />
+                        <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${gp.current >= gp.target ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
+                           <Target size={28} />
                         </div>
                         <div className="flex-1">
                            <div className="flex items-center gap-2 mb-1">
-                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{gp.title}</p>
-                              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded border ${gp.scope === 'DEPARTMENT' ? 'border-amber-200 text-amber-600 bg-amber-50' : 'border-blue-200 text-blue-600 bg-blue-50'}`}>
-                                 {gp.scope === 'DEPARTMENT' ? 'แผนก' : 'องค์กร'}
+                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">{gp.title}</p>
+                              <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border leading-none ${gp.scope === 'DEPARTMENT' ? 'border-amber-200 text-amber-600 bg-amber-50' : 'border-blue-200 text-blue-600 bg-blue-50'}`}>
+                                 {gp.scope === 'DEPARTMENT' ? (gp.deptName || 'แผนก') : 'องค์กร'}
                               </span>
                            </div>
-                           <h3 className="text-lg font-bold text-slate-800 leading-none mb-2">{gp.current}/{gp.target} คอร์ส</h3>
-                           <div className="relative w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                           <h3 className="text-xl font-bold text-slate-800 leading-none mb-3">{gp.current}/{gp.target} คอร์ส</h3>
+                           <div className="relative w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                               <div 
                                  className={`h-full transition-all duration-1000 ${gp.current >= gp.target ? 'bg-emerald-500' : 'bg-primary'}`}
                                  style={{ width: `${Math.min(100, (gp.current / gp.target) * 100)}%` }}
