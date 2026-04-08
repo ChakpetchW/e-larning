@@ -127,9 +127,9 @@ const Dashboard = () => {
             </div>
             
             <div className="flex flex-col lg:flex-row items-center gap-6">
-              <div className="relative h-[220px] w-[220px] shrink-0">
+              <div className="relative h-[220px] w-full max-w-[220px] shrink-0 min-w-0">
                 {stats && (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={220}>
                     <PieChart>
                       <Pie
                         data={stats?.typeDistribution || []}
@@ -310,7 +310,7 @@ const Dashboard = () => {
               <div className="flex-1 overflow-y-auto p-6 no-scrollbar h-full">
                  <h4 className="mb-4 text-xs font-black text-slate-400 uppercase tracking-widest">รายชื่อคอร์สในกลุ่มนี้</h4>
                  <div className="space-y-3">
-                    {selectedGroup.courses?.sort((a,b) => b.students - a.students).map((course, idx) => (
+                    {selectedGroup.courses && [...selectedGroup.courses].sort((a,b) => b.students - a.students).map((course, idx) => (
                       <div key={course.id} className="flex items-center justify-between p-4 rounded-[1.5rem] bg-white border border-slate-100 hover:border-primary/20 hover:shadow-md transition-all group">
                          <div className="flex items-center gap-4">
                             <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 text-xs font-black group-hover:bg-primary/5 group-hover:text-primary transition-colors">
