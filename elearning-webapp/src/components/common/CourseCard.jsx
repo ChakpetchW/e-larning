@@ -19,7 +19,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
     0
   );
 
-  const durationLabel = lessonDuration || course.totalDuration || 'พรีเมียม';
+  const durationLabel = course.totalDuration || (lessonDuration > 0 ? `${lessonDuration} นาที` : 'พรีเมียม');
   const statusLabel = isCompleted ? 'เรียนจบแล้ว' : isInProgress ? 'กำลังเรียน' : 'พร้อมเริ่ม';
   const eyebrowLabel = isCompleted
     ? 'ทบทวนได้ทันที'
@@ -101,7 +101,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
               <div className="h-1 w-1 rounded-full bg-slate-300" />
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
                 <Clock size={13} className="text-slate-400" />
-                <span>{durationLabel} นาที</span>
+                <span>{durationLabel}</span>
               </div>
             </div>
     
