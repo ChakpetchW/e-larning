@@ -876,7 +876,10 @@ const CourseManagement = () => {
                                 หมดอายุ {formatThaiDateTime(category.expiredAt, true)}
                               </span>
                           )}
-                          {category.visibleToAll !== false ? (
+                          {category.visibleToAll ? (
+                            <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-black uppercase text-emerald-700">ทุกคน</span>
+                          ) : (
+                            <>
                               {(category.visibleDepartments || []).map(d => (
                                 <span key={d.id} className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-black uppercase text-primary">{d.name}</span>
                               ))}
