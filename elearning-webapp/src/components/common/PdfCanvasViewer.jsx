@@ -44,7 +44,7 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, scale }) => {
       renderTaskRef.current?.cancel();
       renderTaskRef.current = page.render({
         canvasContext: context,
-        viewport
+        viewport,
       });
 
       try {
@@ -76,15 +76,25 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, scale }) => {
   );
 };
 
-const PdfCanvasViewer = ({ url, onLoad, onError }) => {
+const PdfCanvasViewerContent = ({ url, onLoad, onError }) => {
   const containerRef = useRef(null);
   const manualZoomRef = useRef(false);
+  const onLoadRef = useRef(onLoad);
+  const onErrorRef = useRef(onError);
   const [pdfDocument, setPdfDocument] = useState(null);
   const [pageCount, setPageCount] = useState(0);
   const [fitZoom, setFitZoom] = useState(1);
   const [zoom, setZoom] = useState(null);
   const [isLoadingDocument, setIsLoadingDocument] = useState(true);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    onLoadRef.current = onLoad;
+  }, [onLoad]);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -96,7 +106,7 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
     const updateSize = () => {
       setContainerSize({
         width: container.clientWidth,
-        height: container.clientHeight
+        height: container.clientHeight,
       });
     };
 
@@ -117,14 +127,8 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
     let cancelled = false;
     const loadingTask = getDocument({
       url,
-      withCredentials: false
+      withCredentials: false,
     });
-
-    manualZoomRef.current = false;
-    setPdfDocument(null);
-    setPageCount(0);
-    setZoom(null);
-    setIsLoadingDocument(true);
 
     loadingTask.promise
       .then((loadedPdf) => {
@@ -136,7 +140,7 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
         setPdfDocument(loadedPdf);
         setPageCount(loadedPdf.numPages);
         setIsLoadingDocument(false);
-        onLoad?.();
+        onLoadRef.current?.();
       })
       .catch((error) => {
         if (cancelled) {
@@ -145,14 +149,14 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
 
         console.error('PDF load error:', error);
         setIsLoadingDocument(false);
-        onError?.('ไม่สามารถเปิดเอกสาร PDF ได้ในขณะนี้');
+        onErrorRef.current?.('ไม่สามารถเปิดเอกสาร PDF ได้ในขณะนี้');
       });
 
     return () => {
       cancelled = true;
       loadingTask.destroy();
     };
-  }, [onError, onLoad, url]);
+  }, [url]);
 
   useEffect(() => {
     let active = true;
@@ -192,19 +196,6 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
     setZoom(clamp(nextZoom, MIN_ZOOM, MAX_ZOOM));
   };
 
-  const handleZoomOut = () => {
-    updateZoom(currentZoom - ZOOM_STEP);
-  };
-
-  const handleZoomIn = () => {
-    updateZoom(currentZoom + ZOOM_STEP);
-  };
-
-  const handleResetZoom = () => {
-    manualZoomRef.current = false;
-    setZoom(fitZoom);
-  };
-
   return (
     <div className="flex h-full min-h-0 flex-col bg-slate-100">
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
@@ -216,7 +207,7 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleZoomOut}
+            onClick={() => updateZoom(currentZoom - ZOOM_STEP)}
             disabled={isLoadingDocument || currentZoom <= MIN_ZOOM}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 disabled:opacity-40"
           >
@@ -224,7 +215,10 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
           </button>
           <button
             type="button"
-            onClick={handleResetZoom}
+            onClick={() => {
+              manualZoomRef.current = false;
+              setZoom(fitZoom);
+            }}
             disabled={isLoadingDocument}
             className="inline-flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-40"
           >
@@ -233,7 +227,7 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
           </button>
           <button
             type="button"
-            onClick={handleZoomIn}
+            onClick={() => updateZoom(currentZoom + ZOOM_STEP)}
             disabled={isLoadingDocument || currentZoom >= MAX_ZOOM}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 disabled:opacity-40"
           >
@@ -269,5 +263,14 @@ const PdfCanvasViewer = ({ url, onLoad, onError }) => {
     </div>
   );
 };
+
+const PdfCanvasViewer = ({ url, onLoad, onError }) => (
+  <PdfCanvasViewerContent
+    key={url || 'pdf-viewer'}
+    url={url}
+    onLoad={onLoad}
+    onError={onError}
+  />
+);
 
 export default PdfCanvasViewer;

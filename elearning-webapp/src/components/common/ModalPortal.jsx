@@ -1,13 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 const ModalPortal = ({ children, isOpen = true, lockScroll = true }) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   useEffect(() => {
     if (!isOpen || !lockScroll || typeof document === 'undefined') {
       return undefined;
@@ -22,7 +16,7 @@ const ModalPortal = ({ children, isOpen = true, lockScroll = true }) => {
     };
   }, [isOpen, lockScroll]);
 
-  if (!isOpen || !mounted || typeof document === 'undefined') {
+  if (!isOpen || typeof document === 'undefined') {
     return null;
   }
 

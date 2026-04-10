@@ -263,6 +263,48 @@ const CourseModal = ({
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700 block mb-1">รูปหน้าปกคอร์ส</label>
+                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-5">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <h4 className="text-base font-black text-amber-900">คอร์สชั่วคราว</h4>
+                      <p className="text-sm text-amber-800/80">
+                        ตั้งวันหมดอายุเพื่อให้คอร์สนี้ถูกซ่อนจากผู้ใช้ทั่วไปอัตโนมัติ และย้ายไปอยู่ในมุมมอง archive ของแอดมิน
+                      </p>
+                    </div>
+                    <label className="inline-flex items-center gap-3 rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-bold text-amber-900">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(courseForm.isTemporary)}
+                        onChange={(event) =>
+                          setCourseForm({
+                            ...courseForm,
+                            isTemporary: event.target.checked,
+                            expiredAt: event.target.checked ? courseForm.expiredAt : '',
+                          })
+                        }
+                        className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                      />
+                      เปิดใช้งาน
+                    </label>
+                  </div>
+
+                  {courseForm.isTemporary && (
+                    <div className="mt-4 space-y-1.5">
+                      <label className="text-sm font-black text-amber-900 block ml-1 uppercase tracking-wider">วันหมดอายุ</label>
+                      <div className="relative group">
+                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500" size={18} />
+                        <input
+                          required={Boolean(courseForm.isTemporary)}
+                          type="datetime-local"
+                          className="form-input w-full border-amber-200 bg-white pl-12"
+                          value={courseForm.expiredAt || ''}
+                          onChange={(event) => setCourseForm({ ...courseForm, expiredAt: event.target.value })}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <label className="text-sm font-bold text-gray-700 block mb-1">รูปหน้าปกคอร์ส</label>
                 <input type="file" ref={imageInputRef} accept="image/*" onChange={onImageUpload} className="hidden" />
 
                 {courseForm.image ? (

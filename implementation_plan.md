@@ -1,41 +1,81 @@
-# Implementation Plan - Hierarchical Course Visibility
+# Implementation Plan - Temporary Categories & Courses
 
-The system currently uses a hardcoded tier rank map which is out of sync with the recent "User Tier Ordering" feature. This causes visibility issues where higher-ranking users cannot see courses meant for lower-ranking tiers (e.g., Managers cannot see Officer courses).
+## Refined Scope
 
-## User Review Required
+The original plan mixed automatic expiry with a new manual archive status for categories. After reviewing the current codebase, a simpler and safer approach is to treat archive state as a derived result of:
 
-> [!IMPORTANT]
-> The hierarchy logic will be updated to: **A user can see any course assigned to their own tier OR any tier with a higher 'order' value (meaning it ranks lower in the organizational hierarchy).**
-> 
-> Current Hierarchy confirmed by user:
-> 1. Manager (Order 0) - Highest
-> 2. Supervisor (Order 1)
-> 3. Officer (Order 2) - Lowest
->
-> Logic: `User.Tier.order <= Course.Tier.order`
+- `isTemporary === true`
+- `expiredAt <= now()`
 
-## Proposed Changes
+This keeps the behavior consistent for both categories and courses, avoids a redundant status column, and fits the existing visibility system already used by user/admin services.
 
-### Backend Service (elearning-api)
+## Decisions Applied
 
-#### [MODIFY] [user.service.js](file:///d:/งาน/AI Project/elearning-api/src/services/user.service.js)
-- Update `getUserVisibilityContext` to select the `order` field from the `Tier` model.
-- Remove the hardcoded `TIER_RANK_MAP` and `getTierRank` function.
-- Update `canAccessByTierHierarchy` to compare `userContext.tier.order` with `courseTier.order`.
-- Ensure that if multiple tiers are assigned to a course, the user can access it if their tier ranks higher than or equal to the *highest-ranking* (lowest order value) tier required by the course (which means it matches at least one, or encompasses it).
-    - Logic: `User.order <= Math.max(...RequiredTiers.orders)`. If a course is specifically for Officers (Order 2), a Manager (Order 0) can see it because `0 <= 2`.
+- Add `isTemporary` and `expiredAt` to both `Category` and `Course`.
+- Keep archive state derived instead of storing a separate `ARCHIVED` status.
+- Reuse existing admin update endpoints for editing temporary content.
+- Add dedicated `republish` endpoints that clear temporary expiry and make the item visible again.
+- Keep user-facing ordering simple: temporary categories appear first, then regular category order.
+- Add lightweight "Limited Time" treatment on the home page and course cards.
 
-### Admin Service (elearning-api)
+## Backend Changes
 
-#### [MODIFY] [admin.service.js](file:///d:/งาน/AI Project/elearning-api/src/services/admin.service.js)
-- Ensure consistency in any internal visibility checks used by admin stats if applicable.
+### Prisma
 
-## Verification Plan
+- Update `elearning-api/prisma/schema.prisma`
+  - `Category.isTemporary: Boolean @default(false)`
+  - `Category.expiredAt: DateTime?`
+  - `Course.isTemporary: Boolean @default(false)`
+  - `Course.expiredAt: DateTime?`
+- Add a migration for the new fields.
 
-### Manual Verification
-1. Log in as a **Manager** (Tier Order 0).
-2. Create/Assign a course to the **Officer** Tier (Tier Order 2).
-3. Verify the **Manager** can see the **Officer** course in the course list.
-4. Log in as an **Officer**.
-5. Verify the **Officer** CANNOT see the **Manager** course.
-6. Verify the **Officer** CAN see their own **Officer** course.
+### User Service
+
+- Update `elearning-api/src/services/user.service.js`
+  - Fold temporary expiry checks into the existing visibility flow.
+  - Hide expired temporary categories from `/user/categories`.
+  - Hide expired temporary courses from `/user/courses` and `/user/courses/:id`.
+  - Hide courses whose parent category has already expired.
+  - Sort visible categories by temporary-first, then `order`.
+
+### Admin Service
+
+- Update `elearning-api/src/services/admin.service.js`
+  - Accept `isTemporary` and `expiredAt` in category/course payloads.
+  - Validate that temporary items include an expiration date.
+  - Return derived `isArchived` flags for admin lists.
+  - Add `republishCourse` and `republishCategory`.
+
+### Admin API
+
+- Add republish routes/controllers:
+  - `PUT /admin/courses/:id/republish`
+  - `PUT /admin/categories/:id/republish`
+
+## Frontend Changes
+
+### Admin
+
+- Update `elearning-webapp/src/pages/admin/CourseManagement.jsx`
+  - Add active/archive toggles for courses.
+  - Add active/archive toggles for categories.
+  - Show temporary/archive badges and expiration timestamps.
+  - Add republish actions.
+- Update `elearning-webapp/src/components/admin/CourseModal.jsx`
+  - Add "Temporary" toggle.
+  - Add expiration datetime field.
+
+### User
+
+- Update `elearning-webapp/src/pages/user/Home.jsx`
+  - Preserve API category ordering so temporary categories appear first.
+  - Show a limited-time badge on temporary category sections.
+- Update shared presentation components so temporary categories/courses are visually distinguishable.
+
+## Verification
+
+1. Create a temporary category and temporary course with an expiration a few minutes ahead.
+2. Confirm both appear in admin active views and on the user home page.
+3. After expiry, confirm they disappear from user endpoints/views.
+4. Confirm they appear in admin archive views.
+5. Use republish and confirm they reappear.

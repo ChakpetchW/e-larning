@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Plyr } from 'plyr-react';
 import 'plyr-react/plyr.css';
 import plyrSprite from '../../assets/plyr.svg?url';

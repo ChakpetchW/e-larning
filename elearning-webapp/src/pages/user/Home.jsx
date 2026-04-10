@@ -359,6 +359,7 @@ const Home = () => {
           <section key={category.id} className="animate-slide-up" style={{ animationDelay: `${500 + idx * 100}ms` }}>
             <SectionHeader 
               title={category.name}
+              badgeText={category.isTemporary ? 'Limited Time' : ''}
               onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
             />
             <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">

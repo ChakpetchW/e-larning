@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { 
-  ArrowDown, ArrowUp, Edit, Edit2, Plus, Search, Trash2, 
+  Archive, ArrowDown, ArrowUp, Edit, Edit2, LayoutGrid, Plus, RotateCcw, Search, Trash2, 
   ChevronDown
 } from 'lucide-react';
 import { ICON_LIST } from '../../utils/icons';
@@ -25,7 +25,54 @@ const getDefaultCourseForm = () => ({
   visibleToAll: true,
   visibleDepartmentIds: [],
   visibleTierIds: [],
+  isTemporary: false,
+  expiredAt: '',
 });
+
+const getDefaultCategoryForm = () => ({
+  name: '',
+  icon: 'Grid',
+  type: 'FUNCTION',
+  order: 0,
+  visibleToAll: true,
+  visibleDepartmentIds: [],
+  visibleTierIds: [],
+  isTemporary: false,
+  expiredAt: '',
+});
+
+const toDateTimeLocalValue = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return '';
+  }
+
+  return new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+};
+
+const formatExpiryLabel = (value) => {
+  if (!value) {
+    return '-';
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return '-';
+  }
+
+  return parsed.toLocaleString('th-TH', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+};
 
 const getDefaultLessonForm = (order = 0) => ({
   title: '',
@@ -48,6 +95,7 @@ const CourseManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [courseView, setCourseView] = useState('ACTIVE');
 
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -63,8 +111,9 @@ const CourseManagement = () => {
   const [lessonForm, setLessonForm] = useState(getDefaultLessonForm());
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [categoryForm, setCategoryForm] = useState({ name: '', icon: 'Grid', type: 'FUNCTION', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] });
+  const [categoryForm, setCategoryForm] = useState(getDefaultCategoryForm());
   const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [categoryView, setCategoryView] = useState('ACTIVE');
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -107,6 +156,11 @@ const CourseManagement = () => {
     setActiveTab('basic');
   };
 
+  const resetCategoryEditor = () => {
+    setEditingCategoryId(null);
+    setCategoryForm(getDefaultCategoryForm());
+  };
+
   const openAddCourse = () => {
     resetCourseForm();
     setShowModal(true);
@@ -131,6 +185,8 @@ const CourseManagement = () => {
       visibleToAll: course.visibleToAll ?? true,
       visibleDepartmentIds: course.visibleDepartmentIds || [],
       visibleTierIds: course.visibleTierIds || [],
+      isTemporary: Boolean(course.isTemporary),
+      expiredAt: toDateTimeLocalValue(course.expiredAt),
     });
     setActiveTab('basic');
     setShowModal(true);
@@ -162,11 +218,16 @@ const CourseManagement = () => {
     event.preventDefault();
 
     try {
+      const payload = {
+        ...courseForm,
+        expiredAt: courseForm.isTemporary ? courseForm.expiredAt : '',
+      };
+
       if (isEditing) {
-        await adminAPI.updateCourse(editingId, courseForm);
+        await adminAPI.updateCourse(editingId, payload);
         alert('อัปเดตคอร์สเรียบร้อย');
       } else {
-        await adminAPI.createCourse({ ...courseForm, status: 'PUBLISHED' });
+        await adminAPI.createCourse({ ...payload, status: 'PUBLISHED' });
         alert('สร้างคอร์สเรียบร้อย');
       }
 
@@ -176,6 +237,16 @@ const CourseManagement = () => {
     } catch (error) {
       console.error('Save course error:', error);
       alert(error.response?.data?.message || 'ไม่สามารถบันทึกคอร์สได้');
+    }
+  };
+
+  const handleRepublishCourse = async (id) => {
+    try {
+      await adminAPI.republishCourse(id);
+      await fetchData();
+    } catch (error) {
+      console.error('Republish course error:', error);
+      alert(error.response?.data?.message || 'ไม่สามารถนำคอร์สกลับมาเผยแพร่ได้');
     }
   };
 
@@ -280,18 +351,33 @@ const CourseManagement = () => {
     event.preventDefault();
 
     try {
+      const payload = {
+        ...categoryForm,
+        expiredAt: categoryForm.isTemporary ? categoryForm.expiredAt : '',
+      };
+
       if (editingCategoryId) {
-        await adminAPI.updateCategory(editingCategoryId, categoryForm);
+        await adminAPI.updateCategory(editingCategoryId, payload);
       } else {
-        await adminAPI.createCategory(categoryForm);
+        await adminAPI.createCategory(payload);
       }
 
-      setCategoryForm({ name: '', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] });
+      setCategoryForm(getDefaultCategoryForm());
       setEditingCategoryId(null);
       fetchData();
     } catch (error) {
       console.error('Save category error:', error);
       alert(error.response?.data?.message || 'ไม่สามารถบันทึกหมวดหมู่ได้');
+    }
+  };
+
+  const handleRepublishCategory = async (id) => {
+    try {
+      await adminAPI.republishCategory(id);
+      await fetchData();
+    } catch (error) {
+      console.error('Republish category error:', error);
+      alert(error.response?.data?.message || 'ไม่สามารถนำหมวดหมู่กลับมาเผยแพร่ได้');
     }
   };
 
@@ -310,7 +396,13 @@ const CourseManagement = () => {
   };
 
   const handleMoveCategory = async (index, direction) => {
-    const reordered = [...categories];
+    if (categoryView === 'ARCHIVED') {
+      return;
+    }
+
+    const activeCategories = categories.filter((category) => !category.isArchived);
+    const archivedCategories = categories.filter((category) => category.isArchived);
+    const reordered = [...activeCategories];
 
     if (direction === -1 && index > 0) {
       [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
@@ -325,7 +417,7 @@ const CourseManagement = () => {
       order: itemIndex,
     }));
 
-    setCategories(normalized);
+    setCategories([...normalized, ...archivedCategories]);
 
     try {
       await adminAPI.reorderCategories({
@@ -341,9 +433,18 @@ const CourseManagement = () => {
     courses.filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'ALL' || course.categoryId === selectedCategory;
-      return matchesSearch && matchesCategory;
+      const matchesView = courseView === 'ARCHIVED' ? Boolean(course.isArchived) : !course.isArchived;
+      return matchesSearch && matchesCategory && matchesView;
     })
-  ), [courses, searchTerm, selectedCategory]);
+  ), [courseView, courses, searchTerm, selectedCategory]);
+
+  const filteredCategories = useMemo(() => (
+    categories.filter((category) => (categoryView === 'ARCHIVED' ? Boolean(category.isArchived) : !category.isArchived))
+  ), [categories, categoryView]);
+
+  const selectableCategories = useMemo(() => (
+    categories.filter((category) => !category.isArchived || category.id === courseForm.categoryId)
+  ), [categories, courseForm.categoryId]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -356,7 +457,7 @@ const CourseManagement = () => {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => setShowCategoryModal(true)} className="btn btn-outline">
+          <button onClick={() => { resetCategoryEditor(); setCategoryView('ACTIVE'); setShowCategoryModal(true); }} className="btn btn-outline">
             จัดการหมวดหมู่
           </button>
           <button onClick={openAddCourse} className="btn btn-primary">
@@ -364,6 +465,27 @@ const CourseManagement = () => {
             สร้างคอร์สใหม่
           </button>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {[
+          { key: 'ACTIVE', label: `คอร์สที่เผยแพร่อยู่ (${courses.filter((course) => !course.isArchived).length})`, icon: LayoutGrid },
+          { key: 'ARCHIVED', label: `Archive (${courses.filter((course) => course.isArchived).length})`, icon: Archive },
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setCourseView(key)}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all ${
+              courseView === key
+                ? 'bg-slate-900 text-white shadow-lg'
+                : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+            }`}
+          >
+            {key === 'ACTIVE' ? <LayoutGrid size={16} /> : <Archive size={16} />}
+            {label}
+          </button>
+        ))}
       </div>
 
       <CourseModal
@@ -375,7 +497,7 @@ const CourseManagement = () => {
         setActiveTab={setActiveTab}
         courseForm={courseForm}
         setCourseForm={setCourseForm}
-        categories={categories}
+        categories={selectableCategories}
         departments={departments}
         tiers={tiers}
         lessons={lessons}
@@ -424,11 +546,32 @@ const CourseManagement = () => {
               <button 
                 type="button"
                 aria-label="ปิดหน้าต่างจัดการหมวดหมู่"
-                onClick={() => { setShowCategoryModal(false); setEditingCategoryId(null); setCategoryForm({ name: '', icon: 'Grid', type: 'FUNCTION', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }} 
+                onClick={() => { setShowCategoryModal(false); resetCategoryEditor(); }} 
                 className="text-muted hover:text-gray-800"
               >
                 ปิด
               </button>
+            </div>
+
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {[
+                { key: 'ACTIVE', label: `หมวดหมู่ที่เผยแพร่อยู่ (${categories.filter((category) => !category.isArchived).length})`, icon: LayoutGrid },
+                { key: 'ARCHIVED', label: `Archive (${categories.filter((category) => category.isArchived).length})`, icon: Archive },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => { setCategoryView(key); resetCategoryEditor(); }}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all ${
+                    categoryView === key
+                      ? 'bg-slate-900 text-white shadow-lg'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                  }`}
+                >
+                  {key === 'ACTIVE' ? <LayoutGrid size={16} /> : <Archive size={16} />}
+                  {label}
+                </button>
+              ))}
             </div>
 
             <form 
@@ -446,7 +589,7 @@ const CourseManagement = () => {
                 {editingCategoryId && (
                   <button 
                     type="button"
-                    onClick={() => { setEditingCategoryId(null); setCategoryForm({ name: '', icon: 'Grid', type: 'FUNCTION', order: 0, visibleToAll: true, visibleDepartmentIds: [], visibleTierIds: [] }); }}
+                    onClick={resetCategoryEditor}
                     className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
                   >
                     ยกเลิกการแก้ไข
@@ -555,6 +698,45 @@ const CourseManagement = () => {
                 >
                   {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
                 </button>
+              </div>
+
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-widest text-amber-900">หมวดหมู่ชั่วคราว</p>
+                    <p className="mt-1 text-sm text-amber-800/80">
+                      เมื่อถึงวันหมดอายุ หมวดนี้จะหายจากหน้า user และย้ายไปอยู่ใน archive อัตโนมัติ
+                    </p>
+                  </div>
+                  <label className="inline-flex items-center gap-3 rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-bold text-amber-900">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(categoryForm.isTemporary)}
+                      onChange={(event) =>
+                        setCategoryForm({
+                          ...categoryForm,
+                          isTemporary: event.target.checked,
+                          expiredAt: event.target.checked ? categoryForm.expiredAt : '',
+                        })
+                      }
+                      className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                    />
+                    เปิดใช้งาน
+                  </label>
+                </div>
+
+                {categoryForm.isTemporary && (
+                  <div className="mt-4 space-y-1.5">
+                    <label className="text-[10px] font-bold text-amber-900 uppercase tracking-wider ml-1">วันหมดอายุ</label>
+                    <input
+                      required={Boolean(categoryForm.isTemporary)}
+                      type="datetime-local"
+                      className="form-input w-full border-amber-200 bg-white px-4 py-3 text-sm font-bold"
+                      value={categoryForm.expiredAt || ''}
+                      onChange={(event) => setCategoryForm({ ...categoryForm, expiredAt: event.target.value })}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Visibility Toggle */}
@@ -667,7 +849,7 @@ const CourseManagement = () => {
             <div className="flex-1 overflow-y-auto">
               <p className="mb-2 text-xs font-bold uppercase text-muted">ลำดับหมวดหมู่ปัจจุบัน</p>
               <div className="flex flex-col gap-2">
-                {categories.map((category, index) => {
+                {filteredCategories.map((category, index) => {
                   const isEditing = editingCategoryId === category.id;
                   return (
                     <div
@@ -695,9 +877,23 @@ const CourseManagement = () => {
                                   {category.type}
                                 </span>
                               )}
+                              {category.isTemporary && (
+                                <span className={`rounded-md px-1.5 py-0.5 text-[8px] font-black uppercase ring-1 ring-inset ${
+                                  category.isArchived
+                                    ? 'bg-rose-50 text-rose-600 ring-rose-200'
+                                    : 'bg-amber-50 text-amber-700 ring-amber-200'
+                                }`}>
+                                  {category.isArchived ? 'Archived' : 'Limited Time'}
+                                </span>
+                              )}
                             </div>
                           </div>
                         <div className="mt-1 flex flex-wrap gap-1">
+                          {category.isTemporary && (
+                            <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700">
+                              หมดอายุ {formatExpiryLabel(category.expiredAt)}
+                            </span>
+                          )}
                           {category.visibleToAll !== false ? (
                             <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-700">ทุกคน</span>
                           ) : (
@@ -720,7 +916,7 @@ const CourseManagement = () => {
                         <div className="flex flex-col rounded-lg border border-slate-100 bg-slate-50 overflow-hidden shadow-sm">
                           <button
                             type="button"
-                            disabled={index === 0}
+                            disabled={categoryView === 'ARCHIVED' || index === 0}
                             onClick={() => handleMoveCategory(index, -1)}
                             className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all border-b border-slate-100"
                           >
@@ -728,7 +924,7 @@ const CourseManagement = () => {
                           </button>
                           <button
                             type="button"
-                            disabled={index === categories.length - 1}
+                            disabled={categoryView === 'ARCHIVED' || index === filteredCategories.length - 1}
                             onClick={() => handleMoveCategory(index, 1)}
                             className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all"
                           >
@@ -748,11 +944,22 @@ const CourseManagement = () => {
                                 visibleToAll: category.visibleToAll ?? true,
                                 visibleDepartmentIds: category.visibleDepartmentIds || [],
                                 visibleTierIds: category.visibleTierIds || [],
+                                isTemporary: Boolean(category.isTemporary),
+                                expiredAt: toDateTimeLocalValue(category.expiredAt),
                               });
                             }}
                             className="rounded-xl bg-slate-50 p-2 text-primary transition-all hover:bg-primary hover:text-white"
                           >
                             <Edit2 size={16} />
+                          </button>
+                        )}
+                        {category.isArchived && (
+                          <button
+                            type="button"
+                            onClick={() => handleRepublishCategory(category.id)}
+                            className="rounded-xl bg-emerald-50 p-2 text-emerald-600 transition-all hover:bg-emerald-500 hover:text-white"
+                          >
+                            <RotateCcw size={16} />
                           </button>
                         )}
                         <button
@@ -792,7 +999,7 @@ const CourseManagement = () => {
             onChange={(event) => setSelectedCategory(event.target.value)}
           >
             <option value="ALL">ทุกหมวดหมู่</option>
-            {categories.map((category) => (
+            {categories.filter((category) => !category.isArchived).map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
               </option>
@@ -818,8 +1025,30 @@ const CourseManagement = () => {
               <tbody>
                 {filteredCourses.map((course) => (
                   <tr key={course.id} className="border-b border-border transition-colors hover:bg-gray-50/50">
-                    <td className="p-4 font-medium">{course.title}</td>
-                    <td className="p-4 text-sm text-muted">{course.category?.name || 'Uncategorized'}</td>
+                    <td className="p-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium">{course.title}</span>
+                        {course.isTemporary && (
+                          <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                            course.isArchived
+                              ? 'bg-rose-100 text-rose-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            {course.isArchived ? 'Archived' : 'Limited Time'} · {formatExpiryLabel(course.expiredAt)}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm text-muted">
+                      <div className="flex flex-col gap-1">
+                        <span>{course.category?.name || 'Uncategorized'}</span>
+                        {course.category?.isTemporary && (
+                          <span className="text-[11px] font-bold text-amber-700">
+                            หมวดชั่วคราว · {formatExpiryLabel(course.category?.expiredAt)}
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-4 text-sm text-muted">
                       {course.visibleToAll ? (
                         <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">
@@ -834,6 +1063,15 @@ const CourseManagement = () => {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
+                        {course.isArchived && (
+                          <button
+                            type="button"
+                            onClick={() => handleRepublishCourse(course.id)}
+                            className="rounded p-1.5 text-emerald-600 hover:bg-emerald-50"
+                          >
+                            <RotateCcw size={16} />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => openEditCourse(course)}

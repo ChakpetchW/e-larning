@@ -5,6 +5,7 @@ const SectionHeader = ({
   title,
   onViewAll,
   viewAllText = 'ดูทั้งหมด',
+  badgeText = '',
   className = '',
   showViewAll = true,
 }) => {
@@ -16,6 +17,11 @@ const SectionHeader = ({
           <h3 className="min-w-0 text-xl font-black tracking-tight text-slate-900 md:text-[1.55rem]">
             {title}
           </h3>
+          {badgeText && (
+            <span className="inline-flex shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-amber-700">
+              {badgeText}
+            </span>
+          )}
           <span className="hidden h-px flex-1 bg-gradient-to-r from-slate-200 via-slate-100 to-transparent md:block" />
         </div>
       </div>

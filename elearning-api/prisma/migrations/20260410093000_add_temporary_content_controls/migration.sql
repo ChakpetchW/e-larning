@@ -1,0 +1,7 @@
+ALTER TABLE "Category"
+ADD COLUMN "isTemporary" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "expiredAt" TIMESTAMP(3);
+
+ALTER TABLE "Course"
+ADD COLUMN "isTemporary" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "expiredAt" TIMESTAMP(3);

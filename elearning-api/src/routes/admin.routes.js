@@ -26,12 +26,14 @@ router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 
 router.get('/courses', adminController.getAdminCourses);
 router.post('/courses', adminController.createCourse);
+router.put('/courses/:id/republish', adminController.republishCourse);
 router.put('/courses/:id', adminController.updateCourse);
 router.delete('/courses/:id', adminController.deleteCourse);
 
 router.get('/categories', adminController.getCategories);
 router.post('/categories', adminController.createCategory);
 router.put('/categories/reorder', adminController.reorderCategories);
+router.put('/categories/:id/republish', adminController.republishCategory);
 router.put('/categories/:id', adminController.updateCategory);
 router.delete('/categories/:id', adminController.deleteCategory);
 

@@ -2,6 +2,23 @@ import React from 'react';
 import { ArrowUpRight, CheckCircle2, Clock, Layers3 } from 'lucide-react';
 import { DEFAULT_COURSE_IMAGE, getFullUrl } from '../../utils/api';
 
+const formatExpiryLabel = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return '';
+  }
+
+  return parsed.toLocaleDateString('th-TH', {
+    day: 'numeric',
+    month: 'short',
+  });
+};
+
 const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
   const isCompleted = variant === 'completed' || course.enrollmentStatus === 'COMPLETED';
   const isInProgress = course.isEnrolled && !isCompleted;
@@ -23,6 +40,10 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
     : isInProgress
       ? 'กลับมาเรียนต่อได้'
       : 'คอร์สแนะนำ';
+
+  const temporaryLabel = course.isTemporary
+    ? `Limited Time${course.expiredAt ? ` · ${formatExpiryLabel(course.expiredAt)}` : ''}`
+    : '';
 
   return (
     <div className={`group h-full self-stretch ${className}`}>
@@ -93,6 +114,14 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
             <h3 className="mt-2 line-clamp-2 min-h-[3.15rem] text-[1.05rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-primary">
               {course.title}
             </h3>
+
+            {course.isTemporary && (
+              <div className="mt-3">
+                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-amber-700">
+                  {temporaryLabel}
+                </span>
+              </div>
+            )}
     
             {isInProgress && progressPercent > 0 && (
               <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">

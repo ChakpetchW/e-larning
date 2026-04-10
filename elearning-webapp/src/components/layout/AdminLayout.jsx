@@ -21,7 +21,13 @@ import './AdminLayout.css';
 
 const AdminLayout = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user] = useState(() => {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const drawerRef = useRef(null);
@@ -38,10 +44,6 @@ const AdminLayout = () => {
     containerRef: drawerRef,
     initialFocusRef: closeButtonRef,
   });
-
-  useEffect(() => {
-    setUser(JSON.parse(localStorage.getItem('user') || 'null'));
-  }, []);
 
   useEffect(() => {
     if (mainRef.current) {

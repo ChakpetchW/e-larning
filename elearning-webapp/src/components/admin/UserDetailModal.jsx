@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   CalendarDays,
   CheckCircle2,
@@ -26,7 +26,7 @@ const formatDate = (value, options = {}) => {
   return new Date(value)[formatter]('th-TH', options);
 };
 
-const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
+const UserDetailModalContent = ({ loading, detail, onClose }) => {
   const [activeTab, setActiveTab] = useState('learning');
   const [filterMonth, setFilterMonth] = useState('ALL');
   const [filterYear, setFilterYear] = useState('ALL');
@@ -37,18 +37,6 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
     'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
     'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
   ];
-
-  useEffect(() => {
-    if (isOpen) {
-      setActiveTab('learning');
-      setFilterMonth('ALL');
-      setFilterYear('ALL');
-    }
-  }, [isOpen, detail?.id]);
-
-  if (!isOpen) {
-    return null;
-  }
 
   const enrollments = detail?.enrollments || [];
   const pointsHistory = detail?.pointsHistory || [];
@@ -117,7 +105,7 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
   };
 
   return (
-    <ModalPortal isOpen={isOpen}>
+    <ModalPortal isOpen>
       <div className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
       <div className="card flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
@@ -409,6 +397,21 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
       </div>
       </div>
     </ModalPortal>
+  );
+};
+
+const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <UserDetailModalContent
+      key={detail?.id || 'user-detail'}
+      loading={loading}
+      detail={detail}
+      onClose={onClose}
+    />
   );
 };
 
