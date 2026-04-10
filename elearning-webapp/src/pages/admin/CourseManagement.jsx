@@ -283,14 +283,11 @@ const CourseManagement = () => {
   };
 
   const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) {
-      return;
-    }
+    const file = event.target.files?.[0];
+    if (!file) return;
 
     try {
       setUploading(true);
-      // Compress image before upload to avoid Vercel 4.5MB limit
       const compressedFile = await compressImage(file);
       const response = await adminAPI.uploadFile(compressedFile);
       setCourseForm((currentForm) => ({ ...currentForm, image: response.data.fileUrl }));
@@ -303,19 +300,12 @@ const CourseManagement = () => {
   };
 
   const handleDocUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) {
-      return;
-    }
+    const file = event.target.files?.[0];
+    if (!file) return;
 
     try {
       setUploading(true);
-      // Compress if it's an image, otherwise upload as is
       const finalFile = file.type.startsWith('image/') ? await compressImage(file) : file;
-      const response = await adminAPI.uploadFile(finalFile);
-      setLessonForm((currentForm) => ({ ...currentForm, contentUrl: response.data.fileUrl }));
-    } catch (error) {
-      console.error('Upload document error:', error);
       alert('อัปโหลดเอกสารไม่สำเร็จ');
     } finally {
       setUploading(false);
@@ -723,16 +713,24 @@ const CourseManagement = () => {
                       <label className="text-[10px] font-black uppercase tracking-widest text-amber-900/60">ระบุวันและเวลาหมดอายุ</label>
                     </div>
                     <div className="group relative">
+                      {/* Premium Display Overlay */}
+                      <div className="flex w-full items-center justify-between rounded-2xl border border-amber-200/60 bg-white/90 px-5 py-4 shadow-inner transition-all group-hover:border-amber-300">
+                        <span className="text-sm font-black text-slate-800">
+                          {categoryForm.expiredAt 
+                            ? formatThaiDateTime(categoryForm.expiredAt, true) 
+                            : 'วัน/เดือน/ปี --:--'}
+                        </span>
+                        <ChevronDown size={18} className="text-amber-500/50 group-hover:text-amber-500 transition-colors" />
+                      </div>
+
+                      {/* Hidden Native Input */}
                       <input
                         required={Boolean(categoryForm.isTemporary)}
                         type="datetime-local"
-                        className="form-input w-full rounded-2xl border-amber-200/60 bg-white/90 px-5 py-4 text-sm font-bold text-slate-800 shadow-inner transition-all focus:border-amber-400 focus:ring-4 focus:ring-amber-400/10 group-hover:border-amber-300"
+                        className="absolute inset-0 w-full cursor-pointer opacity-0"
                         value={categoryForm.expiredAt || ''}
                         onChange={(event) => setCategoryForm({ ...categoryForm, expiredAt: event.target.value })}
                       />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-amber-500/50 group-hover:text-amber-500 transition-colors">
-                        <ChevronDown size={18} />
-                      </div>
                     </div>
                     <p className="mt-1.5 px-1 text-[10px] font-medium text-amber-800/60 italic">
                       * ระบบจะตรวจสอบความถูกต้องของเวลาไทยอัตโนมัติ

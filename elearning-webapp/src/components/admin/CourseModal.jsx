@@ -311,16 +311,24 @@ const CourseModal = ({
                         <label className="text-[10px] font-black uppercase tracking-widest text-amber-900/60">กำหนดวันและเวลาหมดอายุ (พ.ศ.)</label>
                       </div>
                       <div className="group relative">
+                        {/* Premium Display Overlay */}
+                        <div className="flex w-full items-center justify-between rounded-2xl border border-amber-200/60 bg-white/90 px-5 py-4 shadow-inner transition-all group-hover:border-amber-300">
+                          <span className="text-sm font-black text-slate-800">
+                            {courseForm.expiredAt 
+                              ? formatThaiDateTime(courseForm.expiredAt, true) 
+                              : 'วัน/เดือน/ปี --:--'}
+                          </span>
+                          <ChevronDown size={18} className="text-amber-500/50 group-hover:text-amber-500 transition-colors" />
+                        </div>
+                        
+                        {/* Hidden Native Input (Handles click to open picker) */}
                         <input
                           required={Boolean(courseForm.isTemporary)}
                           type="datetime-local"
-                          className="form-input w-full rounded-2xl border-amber-200/60 bg-white/90 px-5 py-4 text-sm font-bold text-slate-800 shadow-inner transition-all focus:border-amber-400 focus:ring-4 focus:ring-amber-400/10 group-hover:border-amber-300"
+                          className="absolute inset-0 w-full cursor-pointer opacity-0"
                           value={courseForm.expiredAt || ''}
                           onChange={(event) => setCourseForm({ ...courseForm, expiredAt: event.target.value })}
                         />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-amber-500/50 group-hover:text-amber-500 transition-colors">
-                          <ChevronDown size={18} />
-                        </div>
                       </div>
                     </div>
                   )}
