@@ -299,6 +299,7 @@ const GoalManagement = () => {
                                 <div className="space-y-2">
                                     <CustomDateTimePicker
                                         showTime={false}
+                                        isEndOfDay={true}
                                         value={formData.expiryDate}
                                         onChange={e => setFormData({...formData, expiryDate: e.target.value})}
                                         label="วันหมดอายุ (ถ้ามี)"
