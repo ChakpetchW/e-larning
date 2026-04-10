@@ -110,6 +110,7 @@ const CourseModal = ({
   uploading
 }) => {
   const imageInputRef = useRef(null);
+  const dateInputRef = useRef(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -310,9 +311,12 @@ const CourseModal = ({
                         <AlertTriangle size={14} className="text-amber-600" />
                         <label className="text-[10px] font-black uppercase tracking-widest text-amber-900/60">กำหนดวันและเวลาหมดอายุ (พ.ศ.)</label>
                       </div>
-                      <div className="group relative">
+                      <div 
+                        className="group relative cursor-pointer"
+                        onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
+                      >
                         {/* Premium Display Overlay */}
-                        <div className="flex w-full items-center justify-between rounded-2xl border border-amber-200/60 bg-white/90 px-5 py-4 shadow-inner transition-all group-hover:border-amber-300">
+                        <div className="pointer-events-none flex w-full items-center justify-between rounded-2xl border border-amber-200/60 bg-white/90 px-5 py-4 shadow-inner transition-all group-hover:border-amber-300">
                           <span className="text-sm font-black text-slate-800">
                             {courseForm.expiredAt 
                               ? formatThaiDateTime(courseForm.expiredAt, true) 
@@ -321,8 +325,9 @@ const CourseModal = ({
                           <ChevronDown size={18} className="text-amber-500/50 group-hover:text-amber-500 transition-colors" />
                         </div>
                         
-                        {/* Hidden Native Input (Handles click to open picker) */}
+                        {/* Hidden Native Input */}
                         <input
+                          ref={dateInputRef}
                           required={Boolean(courseForm.isTemporary)}
                           type="datetime-local"
                           className="absolute inset-0 h-full w-full cursor-pointer opacity-0 z-20"

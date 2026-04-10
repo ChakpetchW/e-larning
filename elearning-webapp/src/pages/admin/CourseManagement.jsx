@@ -58,6 +58,7 @@ const getDefaultLessonForm = (order = 0) => ({
 
 const CourseManagement = () => {
   const iconPickerRef = React.useRef(null);
+  const categoryDateRef = React.useRef(null);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -712,9 +713,12 @@ const CourseManagement = () => {
                       <AlertTriangle size={14} className="text-amber-600" />
                       <label className="text-[10px] font-black uppercase tracking-widest text-amber-900/60">ระบุวันและเวลาหมดอายุ</label>
                     </div>
-                    <div className="group relative">
+                    <div 
+                      className="group relative cursor-pointer"
+                      onClick={() => categoryDateRef.current?.showPicker?.() || categoryDateRef.current?.focus()}
+                    >
                       {/* Premium Display Overlay */}
-                      <div className="flex w-full items-center justify-between rounded-2xl border border-amber-200/60 bg-white/90 px-5 py-4 shadow-inner transition-all group-hover:border-amber-300">
+                      <div className="pointer-events-none flex w-full items-center justify-between rounded-2xl border border-amber-200/60 bg-white/90 px-5 py-4 shadow-inner transition-all group-hover:border-amber-300">
                         <span className="text-sm font-black text-slate-800">
                           {categoryForm.expiredAt 
                             ? formatThaiDateTime(categoryForm.expiredAt, true) 
@@ -725,6 +729,7 @@ const CourseManagement = () => {
 
                       {/* Hidden Native Input */}
                       <input
+                        ref={categoryDateRef}
                         required={Boolean(categoryForm.isTemporary)}
                         type="datetime-local"
                         className="absolute inset-0 h-full w-full cursor-pointer opacity-0 z-20"
