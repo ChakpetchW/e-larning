@@ -103,28 +103,22 @@ const CustomDateTimePicker = ({
   };
 
     const updateValue = (date) => {
-      const pad = (n) => n.toString().padStart(2, '0');
-      const yyyy = date.getFullYear();
-      const mm = pad(date.getMonth() + 1);
-      const dd = pad(date.getDate());
+      // Create a new Date object based on the selected date to maintain local time context
+      const finalDate = new Date(date);
       
       if (showTime) {
-        const hh = pad(hours);
-        const min = pad(minutes);
-        const isoString = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-        onChange({ target: { value: isoString } });
+        finalDate.setHours(hours, minutes, 0, 0);
       } else {
-        // Date only mode
         if (isEndOfDay) {
-          // If it's an expiry date, set to last second of the day
-          const isoString = `${yyyy}-${mm}-${dd}T23:59:59`;
-          onChange({ target: { value: isoString } });
+          finalDate.setHours(23, 59, 59, 999);
         } else {
-          // General date (like employment start), set to start of day
-          const dateString = `${yyyy}-${mm}-${dd}`;
-          onChange({ target: { value: dateString } });
+          finalDate.setHours(0, 0, 0, 0);
         }
       }
+
+      // Convert to UTC ISO string (e.g., ...T16:59:59.000Z)
+      // This ensures the server/DB interprets the exact point in time correctly.
+      onChange({ target: { value: finalDate.toISOString() } });
     };
 
   const handleClear = () => {
