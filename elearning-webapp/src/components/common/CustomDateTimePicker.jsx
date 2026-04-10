@@ -320,11 +320,33 @@ const CustomDateTimePicker = ({ value, onChange, label = 'กำหนดวั�
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 px-6 py-3 bg-amber-50 rounded-2xl border border-amber-100 shadow-sm">
+                  <div className="flex items-center gap-3 px-6 py-3 bg-amber-50 rounded-2xl border border-amber-100 shadow-sm transition-all focus-within:ring-4 focus-within:ring-amber-400/20">
                     <Timer size={20} className="text-amber-500" />
-                    <span className="text-xl font-black text-amber-900 tracking-wider">
-                      {hours.toString().padStart(2, '0')} : {minutes.toString().padStart(2, '0')}
-                    </span>
+                    <div className="flex items-baseline gap-1">
+                      <input 
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={hours.toString().padStart(2, '0')}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val) && val >= 0 && val <= 23) setHours(val);
+                        }}
+                        className="w-12 bg-transparent text-xl font-black text-amber-900 border-none outline-none text-center focus:bg-white/50 rounded-lg"
+                      />
+                      <span className="text-xl font-black text-amber-900/40">:</span>
+                      <input 
+                        type="number"
+                        min="0"
+                        max="59"
+                        value={minutes.toString().padStart(2, '0')}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val) && val >= 0 && val <= 59) setMinutes(val);
+                        }}
+                        className="w-12 bg-transparent text-xl font-black text-amber-900 border-none outline-none text-center focus:bg-white/50 rounded-lg"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
