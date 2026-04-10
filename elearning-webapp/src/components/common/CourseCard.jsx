@@ -1,26 +1,9 @@
+import React from 'react';
 import { ArrowUpRight, CheckCircle2, Clock, Layers3 } from 'lucide-react';
 import { DEFAULT_COURSE_IMAGE, getFullUrl } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 
 // Standard date utilities now imported from dateUtils
-
-const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
-  const isCompleted = variant === 'completed' || course.enrollmentStatus === 'COMPLETED';
-  const isInProgress = course.isEnrolled && !isCompleted;
-  const categoryLabel = course.category?.name || 'หมวดทั่วไป';
-  const lessonCount = Array.isArray(course.lessons) ? course.lessons.length : 0;
-  const progressPercent = Math.max(0, Math.min(100, Number(course.progressPercent) || 0));
-  const displayPoints = course.totalPoints ?? course.points ?? 0;
-  const pointsSuffix = displayPoints > 0 ? 'แต้มรวม' : 'เรียน';
-
-  const lessonDuration = course.lessons?.reduce(
-    (total, lesson) => total + (parseInt(lesson.duration, 10) || 0),
-    0
-  );
-
-  const durationLabel = lessonDuration || course.totalDuration || 'พรีเมียม';
-  const statusLabel = isCompleted ? 'เรียนจบแล้ว' : isInProgress ? 'กำลังเรียน' : 'พร้อมเริ่ม';
-  const eyebrowLabel = isCompleted
 
 const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
   const isCompleted = variant === 'completed' || course.enrollmentStatus === 'COMPLETED';
@@ -110,9 +93,17 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
   
         <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
           <div className="flex-1">
-            <p className="text-[11px] font-bold tracking-[0.03em] text-slate-500">
-              {eyebrowLabel}
-            </p>
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                <Layers3 size={13} className="text-slate-400" />
+                <span>{lessonCount} บทเรียน</span>
+              </div>
+              <div className="h-1 w-1 rounded-full bg-slate-300" />
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                <Clock size={13} className="text-slate-400" />
+                <span>{durationLabel} นาที</span>
+              </div>
+            </div>
     
             <h3 className="mt-2 line-clamp-2 min-h-[3.15rem] text-[1.05rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-primary">
               {course.title}
@@ -126,12 +117,27 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
               </div>
             )}
     
-            {isInProgress && progressPercent > 0 && (
-                {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
-              </span>
-              <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">
-                {pointsSuffix}
-              </span>
+            <div className="mt-4 flex items-end justify-between border-t border-slate-100 pt-4">
+              <div className="flex flex-col">
+                <span className="text-xl font-black tabular-nums text-slate-800">
+                  {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
+                </span>
+                <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">
+                  {pointsSuffix}
+                </span>
+              </div>
+              
+              {isInProgress && progressPercent > 0 && (
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-black text-primary">{progressPercent}%</span>
+                  <div className="mt-1.5 h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
+                    <div 
+                      className="h-full bg-primary transition-all duration-700" 
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
