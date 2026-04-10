@@ -325,7 +325,7 @@ const CourseModal = ({
                         <input
                           required={Boolean(courseForm.isTemporary)}
                           type="datetime-local"
-                          className="absolute inset-0 w-full cursor-pointer opacity-0"
+                          className="absolute inset-0 h-full w-full cursor-pointer opacity-0 z-20"
                           value={courseForm.expiredAt || ''}
                           onChange={(event) => setCourseForm({ ...courseForm, expiredAt: event.target.value })}
                         />

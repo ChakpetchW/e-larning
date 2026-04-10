@@ -727,7 +727,7 @@ const CourseManagement = () => {
                       <input
                         required={Boolean(categoryForm.isTemporary)}
                         type="datetime-local"
-                        className="absolute inset-0 w-full cursor-pointer opacity-0"
+                        className="absolute inset-0 h-full w-full cursor-pointer opacity-0 z-20"
                         value={categoryForm.expiredAt || ''}
                         onChange={(event) => setCategoryForm({ ...categoryForm, expiredAt: event.target.value })}
                       />
