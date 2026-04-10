@@ -5,6 +5,7 @@ const SectionHeader = ({
   title,
   onViewAll,
   viewAllText = 'ดูทั้งหมด',
+  badgeText = '',
   className = '',
   showViewAll = true,
 }) => {
@@ -12,10 +13,15 @@ const SectionHeader = ({
     <div className={`mb-7 flex items-end justify-between gap-4 ${className}`}>
       <div className="min-w-0 flex-1">
         <span className="mb-3 block h-1.5 w-14 rounded-full bg-[linear-gradient(90deg,#0f172a_0%,#f59e0b_45%,#e2e8f0_100%)]" />
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:gap-4">
           <h3 className="min-w-0 text-xl font-black tracking-tight text-slate-900 md:text-[1.55rem]">
             {title}
           </h3>
+          {badgeText && (
+            <span className="inline-flex shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[12px] md:text-[13px] font-black uppercase tracking-[0.05em] md:tracking-[0.1em] text-amber-700 shadow-sm">
+              {badgeText}
+            </span>
+          )}
           <span className="hidden h-px flex-1 bg-gradient-to-r from-slate-200 via-slate-100 to-transparent md:block" />
         </div>
       </div>

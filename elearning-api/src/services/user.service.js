@@ -210,9 +210,29 @@ const getUserVisibilityContext = async (userId) => prisma.user.findUnique({
     }
 });
 
-const buildCategoryVisibilityWhere = (userContext) => {
+const buildTemporaryVisibilityWhere = (referenceDate = new Date()) => ({
+    OR: [
+        { isTemporary: false },
+        { expiredAt: null },
+        { expiredAt: { gt: referenceDate } }
+    ]
+});
+
+const isTemporaryEntityVisible = (entity, referenceDate = new Date()) => {
+    if (!entity?.isTemporary) {
+        return true;
+    }
+
+    if (!entity?.expiredAt) {
+        return true;
+    }
+
+    return new Date(entity.expiredAt) > referenceDate;
+};
+
+const buildCategoryVisibilityWhere = (userContext, referenceDate = new Date()) => {
     if (userContext?.role === 'admin') {
-        return {};
+        return buildTemporaryVisibilityWhere(referenceDate);
     }
 
     const departmentConditions = [{ departmentAccess: { none: {} } }];
@@ -228,19 +248,27 @@ const buildCategoryVisibilityWhere = (userContext) => {
     }
 
     return {
-        OR: [
-            { visibleToAll: true },
+        AND: [
+            buildTemporaryVisibilityWhere(referenceDate),
             {
-                visibleToAll: false,
-                AND: [{ OR: departmentConditions }]
+                OR: [
+                    { visibleToAll: true },
+                    {
+                        visibleToAll: false,
+                        AND: [{ OR: departmentConditions }]
+                    }
+                ]
             }
         ]
     };
 };
 
-const buildCourseVisibilityWhere = (userContext) => {
+const buildCourseVisibilityWhere = (userContext, referenceDate = new Date()) => {
     if (userContext?.role === 'admin') {
-        return { status: 'PUBLISHED' };
+        return {
+            status: 'PUBLISHED',
+            ...buildTemporaryVisibilityWhere(referenceDate)
+        };
     }
 
     const departmentConditions = [{ departmentAccess: { none: {} } }];
@@ -256,12 +284,17 @@ const buildCourseVisibilityWhere = (userContext) => {
     }
 
     return {
-        status: 'PUBLISHED',
-        OR: [
-            { visibleToAll: true },
+        AND: [
+            { status: 'PUBLISHED' },
+            buildTemporaryVisibilityWhere(referenceDate),
             {
-                visibleToAll: false,
-                AND: [{ OR: departmentConditions }]
+                OR: [
+                    { visibleToAll: true },
+                    {
+                        visibleToAll: false,
+                        AND: [{ OR: departmentConditions }]
+                    }
+                ]
             }
         ]
     };
@@ -307,21 +340,29 @@ const canAccessByTierHierarchy = (entity, userContext) => {
     return false;
 };
 
-const canAccessScopedEntity = (entity, userContext) => {
+const canAccessScopedEntity = (entity, userContext, referenceDate = new Date()) => {
+    if (!entity) {
+        return true;
+    }
+
+    if (!isTemporaryEntityVisible(entity, referenceDate)) {
+        return false;
+    }
+
     if (userContext?.role === 'admin') {
         return true;
     }
 
-    if (!entity || entity.visibleToAll) {
+    if (entity.visibleToAll) {
         return true;
     }
 
     return canAccessByDepartment(entity, userContext) && canAccessByTierHierarchy(entity, userContext);
 };
 
-const canAccessCourse = (course, userContext) => {
+const canAccessCourse = (course, userContext, referenceDate = new Date()) => {
     const category = course?.category;
-    return canAccessScopedEntity(category, userContext) && canAccessScopedEntity(course, userContext);
+    return canAccessScopedEntity(category, userContext, referenceDate) && canAccessScopedEntity(course, userContext, referenceDate);
 };
 
 const getCourseRewardSummary = (course) => {
@@ -345,8 +386,13 @@ const getCourseRewardSummary = (course) => {
 
 const getCourses = async (userId) => {
     const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
     const courses = await prisma.course.findMany({
-        where: buildCourseVisibilityWhere(userContext),
+        where: buildCourseVisibilityWhere(userContext, referenceDate),
+        orderBy: [
+            { isTemporary: 'desc' },
+            { createdAt: 'desc' }
+        ],
         include: {
             category: {
                 include: {
@@ -385,7 +431,7 @@ const getCourses = async (userId) => {
     });
 
     return courses
-        .filter((course) => canAccessCourse(course, userContext))
+        .filter((course) => canAccessCourse(course, userContext, referenceDate))
         .map((course) => {
         const enrollment = course.enrollments[0];
         const rewardSummary = getCourseRewardSummary(course);
@@ -402,6 +448,7 @@ const getCourses = async (userId) => {
                     tierAccess: undefined
                 }
                 : null,
+            lessonsCount: Array.isArray(course.lessons) ? course.lessons.length : 0,
             lessons: undefined,
             isEnrolled: !!enrollment,
             enrollmentStatus: enrollment ? enrollment.status : null,
@@ -453,10 +500,11 @@ const updateProfile = async (userId, data) => {
 
 const getCourseDetails = async (courseId, userId) => {
     const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
     const course = await prisma.course.findFirst({
         where: {
             id: courseId,
-            ...buildCourseVisibilityWhere(userContext)
+            ...buildCourseVisibilityWhere(userContext, referenceDate)
         },
         include: {
             category: {
@@ -507,7 +555,7 @@ const getCourseDetails = async (courseId, userId) => {
         }
     });
 
-    if (!course || !canAccessCourse(course, userContext)) {
+    if (!course || !canAccessCourse(course, userContext, referenceDate)) {
         return null;
     }
 
@@ -531,6 +579,7 @@ const getCourseDetails = async (courseId, userId) => {
         progressPercent: enrollment ? enrollment.progressPercent : 0,
         completedAt: enrollment ? enrollment.completedAt : null,
         ...rewardSummary,
+        lessonsCount: Array.isArray(course.lessons) ? course.lessons.length : 0,
         lessons: course.lessons.map((lesson) => ({
             ...lesson,
             contentUrl: isProtectedDocumentLesson(lesson) ? null : lesson.contentUrl,
@@ -599,10 +648,11 @@ const getLessonDocumentStream = async (lessonId, token) => {
 
 const enrollCourse = async (userId, courseId) => {
     const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
     const course = await prisma.course.findFirst({
         where: {
             id: courseId,
-            ...buildCourseVisibilityWhere(userContext)
+            ...buildCourseVisibilityWhere(userContext, referenceDate)
         },
         include: {
             category: {
@@ -624,7 +674,7 @@ const enrollCourse = async (userId, courseId) => {
         }
     });
 
-    if (!course || !canAccessCourse(course, userContext)) {
+    if (!course || !canAccessCourse(course, userContext, referenceDate)) {
         throw new Error('Course not found');
     }
 
@@ -1036,8 +1086,9 @@ const requestRedeem = async (userId, rewardId) => {
 
 const getCategories = async (userId) => {
     const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
     const categories = await prisma.category.findMany({
-        where: buildCategoryVisibilityWhere(userContext),
+        where: buildCategoryVisibilityWhere(userContext, referenceDate),
         include: {
             departmentAccess: {
                 include: {
@@ -1050,11 +1101,14 @@ const getCategories = async (userId) => {
                 }
             }
         },
-        orderBy: { order: 'asc' }
+        orderBy: [
+            { isTemporary: 'desc' },
+            { order: 'asc' }
+        ]
     });
 
     return categories
-        .filter((category) => canAccessScopedEntity(category, userContext))
+        .filter((category) => canAccessScopedEntity(category, userContext, referenceDate))
         .map((category) => ({
             ...category,
             departmentAccess: undefined,

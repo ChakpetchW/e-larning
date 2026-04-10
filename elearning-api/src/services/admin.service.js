@@ -66,6 +66,24 @@ const parseFloatValue = (value, fallback = undefined) => {
     return Number.isNaN(parsed) ? fallback : parsed;
 };
 
+const parseOptionalDate = (value, fieldLabel = 'Expiration date') => {
+    if (value === undefined) {
+        return undefined;
+    }
+
+    if (value === null || value === '') {
+        return null;
+    }
+
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+        throw new Error(`${fieldLabel} is invalid`);
+    }
+
+    return parsed;
+};
+
 const normalizeNullableId = (value) => {
     if (value === undefined) {
         return undefined;
@@ -121,9 +139,11 @@ const mapCourseRecord = (course) => {
     const { departmentAccess, tierAccess, ...rest } = course;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
+    const isArchived = Boolean(rest.isTemporary && rest.expiredAt && new Date(rest.expiredAt) <= new Date());
 
     return {
         ...rest,
+        isArchived,
         visibleDepartments,
         visibleDepartmentIds: visibleDepartments.map((department) => department.id),
         visibleTiers,
@@ -135,9 +155,11 @@ const mapCategoryRecord = (category) => {
     const { departmentAccess, tierAccess, ...rest } = category;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
+    const isArchived = Boolean(rest.isTemporary && rest.expiredAt && new Date(rest.expiredAt) <= new Date());
 
     return {
         ...rest,
+        isArchived,
         visibleDepartments,
         visibleDepartmentIds: visibleDepartments.map((department) => department.id),
         visibleTiers,
@@ -372,6 +394,20 @@ const ensureReferenceIdsExist = async (tx, modelName, ids) => {
     }
 };
 
+const buildTemporaryStateData = (input) => {
+    const isTemporary = Boolean(input.isTemporary);
+    const expiredAt = parseOptionalDate(input.expiredAt);
+
+    if (isTemporary && !expiredAt) {
+        throw new Error('Temporary items require an expiration date');
+    }
+
+    return {
+        isTemporary,
+        expiredAt: isTemporary ? expiredAt : null
+    };
+};
+
 const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) => {
     const data = {};
     const { password, pointsBalance, ...baseData } = inputData;
@@ -430,20 +466,24 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
 const buildCourseMutationPayload = async (tx, input) => {
     const visibleDepartmentIds = normalizeIdArray(input.visibleDepartmentIds);
     const visibleTierIds = normalizeIdArray(input.visibleTierIds);
+    const categoryId = normalizeNullableId(input.categoryId);
+    const temporaryState = buildTemporaryStateData(input);
 
     // Using sequential await instead of Promise.all to prevent "Transaction already closed" 
     // errors when one check fails while others are still running on the same tx object.
     await ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds);
     await ensureReferenceIdsExist(tx, 'tier', visibleTierIds);
+    await ensureReferenceName(tx, 'category', categoryId);
 
     const data = {
         title: input.title,
         description: input.description || null,
-        categoryId: input.categoryId || null,
+        categoryId,
         points: parseInteger(input.points, 0),
         status: input.status || undefined,
         image: input.image || null,
         visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true,
+        ...temporaryState,
         instructorName: input.instructorName || null,
         instructorRole: input.instructorRole || null,
         instructorAvatar: input.instructorAvatar || null,
@@ -494,6 +534,7 @@ const saveCourseVisibility = async (tx, courseId, visibleToAll, visibleDepartmen
 const buildCategoryMutationPayload = async (tx, input) => {
     const visibleDepartmentIds = normalizeIdArray(input.visibleDepartmentIds);
     const visibleTierIds = normalizeIdArray(input.visibleTierIds);
+    const temporaryState = buildTemporaryStateData(input);
 
     await ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds);
     await ensureReferenceIdsExist(tx, 'tier', visibleTierIds);
@@ -504,7 +545,8 @@ const buildCategoryMutationPayload = async (tx, input) => {
             icon: input.icon || 'Grid',
             type: input.type || 'FUNCTION',
             order: parseInteger(input.order, 0),
-            visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true
+            visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true,
+            ...temporaryState
         },
         visibleDepartmentIds,
         visibleTierIds
@@ -947,7 +989,10 @@ const reorderTiers = async (tierIds) => prisma.$transaction(
 const getAdminCourses = async () => {
     const courses = await prisma.course.findMany({
         include: courseInclude,
-        orderBy: { createdAt: 'desc' }
+        orderBy: [
+            { isTemporary: 'desc' },
+            { createdAt: 'desc' }
+        ]
     });
 
     return courses.map(mapCourseRecord);
@@ -1004,13 +1049,30 @@ const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
     timeout: 15000
 });
 
+const republishCourse = async (id) => {
+    const course = await prisma.course.update({
+        where: { id },
+        data: {
+            isTemporary: false,
+            expiredAt: null,
+            status: 'PUBLISHED'
+        },
+        include: courseInclude
+    });
+
+    return mapCourseRecord(course);
+};
+
 const deleteCourse = async (id) => prisma.course.delete({ where: { id } });
 
 // CATEGORIES
 const getCategories = async () => {
     const categories = await prisma.category.findMany({
         include: categoryInclude,
-        orderBy: { order: 'asc' }
+        orderBy: [
+            { isTemporary: 'desc' },
+            { order: 'asc' }
+        ]
     });
 
     return categories.map(mapCategoryRecord);
@@ -1050,6 +1112,19 @@ const updateCategory = async (id, input) => prisma.$transaction(async (tx) => {
 
     return mapCategoryRecord(updatedCategory);
 });
+
+const republishCategory = async (id) => {
+    const category = await prisma.category.update({
+        where: { id },
+        data: {
+            isTemporary: false,
+            expiredAt: null
+        },
+        include: categoryInclude
+    });
+
+    return mapCategoryRecord(category);
+};
 
 const deleteCategory = async (id) => prisma.category.delete({
     where: { id }
@@ -1327,10 +1402,12 @@ module.exports = {
     getAdminCourses,
     createCourse,
     updateCourse,
+    republishCourse,
     deleteCourse,
     getCategories,
     createCategory,
     updateCategory,
+    republishCategory,
     deleteCategory,
     reorderCategories,
     getAdminRewards,

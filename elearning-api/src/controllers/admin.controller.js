@@ -103,6 +103,11 @@ const updateCourse = asyncHandler(async (req, res) => {
   res.json({ success: true, data: course });
 });
 
+const republishCourse = asyncHandler(async (req, res) => {
+  const course = await AdminService.republishCourse(req.params.id);
+  res.json({ success: true, data: course });
+});
+
 const deleteCourse = asyncHandler(async (req, res) => {
   await AdminService.deleteCourse(req.params.id);
   res.json({ success: true, message: 'Course deleted' });
@@ -121,6 +126,11 @@ const createCategory = asyncHandler(async (req, res) => {
 
 const updateCategory = asyncHandler(async (req, res) => {
   const category = await AdminService.updateCategory(req.params.id, req.body);
+  res.json({ success: true, data: category });
+});
+
+const republishCategory = asyncHandler(async (req, res) => {
+  const category = await AdminService.republishCategory(req.params.id);
   res.json({ success: true, data: category });
 });
 
@@ -208,10 +218,12 @@ module.exports = {
   getAdminCourses,
   createCourse,
   updateCourse,
+  republishCourse,
   deleteCourse,
   getCategories,
   createCategory,
   updateCategory,
+  republishCategory,
   deleteCategory,
   reorderCategories,
   getAdminRewards,

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X, FileText, ShieldAlert, Loader2, CheckCircle2 } from 'lucide-react';
 import ModalPortal from './ModalPortal';
 import PdfCanvasViewer from './PdfCanvasViewer';
@@ -30,6 +30,7 @@ const DocViewer = ({
   const [isRetrying, setIsRetrying] = useState(false);
   const loadTimeoutRef = useRef(null);
   const autoRetryAttemptedRef = useRef(false);
+  const iframeLoadedRef = useRef(false);
   const normalizedFileName = String(fileName || '').toLowerCase();
   const normalizedExtension = String(extension || '').toLowerCase();
   const effectiveViewerType = String(viewerType || '').toLowerCase();
@@ -48,6 +49,10 @@ const DocViewer = ({
     setCompletionError('');
     setSubmitting(false);
   }, [isCompleted, url]);
+
+  useEffect(() => {
+    iframeLoadedRef.current = iframeLoaded;
+  }, [iframeLoaded]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -100,7 +105,7 @@ const DocViewer = ({
     // Set a timeout to detect if the iframe is stuck (black screen)
     if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     loadTimeoutRef.current = setTimeout(() => {
-      if (!iframeLoaded) {
+      if (!iframeLoadedRef.current) {
         setHasTimedOut(true);
       }
     }, isPdf && isMobileViewport ? 12000 : 10000);
@@ -162,7 +167,7 @@ const DocViewer = ({
     }
   };
 
-  const handleRetryLoad = async ({ silent = false } = {}) => {
+  const handleRetryLoad = useCallback(async ({ silent = false } = {}) => {
     setHasTimedOut(false);
     setIframeLoaded(false);
     setError(null);
@@ -190,7 +195,7 @@ const DocViewer = ({
     }
 
     setIsRetrying(false);
-  };
+  }, [onRefreshUrl]);
 
   useEffect(() => {
     document.body.classList.add('modal-open');
@@ -212,7 +217,7 @@ const DocViewer = ({
     return () => {
       window.clearTimeout(retryTimer);
     };
-  }, [hasTimedOut, onRefreshUrl]);
+  }, [handleRetryLoad, hasTimedOut, onRefreshUrl]);
 
   const isGoogleViewer = viewerUrl.includes('docs.google.com/viewer');
 

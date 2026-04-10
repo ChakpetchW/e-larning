@@ -147,10 +147,6 @@ const CourseDetail = () => {
     [course],
   );
 
-  const completedDocumentCount = useMemo(
-    () => documentLessons.filter((lesson) => lesson.isCompleted).length,
-    [documentLessons],
-  );
   const completionPoints = course?.completionPoints ?? course?.points ?? 0;
   const quizPoints = course?.quizPoints ?? (
     course?.lessons?.reduce((sum, lesson) => (

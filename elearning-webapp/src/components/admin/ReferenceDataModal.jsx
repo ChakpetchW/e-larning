@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Edit2, Plus, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 
 const ReferenceDataModal = ({
@@ -267,7 +268,7 @@ const ReferenceDataModal = ({
                           </div>
                         </div>
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                          #{item.id.slice(-4)} • สร้างเมื่อ {item.createdAt ? new Date(item.createdAt).toLocaleDateString('th-TH') : 'ไม่ระบุ'}
+                          #{item.id.slice(-4)} • สร้างเมื่อ {item.createdAt ? formatThaiDateTime(item.createdAt) : 'ไม่ระบุ'}
                         </div>
                       </div>
                     </div>

@@ -1,80 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, ImageIcon } from 'lucide-react';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import RewardModal from '../../components/admin/RewardModal';
 import { isSuperAdmin } from '../../utils/roles';
 
+const DEFAULT_REWARD_FORM = {
+  name: '',
+  pointsCost: 100,
+  stock: 10,
+  maxPerUser: 1,
+  image: '',
+};
+
 const RewardsManagement = () => {
   const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
-  
-  if (!isSuperAdmin(currentUser)) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
-        <div className="bg-red-50 text-red-500 p-4 rounded-2xl mb-4">
-          <Plus size={48} className="rotate-45" />
-        </div>
-        <h2 className="text-2xl font-black mb-2">เข้าถึงไม่ได้</h2>
-        <p className="text-muted max-w-md">คุณไม่มีสิทธิ์ในการจัดการของรางวัลในระบบ กรุณาติดต่อ Superadmin</p>
-      </div>
-    );
-  }
-  
-  // Modal State
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [rewardForm, setRewardForm] = useState({ name: '', pointsCost: 100, stock: 10, maxPerUser: 1, image: '' });
+  const [rewardForm, setRewardForm] = useState(DEFAULT_REWARD_FORM);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+
   useEffect(() => {
+    const fetchRewards = async () => {
+      try {
+        const response = await adminAPI.getRewards();
+        setRewards(response.data);
+      } catch (error) {
+        console.error('Fetch rewards error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchRewards();
   }, []);
 
-  const fetchRewards = async () => {
+  const refreshRewards = async () => {
     try {
       const response = await adminAPI.getRewards();
       setRewards(response.data);
     } catch (error) {
       console.error('Fetch rewards error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      setUploadingImage(true);
-      const res = await adminAPI.uploadFile(file);
-      setRewardForm({ ...rewardForm, image: res.data.fileUrl });
-    } catch (err) {
-      console.error(err);
-      alert('อัปโหลดรูปภาพไม่สำเร็จ');
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (isEditing) {
-        await adminAPI.updateReward(editingId, { ...rewardForm });
-        alert('อัปเดตของรางวัลสำเร็จ!');
-      } else {
-        await adminAPI.createReward({ ...rewardForm, status: 'ACTIVE' });
-        alert('เพิ่มของรางวัลสำเร็จ!');
-      }
-      closeModal();
-      fetchRewards();
-    } catch (error) {
-      console.error(error);
-      alert('เกิดข้อผิดพลาด');
     }
   };
 
@@ -82,31 +52,87 @@ const RewardsManagement = () => {
     setShowModal(false);
     setIsEditing(false);
     setEditingId(null);
-    setRewardForm({ name: '', pointsCost: 100, stock: 10, maxPerUser: 1, image: '' });
+    setRewardForm(DEFAULT_REWARD_FORM);
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingImage(true);
+      const response = await adminAPI.uploadFile(file);
+      setRewardForm((currentForm) => ({ ...currentForm, image: response.data.fileUrl }));
+    } catch (error) {
+      console.error(error);
+      alert('อัปโหลดรูปภาพไม่สำเร็จ');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      if (isEditing) {
+        await adminAPI.updateReward(editingId, { ...rewardForm });
+        alert('อัปเดตรางวัลสำเร็จ');
+      } else {
+        await adminAPI.createReward({ ...rewardForm, status: 'ACTIVE' });
+        alert('เพิ่มรางวัลสำเร็จ');
+      }
+
+      closeModal();
+      await refreshRewards();
+    } catch (error) {
+      console.error(error);
+      alert('เกิดข้อผิดพลาด');
+    }
   };
 
   const openEdit = (reward) => {
     setIsEditing(true);
     setEditingId(reward.id);
-    setRewardForm({ name: reward.name, pointsCost: reward.pointsCost, stock: reward.stock, maxPerUser: reward.maxPerUser || 1, image: reward.image || '' });
+    setRewardForm({
+      name: reward.name,
+      pointsCost: reward.pointsCost,
+      stock: reward.stock,
+      maxPerUser: reward.maxPerUser || 1,
+      image: reward.image || '',
+    });
     setShowModal(true);
   };
 
   const handleDelete = async (id) => {
-    if(confirm('ยืนยันการลบของรางวัล?')) {
-        try {
-            await adminAPI.deleteReward(id);
-            setRewards(rewards.filter(r => r.id !== id));
-        } catch (error) {
-            console.error(error);
-            alert('ลบไม่สำเร็จ');
-        }
+    if (!window.confirm('ยืนยันการลบรางวัล?')) {
+      return;
+    }
+
+    try {
+      await adminAPI.deleteReward(id);
+      setRewards((currentRewards) => currentRewards.filter((reward) => reward.id !== id));
+    } catch (error) {
+      console.error(error);
+      alert('ลบไม่สำเร็จ');
     }
   };
 
+  if (!isSuperAdmin(currentUser)) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center p-12 text-center">
+        <div className="mb-4 rounded-2xl bg-red-50 p-4 text-red-500">
+          <Plus size={48} className="rotate-45" />
+        </div>
+        <h2 className="mb-2 text-2xl font-black">เข้าถึงไม่ได้</h2>
+        <p className="max-w-md text-muted">คุณไม่มีสิทธิ์ในการจัดการของรางวัลในระบบ กรุณาติดต่อ Superadmin</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <AdminPageHeader 
+      <AdminPageHeader
         title="จัดการของรางวัล"
         subtitle="จัดการรายการของรางวัลในระบบเพื่อจูงใจพนักงาน"
         actions={
@@ -116,7 +142,7 @@ const RewardsManagement = () => {
         }
       />
 
-      <RewardModal 
+      <RewardModal
         isOpen={showModal}
         onClose={closeModal}
         onSave={handleSubmit}
@@ -127,48 +153,59 @@ const RewardsManagement = () => {
         uploadingImage={uploadingImage}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
+      <div className="mb-2 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {loading ? (
           <div className="col-span-full flex items-center justify-center p-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
           </div>
         ) : rewards.length === 0 ? (
-          <div className="col-span-full text-center p-12 text-muted border-2 border-dashed rounded-2xl border-border bg-gray-50/50">
+          <div className="col-span-full rounded-2xl border-2 border-dashed border-border bg-gray-50/50 p-12 text-center text-muted">
             ยังไม่มีของรางวัลในระบบ
           </div>
         ) : rewards.map((reward) => (
-          <div key={reward.id} className={`card p-5 group transition-all hover:border-primary/20 hover:shadow-lg ${reward.stock === 0 ? 'bg-gray-50' : 'bg-surface'}`}>
-            <div className="flex justify-between items-start mb-4">
+          <div
+            key={reward.id}
+            className={`card group p-5 transition-all hover:border-primary/20 hover:shadow-lg ${
+              reward.stock === 0 ? 'bg-gray-50' : 'bg-surface'
+            }`}
+          >
+            <div className="mb-4 flex items-start justify-between">
               <span className={`badge text-[10px] font-black uppercase tracking-wider ${reward.stock > 0 ? 'badge-success' : 'bg-gray-200 text-gray-700'}`}>
-                {reward.stock > 0 ? 'Active' : 'หมดสต๊อก'}
+                {reward.stock > 0 ? 'Active' : 'หมดสต็อก'}
               </span>
-              <div className="flex gap-1 text-muted opacity-0 group-hover:opacity-100 transition-opacity">
-                 <button onClick={() => openEdit(reward)} className="p-1.5 hover:bg-white rounded text-primary"><Edit size={16}/></button>
-                 <button onClick={() => handleDelete(reward.id)} className="p-1.5 hover:bg-white rounded text-danger"><Trash2 size={16}/></button>
+              <div className="flex gap-1 text-muted opacity-0 transition-opacity group-hover:opacity-100">
+                <button onClick={() => openEdit(reward)} className="rounded p-1.5 text-primary hover:bg-white">
+                  <Edit size={16} />
+                </button>
+                <button onClick={() => handleDelete(reward.id)} className="rounded p-1.5 text-danger hover:bg-white">
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
-            
-            <div className="flex gap-4 items-center mb-3">
+
+            <div className="mb-3 flex items-center gap-4">
               {reward.image ? (
-                <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
-                  <img src={getFullUrl(reward.image)} alt="Reward" className="w-full h-full object-cover" />
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-100">
+                  <img src={getFullUrl(reward.image)} alt="Reward" className="h-full w-full object-cover" />
                 </div>
               ) : (
-                <div className="w-14 h-14 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50">
                   <ImageIcon size={24} className="text-indigo-400" />
                 </div>
               )}
-              <h3 className="font-bold text-base leading-tight">{reward.name}</h3>
+              <h3 className="text-base font-bold leading-tight">{reward.name}</h3>
             </div>
-            
-            <div className="flex justify-between items-end mt-4 pt-4 border-t border-border/50">
+
+            <div className="mt-4 flex items-end justify-between border-t border-border/50 pt-4">
               <div>
-                <p className="text-[10px] font-black text-muted mb-0.5 uppercase tracking-wide">แต้มที่ใช้</p>
-                <p className="font-black text-lg text-warning leading-none">{reward.pointsCost} <span className="text-[10px]">PTS</span></p>
+                <p className="mb-0.5 text-[10px] font-black uppercase tracking-wide text-muted">แต้มที่ใช้</p>
+                <p className="text-lg font-black leading-none text-warning">
+                  {reward.pointsCost} <span className="text-[10px]">PTS</span>
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black text-muted mb-0.5 uppercase tracking-wide">คงเหลือ</p>
-                <p className={`font-black text-lg leading-none ${reward.stock === 0 ? 'text-danger' : 'text-primary'}`}>
+                <p className="mb-0.5 text-[10px] font-black uppercase tracking-wide text-muted">คงเหลือ</p>
+                <p className={`text-lg font-black leading-none ${reward.stock === 0 ? 'text-danger' : 'text-primary'}`}>
                   {reward.stock}
                 </p>
               </div>

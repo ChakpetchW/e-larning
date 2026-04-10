@@ -127,11 +127,13 @@ export const adminAPI = {
   getCourses: () => api.get('/admin/courses'),
   createCourse: (data) => api.post('/admin/courses', data),
   updateCourse: (id, data) => api.put(`/admin/courses/${id}`, data),
+  republishCourse: (id) => api.put(`/admin/courses/${id}/republish`),
   deleteCourse: (id) => api.delete(`/admin/courses/${id}`),
 
   getCategories: () => api.get('/admin/categories'),
   createCategory: (data) => api.post('/admin/categories', data),
   updateCategory: (id, data) => api.put(`/admin/categories/${id}`, data),
+  republishCategory: (id) => api.put(`/admin/categories/${id}/republish`),
   deleteCategory: (id) => api.delete(`/admin/categories/${id}`),
   reorderCategories: (data) => api.put('/admin/categories/reorder', data),
 

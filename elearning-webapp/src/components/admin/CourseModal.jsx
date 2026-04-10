@@ -1,9 +1,11 @@
 import React, { useRef } from 'react';
-import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Play, Edit, GripVertical, Book, Trophy, Users, GraduationCap } from 'lucide-react';
+import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Play, Edit, GripVertical, Book, Trophy, Users, GraduationCap, AlertTriangle, ChevronDown } from 'lucide-react';
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
+import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import {
   DndContext,
   closestCenter,
@@ -210,7 +212,7 @@ const CourseModal = ({
                             )}
                           </td>
                           <td className="p-3 text-right text-muted text-xs">
-                            {new Date(report.createdAt).toLocaleString('th-TH')}
+                            {formatThaiDateTime(report.createdAt)}
                           </td>
                         </tr>
                       ))}
@@ -262,6 +264,57 @@ const CourseModal = ({
                 </div>
               </div>
               <div>
+                <div className="relative overflow-hidden rounded-[2rem] border border-amber-200/50 bg-gradient-to-br from-amber-50/80 to-amber-100/40 p-6 backdrop-blur-md shadow-sm transition-all hover:shadow-md mb-6">
+                  {/* Decorative background pulse */}
+                  <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-400/10 blur-2xl animate-pulse"></div>
+                  <div className="absolute -left-4 -bottom-4 h-20 w-20 rounded-full bg-amber-300/10 blur-2xl animate-pulse delay-700"></div>
+
+                  <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                    <div className="flex gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400/20 text-amber-700 shadow-inner">
+                        <Clock size={24} className="animate-spin-slow" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[11px] font-black uppercase tracking-widest text-amber-900/70">คอร์สเรียนชั่วคราว</p>
+                          <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        </div>
+                        <p className="mt-1.5 text-sm font-medium leading-relaxed text-amber-900/80">
+                          คอร์สนี้จะถูกซ่อน <span className="font-bold">อัตโนมัติ</span> เมื่อถึงกำหนดเวลาที่ตั้งไว้
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <label className="group flex cursor-pointer select-none items-center gap-3 self-end rounded-2xl border border-amber-300/40 bg-white/80 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-amber-900 shadow-sm transition-all hover:bg-white hover:shadow-md active:scale-95 md:self-start">
+                      <div className="relative inline-flex h-5 w-5 items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(courseForm.isTemporary)}
+                          onChange={(event) =>
+                            setCourseForm({
+                              ...courseForm,
+                              isTemporary: event.target.checked,
+                              expiredAt: event.target.checked ? courseForm.expiredAt : '',
+                            })
+                          }
+                          className="peer h-5 w-5 cursor-pointer appearance-none rounded-lg border-2 border-amber-300 transition-all checked:bg-amber-500 checked:border-transparent"
+                        />
+                        <Plus size={14} className="absolute text-white opacity-0 transition-opacity peer-checked:opacity-100 rotate-45" />
+                      </div>
+                      ใช้งานระบบชั่วคราว
+                    </label>
+                  </div>
+
+                  {courseForm.isTemporary && (
+                    <div className="mt-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <CustomDateTimePicker
+                        value={courseForm.expiredAt}
+                        onChange={(e) => setCourseForm({ ...courseForm, expiredAt: e.target.value })}
+                        label="กำหนดวันและเวลาหมดอายุ (พ.ศ.)"
+                      />
+                    </div>
+                  )}
+                </div>
                 <label className="text-sm font-bold text-gray-700 block mb-1">รูปหน้าปกคอร์ส</label>
                 <input type="file" ref={imageInputRef} accept="image/*" onChange={onImageUpload} className="hidden" />
 

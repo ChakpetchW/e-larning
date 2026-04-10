@@ -14,3 +14,12 @@
 - **Admin Permissions**: Separate system management (Superadmin) from content management (Sub-admin/Manager). Use `verifySuperAdmin` middleware for sensitive operations (Users, Tiers, Departments, Settings, Rewards) and allow Managers to manage Courses, Lessons, and Reports by using `verifyAdminPanelAccess`.
 - **Modal Standardization**: When creating or modifying modals, ALWAYS use `ModalPortal` to ensure correct DOM placement (under `document.body`) and prevent z-index/clipping issues. Every modal MUST implement `backdrop-blur-md` and `bg-slate-950/65` for the backdrop, and a premium container style (`rounded-[2.5rem]`, `bg-white/95`, and high-quality shadows). Always ensure "Scroll Locking" is handled via the Portal to prevent background scrolling.
 
+- **CourseCard Design Standard**:
+    - **Container**: Use `rounded-[1.8rem]`, `border-slate-200/80`, and a soft premium shadow (`0 22px 45px -36px rgba(15, 23, 42, 0.24)`).
+    - **Media Section**: Maintain an `aspect-[16/10]` ratio with a bottom-to-top gradient overlay (`from-slate-950/72`).
+    - **Meta Row**: Display `lessonCount` and `durationLabel` with corresponding Lucide icons at the top of the content area.
+    - **Centered Badge**: When `isTemporary` is true, the expiration badge MUST be centered using `flex justify-center`.
+    - **Footer Area (`border-t`)**:
+        - **Left Side**: Always place the **Progress Bar** and **Percentage** here (left-aligned).
+        - **Right Side**: Always place **Points** and **"แต้มรวม"** label here (right-aligned).
+    - **Hover Effects**: Maintain `-translate-y-1.5` and amplified shadow on hover to ensure a premium interactive feel.

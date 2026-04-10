@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
+import CustomDateTimePicker from '../common/CustomDateTimePicker';
 
 const UserModal = ({
   isOpen,
@@ -134,13 +135,12 @@ const UserModal = ({
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">วันที่เริ่มงาน</label>
-                <input
-                  type="date"
-                  className="form-input w-full"
+              <div className="flex flex-col">
+                <CustomDateTimePicker
+                  showTime={false}
                   value={formData.employmentDate}
                   onChange={(event) => setFormData({ ...formData, employmentDate: event.target.value })}
+                  label="วันที่เริ่มงาน"
                 />
               </div>
 

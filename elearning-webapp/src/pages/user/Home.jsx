@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PlayCircle, ChevronRight, Target, Gift, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
+import { formatThaiDateTime, formatThaiFullDate } from '../../utils/dateUtils';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
 import SectionHeader from '../../components/common/SectionHeader';
@@ -261,11 +262,11 @@ const Home = () => {
       {/* Learning Activities Section */}
       <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
          <h3 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight mb-5 px-1 md:px-2">กิจกรรมการเรียน</h3>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 items-stretch">
+         <div className={`grid gap-5 md:gap-8 ${goalsProgress.length <= 1 ? 'grid-cols-1 md:grid-cols-2 items-center' : 'grid-cols-1'}`}>
             {/* Ongoing Courses Card */}
             <button
                onClick={() => navigate('/user/ongoing')}
-               className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 text-left"
+               className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 text-left w-full"
             >
                <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/5 text-primary transition-transform group-hover:rotate-12 duration-500">
                   <PlayCircle size={32} />
@@ -283,13 +284,13 @@ const Home = () => {
 
 
             {/* Learning Goals Bento */}
-            <div className="flex flex-col gap-4">
+            <div className={`flex flex-col gap-4 ${goalsProgress.length >= 2 ? 'md:grid md:grid-cols-2 md:gap-8' : ''}`}>
                {goalsProgress.length > 0 ? (
                   goalsProgress.map((gp) => (
                      <button 
                          key={gp.id} 
                          onClick={() => navigate(`/user/goals/${gp.id}`)}
-                         className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 w-full text-left h-full"
+                         className="group relative flex items-center gap-6 rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 w-full text-left"
                      >
                         <div className={`flex h-16 w-16 items-center justify-center rounded-3xl transition-transform group-hover:scale-110 duration-500 shrink-0 ${gp.current >= gp.target ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-white shadow-lg shadow-slate-800/20'}`}>
                            <Target size={28} />
@@ -359,6 +360,7 @@ const Home = () => {
           <section key={category.id} className="animate-slide-up" style={{ animationDelay: `${500 + idx * 100}ms` }}>
             <SectionHeader 
               title={category.name}
+              badgeText={category.isTemporary ? `เข้าดูได้ถึง · ${formatThaiFullDate(category.expiredAt)}` : ''}
               onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
             />
             <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">

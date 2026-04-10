@@ -28,7 +28,14 @@ const CategoryPills = ({
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-800 md:bg-transparent md:text-slate-400 md:hover:border-transparent md:hover:text-slate-700'
               }`}
             >
-              {category.name}
+              <span className="inline-flex items-center gap-2">
+                {category.name}
+                {category.isTemporary && (
+                  <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-amber-700 md:text-[8px]">
+                    Time
+                  </span>
+                )}
+              </span>
               {isActive && (
                 <span className="absolute bottom-[-1px] left-0 hidden h-[3px] w-full rounded-t-full bg-slate-900 md:block" />
               )}

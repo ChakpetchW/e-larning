@@ -1,12 +1,15 @@
 import React from 'react';
 import { ArrowUpRight, CheckCircle2, Clock, Layers3 } from 'lucide-react';
 import { DEFAULT_COURSE_IMAGE, getFullUrl } from '../../utils/api';
+import { formatThaiDateTime, formatThaiFullDate } from '../../utils/dateUtils';
+
+// Standard date utilities now imported from dateUtils
 
 const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
   const isCompleted = variant === 'completed' || course.enrollmentStatus === 'COMPLETED';
   const isInProgress = course.isEnrolled && !isCompleted;
   const categoryLabel = course.category?.name || 'หมวดทั่วไป';
-  const lessonCount = Array.isArray(course.lessons) ? course.lessons.length : 0;
+  const lessonCount = course.lessonsCount ?? (Array.isArray(course.lessons) ? course.lessons.length : 0);
   const progressPercent = Math.max(0, Math.min(100, Number(course.progressPercent) || 0));
   const displayPoints = course.totalPoints ?? course.points ?? 0;
   const pointsSuffix = displayPoints > 0 ? 'แต้มรวม' : 'เรียน';
@@ -16,13 +19,17 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
     0
   );
 
-  const durationLabel = lessonDuration || course.totalDuration || 'พรีเมียม';
+  const durationLabel = course.totalDuration || (lessonDuration > 0 ? `${lessonDuration} นาที` : 'พรีเมียม');
   const statusLabel = isCompleted ? 'เรียนจบแล้ว' : isInProgress ? 'กำลังเรียน' : 'พร้อมเริ่ม';
   const eyebrowLabel = isCompleted
     ? 'ทบทวนได้ทันที'
     : isInProgress
       ? 'กลับมาเรียนต่อได้'
       : 'คอร์สแนะนำ';
+
+  const temporaryLabel = course.isTemporary
+    ? `เข้าดูได้ถึง${course.expiredAt ? ` · ${formatThaiFullDate(course.expiredAt)}` : ''}`
+    : '';
 
   return (
     <div className={`group h-full self-stretch ${className}`}>
@@ -86,54 +93,53 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
   
         <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
           <div className="flex-1">
-            <p className="text-[11px] font-bold tracking-[0.03em] text-slate-500">
-              {eyebrowLabel}
-            </p>
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                <Layers3 size={13} className="text-slate-400" />
+                <span>{lessonCount} บทเรียน</span>
+              </div>
+              <div className="h-1 w-1 rounded-full bg-slate-300" />
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                <Clock size={13} className="text-slate-400" />
+                <span>{durationLabel}</span>
+              </div>
+            </div>
     
             <h3 className="mt-2 line-clamp-2 min-h-[3.15rem] text-[1.05rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-primary">
               {course.title}
             </h3>
-    
-            {isInProgress && progressPercent > 0 && (
-              <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <span className="text-[11px] font-bold tracking-[0.04em] text-slate-500">
-                    Progress
-                  </span>
-                  <span className="text-sm font-black text-slate-800">{progressPercent}%</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className="h-full rounded-full bg-primary transition-[width] duration-500"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
+
+            {course.isTemporary && (
+              <div className="mt-3 flex justify-center">
+                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[13px] font-black uppercase tracking-[0.08em] text-amber-700 shadow-sm">
+                  {temporaryLabel}
+                </span>
               </div>
             )}
-          </div>
-  
-          <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-slate-500">
-              <span className="inline-flex items-center gap-1.5">
-                <Clock size={13} strokeWidth={2.3} />
-                <span>{durationLabel}</span>
-              </span>
-  
-              {lessonCount > 0 && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Layers3 size={13} strokeWidth={2.3} />
-                  <span>{lessonCount} บท</span>
+    
+            <div className="mt-4 flex items-end justify-between border-t border-slate-100 pt-4">
+              <div className="flex-1">
+                {isInProgress && progressPercent > 0 && (
+                  <div className="flex flex-col items-start w-full">
+                    <span className="text-sm font-black text-primary">{progressPercent}%</span>
+                    <div className="mt-1.5 h-1.5 w-full max-w-[120px] overflow-hidden rounded-full bg-slate-100">
+                      <div 
+                        className="h-full bg-primary transition-all duration-700" 
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col items-end">
+                <span className="text-xl font-black tabular-nums text-slate-800">
+                  {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
                 </span>
-              )}
-            </div>
-  
-            <div className="text-right leading-none">
-              <span className="text-[1.2rem] font-black tracking-tight text-slate-900">
-                {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
-              </span>
-              <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">
-                {pointsSuffix}
-              </span>
+                <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">
+                  {pointsSuffix}
+                </span>
+              </div>
             </div>
           </div>
         </div>

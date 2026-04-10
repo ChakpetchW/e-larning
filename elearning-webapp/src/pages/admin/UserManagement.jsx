@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Edit, Eye, Plus, Search, Settings2, Sparkles } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import AdminTable from '../../components/admin/AdminTable';
 import UserModal from '../../components/admin/UserModal';
@@ -383,7 +384,7 @@ const UserManagement = () => {
               <td className="p-4 text-sm text-muted">{user.department || '-'}</td>
               <td className="p-4 text-sm text-muted">{user.tier?.name || user.tier || '-'}</td>
               <td className="p-4 text-sm text-muted">
-                {user.employmentDate ? new Date(user.employmentDate).toLocaleDateString('th-TH') : '-'}
+                {user.employmentDate ? formatThaiDateTime(user.employmentDate) : '-'}
               </td>
               <td className="p-4 text-center text-sm">
                 <span className="rounded-full bg-primary-light px-2 py-1 font-bold text-primary">

@@ -42,6 +42,8 @@ model Course {
   status      String   @default("DRAFT") // "DRAFT" | "PUBLISHED"
   image       String?
   visibleToAll Boolean @default(true)
+  isTemporary Boolean  @default(false)
+  expiredAt   DateTime?
   
   // Premium Fields
   instructorName   String?   @default("ทีมงานวิทยากรผู้เชี่ยวชาญ")
@@ -74,6 +76,8 @@ model Category {
   type      String?  @default("FUNCTION") // LEADERSHIP | FUNCTION | INNOVATION
   order     Int      @default(0)
   visibleToAll Boolean @default(true)
+  isTemporary Boolean @default(false)
+  expiredAt   DateTime?
   createdAt DateTime @default(now())
 
   courses Course[]
