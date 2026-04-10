@@ -10,6 +10,7 @@ import { compressImage } from '../../utils/imageUtils';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
 import ModalPortal from '../../components/common/ModalPortal';
+import CustomDateTimePicker from '../../components/common/CustomDateTimePicker';
 
 const getDefaultCourseForm = () => ({
   title: '',
@@ -58,7 +59,6 @@ const getDefaultLessonForm = (order = 0) => ({
 
 const CourseManagement = () => {
   const iconPickerRef = React.useRef(null);
-  const categoryDateRef = React.useRef(null);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -708,35 +708,12 @@ const CourseManagement = () => {
                 </div>
 
                 {categoryForm.isTemporary && (
-                  <div className="relative z-10 mt-6 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-center gap-2 ml-1">
-                      <AlertTriangle size={14} className="text-amber-600" />
-                      <label className="text-[10px] font-black uppercase tracking-widest text-amber-900/60">ระบุวันและเวลาหมดอายุ</label>
-                    </div>
-                    <div 
-                      className="group relative cursor-pointer"
-                      onClick={() => categoryDateRef.current?.showPicker?.() || categoryDateRef.current?.focus()}
-                    >
-                      {/* Premium Display Overlay */}
-                      <div className="pointer-events-none flex w-full items-center justify-between rounded-2xl border border-amber-200/60 bg-white/90 px-5 py-4 shadow-inner transition-all group-hover:border-amber-300">
-                        <span className="text-sm font-black text-slate-800">
-                          {categoryForm.expiredAt 
-                            ? formatThaiDateTime(categoryForm.expiredAt, true) 
-                            : 'วัน/เดือน/ปี --:--'}
-                        </span>
-                        <ChevronDown size={18} className="text-amber-500/50 group-hover:text-amber-500 transition-colors" />
-                      </div>
-
-                      {/* Hidden Native Input */}
-                      <input
-                        ref={categoryDateRef}
-                        required={Boolean(categoryForm.isTemporary)}
-                        type="datetime-local"
-                        className="absolute inset-0 h-full w-full cursor-pointer opacity-0 z-20"
-                        value={categoryForm.expiredAt || ''}
-                        onChange={(event) => setCategoryForm({ ...categoryForm, expiredAt: event.target.value })}
-                      />
-                    </div>
+                  <div className="mt-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <CustomDateTimePicker
+                      value={categoryForm.expiredAt}
+                      onChange={(e) => setCategoryForm({ ...categoryForm, expiredAt: e.target.value })}
+                      label="ระบุวันและเวลาหมดอายุ (พ.ศ.)"
+                    />
                     <p className="mt-1.5 px-1 text-[10px] font-medium text-amber-800/60 italic">
                       * ระบบจะตรวจสอบความถูกต้องของเวลาไทยอัตโนมัติ
                     </p>
