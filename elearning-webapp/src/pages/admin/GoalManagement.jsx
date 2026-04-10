@@ -5,6 +5,7 @@ import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import AdminTable from '../../components/admin/AdminTable';
 import ModalPortal from '../../components/common/ModalPortal';
+import CustomDateTimePicker from '../../components/common/CustomDateTimePicker';
 
 const GoalManagement = () => {
     const [goals, setGoals] = useState([]);
@@ -296,12 +297,11 @@ const GoalManagement = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700">วันหมดอายุ (ถ้ามี)</label>
-                                    <input 
-                                        type="date" 
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary outline-none transition-all"
+                                    <CustomDateTimePicker
+                                        showTime={false}
                                         value={formData.expiryDate}
                                         onChange={e => setFormData({...formData, expiryDate: e.target.value})}
+                                        label="วันหมดอายุ (ถ้ามี)"
                                     />
                                 </div>
                             </div>
