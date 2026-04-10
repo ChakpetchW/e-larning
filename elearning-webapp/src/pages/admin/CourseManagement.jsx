@@ -872,14 +872,11 @@ const CourseManagement = () => {
                           </div>
                         <div className="mt-1 flex flex-wrap gap-1">
                           {category.isTemporary && (
-                              <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700">
+                              <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[13px] font-black text-amber-700">
                                 หมดอายุ {formatThaiDateTime(category.expiredAt, true)}
                               </span>
                           )}
                           {category.visibleToAll !== false ? (
-                            <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-700">ทุกคน</span>
-                          ) : (
-                            <>
                               {(category.visibleDepartments || []).map(d => (
                                 <span key={d.id} className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-black uppercase text-primary">{d.name}</span>
                               ))}

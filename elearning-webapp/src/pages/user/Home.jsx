@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PlayCircle, ChevronRight, Target, Gift, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
-import { formatThaiDateTime } from '../../utils/dateUtils';
+import { formatThaiDateTime, formatThaiFullDate } from '../../utils/dateUtils';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
 import SectionHeader from '../../components/common/SectionHeader';
@@ -360,7 +360,7 @@ const Home = () => {
           <section key={category.id} className="animate-slide-up" style={{ animationDelay: `${500 + idx * 100}ms` }}>
             <SectionHeader 
               title={category.name}
-              badgeText={category.isTemporary ? `Limited Time · ${formatThaiDateTime(category.expiredAt, true)}` : ''}
+              badgeText={category.isTemporary ? `เข้าดูได้ถึง · ${formatThaiFullDate(category.expiredAt)}` : ''}
               onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
             />
             <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">

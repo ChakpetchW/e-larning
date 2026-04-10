@@ -18,7 +18,7 @@ const SectionHeader = ({
             {title}
           </h3>
           {badgeText && (
-            <span className="inline-flex shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-amber-700">
+            <span className="inline-flex shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[13px] font-black uppercase tracking-[0.1em] text-amber-700 shadow-sm">
               {badgeText}
             </span>
           )}

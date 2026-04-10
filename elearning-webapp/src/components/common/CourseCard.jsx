@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowUpRight, CheckCircle2, Clock, Layers3 } from 'lucide-react';
 import { DEFAULT_COURSE_IMAGE, getFullUrl } from '../../utils/api';
-import { formatThaiDateTime } from '../../utils/dateUtils';
+import { formatThaiDateTime, formatThaiFullDate } from '../../utils/dateUtils';
 
 // Standard date utilities now imported from dateUtils
 
@@ -28,7 +28,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
       : 'คอร์สแนะนำ';
 
   const temporaryLabel = course.isTemporary
-    ? `Limited Time${course.expiredAt ? ` · ${formatThaiDateTime(course.expiredAt, true)}` : ''}`
+    ? `เข้าดูได้ถึง${course.expiredAt ? ` · ${formatThaiFullDate(course.expiredAt)}` : ''}`
     : '';
 
   return (
@@ -111,7 +111,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
 
             {course.isTemporary && (
               <div className="mt-3">
-                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-amber-700">
+                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[13px] font-black uppercase tracking-[0.08em] text-amber-700 shadow-sm">
                   {temporaryLabel}
                 </span>
               </div>

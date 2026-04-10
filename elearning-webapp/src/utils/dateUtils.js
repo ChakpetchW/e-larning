@@ -58,3 +58,22 @@ export const formatThaiDateTime = (value, includeTime = false) => {
 
   return `${datePart} ${timePart}`;
 };
+
+/**
+ * Formats a date to full Thai words (BE)
+ * @param {string|Date} value - The date to format
+ * @returns {string} - Formatted string (e.g., "วันที่ 29 เมษายน 2569")
+ */
+export const formatThaiFullDate = (value) => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '-';
+
+  const dateStr = date.toLocaleDateString('th-TH', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  return `วันที่ ${dateStr}`;
+};

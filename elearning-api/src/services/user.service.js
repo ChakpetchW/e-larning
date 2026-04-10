@@ -389,6 +389,10 @@ const getCourses = async (userId) => {
     const referenceDate = new Date();
     const courses = await prisma.course.findMany({
         where: buildCourseVisibilityWhere(userContext, referenceDate),
+        orderBy: [
+            { isTemporary: 'desc' },
+            { createdAt: 'desc' }
+        ],
         include: {
             category: {
                 include: {
