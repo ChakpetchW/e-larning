@@ -110,7 +110,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
             </h3>
 
             {course.isTemporary && (
-              <div className="mt-3">
+              <div className="mt-3 flex justify-center">
                 <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[13px] font-black uppercase tracking-[0.08em] text-amber-700 shadow-sm">
                   {temporaryLabel}
                 </span>
@@ -118,7 +118,21 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
             )}
     
             <div className="mt-4 flex items-end justify-between border-t border-slate-100 pt-4">
-              <div className="flex flex-col">
+              <div className="flex-1">
+                {isInProgress && progressPercent > 0 && (
+                  <div className="flex flex-col items-start w-full">
+                    <span className="text-sm font-black text-primary">{progressPercent}%</span>
+                    <div className="mt-1.5 h-1.5 w-full max-w-[120px] overflow-hidden rounded-full bg-slate-100">
+                      <div 
+                        className="h-full bg-primary transition-all duration-700" 
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col items-end">
                 <span className="text-xl font-black tabular-nums text-slate-800">
                   {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
                 </span>
@@ -126,18 +140,6 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
                   {pointsSuffix}
                 </span>
               </div>
-              
-              {isInProgress && progressPercent > 0 && (
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-black text-primary">{progressPercent}%</span>
-                  <div className="mt-1.5 h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
-                    <div 
-                      className="h-full bg-primary transition-all duration-700" 
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
