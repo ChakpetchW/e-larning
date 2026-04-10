@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Target, ArrowLeft, Calendar, BookOpen, CheckCircle2, Clock } from 'lucide-react';
 import { userAPI } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 import CourseCard from '../../components/common/CourseCard';
 
 const GoalDetail = () => {
@@ -141,7 +142,7 @@ const GoalDetail = () => {
                 {goal.expiryDate && (
                     <div className="relative z-10 mt-8 flex items-center gap-2 text-sm text-slate-300 bg-slate-800/50 w-fit px-4 py-2 rounded-xl backdrop-blur-sm border border-white/5">
                         <Calendar size={16} className="text-amber-400" />
-                        หมดเขต: {new Date(goal.expiryDate).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        หมดเขต: {formatThaiDateTime(goal.expiryDate)}
                     </div>
                 )}
             </div>

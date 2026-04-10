@@ -1,8 +1,9 @@
 import React, { useRef } from 'react';
-import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Play, Edit, GripVertical, Book, Trophy, Users, GraduationCap } from 'lucide-react';
+import { X, Upload, Trash2, ImageIcon, Video, Clock, Layers, Plus, FileText, Play, Edit, GripVertical, Book, Trophy, Users, GraduationCap, AlertTriangle, ChevronDown } from 'lucide-react';
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 import {
   DndContext,
@@ -210,7 +211,7 @@ const CourseModal = ({
                             )}
                           </td>
                           <td className="p-3 text-right text-muted text-xs">
-                            {new Date(report.createdAt).toLocaleString('th-TH')}
+                            {formatThaiDateTime(report.createdAt)}
                           </td>
                         </tr>
                       ))}
@@ -262,44 +263,64 @@ const CourseModal = ({
                 </div>
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-700 block mb-1">รูปหน้าปกคอร์ส</label>
-                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-5">
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <h4 className="text-base font-black text-amber-900">คอร์สชั่วคราว</h4>
-                      <p className="text-sm text-amber-800/80">
-                        ตั้งวันหมดอายุเพื่อให้คอร์สนี้ถูกซ่อนจากผู้ใช้ทั่วไปอัตโนมัติ และย้ายไปอยู่ในมุมมอง archive ของแอดมิน
-                      </p>
+                <div className="relative overflow-hidden rounded-[2rem] border border-amber-200/50 bg-gradient-to-br from-amber-50/80 to-amber-100/40 p-6 backdrop-blur-md shadow-sm transition-all hover:shadow-md mb-6">
+                  {/* Decorative background pulse */}
+                  <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-400/10 blur-2xl animate-pulse"></div>
+                  <div className="absolute -left-4 -bottom-4 h-20 w-20 rounded-full bg-amber-300/10 blur-2xl animate-pulse delay-700"></div>
+
+                  <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                    <div className="flex gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400/20 text-amber-700 shadow-inner">
+                        <Clock size={24} className="animate-spin-slow" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[11px] font-black uppercase tracking-widest text-amber-900/70">คอร์สเรียนชั่วคราว</p>
+                          <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        </div>
+                        <p className="mt-1.5 text-sm font-medium leading-relaxed text-amber-900/80">
+                          คอร์สนี้จะถูกซ่อน <span className="font-bold">อัตโนมัติ</span> เมื่อถึงกำหนดเวลาที่ตั้งไว้
+                        </p>
+                      </div>
                     </div>
-                    <label className="inline-flex items-center gap-3 rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-bold text-amber-900">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(courseForm.isTemporary)}
-                        onChange={(event) =>
-                          setCourseForm({
-                            ...courseForm,
-                            isTemporary: event.target.checked,
-                            expiredAt: event.target.checked ? courseForm.expiredAt : '',
-                          })
-                        }
-                        className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                      />
-                      เปิดใช้งาน
+                    
+                    <label className="group flex cursor-pointer select-none items-center gap-3 self-end rounded-2xl border border-amber-300/40 bg-white/80 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-amber-900 shadow-sm transition-all hover:bg-white hover:shadow-md active:scale-95 md:self-start">
+                      <div className="relative inline-flex h-5 w-5 items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(courseForm.isTemporary)}
+                          onChange={(event) =>
+                            setCourseForm({
+                              ...courseForm,
+                              isTemporary: event.target.checked,
+                              expiredAt: event.target.checked ? courseForm.expiredAt : '',
+                            })
+                          }
+                          className="peer h-5 w-5 cursor-pointer appearance-none rounded-lg border-2 border-amber-300 transition-all checked:bg-amber-500 checked:border-transparent"
+                        />
+                        <Plus size={14} className="absolute text-white opacity-0 transition-opacity peer-checked:opacity-100 rotate-45" />
+                      </div>
+                      ใช้งานระบบชั่วคราว
                     </label>
                   </div>
 
                   {courseForm.isTemporary && (
-                    <div className="mt-4 space-y-1.5">
-                      <label className="text-sm font-black text-amber-900 block ml-1 uppercase tracking-wider">วันหมดอายุ</label>
-                      <div className="relative group">
-                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500" size={18} />
+                    <div className="relative z-10 mt-6 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 ml-1">
+                        <AlertTriangle size={14} className="text-amber-600" />
+                        <label className="text-[10px] font-black uppercase tracking-widest text-amber-900/60">กำหนดวันและเวลาหมดอายุ (พ.ศ.)</label>
+                      </div>
+                      <div className="group relative">
                         <input
                           required={Boolean(courseForm.isTemporary)}
                           type="datetime-local"
-                          className="form-input w-full border-amber-200 bg-white pl-12"
+                          className="form-input w-full rounded-2xl border-amber-200/60 bg-white/90 px-5 py-4 text-sm font-bold text-slate-800 shadow-inner transition-all focus:border-amber-400 focus:ring-4 focus:ring-amber-400/10 group-hover:border-amber-300"
                           value={courseForm.expiredAt || ''}
                           onChange={(event) => setCourseForm({ ...courseForm, expiredAt: event.target.value })}
                         />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-amber-500/50 group-hover:text-amber-500 transition-colors">
+                          <ChevronDown size={18} />
+                        </div>
                       </div>
                     </div>
                   )}

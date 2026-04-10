@@ -12,19 +12,8 @@ import {
   FileDown,
   Filter,
 } from 'lucide-react';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
-
-const formatDate = (value, options = {}) => {
-  if (!value) {
-    return '-';
-  }
-
-  const formatter = options.hour || options.minute
-    ? 'toLocaleString'
-    : 'toLocaleDateString';
-
-  return new Date(value)[formatter]('th-TH', options);
-};
 
 const UserDetailModalContent = ({ loading, detail, onClose }) => {
   const [activeTab, setActiveTab] = useState('learning');
@@ -72,20 +61,20 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
     csvContent += `แผนก,${detail.department || '-'}\n`;
     csvContent += `ระดับ,${detail.tier?.name || detail.tier || '-'}\n`;
     csvContent += `แต้มคงเหลือ,${detail.pointsBalance || 0}\n`;
-    csvContent += `วันที่ส่งออก,${new Date().toLocaleString('th-TH')}\n\n`;
+    csvContent += `วันที่ส่งออก,${formatThaiDateTime(new Date())}\n\n`;
 
     if (activeTab === 'learning') {
       csvContent += `คอร์ส,หมวดหมู่,เริ่มเรียน,เรียนจบ,ความคืบหน้า,สถานะ\n`;
       data.forEach(item => {
-        const started = item.startedAt ? new Date(item.startedAt).toLocaleString('th-TH') : '-';
-        const completed = item.completedAt ? new Date(item.completedAt).toLocaleString('th-TH') : '-';
+        const started = item.startedAt ? formatThaiDateTime(item.startedAt) : '-';
+        const completed = item.completedAt ? formatThaiDateTime(item.completedAt) : '-';
         const status = item.status === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน';
         csvContent += `"${item.course.title}","${item.course.categoryName || '-'}","${started}","${completed}","${Math.round(item.progressPercent || 0)}%","${status}"\n`;
       });
     } else {
       csvContent += `ประเภท,ที่มา/การใช้งาน,หมายเหตุ,Point,เวลา\n`;
       data.forEach(item => {
-        const time = item.createdAt ? new Date(item.createdAt).toLocaleString('th-TH') : '-';
+        const time = item.createdAt ? formatThaiDateTime(item.createdAt) : '-';
         const type = item.points >= 0 ? 'ได้รับแต้ม' : 'ใช้แต้ม';
         csvContent += `"${type}","${item.sourceLabel}","${item.note || '-'}","${item.points}","${time}"\n`;
       });
@@ -94,7 +83,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    const fileName = `Export_${activeTab === 'learning' ? 'Learning' : 'Points'}_${detail.name}_${new Date().toLocaleDateString('th-TH')}.csv`;
+    const fileName = `Export_${activeTab === 'learning' ? 'Learning' : 'Points'}_${detail.name}_${formatThaiDateTime(new Date()).replace(/\//g, '-')}.csv`;
     
     link.setAttribute("href", url);
     link.setAttribute("download", fileName);
@@ -150,7 +139,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                   </div>
                   <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">เริ่มงาน</div>
                   <div className="mt-2 text-lg font-black text-slate-900">
-                    {formatDate(detail.employmentDate)}
+                    {formatThaiDateTime(detail.employmentDate)}
                   </div>
                   <div className="mt-1 text-sm text-slate-500">วันที่เริ่มเป็นพนักงานในระบบ</div>
                 </div>
@@ -269,22 +258,10 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                                 {enrollment.course.categoryName || '-'}
                               </td>
                               <td className="px-5 py-4 text-sm text-slate-600">
-                                {formatDate(enrollment.startedAt, {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
+                                {formatThaiDateTime(enrollment.startedAt)}
                               </td>
                               <td className="px-5 py-4 text-sm text-slate-600">
-                                {formatDate(enrollment.completedAt, {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
+                                {formatThaiDateTime(enrollment.completedAt)}
                               </td>
                               <td className="px-5 py-4 text-sm font-semibold text-slate-700">
                                 {Math.round(enrollment.progressPercent || 0)}%
@@ -344,13 +321,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                               </span>
                             </td>
                             <td className="px-5 py-4 text-sm text-slate-600">
-                              {formatDate(entry.createdAt, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                              {formatThaiDateTime(entry.createdAt)}
                             </td>
                           </tr>
                         ))}

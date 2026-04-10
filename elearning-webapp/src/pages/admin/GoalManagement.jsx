@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Target, Plus, Trash2, Calendar, BookOpen, ChevronRight, User, CheckCircle2, XCircle, FileText, Search, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import AdminTable from '../../components/admin/AdminTable';
 import ModalPortal from '../../components/common/ModalPortal';
@@ -161,7 +162,7 @@ const GoalManagement = () => {
                         <tr key={goal.id} className="border-b border-border hover:bg-gray-50/50 transition-colors">
                             <td className="p-4">
                                 <div className="font-bold text-slate-800">{goal.title}</div>
-                                <div className="text-xs text-muted">สร้างเมื่อ {new Date(goal.createdAt).toLocaleDateString('th-TH')}</div>
+                                <div className="text-xs text-muted">สร้างเมื่อ {formatThaiDateTime(goal.createdAt)}</div>
                             </td>
                             <td className="p-4">
                                 <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${goal.type === 'ANY' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
@@ -187,7 +188,7 @@ const GoalManagement = () => {
                                 {goal.expiryDate ? (
                                     <div className="flex items-center gap-1 text-slate-700">
                                         <Calendar size={14} className="text-muted" />
-                                        {new Date(goal.expiryDate).toLocaleDateString('th-TH')}
+                                        {formatThaiDateTime(goal.expiryDate)}
                                     </div>
                                 ) : <span className="text-muted">ไม่มีกำหนด</span>}
                             </td>

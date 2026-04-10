@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Gift, Zap, Ticket, Coffee, CheckCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 import RewardCard from '../../components/common/RewardCard';
 
 
@@ -133,7 +134,7 @@ const Rewards = () => {
                 </div>
                 <div>
                   <h4 className="mb-1 max-w-[160px] truncate text-[15px] font-bold leading-tight text-slate-900">{entry.note}</h4>
-                  <p className="text-xs font-medium text-slate-500">{new Date(entry.createdAt).toLocaleDateString('th-TH')}</p>
+                  <p className="text-xs font-medium text-slate-500">{formatThaiDateTime(entry.createdAt)}</p>
                 </div>
               </div>
               <div className="text-right flex flex-col justify-center">

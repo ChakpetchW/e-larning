@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Gift, CheckCircle, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 
 const PointsHistory = () => {
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ const PointsHistory = () => {
                     {getHistoryActionLabel(log.sourceType)}: {log.note ? log.note.split(': ').pop() : getHistoryFallbackName(log.sourceType)}
                   </h4>
                   <p className="mt-1 text-xs font-medium text-slate-400">
-                    {new Date(log.createdAt).toLocaleDateString()} {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {formatThaiDateTime(log.createdAt)}
                   </p>
                 </div>
               </div>

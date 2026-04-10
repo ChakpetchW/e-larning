@@ -1,23 +1,26 @@
-import React from 'react';
 import { ArrowUpRight, CheckCircle2, Clock, Layers3 } from 'lucide-react';
 import { DEFAULT_COURSE_IMAGE, getFullUrl } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 
-const formatExpiryLabel = (value) => {
-  if (!value) {
-    return '';
-  }
+// Standard date utilities now imported from dateUtils
 
-  const parsed = new Date(value);
+const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
+  const isCompleted = variant === 'completed' || course.enrollmentStatus === 'COMPLETED';
+  const isInProgress = course.isEnrolled && !isCompleted;
+  const categoryLabel = course.category?.name || 'หมวดทั่วไป';
+  const lessonCount = Array.isArray(course.lessons) ? course.lessons.length : 0;
+  const progressPercent = Math.max(0, Math.min(100, Number(course.progressPercent) || 0));
+  const displayPoints = course.totalPoints ?? course.points ?? 0;
+  const pointsSuffix = displayPoints > 0 ? 'แต้มรวม' : 'เรียน';
 
-  if (Number.isNaN(parsed.getTime())) {
-    return '';
-  }
+  const lessonDuration = course.lessons?.reduce(
+    (total, lesson) => total + (parseInt(lesson.duration, 10) || 0),
+    0
+  );
 
-  return parsed.toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-  });
-};
+  const durationLabel = lessonDuration || course.totalDuration || 'พรีเมียม';
+  const statusLabel = isCompleted ? 'เรียนจบแล้ว' : isInProgress ? 'กำลังเรียน' : 'พร้อมเริ่ม';
+  const eyebrowLabel = isCompleted
 
 const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
   const isCompleted = variant === 'completed' || course.enrollmentStatus === 'COMPLETED';
@@ -42,7 +45,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
       : 'คอร์สแนะนำ';
 
   const temporaryLabel = course.isTemporary
-    ? `Limited Time${course.expiredAt ? ` · ${formatExpiryLabel(course.expiredAt)}` : ''}`
+    ? `Limited Time${course.expiredAt ? ` · ${formatThaiDateTime(course.expiredAt, true)}` : ''}`
     : '';
 
   return (
@@ -124,40 +127,6 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
             )}
     
             {isInProgress && progressPercent > 0 && (
-              <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <span className="text-[11px] font-bold tracking-[0.04em] text-slate-500">
-                    Progress
-                  </span>
-                  <span className="text-sm font-black text-slate-800">{progressPercent}%</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className="h-full rounded-full bg-primary transition-[width] duration-500"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-  
-          <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-slate-500">
-              <span className="inline-flex items-center gap-1.5">
-                <Clock size={13} strokeWidth={2.3} />
-                <span>{durationLabel}</span>
-              </span>
-  
-              {lessonCount > 0 && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Layers3 size={13} strokeWidth={2.3} />
-                  <span>{lessonCount} บท</span>
-                </span>
-              )}
-            </div>
-  
-            <div className="text-right leading-none">
-              <span className="text-[1.2rem] font-black tracking-tight text-slate-900">
                 {displayPoints > 0 ? displayPoints.toLocaleString() : 'FREE'}
               </span>
               <span className="mt-1 block text-[10px] font-bold tracking-[0.04em] text-slate-500">

@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Archive, ArrowDown, ArrowUp, Edit, Edit2, LayoutGrid, Plus, RotateCcw, Search, Trash2, 
-  ChevronDown
+  ChevronDown, Clock, AlertTriangle
 } from 'lucide-react';
 import { ICON_LIST } from '../../utils/icons';
 import { adminAPI } from '../../utils/api';
+import { toUTCISOString, toLocalInputValue, formatThaiDateTime } from '../../utils/dateUtils';
+import { compressImage } from '../../utils/imageUtils';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
 import ModalPortal from '../../components/common/ModalPortal';
@@ -41,38 +43,7 @@ const getDefaultCategoryForm = () => ({
   expiredAt: '',
 });
 
-const toDateTimeLocalValue = (value) => {
-  if (!value) {
-    return '';
-  }
-
-  const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return '';
-  }
-
-  return new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
-};
-
-const formatExpiryLabel = (value) => {
-  if (!value) {
-    return '-';
-  }
-
-  const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return '-';
-  }
-
-  return parsed.toLocaleString('th-TH', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
-};
+// Standard date utilities now imported from dateUtils
 
 const getDefaultLessonForm = (order = 0) => ({
   title: '',
@@ -186,7 +157,7 @@ const CourseManagement = () => {
       visibleDepartmentIds: course.visibleDepartmentIds || [],
       visibleTierIds: course.visibleTierIds || [],
       isTemporary: Boolean(course.isTemporary),
-      expiredAt: toDateTimeLocalValue(course.expiredAt),
+      expiredAt: toLocalInputValue(course.expiredAt),
     });
     setActiveTab('basic');
     setShowModal(true);
@@ -220,7 +191,7 @@ const CourseManagement = () => {
     try {
       const payload = {
         ...courseForm,
-        expiredAt: courseForm.isTemporary ? courseForm.expiredAt : '',
+        expiredAt: courseForm.isTemporary ? toUTCISOString(courseForm.expiredAt) : null,
       };
 
       if (isEditing) {
@@ -319,7 +290,9 @@ const CourseManagement = () => {
 
     try {
       setUploading(true);
-      const response = await adminAPI.uploadFile(file);
+      // Compress image before upload to avoid Vercel 4.5MB limit
+      const compressedFile = await compressImage(file);
+      const response = await adminAPI.uploadFile(compressedFile);
       setCourseForm((currentForm) => ({ ...currentForm, image: response.data.fileUrl }));
     } catch (error) {
       console.error('Upload image error:', error);
@@ -337,7 +310,9 @@ const CourseManagement = () => {
 
     try {
       setUploading(true);
-      const response = await adminAPI.uploadFile(file);
+      // Compress if it's an image, otherwise upload as is
+      const finalFile = file.type.startsWith('image/') ? await compressImage(file) : file;
+      const response = await adminAPI.uploadFile(finalFile);
       setLessonForm((currentForm) => ({ ...currentForm, contentUrl: response.data.fileUrl }));
     } catch (error) {
       console.error('Upload document error:', error);
@@ -353,7 +328,7 @@ const CourseManagement = () => {
     try {
       const payload = {
         ...categoryForm,
-        expiredAt: categoryForm.isTemporary ? categoryForm.expiredAt : '',
+        expiredAt: categoryForm.isTemporary ? toUTCISOString(categoryForm.expiredAt) : null,
       };
 
       if (editingCategoryId) {
@@ -700,41 +675,68 @@ const CourseManagement = () => {
                 </button>
               </div>
 
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-amber-900">หมวดหมู่ชั่วคราว</p>
-                    <p className="mt-1 text-sm text-amber-800/80">
-                      เมื่อถึงวันหมดอายุ หมวดนี้จะหายจากหน้า user และย้ายไปอยู่ใน archive อัตโนมัติ
-                    </p>
+              <div className="relative overflow-hidden rounded-[2rem] border border-amber-200/50 bg-gradient-to-br from-amber-50/80 to-amber-100/40 p-6 backdrop-blur-md shadow-sm transition-all hover:shadow-md">
+                {/* Decorative background pulse */}
+                <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-400/10 blur-2xl animate-pulse"></div>
+                <div className="absolute -left-4 -bottom-4 h-20 w-20 rounded-full bg-amber-300/10 blur-2xl animate-pulse delay-700"></div>
+
+                <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                  <div className="flex gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400/20 text-amber-700 shadow-inner">
+                      <Clock size={24} className="animate-spin-slow" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-amber-900/70">หมวดหมู่ชั่วคราว</p>
+                        <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                      </div>
+                      <p className="mt-1.5 text-sm font-medium leading-relaxed text-amber-900/80">
+                        หมวดนี้จะย้ายไปยัง <span className="font-bold">Archive</span> อัตโนมัติเมื่อครบกำหนดเวลา
+                      </p>
+                    </div>
                   </div>
-                  <label className="inline-flex items-center gap-3 rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-bold text-amber-900">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(categoryForm.isTemporary)}
-                      onChange={(event) =>
-                        setCategoryForm({
-                          ...categoryForm,
-                          isTemporary: event.target.checked,
-                          expiredAt: event.target.checked ? categoryForm.expiredAt : '',
-                        })
-                      }
-                      className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                    เปิดใช้งาน
+                  
+                  <label className="group flex cursor-pointer select-none items-center gap-3 self-end rounded-2xl border border-amber-300/40 bg-white/80 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-amber-900 shadow-sm transition-all hover:bg-white hover:shadow-md active:scale-95 md:self-start">
+                    <div className="relative inline-flex h-5 w-5 items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(categoryForm.isTemporary)}
+                        onChange={(event) =>
+                          setCategoryForm({
+                            ...categoryForm,
+                            isTemporary: event.target.checked,
+                            expiredAt: event.target.checked ? categoryForm.expiredAt : '',
+                          })
+                        }
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-lg border-2 border-amber-300 transition-all checked:bg-amber-500 checked:border-transparent"
+                      />
+                      <Plus size={14} className="absolute text-white opacity-0 transition-opacity peer-checked:opacity-100 rotate-45" />
+                    </div>
+                    ใช้งานระบบชั่วคราว
                   </label>
                 </div>
 
                 {categoryForm.isTemporary && (
-                  <div className="mt-4 space-y-1.5">
-                    <label className="text-[10px] font-bold text-amber-900 uppercase tracking-wider ml-1">วันหมดอายุ</label>
-                    <input
-                      required={Boolean(categoryForm.isTemporary)}
-                      type="datetime-local"
-                      className="form-input w-full border-amber-200 bg-white px-4 py-3 text-sm font-bold"
-                      value={categoryForm.expiredAt || ''}
-                      onChange={(event) => setCategoryForm({ ...categoryForm, expiredAt: event.target.value })}
-                    />
+                  <div className="relative z-10 mt-6 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-2 ml-1">
+                      <AlertTriangle size={14} className="text-amber-600" />
+                      <label className="text-[10px] font-black uppercase tracking-widest text-amber-900/60">ระบุวันและเวลาหมดอายุ</label>
+                    </div>
+                    <div className="group relative">
+                      <input
+                        required={Boolean(categoryForm.isTemporary)}
+                        type="datetime-local"
+                        className="form-input w-full rounded-2xl border-amber-200/60 bg-white/90 px-5 py-4 text-sm font-bold text-slate-800 shadow-inner transition-all focus:border-amber-400 focus:ring-4 focus:ring-amber-400/10 group-hover:border-amber-300"
+                        value={categoryForm.expiredAt || ''}
+                        onChange={(event) => setCategoryForm({ ...categoryForm, expiredAt: event.target.value })}
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-amber-500/50 group-hover:text-amber-500 transition-colors">
+                        <ChevronDown size={18} />
+                      </div>
+                    </div>
+                    <p className="mt-1.5 px-1 text-[10px] font-medium text-amber-800/60 italic">
+                      * ระบบจะตรวจสอบความถูกต้องของเวลาไทยอัตโนมัติ
+                    </p>
                   </div>
                 )}
               </div>
@@ -890,9 +892,9 @@ const CourseManagement = () => {
                           </div>
                         <div className="mt-1 flex flex-wrap gap-1">
                           {category.isTemporary && (
-                            <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700">
-                              หมดอายุ {formatExpiryLabel(category.expiredAt)}
-                            </span>
+                              <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700">
+                                หมดอายุ {formatThaiDateTime(category.expiredAt, true)}
+                              </span>
                           )}
                           {category.visibleToAll !== false ? (
                             <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-700">ทุกคน</span>
@@ -945,7 +947,7 @@ const CourseManagement = () => {
                                 visibleDepartmentIds: category.visibleDepartmentIds || [],
                                 visibleTierIds: category.visibleTierIds || [],
                                 isTemporary: Boolean(category.isTemporary),
-                                expiredAt: toDateTimeLocalValue(category.expiredAt),
+                                expiredAt: toLocalInputValue(category.expiredAt),
                               });
                             }}
                             className="rounded-xl bg-slate-50 p-2 text-primary transition-all hover:bg-primary hover:text-white"
@@ -1034,7 +1036,7 @@ const CourseManagement = () => {
                               ? 'bg-rose-100 text-rose-700'
                               : 'bg-amber-100 text-amber-700'
                           }`}>
-                            {course.isArchived ? 'Archived' : 'Limited Time'} · {formatExpiryLabel(course.expiredAt)}
+                            {course.isArchived ? 'Archived' : 'Limited Time'} · {formatThaiDateTime(course.expiredAt, true)}
                           </span>
                         )}
                       </div>
@@ -1044,7 +1046,7 @@ const CourseManagement = () => {
                         <span>{course.category?.name || 'Uncategorized'}</span>
                         {course.category?.isTemporary && (
                           <span className="text-[11px] font-bold text-amber-700">
-                            หมวดชั่วคราว · {formatExpiryLabel(course.category?.expiredAt)}
+                            หมวดชั่วคราว · {formatThaiDateTime(course.category?.expiredAt, true)}
                           </span>
                         )}
                       </div>
