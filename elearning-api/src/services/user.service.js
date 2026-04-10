@@ -448,6 +448,7 @@ const getCourses = async (userId) => {
                     tierAccess: undefined
                 }
                 : null,
+            lessonsCount: Array.isArray(course.lessons) ? course.lessons.length : 0,
             lessons: undefined,
             isEnrolled: !!enrollment,
             enrollmentStatus: enrollment ? enrollment.status : null,
@@ -578,6 +579,7 @@ const getCourseDetails = async (courseId, userId) => {
         progressPercent: enrollment ? enrollment.progressPercent : 0,
         completedAt: enrollment ? enrollment.completedAt : null,
         ...rewardSummary,
+        lessonsCount: Array.isArray(course.lessons) ? course.lessons.length : 0,
         lessons: course.lessons.map((lesson) => ({
             ...lesson,
             contentUrl: isProtectedDocumentLesson(lesson) ? null : lesson.contentUrl,

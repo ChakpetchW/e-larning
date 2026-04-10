@@ -9,7 +9,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
   const isCompleted = variant === 'completed' || course.enrollmentStatus === 'COMPLETED';
   const isInProgress = course.isEnrolled && !isCompleted;
   const categoryLabel = course.category?.name || 'หมวดทั่วไป';
-  const lessonCount = Array.isArray(course.lessons) ? course.lessons.length : 0;
+  const lessonCount = course.lessonsCount ?? (Array.isArray(course.lessons) ? course.lessons.length : 0);
   const progressPercent = Math.max(0, Math.min(100, Number(course.progressPercent) || 0));
   const displayPoints = course.totalPoints ?? course.points ?? 0;
   const pointsSuffix = displayPoints > 0 ? 'แต้มรวม' : 'เรียน';
