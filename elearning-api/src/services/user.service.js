@@ -939,7 +939,7 @@ const getCategories = async (userId) => {
     });
 
     return categories
-        .filter((category) => canAccessScopedEntity(category, userContext, referenceDate))
+        .filter((category) => authHelpers.canAccessEntity(userContext, category, referenceDate))
         .map((category) => ({
             ...category,
             departmentAccess: undefined,
