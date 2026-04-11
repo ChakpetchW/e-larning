@@ -96,7 +96,7 @@ const SystemSettings = () => {
 
       {message && (
         <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 animate-slide-up border ${
-          message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'
+          message.type === 'success' ? 'bg-success-bg text-success-text border-success-border' : 'bg-danger-bg text-danger-text border-danger-border'
         }`}>
           {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
           <span className="font-bold">{message.text}</span>

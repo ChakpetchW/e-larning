@@ -77,3 +77,15 @@ export const formatThaiFullDate = (value) => {
 
   return `วันที่ ${dateStr}`;
 };
+
+/**
+ * Returns the Buddhist Era (BE) year for a date
+ * @param {string|Date} value - The date
+ * @returns {number|string} - Year + 543 or '-'
+ */
+export const toThaiYear = (value) => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '-';
+  return date.getFullYear() + 543;
+};

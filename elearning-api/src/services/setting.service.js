@@ -1,4 +1,5 @@
 const prisma = require('../utils/prisma');
+const authHelpers = require('../utils/auth.helpers');
 
 const getDepartmentWeeklyGoalKey = (departmentId) => `weekly_goal_department_${departmentId}`;
 
@@ -13,14 +14,8 @@ const getSettings = async (authUser) => {
     let departmentId = null;
 
     if (authUser?.userId && authUser.role !== 'admin') {
-        const user = await prisma.user.findUnique({
-            where: { id: authUser.userId },
-            select: {
-                departmentId: true
-            }
-        });
-
-        departmentId = user?.departmentId || null;
+        const actor = await authHelpers.getActorContext(prisma, authUser);
+        departmentId = actor?.departmentId || null;
         if (departmentId) {
             const departmentGoalKey = getDepartmentWeeklyGoalKey(departmentId);
             if (settingsMap[departmentGoalKey] !== undefined) {
@@ -40,13 +35,7 @@ const getSettings = async (authUser) => {
 };
 
 const updateSetting = async (key, value, authUser) => {
-    const actor = await prisma.user.findUnique({
-        where: { id: authUser.userId },
-        select: {
-            role: true,
-            departmentId: true
-        }
-    });
+    const actor = await authHelpers.getActorContext(prisma, authUser);
 
     if (!actor || !['admin', 'manager'].includes(actor.role)) {
         throw new Error('Admin panel access required');

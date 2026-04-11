@@ -1,0 +1,27 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "search": "Search",
+    "noData": "No data found"
+  },
+  "nav": {
+    "home": "Home",
+    "courses": "Courses",
+    "rewards": "Rewards",
+    "profile": "Profile",
+    "admin": "Admin Panel"
+  },
+  "course": {
+    "enroll": "Enroll Now",
+    "start": "Start Learning",
+    "continue": "Continue",
+    "completed": "Completed",
+    "lesson": "Lesson",
+    "duration": "Duration"
+  }
+}

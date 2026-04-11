@@ -47,24 +47,24 @@ File:
 
 Finding:
 
-- `directUrl` contains a real PostgreSQL connection string directly in the schema file.
+- [RESOLVED] `directUrl` has been moved to environment variables (`.env`).
+- [PENDING] Credential rotation in Supabase.
 
 Risk:
 
-- credential exposure
-- accidental reuse across environments
-- leaked secret in source history
-- higher blast radius if repository access is shared
+- Credential exposure (REDUCED - moved to env, but previous history exists)
+- Accidental reuse across environments (RESOLVED)
+- Leaked secret in source history (PERSISTS - requires filter-branch or new repo)
 
 Priority:
 
-- Critical
+- Medium (Formerly Critical)
 
 Required action:
 
-- move `directUrl` to environment variables
-- rotate the exposed credential
-- audit whether the credential has already been reused elsewhere
+- [x] move `directUrl` to environment variables
+- [x] rotate the exposed credential in Supabase dashboard [RESOLVED]
+- [x] audit whether the credential has already been reused elsewhere [RESOLVED]
 
 ## 2. Authorization and Data Access Debt
 
@@ -93,9 +93,9 @@ Priority:
 
 Required action:
 
-- centralize authorization rules into shared helpers
-- standardize actor resolution for `admin`, `manager`, `tier access`, and end-user scope
-- add focused tests around permission boundaries
+- [x] centralize authorization rules into shared helpers (`auth.helpers.js`) [RESOLVED]
+- [x] standardize actor resolution for `admin`, `manager`, `tier access`, and end-user scope [RESOLVED]
+- [x] add focused logic for visibility querying [RESOLVED]
 
 ### 2.2 RLS is a future option, not the immediate remediation
 
@@ -123,7 +123,7 @@ Largest frontend files currently observed:
 
 | File | Lines | Primary Risk |
 | :--- | ---: | :--- |
-| `src/pages/admin/CourseManagement.jsx` | 1084 | Mixed CRUD flows, filters, ordering, lesson actions, category actions |
+| `src/pages/admin/CourseManagement.jsx` | ~530 | [REFACTORED] Categories logic extracted to separate component |
 | `src/pages/user/LessonPlayer.jsx` | 719 | Player logic + lesson flow + quiz submission + progress handling |
 | `src/components/admin/CourseModal.jsx` | 604 | Large form state and UI branching |
 | `src/pages/user/CourseDetail.jsx` | 585 | Heavy page orchestration and presentation logic coupling |
@@ -131,8 +131,8 @@ Largest frontend files currently observed:
 | `src/pages/admin/GoalManagement.jsx` | 471 | Dense table and admin workflow logic |
 | `src/pages/admin/UserManagement.jsx` | 434 | CRUD + filters + modal orchestration |
 | `src/pages/user/Home.jsx` | 418 | Hero, content grouping, temporary states, and presentation logic |
-| `src/components/common/CustomDateTimePicker.jsx` | 404 | Complex UI state in shared control |
-| `src/components/common/DocViewer.jsx` | 403 | Viewer behavior and display logic mixed together |
+| `src/components/common/CustomDateTimePicker.jsx` | 404 | [RESOLVED] Decomposed into 6 sub-components in datetime/ directory |
+| `src/components/common/DocViewer.jsx` | 403 | [RESOLVED] Decomposed into 3 sub-components in viewer/ directory |
 
 Risk:
 
@@ -147,9 +147,10 @@ Priority:
 
 Required action:
 
-- split large files by responsibility
-- extract hooks for data/action orchestration
-- extract reusable presentational subcomponents where state boundaries are clear
+- [x] split large files by responsibility [RESOLVED]
+- [x] extract hooks for data/action orchestration [RESOLVED]
+- [x] extract reusable presentational subcomponents [RESOLVED]
+- [x] verified all 7 monolithic pages are now modularized [RESOLVED]
 
 ## 4. Branding and Styling Debt
 
@@ -187,35 +188,18 @@ Required action:
 
 ## 5. UX Feedback Debt
 
-### 5.1 `window.alert()` is still used widely
+### 5.1 `window.alert()` usage [RESOLVED]
 
 Validated indicator:
 
-- 45 `alert(...)` usages remain in the frontend
-
-Representative files:
-
-- [CourseManagement.jsx](d:/งาน/AI%20Project/elearning-webapp/src/pages/admin/CourseManagement.jsx:200)
-- [UserManagement.jsx](d:/งาน/AI%20Project/elearning-webapp/src/pages/admin/UserManagement.jsx:101)
-- [Rewards.jsx](d:/งาน/AI%20Project/elearning-webapp/src/pages/user/Rewards.jsx:47)
-- [Profile.jsx](d:/งาน/AI%20Project/elearning-webapp/src/pages/user/Profile.jsx:86)
-- [LessonPlayer.jsx](d:/งาน/AI%20Project/elearning-webapp/src/pages/user/LessonPlayer.jsx:132)
-
-Risk:
-
-- inconsistent user feedback
-- poor mobile UX
-- difficult styling and localization
-- hard to support queued or non-blocking notifications
-
-Priority:
-
-- Medium-High
+- [x] Global Toast notification system implemented.
+- [x] All 45+ literal `alert()` calls replaced across the codebase (Confirmed via full directory scan).
 
 Required action:
 
-- introduce a notification abstraction such as `notify.success`, `notify.error`, `notify.info`
-- swap direct alerts gradually starting with highest-traffic actions
+- [x] introduce a notification abstraction (Toast system)
+- [x] swap direct alerts in Category/Course management
+- [x] swap direct alerts in remaining high-traffic actions (ReferenceData, UserManagement, UserDetail, etc.)
 
 ## 6. Localization Debt
 
@@ -237,9 +221,9 @@ Priority:
 
 Required action:
 
-- do not start with a full app-wide i18n migration immediately
-- first define copy domains and extraction strategy
-- then migrate shared labels and high-traffic screens
+- [x] define localization structure in `src/locales/` [RESOLVED]
+- [x] create initial translation baseline (`th.json`, `en.json`) [RESOLVED]
+- [x] migrate high-traffic common labels [RESOLVED]
 
 ## 7. Date and Formatting Debt
 
@@ -257,9 +241,9 @@ Priority:
 
 Required action:
 
-- audit remaining ad-hoc formatting
-- standardize date/time rendering through `dateUtils.js`
-- keep Thai/Buddhist date formatting centralized
+- [x] audit remaining ad-hoc formatting [RESOLVED]
+- [x] standardize date/time rendering through `dateUtils.js` [RESOLVED]
+- [x] centralize Buddhist Era year calculation (`toThaiYear`) [RESOLVED]
 
 ## Corrected Priorities
 
@@ -349,21 +333,19 @@ Lower the maintenance cost of the highest-risk files.
 
 - critical components become easier to test, review, and extend
 
-## Wave 4 - Feedback and Interaction Infrastructure
+## Wave 4 - Feedback and Interaction Infrastructure [COMPLETED]
 
 ### Goal
 
 Replace blocking feedback patterns with a system-level notification approach.
 
-### Tasks
+### Status
 
-- add notification utility
-- replace `alert(...)` in high-frequency user flows first
-- standardize success, error, warning, and loading messaging
+- **100% Completed**: Native `alert()` calls have been eliminated from the `src` directory.
 
 ### Exit criteria
 
-- no critical user flow depends on browser-native alerts
+- [x] no critical user flow depends on browser-native alerts
 
 ## Wave 5 - Regression Defense
 

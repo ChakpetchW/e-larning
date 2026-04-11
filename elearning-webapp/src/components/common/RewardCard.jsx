@@ -3,19 +3,19 @@ import { Gift, Zap, Ticket, Coffee } from 'lucide-react';
 import { getFullUrl } from '../../utils/api';
 
 const iconMap = {
-  coffee: <Coffee className="text-green-600" size={32} strokeWidth={1.5}/>,
-  ticket: <Ticket className="text-red-600" size={32} strokeWidth={1.5}/>,
-  food: <Zap className="text-green-500" size={32} strokeWidth={1.5}/>,
-  voucher: <Gift className="text-orange-500" size={32} strokeWidth={1.5}/>,
+  coffee: <Coffee className="text-success" size={32} strokeWidth={1.5}/>,
+  ticket: <Ticket className="text-danger" size={32} strokeWidth={1.5}/>,
+  food: <Zap className="text-success" size={32} strokeWidth={1.5}/>,
+  voucher: <Gift className="text-warning" size={32} strokeWidth={1.5}/>,
   default: <Gift className="text-primary" size={32} strokeWidth={1.5}/>
 };
 
 const bgMap = {
-  coffee: 'bg-green-50',
-  ticket: 'bg-red-50',
-  food: 'bg-green-50',
-  voucher: 'bg-orange-50',
-  default: 'bg-indigo-50'
+  coffee: 'bg-success-bg',
+  ticket: 'bg-danger-bg',
+  food: 'bg-success-bg',
+  voucher: 'bg-warning-bg',
+  default: 'bg-primary-light'
 };
 
 const RewardCard = ({ reward, points, onRedeem, redeeming }) => {
@@ -40,7 +40,7 @@ const RewardCard = ({ reward, points, onRedeem, redeeming }) => {
         <h4 className="text-[15px] font-bold leading-snug text-slate-900">{reward.name}</h4>
         <div className="flex flex-col gap-3">
           <div className="flex items-end justify-between border-t border-slate-100 pt-3">
-            <span className="rounded border border-orange-100 bg-orange-50 px-2 py-0.5 text-sm font-black text-warning/90">
+            <span className="rounded border border-warning-border bg-warning-bg px-2 py-0.5 text-sm font-black text-warning-text">
               {reward.pointsCost} แต้ม
             </span>
             {reward.stock > 0 ? (

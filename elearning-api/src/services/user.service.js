@@ -4,6 +4,7 @@ const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
 const ErrorResponse = require('../utils/errorResponse');
+const authHelpers = require('../utils/auth.helpers');
 
 const SUPABASE_BUCKET = 'uploads';
 const DOCUMENT_SIGNED_URL_TTL_SECONDS = 90;
@@ -177,192 +178,22 @@ const getDocumentUpstreamResponse = async (documentAccessPayload) => {
     };
 };
 
-const mapPublicUser = (user) => ({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    status: user.status,
-    createdAt: user.createdAt,
-    employmentDate: user.employmentDate || user.createdAt,
-    departmentId: user.departmentRef?.id || user.departmentId || null,
-    department: user.departmentRef?.name || user.department || null,
-    tierId: user.tier?.id || user.tierId || null,
-    tier: user.tier ? {
-        id: user.tier.id,
-        name: user.tier.name,
-        accessAdmin: user.tier.accessAdmin
-    } : null
-});
+const mapPublicUser = authHelpers.mapUserRecord;
 
-const getUserVisibilityContext = async (userId) => prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-        role: true,
-        departmentId: true,
-        tierId: true,
-        tier: {
-            select: {
-                name: true,
-                order: true
-            }
-        }
-    }
-});
+const getUserVisibilityContext = (userId) => authHelpers.getActorContext(prisma, { userId });
 
-const buildTemporaryVisibilityWhere = (referenceDate = new Date()) => ({
-    OR: [
-        { isTemporary: false },
-        { expiredAt: null },
-        { expiredAt: { gt: referenceDate } }
-    ]
-});
+const buildCategoryVisibilityWhere = (userContext, referenceDate = new Date()) => authHelpers.buildVisibilityWhere(userContext, { status: null, referenceDate });
 
-const isTemporaryEntityVisible = (entity, referenceDate = new Date()) => {
-    if (!entity?.isTemporary) {
-        return true;
-    }
-
-    if (!entity?.expiredAt) {
-        return true;
-    }
-
-    return new Date(entity.expiredAt) > referenceDate;
-};
-
-const buildCategoryVisibilityWhere = (userContext, referenceDate = new Date()) => {
-    if (userContext?.role === 'admin') {
-        return buildTemporaryVisibilityWhere(referenceDate);
-    }
-
-    const departmentConditions = [{ departmentAccess: { none: {} } }];
-
-    if (userContext?.departmentId) {
-        departmentConditions.push({
-            departmentAccess: {
-                some: {
-                    departmentId: userContext.departmentId
-                }
-            }
-        });
-    }
-
-    return {
-        AND: [
-            buildTemporaryVisibilityWhere(referenceDate),
-            {
-                OR: [
-                    { visibleToAll: true },
-                    {
-                        visibleToAll: false,
-                        AND: [{ OR: departmentConditions }]
-                    }
-                ]
-            }
-        ]
-    };
-};
-
-const buildCourseVisibilityWhere = (userContext, referenceDate = new Date()) => {
-    if (userContext?.role === 'admin') {
-        return {
-            status: 'PUBLISHED',
-            ...buildTemporaryVisibilityWhere(referenceDate)
-        };
-    }
-
-    const departmentConditions = [{ departmentAccess: { none: {} } }];
-
-    if (userContext?.departmentId) {
-        departmentConditions.push({
-            departmentAccess: {
-                some: {
-                    departmentId: userContext.departmentId
-                }
-            }
-        });
-    }
-
-    return {
-        AND: [
-            { status: 'PUBLISHED' },
-            buildTemporaryVisibilityWhere(referenceDate),
-            {
-                OR: [
-                    { visibleToAll: true },
-                    {
-                        visibleToAll: false,
-                        AND: [{ OR: departmentConditions }]
-                    }
-                ]
-            }
-        ]
-    };
-};
+const buildCourseVisibilityWhere = (userContext, referenceDate = new Date()) => authHelpers.buildVisibilityWhere(userContext, { status: 'PUBLISHED', referenceDate });
 
 const getVisibleCourseQuery = async (userId) => {
     return getUserVisibilityContext(userId);
 };
 
-const canAccessByDepartment = (course, userContext) => {
-    const departmentAccess = Array.isArray(course.departmentAccess) ? course.departmentAccess : [];
-
-    if (departmentAccess.length === 0) {
-        return true;
-    }
-
-    if (!userContext?.departmentId) {
-        return false;
-    }
-
-    return departmentAccess.some((entry) => entry.departmentId === userContext.departmentId);
-};
-
-const canAccessByTierHierarchy = (entity, userContext) => {
-    const tierAccess = Array.isArray(entity.tierAccess) ? entity.tierAccess : [];
-
-    if (tierAccess.length === 0) {
-        return true;
-    }
-
-    const userTierOrder = userContext?.tier?.order ?? 999;
-    const requiredOrders = tierAccess
-        .map((entry) => entry.tier?.order)
-        .filter((order) => order !== undefined && order !== null);
-
-    if (requiredOrders.length > 0) {
-        // Hierarchy logic: A user with lower order value (higher rank)
-        // can see anything that requires their rank OR anything that ranks lower (higher order value).
-        // e.g. Manager (0) can see anything requiring Officer (2) because 0 <= 2.
-        return userTierOrder <= Math.max(...requiredOrders);
-    }
-
-    return false;
-};
-
-const canAccessScopedEntity = (entity, userContext, referenceDate = new Date()) => {
-    if (!entity) {
-        return true;
-    }
-
-    if (!isTemporaryEntityVisible(entity, referenceDate)) {
-        return false;
-    }
-
-    if (userContext?.role === 'admin') {
-        return true;
-    }
-
-    if (entity.visibleToAll) {
-        return true;
-    }
-
-    return canAccessByDepartment(entity, userContext) && canAccessByTierHierarchy(entity, userContext);
-};
-
 const canAccessCourse = (course, userContext, referenceDate = new Date()) => {
     const category = course?.category;
-    return canAccessScopedEntity(category, userContext, referenceDate) && canAccessScopedEntity(course, userContext, referenceDate);
+    return authHelpers.canAccessEntity(userContext, category, referenceDate) && 
+           authHelpers.canAccessEntity(userContext, course, referenceDate);
 };
 
 const getCourseRewardSummary = (course) => {

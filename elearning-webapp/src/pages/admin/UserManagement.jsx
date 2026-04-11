@@ -1,13 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Edit, Eye, Plus, Search, Settings2, Sparkles } from 'lucide-react';
+import { Plus, Settings2, Sparkles } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
-import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
-import AdminTable from '../../components/admin/AdminTable';
 import UserModal from '../../components/admin/UserModal';
 import ReferenceDataModal from '../../components/admin/ReferenceDataModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
-import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { canEditAdminUsers } from '../../utils/roles';
+import { useToast } from '../../context/ToastContext';
+import useConfirm from '../../hooks/useConfirm';
+
+// Sub-components
+import UserFilters from '../../components/admin/UserFilters';
+import UserList from '../../components/admin/UserList';
 
 const getDefaultFormData = () => ({
   name: '',
@@ -29,6 +34,8 @@ const formatDateForInput = (value) => {
 };
 
 const UserManagement = () => {
+  const toast = useToast();
+  const { confirm, ConfirmDialogProps } = useConfirm();
   const [users, setUsers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [tiers, setTiers] = useState([]);
@@ -67,6 +74,7 @@ const UserManagement = () => {
       setUsers(response.data);
     } catch (error) {
       console.error('Fetch users error:', error);
+      toast.error('ไม่สามารถโหลดข้อมูลผู้ใช้งานได้');
     } finally {
       setLoading(false);
     }
@@ -98,10 +106,10 @@ const UserManagement = () => {
 
       if (editingUser) {
         await adminAPI.updateUser(editingUser.id, payload);
-        alert('อัปเดตข้อมูลผู้ใช้งานเรียบร้อย');
+        toast.success('อัปเดตข้อมูลผู้ใช้งานเรียบร้อย');
       } else {
         await adminAPI.createUser(payload);
-        alert('เพิ่มผู้ใช้งานเรียบร้อย');
+        toast.success('เพิ่มผู้ใช้งานเรียบร้อย');
       }
 
       setShowUserModal(false);
@@ -110,21 +118,26 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       console.error('Save user error:', error);
-      alert(error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลผู้ใช้งานได้');
+      toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลผู้ใช้งานได้');
     }
   };
 
   const handleDeleteUser = async (id, name) => {
-    if (!window.confirm(`ต้องการลบผู้ใช้งาน "${name}" ใช่หรือไม่?`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: 'ยืนยันการลบผู้ใช้งาน',
+      message: `ต้องการลบผู้ใช้งาน "${name}" ใช่หรือไม่?`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     try {
       await adminAPI.deleteUser(id);
+      toast.success('ลบผู้ใช้งานเรียบร้อย');
       fetchUsers();
     } catch (error) {
       console.error('Delete user error:', error);
-      alert(error.response?.data?.message || 'ลบผู้ใช้งานไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบผู้ใช้งานไม่สำเร็จ');
     }
   };
 
@@ -136,7 +149,7 @@ const UserManagement = () => {
       setSelectedUserDetail(response.data);
     } catch (error) {
       console.error('Fetch user detail error:', error);
-      alert(error.response?.data?.message || 'ไม่สามารถโหลดประวัติผู้ใช้งานได้');
+      toast.error(error.response?.data?.message || 'ไม่สามารถโหลดประวัติผู้ใช้งานได้');
       setShowDetailModal(false);
     } finally {
       setDetailLoading(false);
@@ -165,30 +178,40 @@ const UserManagement = () => {
   };
 
   const handleDepartmentDelete = async (id, name) => {
-    if (!window.confirm(`ต้องการลบแผนก "${name}" ใช่หรือไม่?`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: 'ยืนยันการลบแผนก',
+      message: `ต้องการลบแผนก "${name}" ใช่หรือไม่?`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     try {
       await adminAPI.deleteDepartment(id);
+      toast.success('ลบแผนกเรียบร้อย');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete department error:', error);
-      alert(error.response?.data?.message || 'ลบแผนกไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบแผนกไม่สำเร็จ');
     }
   };
 
   const handleTierDelete = async (id, name) => {
-    if (!window.confirm(`ต้องการลบระดับ "${name}" ใช่หรือไม่?`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: 'ยืนยันการลบระดับ',
+      message: `ต้องการลบระดับ "${name}" ใช่หรือไม่?`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     try {
       await adminAPI.deleteTier(id);
+      toast.success('ลบระดับผู้เรียนเรียบร้อย');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete tier error:', error);
-      alert(error.response?.data?.message || 'ลบระดับไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบระดับไม่สำเร็จ');
     }
   };
 
@@ -197,9 +220,10 @@ const UserManagement = () => {
       const tierIds = reorderedItems.map(item => item.id);
       setTiers(reorderedItems); // Optimistic update
       await adminAPI.reorderTiers(tierIds);
+      toast.success('บันทึกลำดับระดับผู้เรียนเรียบร้อย');
     } catch (error) {
       console.error('Reorder tiers error:', error);
-      alert('ไม่สามารถบันทึกลำดับได้');
+      toast.error('ไม่สามารถบันทึกลำดับได้');
       fetchReferenceData(); // Rollback
     }
   };
@@ -287,10 +311,12 @@ const UserManagement = () => {
             onClose={() => setShowDepartmentModal(false)}
             onCreate={async (payload) => {
               await adminAPI.createDepartment(payload);
+              toast.success('สร้างแผนกเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onUpdate={async (id, payload) => {
               await adminAPI.updateDepartment(id, payload);
+              toast.success('อัปเดตแผนกเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onDelete={handleDepartmentDelete}
@@ -306,10 +332,12 @@ const UserManagement = () => {
             onClose={() => setShowTierModal(false)}
             onCreate={async (payload) => {
               await adminAPI.createTier(payload);
+              toast.success('สร้างระดับผู้เรียนเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onUpdate={async (id, payload) => {
               await adminAPI.updateTier(id, payload);
+              toast.success('อัปเดตระดับผู้เรียนเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onDelete={handleTierDelete}
@@ -330,103 +358,28 @@ const UserManagement = () => {
       />
 
       <div className="card overflow-hidden">
-        <div className="flex flex-wrap gap-4 border-b border-border p-4">
-          <div className="relative w-full lg:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
-            <input
-              type="text"
-              placeholder="ค้นหาชื่อ หรืออีเมล..."
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              className="w-full rounded-md border border-border bg-gray-50 py-2 pl-10 pr-4 text-sm outline-none focus:border-primary"
-            />
-          </div>
+        <UserFilters 
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedDepartment={selectedDepartment}
+          onDepartmentChange={setSelectedDepartment}
+          departments={departments}
+          selectedTier={selectedTier}
+          onTierChange={setSelectedTier}
+          tiers={tiers}
+        />
 
-          <select
-            className="rounded-md border border-border bg-white px-3 py-2 text-sm text-muted outline-none"
-            value={selectedDepartment}
-            onChange={(event) => setSelectedDepartment(event.target.value)}
-          >
-            <option value="ALL">ทุกแผนก</option>
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>
-                {department.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="rounded-md border border-border bg-white px-3 py-2 text-sm text-muted outline-none"
-            value={selectedTier}
-            onChange={(event) => setSelectedTier(event.target.value)}
-          >
-            <option value="ALL">ทุกระดับ</option>
-            {tiers.map((tier) => (
-              <option key={tier.id} value={tier.id}>
-                {tier.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <AdminTable
+        <UserList 
           columns={columns}
-          data={filteredUsers}
+          users={filteredUsers}
           loading={loading}
-          emptyMessage="ยังไม่พบผู้ใช้งานที่ตรงกับตัวกรอง"
-          renderRow={(user) => (
-            <tr key={user.id} className="border-b border-border transition-colors hover:bg-gray-50/50">
-              <td className="p-4">
-                <div className="font-medium text-sm">{user.name}</div>
-                <div className="mt-0.5 text-xs text-muted">{user.email}</div>
-              </td>
-              <td className="p-4 text-sm text-muted">{getRoleLabel(user)}</td>
-              <td className="p-4 text-sm text-muted">{user.department || '-'}</td>
-              <td className="p-4 text-sm text-muted">{user.tier?.name || user.tier || '-'}</td>
-              <td className="p-4 text-sm text-muted">
-                {user.employmentDate ? formatThaiDateTime(user.employmentDate) : '-'}
-              </td>
-              <td className="p-4 text-center text-sm">
-                <span className="rounded-full bg-primary-light px-2 py-1 font-bold text-primary">
-                  {user._count?.enrollments || 0}
-                </span>
-              </td>
-              <td className="p-4 text-right text-sm font-bold text-warning">{user.pointsBalance || 0}</td>
-              <td className="p-4 text-right">
-                <div className="flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleViewUser(user.id)}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                  >
-                    <Eye size={14} />
-                    ดูประวัติ
-                  </button>
-                  {canEditUsers && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => openEditUser(user)}
-                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:underline"
-                      >
-                        <Edit size={14} />
-                        แก้ไข
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteUser(user.id, user.name)}
-                        className="text-sm font-medium text-red-500 hover:underline"
-                      >
-                        ลบ
-                      </button>
-                    </>
-                  )}
-                </div>
-              </td>
-            </tr>
-          )}
+          onViewUser={handleViewUser}
+          onEditUser={openEditUser}
+          onDeleteUser={handleDeleteUser}
+          canEditUsers={canEditUsers}
         />
       </div>
+      <ConfirmDialog {...ConfirmDialogProps} />
     </div>
   );
 };

@@ -14,8 +14,10 @@ import {
 } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
+import { useToast } from '../../context/ToastContext';
 
 const UserDetailModalContent = ({ loading, detail, onClose }) => {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('learning');
   const [filterMonth, setFilterMonth] = useState('ALL');
   const [filterYear, setFilterYear] = useState('ALL');
@@ -47,7 +49,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
   const handleExport = () => {
     const data = activeTab === 'learning' ? filteredEnrollments : filteredPointsHistory;
     if (data.length === 0) {
-      alert('ไม่มีข้อมูลสำหรับการส่งออก');
+      showToast('ไม่มีข้อมูลสำหรับการส่งออก', 'info');
       return;
     }
 

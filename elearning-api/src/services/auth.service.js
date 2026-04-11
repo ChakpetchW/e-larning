@@ -1,24 +1,9 @@
 const prisma = require('../utils/prisma');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const authHelpers = require('../utils/auth.helpers');
 
-const mapPublicUser = (user) => ({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    status: user.status,
-    createdAt: user.createdAt,
-    employmentDate: user.employmentDate || user.createdAt,
-    departmentId: user.departmentRef?.id || user.departmentId || null,
-    department: user.departmentRef?.name || user.department || null,
-    tierId: user.tier?.id || user.tierId || null,
-    tier: user.tier ? {
-        id: user.tier.id,
-        name: user.tier.name,
-        accessAdmin: user.tier.accessAdmin
-    } : null
-});
+const mapPublicUser = authHelpers.mapUserRecord;
 
 const login = async (email, password) => {
     const user = await prisma.user.findUnique({
