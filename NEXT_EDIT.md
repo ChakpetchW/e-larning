@@ -69,7 +69,30 @@ Track here all reported bugs and UI/UX improvements to be addressed in the next 
   - **Issue**: In the "Lesson Complete" container, navigation buttons wrap into two lines.
   - **Fix**: Added `whitespace-nowrap` to buttons and optimized flex containers for better responsiveness.
 
+
+## 🟡 Upcoming / Backlog
+- [ ] **Skeleton Loading (Admin Dashboard)**:
+  - Replace current spinners with structured skeleton screens to improve perceived performance and align with premium aesthetics.
+- [ ] **URL-Based Filter Persistence (Admin)**:
+  - Implement Search Params for filters in `UserManagement.jsx` and `CourseManagement.jsx` to allow shareable and persistent filter states.
+- [ ] **Enhanced Empty States**:
+  - Design and implement visual "Empty State" components for charts and tables when no data is available, preventing "broken" UI looks.
+- [ ] **Admin Reporting (PDF/Print)**:
+  - Implement print-friendly CSS and actual export logic for the Dashboard "Export PDF" action.
+- [ ] **Centralized Branding CI (Wave 2 - Scalability)**:
+  - **Risk**: Current brand colors (indigo/amber) are embedded as literals in ~300+ places.
+  - **Task**: Execute the `implementation_plan.md` to migrate all literal colors to Tailwind v4 theme variables. Goal: Reskin the entire app by changing only `index.css`.
+- [ ] **Regression Defense & Unit Testing (Wave 5 - Reliability)**:
+  - **Risk**: Complex visibility rules (Goal Expiry, Tier Access) rely on manual testing.
+  - **Task**: Implement unit tests for `auth.helpers.js` and `dateUtils.js`. Focus on edge cases: leap years, timezone boundaries for expiration, and multi-department manager access.
+- [ ] **Localization Baseline (Wave 6 - Maintainability)**:
+  - **Risk**: ~1000+ Thai literals embedded in JSX make multi-language support (EN) high-cost.
+  - **Task**: Systematically extract high-traffic labels into `locales/th.json` and implement the `useTranslation` hook across Admin and User surfaces.
+- [ ] **Refactor: CategoryManagementModal (Wave 3 Cleanup)**:
+  - **Issue**: Currently the largest file in the project (~579 lines).
+  - **Task**: Decompose the form state and category logic into custom hooks; split the color-picker and access-toggle into standalone sub-components.
+
 ---
-*Created on 2025-04-05*
+*Updated on 2026-04-12*
 
 

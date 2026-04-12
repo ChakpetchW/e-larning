@@ -95,7 +95,7 @@ Required action:
 
 - [x] centralize authorization rules into shared helpers (`auth.helpers.js`) [RESOLVED]
 - [x] standardize actor resolution for `admin`, `manager`, `tier access`, and end-user scope [RESOLVED]
-- [x] add focused logic for visibility querying [RESOLVED]
+- [x] add focused logic for visibility querying [RESOLVED for Goals, Courses, Categories]
 
 ### 2.2 RLS is a future option, not the immediate remediation
 
@@ -200,6 +200,7 @@ Required action:
 - [x] introduce a notification abstraction (Toast system)
 - [x] swap direct alerts in Category/Course management
 - [x] swap direct alerts in remaining high-traffic actions (ReferenceData, UserManagement, UserDetail, etc.)
+- [x] disable dashboard "lift" and "scale" hover effects to improve administrative stability [RESOLVED]
 
 ## 6. Localization Debt
 
@@ -244,6 +245,7 @@ Required action:
 - [x] audit remaining ad-hoc formatting [RESOLVED]
 - [x] standardize date/time rendering through `dateUtils.js` [RESOLVED]
 - [x] centralize Buddhist Era year calculation (`toThaiYear`) [RESOLVED]
+- [x] implement centralized visibility filtering for goals and timed items [RESOLVED]
 
 ## Corrected Priorities
 

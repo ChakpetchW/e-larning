@@ -71,6 +71,7 @@ const CourseManagement = () => {
   const [lessonForm, setLessonForm] = useState(getDefaultLessonForm());
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editorImageUploading, setEditorImageUploading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -305,6 +306,27 @@ const CourseManagement = () => {
     }
   };
 
+  const handleEditorImageUpload = async (file) => {
+    if (!file?.type?.startsWith('image/')) {
+      toast.error('ไฟล์รูปภาพไม่ถูกต้อง');
+      return '';
+    }
+
+    try {
+      setEditorImageUploading(true);
+      const compressedFile = await compressImage(file);
+      const response = await adminAPI.uploadFile(compressedFile);
+      toast.success('อัปโหลดรูปภาพในบทเรียนเรียบร้อย');
+      return response.data.fileUrl;
+    } catch (error) {
+      console.error('Upload lesson editor image error:', error);
+      toast.error('อัปโหลดรูปภาพไม่สำเร็จ');
+      return '';
+    } finally {
+      setEditorImageUploading(false);
+    }
+  };
+
   const filteredCourses = useMemo(() => (
     courses.filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -409,7 +431,9 @@ const CourseManagement = () => {
         lessonForm={lessonForm}
         setLessonForm={setLessonForm}
         uploading={uploading}
+        editorImageUploading={editorImageUploading}
         onDocUpload={handleDocUpload}
+        onEditorImageUpload={handleEditorImageUpload}
         isEditing={!!editingLesson}
       />
       <ConfirmDialog {...ConfirmDialogProps} />

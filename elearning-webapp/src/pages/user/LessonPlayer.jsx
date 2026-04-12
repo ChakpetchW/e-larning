@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Play, CheckCircle, Clock, FileText } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Play, CheckCircle, Clock, FileText, BookOpen } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import DocViewer from '../../components/common/DocViewer';
+import { hasRenderableLessonContent, sanitizeLessonContent } from '../../utils/richText';
 
-// Sub-components
 import LessonMedia from '../../components/user/LessonMedia';
 import QuizSection from '../../components/user/QuizSection';
 import LessonProgressActions from '../../components/user/LessonProgressActions';
@@ -14,7 +14,8 @@ import LessonSidebar from '../../components/user/LessonSidebar';
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
   if (type === 'video') return 'วิดีโอ';
-  if (type === 'pdf' || type === 'document' || type === 'article') return 'เอกสาร';
+  if (type === 'article') return 'บทความ';
+  if (type === 'pdf' || type === 'document') return 'เอกสาร';
   return 'เอกสาร';
 };
 
@@ -22,7 +23,7 @@ const LessonPlayer = () => {
   const { id: courseId, lessonId } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  
+
   const [lesson, setLesson] = useState(null);
   const [course, setCourse] = useState(null);
   const [completed, setCompleted] = useState(false);
@@ -33,11 +34,11 @@ const LessonPlayer = () => {
   const [openingDocument, setOpeningDocument] = useState(false);
   const [isNavigatingAway, setIsNavigatingAway] = useState(false);
 
-  // Quiz State
   const [answers, setAnswers] = useState({});
   const [quizResult, setQuizResult] = useState(null);
   const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = useState(false);
   const quizResultRef = useRef(null);
+  const lessonContentRef = useRef(null);
 
   useEffect(() => {
     const fetchLessonData = async () => {
@@ -48,14 +49,15 @@ const LessonPlayer = () => {
         setIsNavigatingAway(false);
         setAnswers({});
         setQuizResult(null);
+
         const response = await userAPI.getCourseDetails(courseId);
         setCourse(response.data);
 
-        const currentLesson = response.data.lessons.find(l => l.id === lessonId);
-        
+        const currentLesson = response.data.lessons.find((item) => item.id === lessonId);
+
         if (currentLesson?.type === 'quiz') {
-          const qRes = await userAPI.getLessonQuestions(lessonId);
-          currentLesson.questions = qRes.data;
+          const questionResponse = await userAPI.getLessonQuestions(lessonId);
+          currentLesson.questions = questionResponse.data;
         }
 
         setLesson(currentLesson);
@@ -65,7 +67,7 @@ const LessonPlayer = () => {
           setQuizResult({
             scorePercent: currentLesson.lastAttempt.score,
             passed: currentLesson.lastAttempt.status === 'PASSED',
-            passScore: currentLesson.passScore || 60
+            passScore: currentLesson.passScore || 60,
           });
         }
       } catch (error) {
@@ -75,6 +77,7 @@ const LessonPlayer = () => {
         setLoading(false);
       }
     };
+
     fetchLessonData();
   }, [courseId, lessonId, toast]);
 
@@ -142,25 +145,25 @@ const LessonPlayer = () => {
       toast.warning('กรุณาตอบคำถามให้ครบทุกข้อ');
       return;
     }
-    
+
     try {
       setUpdating(true);
-      const res = await userAPI.submitQuiz(lessonId, { answers });
-      setQuizResult(res.data);
+      const response = await userAPI.submitQuiz(lessonId, { answers });
+      setQuizResult(response.data);
       setShouldScrollToQuizResult(true);
-      
-      if (res.data.passed) {
-        toast.success(`ยินดีด้วย! คุณผ่านแบบทดสอบด้วยคะแนน ${res.data.scorePercent}%`);
+
+      if (response.data.passed) {
+        toast.success(`ยินดีด้วย! คุณผ่านแบบทดสอบด้วยคะแนน ${response.data.scorePercent}%`);
       } else {
-        toast.error(`เสียใจด้วย คุณยังไม่ผ่านเกณฑ์ (ได้ ${res.data.scorePercent}%)`);
+        toast.error(`เสียใจด้วย คุณยังไม่ผ่านเกณฑ์ (ได้ ${response.data.scorePercent}%)`);
       }
 
-      if (res.data.isCompleted) {
+      if (response.data.isCompleted) {
         setCompleted(true);
         syncCompletedLessonState();
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error('Submit quiz error:', error);
       toast.error('เกิดข้อผิดพลาดในการส่งคำตอบ');
     } finally {
       setUpdating(false);
@@ -169,6 +172,7 @@ const LessonPlayer = () => {
 
   const navigateToPath = (path, options = {}) => {
     if (!path) return;
+
     setShowDocViewer(false);
     setIsNavigatingAway(true);
 
@@ -182,11 +186,11 @@ const LessonPlayer = () => {
   };
 
   const handleNavigateToNextLesson = () => {
-    const nextLessonId = course?.lessons?.find((l, idx, arr) => {
-      const currentIdx = arr.findIndex(item => item.id === lessonId);
-      return idx === currentIdx + 1;
+    const nextLessonId = course?.lessons?.find((item, index, items) => {
+      const currentIndex = items.findIndex((entry) => entry.id === lessonId);
+      return index === currentIndex + 1;
     })?.id;
-    
+
     if (nextLessonId) {
       navigateToPath(`/user/courses/${courseId}/lesson/${nextLessonId}`);
     }
@@ -196,13 +200,21 @@ const LessonPlayer = () => {
     navigateToPath(`/user/courses/${courseId}`, { replace: true });
   };
 
+  const handleScrollToContent = () => {
+    lessonContentRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
+
   const requestDocumentAccess = async () => {
     if (openingDocument) return '';
+
     try {
       setOpeningDocument(true);
       const response = await userAPI.getLessonDocumentAccess(lessonId);
       const accessUrl = response?.data?.accessUrl || response?.accessUrl || '';
-      
+
       if (!accessUrl) {
         throw new Error('Document access URL was not returned');
       }
@@ -230,8 +242,8 @@ const LessonPlayer = () => {
 
   if (loading || !lesson) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary border-r-2 border-r-transparent"></div>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="h-10 w-10 animate-spin rounded-full border-t-2 border-r-2 border-primary border-r-transparent" />
       </div>
     );
   }
@@ -247,13 +259,13 @@ const LessonPlayer = () => {
   const quizRewardPoints = Number(lesson?.points) || 0;
   const canEarnQuizPoints = lesson?.type === 'quiz' && quizRewardPoints > 0;
   const hasProtectedDocument = lesson?.hasDocument === true;
+  const lessonContentHtml = sanitizeLessonContent(lesson.content);
+  const hasLessonContent = hasRenderableLessonContent(lesson.content);
 
   return (
-    <div className="flex flex-col w-full max-w-5xl mx-auto md:px-4 md:py-6 relative min-h-screen pb-12 bg-white md:bg-transparent">
-      
-      <LessonMedia 
+    <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col bg-white pb-12 md:bg-transparent md:px-4 md:py-6">
+      <LessonMedia
         lesson={lesson}
-        courseId={courseId}
         isNavigatingAway={isNavigatingAway}
         lessonMediaUrl={lessonMediaUrl}
         handleComplete={handleComplete}
@@ -261,6 +273,7 @@ const LessonPlayer = () => {
         handleOpenDocument={handleOpenDocument}
         openingDocument={openingDocument}
         hasProtectedDocument={hasProtectedDocument}
+        onScrollToContent={handleScrollToContent}
       />
 
       {showDocViewer && documentAccess?.accessUrl && (
@@ -281,38 +294,43 @@ const LessonPlayer = () => {
 
       <div className="bg-white md:mt-8 md:overflow-hidden md:rounded-[3.5rem] md:border md:border-slate-100 md:shadow-[0_40px_100px_-20px_rgba(15,23,42,0.1)]">
         <div className="px-6 py-10 md:p-14">
-          {/* Content Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 md:mb-10">
-            <div className="flex-1">
-              <div className="flex items-center gap-2.5 mb-5">
+          <div className="mb-6 flex flex-col justify-between gap-6 md:mb-10 md:flex-row md:items-end">
+            <div className="flex-1" ref={lessonContentRef}>
+              <div className="mb-5 flex items-center gap-2.5">
                 <span className="flex items-center gap-1.5 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-black tracking-[0.04em] text-primary">
-                  {lesson.type === 'video' ? <Play size={14} fill="currentColor"/> : 
-                   lesson.type === 'quiz' ? <CheckCircle size={14}/> : <FileText size={14}/>} 
+                  {lesson.type === 'video' ? <Play size={14} fill="currentColor" /> :
+                    lesson.type === 'quiz' ? <CheckCircle size={14} /> :
+                    lesson.type === 'article' ? <BookOpen size={14} /> :
+                    <FileText size={14} />}
                   {getLessonTypeLabel(lesson.type)}
                 </span>
                 <span className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-black tracking-[0.04em] text-slate-600">
-                  <Clock size={14}/> {lesson.duration || '10'}m
+                  <Clock size={14} /> {lesson.duration || '10'}m
                 </span>
               </div>
-              <h1 className="text-[22px] md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-[1.2]">{lesson.title}</h1>
+              <h1 className="text-[22px] font-black leading-[1.2] tracking-tight text-slate-900 md:text-3xl lg:text-4xl">
+                {lesson.title}
+              </h1>
             </div>
-            
+
             {completed && (
-              <div className="flex items-center gap-3 bg-emerald-50 px-5 py-2.5 rounded-2xl border border-emerald-100 shadow-sm animate-fade-in shrink-0 self-start md:self-auto">
-                <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-200">
-                  <CheckCircle size={14} strokeWidth={3} />
+              <div className="animate-fade-in self-start rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-2.5 shadow-sm md:self-auto">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-200">
+                    <CheckCircle size={14} strokeWidth={3} />
+                  </div>
+                  <span className="text-sm font-black tracking-[0.04em] text-emerald-800">เรียนจบแล้ว</span>
                 </div>
-                <span className="text-sm font-black tracking-[0.04em] text-emerald-800">เรียนจบแล้ว</span>
               </div>
             )}
           </div>
 
-          <div className="mb-6 md:mb-12 h-px w-full bg-slate-100"></div>
+          <div className="mb-6 h-px w-full bg-slate-100 md:mb-12" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
             <div className={hasResources || showAchievementCard ? 'lg:col-span-8' : 'lg:col-span-12'}>
               {lesson.type === 'quiz' ? (
-                <QuizSection 
+                <QuizSection
                   lesson={lesson}
                   answers={answers}
                   setAnswers={setAnswers}
@@ -325,14 +343,16 @@ const LessonPlayer = () => {
                   quizRewardPoints={quizRewardPoints}
                 />
               ) : (
-                <div className="prose prose-slate prose-lg max-w-none">
-                  <p className="text-xl text-slate-600 leading-[1.8] whitespace-pre-wrap font-medium">
-                    {lesson.content || 'เนื้อหาเพิ่มเติมสำหรับบทเรียนนี้...'}
-                  </p>
+                <div className="rich-text-content rounded-[2rem] border border-slate-100 bg-slate-50/70 px-6 py-7 text-[1.05rem] text-slate-700 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.2)] md:px-8 md:py-9 md:text-[1.1rem]">
+                  {hasLessonContent ? (
+                    <div dangerouslySetInnerHTML={{ __html: lessonContentHtml }} />
+                  ) : (
+                    <p className="font-medium text-slate-500">เนื้อหาเพิ่มเติมสำหรับบทเรียนนี้...</p>
+                  )}
                 </div>
               )}
 
-              <LessonProgressActions 
+              <LessonProgressActions
                 lesson={lesson}
                 completed={completed}
                 updating={updating}
@@ -347,7 +367,7 @@ const LessonPlayer = () => {
             </div>
 
             {(hasResources || showAchievementCard) && (
-              <LessonSidebar 
+              <LessonSidebar
                 completed={completed}
                 showAchievementCard={showAchievementCard}
                 nextLessonId={nextLessonId}
