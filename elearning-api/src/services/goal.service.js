@@ -1,4 +1,6 @@
 const prisma = require('../utils/prisma');
+const authHelpers = require('../utils/auth.helpers');
+const ErrorResponse = require('../utils/errorResponse');
 
 const createGoal = async (data, authUser) => {
     const { title, type, targetCount, expiryDate, scope, departmentId, courseIds } = data;
@@ -7,19 +9,16 @@ const createGoal = async (data, authUser) => {
     let finalScope = scope || 'GLOBAL';
     let finalDeptId = departmentId || null;
 
-    const user = await prisma.user.findUnique({
-        where: { id: authUser.userId },
-        select: { departmentId: true }
-    });
+    const actor = await authHelpers.getActorContext(prisma, authUser);
 
-    if (authUser.role === 'admin') {
-        finalScope = scope || (user?.departmentId ? 'DEPARTMENT' : 'GLOBAL');
-        finalDeptId = finalScope === 'GLOBAL' ? null : (departmentId || user?.departmentId);
+    if (actor.isAdmin) {
+        finalScope = scope || (actor?.departmentId ? 'DEPARTMENT' : 'GLOBAL');
+        finalDeptId = finalScope === 'GLOBAL' ? null : (departmentId || actor?.departmentId);
     } else {
         // Manager or other fallback
-        if (user && user.departmentId) {
+        if (actor.departmentId) {
             finalScope = 'DEPARTMENT';
-            finalDeptId = user.departmentId;
+            finalDeptId = actor.departmentId;
         } else {
             finalScope = 'GLOBAL';
             finalDeptId = null;
@@ -52,20 +51,16 @@ const createGoal = async (data, authUser) => {
     });
 };
 
-const getGoals = async (authUser) => {
-    const user = await prisma.user.findUnique({
-        where: { id: authUser.userId },
-        select: { departmentId: true }
+const getGoals = async (authUser, options = {}) => {
+    const actor = await authHelpers.getActorContext(prisma, authUser);
+    const referenceDate = new Date();
+    const includeExpired = Boolean(options.includeExpired && actor.canAccessAdminPanel);
+    const includeAllScopes = Boolean(options.includeExpired && actor.isAdmin);
+    const where = authHelpers.buildGoalVisibilityWhere(actor, {
+        referenceDate,
+        includeExpired,
+        includeAllScopes
     });
-    
-    // All users (Admin, Manager, User) see their department's goals AND global goals
-    let where = {
-        OR: [
-            { scope: 'GLOBAL' },
-            { AND: [{ scope: 'DEPARTMENT' }, { departmentId: user?.departmentId || null }] }
-        ],
-        status: 'ACTIVE'
-    };
 
     return await prisma.learningGoal.findMany({
         where,
@@ -86,10 +81,8 @@ const getGoals = async (authUser) => {
 };
 
 const getGoalDetails = async (id, authUser) => {
-    const user = await prisma.user.findUnique({
-        where: { id: authUser.userId },
-        select: { departmentId: true }
-    });
+    const actor = await authHelpers.getActorContext(prisma, authUser);
+    const referenceDate = new Date();
 
     const goal = await prisma.learningGoal.findUnique({
         where: { id },
@@ -109,27 +102,19 @@ const getGoalDetails = async (id, authUser) => {
         }
     });
 
-    if (!goal || goal.status !== 'ACTIVE') {
-        throw new Error('Goal not found or inactive');
-    }
-
-    if (goal.scope === 'DEPARTMENT' && goal.departmentId !== user.departmentId) {
-        throw new Error('Not authorized to view this goal');
+    if (!authHelpers.canAccessGoal(actor, goal, { referenceDate })) {
+        throw new ErrorResponse('Goal not found', 404);
     }
 
     return goal;
 };
 
 const deleteGoal = async (id, authUser) => {
+    const actor = await authHelpers.getActorContext(prisma, authUser);
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
     if (!goal) throw new Error('Goal not found');
 
-    const user = await prisma.user.findUnique({
-        where: { id: authUser.userId },
-        select: { departmentId: true }
-    });
-
-    if (goal.departmentId !== null && goal.departmentId !== user.departmentId) {
+    if (goal.departmentId !== null && goal.departmentId !== actor.departmentId) {
         throw new Error('Not authorized to delete this goal');
     }
 

@@ -43,9 +43,14 @@ const LoadingFallback = () => (
   </div>
 );
 
+import { ToastProvider } from './context/ToastContext';
+import { LanguageProvider } from './context/LanguageContext';
+
 function App() {
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <LanguageProvider>
+      <ToastProvider>
+        <Suspense fallback={<LoadingFallback />}>
       <Routes>
         {/* Root Redirect - Check for existing session */}
         <Route path="/" element={
@@ -94,6 +99,8 @@ function App() {
         <Route path="*" element={<div className="p-12 text-center font-black text-slate-400">404 - ไม่พบหน้าที่คุณต้องการ</div>} />
       </Routes>
     </Suspense>
+    </ToastProvider>
+    </LanguageProvider>
   );
 }
 

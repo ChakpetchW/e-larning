@@ -4,6 +4,9 @@ import { adminAPI, getFullUrl } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import RewardModal from '../../components/admin/RewardModal';
 import { isSuperAdmin } from '../../utils/roles';
+import { useToast } from '../../context/ToastContext';
+import useConfirm from '../../hooks/useConfirm';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 
 const DEFAULT_REWARD_FORM = {
   name: '',
@@ -21,6 +24,8 @@ const RewardsManagement = () => {
   const [editingId, setEditingId] = useState(null);
   const [rewardForm, setRewardForm] = useState(DEFAULT_REWARD_FORM);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const toast = useToast();
+  const { confirm, ConfirmDialogProps } = useConfirm();
 
   const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 
@@ -65,7 +70,7 @@ const RewardsManagement = () => {
       setRewardForm((currentForm) => ({ ...currentForm, image: response.data.fileUrl }));
     } catch (error) {
       console.error(error);
-      alert('อัปโหลดรูปภาพไม่สำเร็จ');
+      toast.error('อัปโหลดรูปภาพไม่สำเร็จ');
     } finally {
       setUploadingImage(false);
     }
@@ -77,17 +82,17 @@ const RewardsManagement = () => {
     try {
       if (isEditing) {
         await adminAPI.updateReward(editingId, { ...rewardForm });
-        alert('อัปเดตรางวัลสำเร็จ');
+        toast.success('อัปเดตรางวัลสำเร็จ');
       } else {
         await adminAPI.createReward({ ...rewardForm, status: 'ACTIVE' });
-        alert('เพิ่มรางวัลสำเร็จ');
+        toast.success('เพิ่มรางวัลสำเร็จ');
       }
 
       closeModal();
       await refreshRewards();
     } catch (error) {
       console.error(error);
-      alert('เกิดข้อผิดพลาด');
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
     }
   };
 
@@ -105,23 +110,28 @@ const RewardsManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('ยืนยันการลบรางวัล?')) {
-      return;
-    }
+    const ok = await confirm({
+      title: 'ยืนยันการลบรางวัล',
+      message: 'ยืนยันการลบรางวัลนี้? การลบนี้จะไม่สามารถย้อนคืนได้',
+      confirmLabel: 'ลบรางวัล',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     try {
       await adminAPI.deleteReward(id);
+      toast.success('ลบรางวัลสำเร็จ');
       setRewards((currentRewards) => currentRewards.filter((reward) => reward.id !== id));
     } catch (error) {
       console.error(error);
-      alert('ลบไม่สำเร็จ');
+      toast.error('ลบไม่สำเร็จ');
     }
   };
 
   if (!isSuperAdmin(currentUser)) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center p-12 text-center">
-        <div className="mb-4 rounded-2xl bg-red-50 p-4 text-red-500">
+        <div className="mb-4 rounded-2xl bg-danger-bg p-4 text-danger">
           <Plus size={48} className="rotate-45" />
         </div>
         <h2 className="mb-2 text-2xl font-black">เข้าถึงไม่ได้</h2>
@@ -189,8 +199,8 @@ const RewardsManagement = () => {
                   <img src={getFullUrl(reward.image)} alt="Reward" className="h-full w-full object-cover" />
                 </div>
               ) : (
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50">
-                  <ImageIcon size={24} className="text-indigo-400" />
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-primary-light">
+                  <ImageIcon size={24} className="text-primary/60" />
                 </div>
               )}
               <h3 className="text-base font-bold leading-tight">{reward.name}</h3>
@@ -213,6 +223,7 @@ const RewardsManagement = () => {
           </div>
         ))}
       </div>
+      <ConfirmDialog {...ConfirmDialogProps} />
     </div>
   );
 };

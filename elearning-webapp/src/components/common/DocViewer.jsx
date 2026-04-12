@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { X, FileText, ShieldAlert, Loader2, CheckCircle2 } from 'lucide-react';
 import ModalPortal from './ModalPortal';
 import PdfCanvasViewer from './PdfCanvasViewer';
 
+// Sub-components
+import DocViewerHeader from './viewer/DocViewerHeader';
+import DocViewerFooter from './viewer/DocViewerFooter';
+import { DocViewerLoading, DocViewerTimeout, DocViewerError } from './viewer/DocViewerOverlays';
+
 /**
- * SecureDocViewer - แสดงเอกสารภายในแอป โดยหลีกเลี่ยงการสร้าง blob URL
- * เพราะ Chrome บน production บางกรณีจะไม่ยอมโหลด blob: ภายใน iframe
+ * SecureDocViewer - แสดงเอกสารภายในแอป แบบ Modular
  */
 const DocViewer = ({
   url,
@@ -31,15 +34,14 @@ const DocViewer = ({
   const loadTimeoutRef = useRef(null);
   const autoRetryAttemptedRef = useRef(false);
   const iframeLoadedRef = useRef(false);
+
   const normalizedFileName = String(fileName || '').toLowerCase();
   const normalizedExtension = String(extension || '').toLowerCase();
   const effectiveViewerType = String(viewerType || '').toLowerCase();
-  const isMobileViewport = typeof window !== 'undefined'
-    ? window.matchMedia('(max-width: 767px)').matches
-    : false;
-  const isIosDevice = typeof window !== 'undefined'
-    ? /iPad|iPhone|iPod/i.test(window.navigator.userAgent)
-    : false;
+  
+  const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false;
+  const isIosDevice = typeof window !== 'undefined' ? /iPad|iPhone|iPod/i.test(window.navigator.userAgent) : false;
+  
   const isPdfDocument = effectiveViewerType === 'pdf' || normalizedExtension === 'pdf' || normalizedFileName.endsWith('.pdf');
   const isIosMobilePdf = isIosDevice && isMobileViewport && isPdfDocument;
   const shouldUsePdfCanvasViewer = isPdfDocument && isMobileViewport;
@@ -69,30 +71,19 @@ const DocViewer = ({
       setViewerUrl('');
       setError('ไม่พบ URL เอกสาร');
       setLoading(false);
-
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown, true);
-      };
+      return () => document.removeEventListener('keydown', handleKeyDown, true);
     }
 
     const resolvedUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
     const normalizedUrl = resolvedUrl.toLowerCase().split('?')[0];
-    const isPdf = effectiveViewerType === 'pdf'
-      || normalizedExtension === 'pdf'
-      || normalizedFileName.endsWith('.pdf')
-      || normalizedUrl.endsWith('.pdf')
-      || normalizedUrl.includes('/documents/');
+    const isPdf = isPdfDocument || normalizedUrl.endsWith('.pdf') || normalizedUrl.includes('/documents/');
     const encoded = encodeURIComponent(resolvedUrl);
 
     autoRetryAttemptedRef.current = false;
     setIsRetrying(false);
 
     if (isPdf) {
-      setViewerUrl(
-        shouldUsePdfCanvasViewer || isIosMobilePdf
-          ? resolvedUrl
-          : `${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`
-      );
+      setViewerUrl(shouldUsePdfCanvasViewer || isIosMobilePdf ? resolvedUrl : `${resolvedUrl}#toolbar=0&navpanes=0&pagemode=none&zoom=page-fit`);
     } else {
       setViewerUrl(`https://docs.google.com/viewer?url=${encoded}&embedded=true`);
     }
@@ -102,38 +93,30 @@ const DocViewer = ({
     setHasTimedOut(false);
     setLoading(false);
 
-    // Set a timeout to detect if the iframe is stuck (black screen)
     if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     loadTimeoutRef.current = setTimeout(() => {
-      if (!iframeLoadedRef.current) {
-        setHasTimedOut(true);
-      }
+      if (!iframeLoadedRef.current) setHasTimedOut(true);
     }, isPdf && isMobileViewport ? 12000 : 10000);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     };
-  }, [url, effectiveViewerType, normalizedExtension, normalizedFileName, isIosMobilePdf, isMobileViewport, shouldUsePdfCanvasViewer]);
+  }, [url, effectiveViewerType, normalizedExtension, normalizedFileName, isIosMobilePdf, isMobileViewport, shouldUsePdfCanvasViewer, isPdfDocument]);
 
   const handleClose = async () => {
     if (submitting) return;
-
-    // If already completed, just close
     if (completionReady) {
       onClose();
       return;
     }
-
-    // Try to mark as complete on close for Desktop (where footer is hidden)
-    // or if the user clicks X on mobile
     try {
       setSubmitting(true);
       await onComplete?.();
       onClose();
     } catch (err) {
       console.error('Auto-complete on close error:', err);
-      onClose(); // Still close even if completion fails
+      onClose();
     } finally {
       setSubmitting(false);
     }
@@ -141,24 +124,20 @@ const DocViewer = ({
 
   const handleFinishReading = async () => {
     if (submitting) return;
-
     if (completionReady) {
       onClose();
       return;
     }
-
     try {
       setSubmitting(true);
       setCompletionError('');
       const result = await onComplete?.();
-
       if (result === false) {
         setCompletionError('ไม่สามารถบันทึกความคืบหน้าได้ โปรดลองอีกครั้ง');
         return;
       }
-
       setCompletionReady(true);
-      onClose(); // Automatically close after marking complete if requested
+      onClose();
     } catch (completionRequestError) {
       console.error('Complete document lesson error:', completionRequestError);
       setCompletionError('ไม่สามารถบันทึกความคืบหน้าได้ โปรดลองอีกครั้ง');
@@ -174,13 +153,9 @@ const DocViewer = ({
     setIsRetrying(true);
 
     if (typeof onRefreshUrl === 'function') {
-      if (!silent) {
-        setLoading(true);
-      }
-
+      if (!silent) setLoading(true);
       try {
         const refreshedUrl = await onRefreshUrl();
-
         if (!refreshedUrl) {
           setLoading(false);
           setError('ไม่สามารถเชื่อมต่อเอกสารได้ในขณะนี้');
@@ -193,208 +168,94 @@ const DocViewer = ({
     } else {
       setViewerUrl((currentUrl) => currentUrl);
     }
-
     setIsRetrying(false);
   }, [onRefreshUrl]);
 
   useEffect(() => {
     document.body.classList.add('modal-open');
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
+    return () => document.body.classList.remove('modal-open');
   }, []);
 
   useEffect(() => {
-    if (!hasTimedOut || autoRetryAttemptedRef.current || typeof onRefreshUrl !== 'function') {
-      return;
-    }
-
+    if (!hasTimedOut || autoRetryAttemptedRef.current || typeof onRefreshUrl !== 'function') return;
     autoRetryAttemptedRef.current = true;
-    const retryTimer = window.setTimeout(() => {
-      handleRetryLoad({ silent: true });
-    }, 400);
-
-    return () => {
-      window.clearTimeout(retryTimer);
-    };
+    const retryTimer = window.setTimeout(() => handleRetryLoad({ silent: true }), 400);
+    return () => window.clearTimeout(retryTimer);
   }, [handleRetryLoad, hasTimedOut, onRefreshUrl]);
 
   const isGoogleViewer = viewerUrl.includes('docs.google.com/viewer');
 
   return (
     <ModalPortal>
-      <div
-        className="fixed inset-0 z-[100] flex flex-col bg-black animate-fade-in overflow-hidden h-[100dvh]"
-        onContextMenu={(event) => event.preventDefault()}
-      >
-      <style>{`@media print { .doc-viewer-print-guard { display: none !important; } }`}</style>
+      <div className="fixed inset-0 z-[100] flex flex-col bg-black animate-fade-in overflow-hidden h-[100dvh]" onContextMenu={(event) => event.preventDefault()}>
+        <style>{`@media print { .doc-viewer-print-guard { display: none !important; } }`}</style>
 
-      <div className="doc-viewer-print-guard flex h-full w-full flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-slate-950 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/20 text-primary">
-              <FileText size={18} strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-sm font-bold leading-tight text-white">{title || 'เอกสารประกอบ'}</p>
-              <div className="mt-0.5 flex items-center gap-1.5">
-                <ShieldAlert size={11} className="text-amber-400" />
-                <p className="text-[11px] font-bold tracking-[0.04em] text-amber-300">Protected • ห้ามดาวน์โหลด</p>
+        <div className="doc-viewer-print-guard flex h-full w-full flex-col overflow-hidden">
+          <DocViewerHeader title={title} onClose={handleClose} submitting={submitting} />
+
+          <div className={`relative flex flex-1 items-center justify-center ${shouldUsePdfCanvasViewer || isIosMobilePdf ? 'overflow-auto bg-white' : 'overflow-hidden bg-slate-900'}`}>
+            <DocViewerLoading show={loading} />
+            
+            {!loading && !iframeLoaded && (
+              <DocViewerTimeout 
+                show={hasTimedOut || !iframeLoaded} 
+                isRetrying={isRetrying} 
+                onRetry={handleRetryLoad} 
+                onClose={handleClose} 
+              />
+            )}
+
+            {error ? (
+              <DocViewerError error={error} onClose={onClose} />
+            ) : shouldUsePdfCanvasViewer ? (
+              <div className={`relative h-full w-full transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                <PdfCanvasViewer
+                  url={viewerUrl}
+                  onLoad={() => {
+                    setIframeLoaded(true);
+                    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+                  }}
+                  onError={(message) => {
+                    setError(message);
+                    setLoading(false);
+                    setHasTimedOut(false);
+                  }}
+                />
               </div>
-            </div>
+            ) : (
+              <div className={`${isIosMobilePdf ? 'relative h-full w-full overflow-auto bg-white' : 'absolute inset-0 h-full w-full overflow-hidden'} transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                <iframe
+                  key={viewerUrl}
+                  src={viewerUrl}
+                  scrolling={isIosMobilePdf ? 'yes' : 'auto'}
+                  onLoad={() => {
+                    setIframeLoaded(true);
+                    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+                  }}
+                  title={title || 'เอกสาร'}
+                  style={isIosMobilePdf ? {
+                    display: 'block', width: '100%', height: '100%', minHeight: '100%', border: 'none', background: '#ffffff', overflow: 'auto', WebkitOverflowScrolling: 'touch'
+                  } : isGoogleViewer ? {
+                    position: 'absolute', top: '-50px', left: 0, width: '100%', height: 'calc(100% + 50px)', border: 'none'
+                  } : {
+                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none'
+                  }}
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
+
+            <div ref={overlayRef} className="absolute inset-0 z-10" onContextMenu={(event) => event.preventDefault()} style={{ pointerEvents: 'none' }} />
           </div>
-          <button
-            onClick={handleClose}
-            disabled={submitting}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition-all hover:scale-105 hover:bg-white/20 active:scale-95 disabled:opacity-50"
-          >
-            {submitting ? <Loader2 size={16} className="animate-spin" /> : <X size={18} />}
-          </button>
-        </div>
 
-        {/* Content Area */}
-        <div className={`relative flex flex-1 items-center justify-center ${shouldUsePdfCanvasViewer || isIosMobilePdf ? 'overflow-auto bg-white' : 'overflow-hidden bg-slate-900'}`}>
-          {loading && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-slate-950/80 backdrop-blur-md transition-opacity">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-sm font-medium animate-pulse text-white/80">กำลังเตรียมเอกสารแบบปลอดภัย...</p>
-            </div>
-          )}
-
-          {!iframeLoaded && !loading && (
-            <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 transition-opacity ${hasTimedOut ? 'bg-slate-950/50' : ''}`}>
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-sm font-medium animate-pulse text-white/80">
-                {isRetrying ? 'กำลังลองเชื่อมต่อเอกสารอีกครั้ง...' : 'กำลังโหลดเอกสาร...'}
-              </p>
-              
-              {hasTimedOut && (
-                <div className="mt-8 flex flex-col items-center gap-4 animate-in fade-in zoom-in slide-in-from-bottom-4 duration-500">
-                  <div className="text-center px-6">
-                    <p className="text-sm font-bold text-white mb-1">หน้าจอค้างหรือไม่ยอมโหลด?</p>
-                    <p className="text-xs text-white/50">บริการพรีวิวอาจใช้เวลานานกว่าปกติ</p>
-                  </div>
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={handleRetryLoad}
-                      className="rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold text-white hover:bg-white/10"
-                    >
-                      ลองโหลดใหม่
-                    </button>
-                    <button
-                      onClick={handleClose}
-                      className="relative rounded-xl bg-primary px-4 py-2 text-xs font-bold text-transparent shadow-lg"
-                    >
-                      <span className="absolute inset-0 flex items-center justify-center text-white">ปิดเอกสาร</span>
-                      เปิดไฟล์โดยตรง
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {error ? (
-            <div className="max-w-sm rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-              <ShieldAlert className="mx-auto mb-3 h-12 w-12 text-red-500" />
-              <p className="mb-1 font-bold text-white">เกิดข้อผิดพลาด</p>
-              <p className="text-sm text-red-400">{error}</p>
-              <button onClick={onClose} className="mt-4 rounded-xl bg-white/10 px-6 py-2 text-sm font-bold text-white">
-                ปิดหน้าต่าง
-              </button>
-            </div>
-          ) : shouldUsePdfCanvasViewer ? (
-            <div className={`relative h-full w-full transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
-              <PdfCanvasViewer
-                url={viewerUrl}
-                onLoad={() => {
-                  setIframeLoaded(true);
-                  if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
-                }}
-                onError={(message) => {
-                  setError(message);
-                  setLoading(false);
-                  setHasTimedOut(false);
-                }}
-              />
-            </div>
-          ) : (
-            <div className={`${isIosMobilePdf ? 'relative h-full w-full overflow-auto bg-white' : 'absolute inset-0 h-full w-full overflow-hidden'} transition-opacity duration-700 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}>
-              <iframe
-                key={viewerUrl}
-                src={viewerUrl}
-                scrolling={isIosMobilePdf ? 'yes' : 'auto'}
-                onLoad={() => {
-                  setIframeLoaded(true);
-                  if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
-                }}
-                title={title || 'เอกสาร'}
-                style={isIosMobilePdf ? {
-                  display: 'block',
-                  width: '100%',
-                  height: '100%',
-                  minHeight: '100%',
-                  border: 'none',
-                  background: '#ffffff',
-                  overflow: 'auto',
-                  WebkitOverflowScrolling: 'touch'
-                } : isGoogleViewer ? {
-                  position: 'absolute',
-                  top: '-50px',
-                  left: 0,
-                  width: '100%',
-                  height: 'calc(100% + 50px)',
-                  border: 'none'
-                } : {
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  border: 'none'
-                }}
-                referrerPolicy="no-referrer"
-              />
-            </div>
-          )}
-
-          <div
-            ref={overlayRef}
-            className="absolute inset-0 z-10"
-            onContextMenu={(event) => event.preventDefault()}
-            style={{ pointerEvents: 'none' }}
+          <DocViewerFooter 
+            show={!shouldUsePdfCanvasViewer}
+            completionReady={completionReady}
+            submitting={submitting}
+            completionError={completionError}
+            onFinishReading={handleFinishReading}
           />
         </div>
-
-        {/* Footer - Compact Single Button (Mobile Only) */}
-        <div className={`${shouldUsePdfCanvasViewer ? 'hidden' : 'flex md:hidden'} shrink-0 flex-col border-t border-white/10 bg-slate-950 p-6 pb-8 md:p-8`}>
-          <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
-             {completionError && <p className="text-center text-xs font-medium text-red-400">{completionError}</p>}
-             
-             <button
-               onClick={handleFinishReading}
-               disabled={submitting}
-               className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-black transition-all active:scale-95 sm:h-14 sm:text-base ${
-                 completionReady 
-                   ? 'border border-white/10 bg-white/10 text-white hover:bg-white/20' 
-                   : 'bg-primary text-white shadow-xl shadow-primary/20'
-               }`}
-             >
-               {submitting ? (
-                 <>
-                   <Loader2 size={18} className="animate-spin" />
-                   กำลังบันทึก...
-                 </>
-               ) : (
-                 <>
-                   {completionReady ? 'ปิดเอกสาร' : 'อ่านจบแล้ว • ปิดเอกสาร'}
-                 </>
-               )}
-             </button>
-          </div>
-        </div>
-      </div>
       </div>
     </ModalPortal>
   );

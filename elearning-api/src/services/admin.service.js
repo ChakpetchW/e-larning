@@ -1,5 +1,6 @@
 const prisma = require('../utils/prisma');
 const bcrypt = require('bcrypt');
+const authHelpers = require('../utils/auth.helpers');
 
 const courseInclude = {
     category: true,
@@ -118,28 +119,13 @@ const sanitizeName = (value, entityLabel) => {
     return name;
 };
 
-const mapUserRecord = (user) => {
-    const { departmentRef, tier, ...rest } = user;
-
-    return {
-        ...rest,
-        departmentId: departmentRef?.id || rest.departmentId || null,
-        department: departmentRef?.name || rest.department || null,
-        tierId: tier?.id || rest.tierId || null,
-        tier: tier ? {
-            id: tier.id,
-            name: tier.name,
-            accessAdmin: tier.accessAdmin
-        } : null,
-        employmentDate: rest.employmentDate || rest.createdAt
-    };
-};
+const mapUserRecord = authHelpers.mapUserRecord;
 
 const mapCourseRecord = (course) => {
     const { departmentAccess, tierAccess, ...rest } = course;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
-    const isArchived = Boolean(rest.isTemporary && rest.expiredAt && new Date(rest.expiredAt) <= new Date());
+    const isArchived = authHelpers.isTimedEntityExpired(rest);
 
     return {
         ...rest,
@@ -155,7 +141,7 @@ const mapCategoryRecord = (category) => {
     const { departmentAccess, tierAccess, ...rest } = category;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
-    const isArchived = Boolean(rest.isTemporary && rest.expiredAt && new Date(rest.expiredAt) <= new Date());
+    const isArchived = authHelpers.isTimedEntityExpired(rest);
 
     return {
         ...rest,
@@ -171,101 +157,17 @@ const mapCategoryRecord = (category) => {
 const ADMIN_PANEL_ROLES = ['admin', 'manager'];
 const MANAGED_USER_ROLES = ['user', 'manager'];
 
-const getActorContext = async (authUser) => {
-    if (!authUser?.userId) {
-        throw new Error('Authentication required');
-    }
+const getActorContext = (authUser) => authHelpers.getActorContext(prisma, authUser);
 
-    const actor = await prisma.user.findUnique({
-        where: { id: authUser.userId },
-        include: {
-            departmentRef: true,
-            tier: true
-        }
-    });
+const buildAdminManagedUsersWhere = (actor, extraWhere = {}) => authHelpers.buildUserManagementWhere(actor, extraWhere);
 
-    if (!actor) {
-        throw new Error('User not found');
-    }
-
-    const roleWithTierAccess = actor.role === 'admin'
-        ? 'admin'
-        : (actor.role === 'manager' || actor.tier?.accessAdmin)
-            ? 'manager'
-            : 'user';
-
-    if (!ADMIN_PANEL_ROLES.includes(roleWithTierAccess)) {
-        throw new Error('Admin panel access required');
-    }
-
-    const mappedActor = {
-        ...mapUserRecord(actor),
-        role: roleWithTierAccess // Override role for internal scoping if granted via tier
-    };
-
-    if (mappedActor.role === 'manager' && !mappedActor.departmentId) {
-        throw new Error('Manager account must belong to a department');
-    }
-
-    return mappedActor;
-};
-
-const buildAdminManagedUsersWhere = (actor, extraWhere = {}) => {
-    if (actor.role === 'manager') {
-        return {
-            role: 'user',
-            departmentId: actor.departmentId,
-            ...extraWhere
-        };
-    }
-
-    return {
-        role: {
-            in: MANAGED_USER_ROLES
-        },
-        ...extraWhere
-    };
-};
-
-const buildDepartmentVisibleCourseWhere = (departmentId) => ({
-    status: 'PUBLISHED',
-    OR: [
-        { visibleToAll: true },
-        {
-            visibleToAll: false,
-            AND: [
-                {
-                    OR: [
-                        { departmentAccess: { none: {} } },
-                        {
-                            departmentAccess: {
-                                some: {
-                                    departmentId
-                                }
-                            }
-                        }
-                    ]
-                },
-                { tierAccess: { none: {} } }
-            ]
-        }
-    ]
-});
+const buildDepartmentVisibleCourseWhere = (departmentId) => authHelpers.buildVisibilityWhere({ departmentId, isManager: true }, { status: 'PUBLISHED' });
 
 const buildScopedUserWhere = async (actor, targetUserId) => {
-    if (actor.role === 'manager') {
-        return {
-            id: targetUserId,
-            role: 'user',
-            departmentId: actor.departmentId
-        };
-    }
-
+    const where = authHelpers.buildUserManagementWhere(actor);
     return {
-        id: targetUserId,
-        role: {
-            in: MANAGED_USER_ROLES
-        }
+        ...where,
+        id: targetUserId
     };
 };
 

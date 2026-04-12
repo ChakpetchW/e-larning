@@ -39,12 +39,12 @@ const OngoingCourses = () => {
       {/* Premium Hero Section */}
       <section className="relative overflow-hidden rounded-[2rem] border border-white/70 mesh-bg-premium p-6 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.18)] md:rounded-[2.75rem] md:p-8">
         <div className="absolute right-0 top-0 h-full w-1/3 overflow-hidden opacity-40">
-          <div className="absolute right-[-10%] top-[-10%] h-[150%] w-[150%] rounded-full bg-gradient-to-br from-primary/20 via-amber-400/10 to-transparent blur-[100px]"></div>
+          <div className="absolute right-[-10%] top-[-10%] h-[150%] w-[150%] rounded-full bg-gradient-to-br from-primary/20 via-warning/10 to-transparent blur-[100px]"></div>
         </div>
 
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-[12px] font-black tracking-[0.04em] text-primary">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-light px-4 py-1.5 text-[12px] font-black tracking-[0.04em] text-primary">
               <Clock size={14} />
               กำลังดำเนินการ
             </div>

@@ -3,11 +3,16 @@ import { Check, X, Clock } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import AdminTable from '../../components/admin/AdminTable';
+import { useToast } from '../../context/ToastContext';
+import useConfirm from '../../hooks/useConfirm';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 
 const RedeemRequests = () => {
   const [requests, setRequests] = useState([]);
   const [filter, setFilter] = useState('PENDING'); // PENDING or ALL
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
+  const { confirm, ConfirmDialogProps } = useConfirm();
 
   useEffect(() => {
     fetchRequests();
@@ -25,15 +30,22 @@ const RedeemRequests = () => {
   };
 
   const handleUpdateStatus = async (id, status) => {
-    if (confirm(`ยืนยันการ${status === 'APPROVED' ? 'อนุมัติ' : 'ปฏิเสธ'}คำขอนี้?`)) {
-        try {
-            await adminAPI.updateRedeemStatus(id, status);
-            alert('อัปเดตสถานะสำเร็จ');
-            fetchRequests();
-        } catch (error) {
-            console.error('Update redeem error:', error);
-            alert('อัปเดตสถานะล้มเหลว');
-        }
+    const actionLabel = status === 'APPROVED' ? 'อนุมัติ' : 'ปฏิเสธ';
+    const ok = await confirm({
+      title: `ยืนยันการ${actionLabel}`,
+      message: `ยืนยันการ${actionLabel}คำขอนี้?`,
+      confirmLabel: actionLabel,
+      variant: status === 'APPROVED' ? 'primary' : 'danger',
+    });
+    if (!ok) return;
+
+    try {
+        await adminAPI.updateRedeemStatus(id, status);
+        toast.success('อัปเดตสถานะสำเร็จ');
+        fetchRequests();
+    } catch (error) {
+        console.error('Update redeem error:', error);
+        toast.error('อัปเดตสถานะล้มเหลว');
     }
   };
 
@@ -93,8 +105,8 @@ const RedeemRequests = () => {
             <td className="p-4 text-center">
               {req.status === 'PENDING' ? (
                 <div className="flex justify-center gap-2">
-                  <button onClick={() => handleUpdateStatus(req.id, 'APPROVED')} className="p-2 bg-green-50 text-success hover:bg-green-500 hover:text-white rounded-lg transition-all" title="อนุมัติ"><Check size={18} /></button>
-                  <button onClick={() => handleUpdateStatus(req.id, 'REJECTED')} className="p-2 bg-red-50 text-danger hover:bg-red-500 hover:text-white rounded-lg transition-all" title="ปฏิเสธ"><X size={18} /></button>
+                  <button onClick={() => handleUpdateStatus(req.id, 'APPROVED')} className="p-2 bg-success-bg text-success hover:bg-success hover:text-white rounded-lg transition-all" title="อนุมัติ"><Check size={18} /></button>
+                  <button onClick={() => handleUpdateStatus(req.id, 'REJECTED')} className="p-2 bg-danger-bg text-danger hover:bg-danger hover:text-white rounded-lg transition-all" title="ปฏิเสธ"><X size={18} /></button>
                 </div>
               ) : (
                 <span className="text-slate-300 text-xs font-black">PROCESSED</span>
@@ -103,6 +115,7 @@ const RedeemRequests = () => {
           </tr>
         )}
       />
+      <ConfirmDialog {...ConfirmDialogProps} />
     </div>
   );
 };

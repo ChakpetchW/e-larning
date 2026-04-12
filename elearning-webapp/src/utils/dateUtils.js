@@ -77,3 +77,53 @@ export const formatThaiFullDate = (value) => {
 
   return `วันที่ ${dateStr}`;
 };
+
+/**
+ * Returns the Buddhist Era (BE) year for a date
+ * @param {string|Date} value - The date
+ * @returns {number|string} - Year + 543 or '-'
+ */
+export const toThaiYear = (value) => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return '-';
+  return date.getFullYear() + 543;
+};
+
+/**
+ * Checks whether the given timestamp has already expired.
+ * Useful as a UI safety net when the backend accidentally returns stale records.
+ * @param {string|Date} value
+ * @param {Date} referenceDate
+ * @returns {boolean}
+ */
+export const isExpiredAt = (value, referenceDate = new Date()) => {
+  if (!value) return false;
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return false;
+  return date <= referenceDate;
+};
+
+/**
+ * Filters temporary course/category-like items that should no longer be visible.
+ * @param {Array} items
+ * @param {Date} referenceDate
+ * @returns {Array}
+ */
+export const filterVisibleTimedItems = (items, referenceDate = new Date()) => {
+  if (!Array.isArray(items)) return [];
+
+  return items.filter((item) => !item?.isTemporary || !isExpiredAt(item.expiredAt, referenceDate));
+};
+
+/**
+ * Filters visible learning goals based on expiryDate.
+ * @param {Array} goals
+ * @param {Date} referenceDate
+ * @returns {Array}
+ */
+export const filterVisibleGoals = (goals, referenceDate = new Date()) => {
+  if (!Array.isArray(goals)) return [];
+
+  return goals.filter((goal) => !isExpiredAt(goal?.expiryDate, referenceDate));
+};

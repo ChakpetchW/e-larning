@@ -66,7 +66,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
               <span
                 className={`inline-flex rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
                   isCompleted
-                    ? 'bg-emerald-50 text-emerald-700'
+                    ? 'bg-success-bg text-success-text'
                     : 'bg-primary/10 text-primary'
                 }`}
               >
@@ -111,7 +111,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
 
             {course.isTemporary && (
               <div className="mt-3 flex justify-center">
-                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[13px] font-black uppercase tracking-[0.08em] text-amber-700 shadow-sm">
+                <span className="inline-flex rounded-full border border-warning-border bg-warning-bg px-3.5 py-1.5 text-[13px] font-black uppercase tracking-[0.08em] text-warning-text shadow-sm">
                   {temporaryLabel}
                 </span>
               </div>

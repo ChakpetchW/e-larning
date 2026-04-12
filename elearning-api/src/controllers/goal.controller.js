@@ -11,7 +11,8 @@ const createGoal = asyncHandler(async (req, res) => {
 });
 
 const getGoals = asyncHandler(async (req, res) => {
-    const goals = await goalService.getGoals(req.user);
+    const includeExpired = String(req.query.includeExpired).toLowerCase() === 'true';
+    const goals = await goalService.getGoals(req.user, { includeExpired });
     res.json({
         success: true,
         data: goals

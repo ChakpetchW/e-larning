@@ -22,4 +22,13 @@
     - **Footer Area (`border-t`)**:
         - **Left Side**: Always place the **Progress Bar** and **Percentage** here (left-aligned).
         - **Right Side**: Always place **Points** and **"แต้มรวม"** label here (right-aligned).
-    - **Hover Effects**: Maintain `-translate-y-1.5` and amplified shadow on hover to ensure a premium interactive feel.
+
+- **Standard Clean Code & Architecture Rules (v1.7.0)**:
+    - **No Blocking UI**: NEVER use `window.alert()` or `window.confirm()`. Use `useToast()` for notifications and `useConfirm()` for destructive actions.
+    - **Auth & Permissions**: All backend services MUST use `authHelpers.getActorContext(prisma, authUser)` for actor resolution and `authHelpers.buildVisibilityWhere` for Prisma filtering. Never implement duplicate role-checking logic in local services.
+    - **Visibility Scoping**: When fetching Courses or Categories, always apply the scoping logic from `auth.helpers.js` to ensure users only see content allowed for their Department or Tier.
+    - **Component Sustainability**: Keep files under 400 lines. If a component grows larger, extract logic into a dedicated custom hook or sub-component.
+    - **Localization**: No hardcoded Thai strings in UI code. Add all labels to `src/locales/th.json` and use the `t()` translation hook.
+    - **Date Standardization**: Static date formatting must use `dateUtils.js`. Thai year conversion must use the `toThaiYear` helper.
+    - **Database Security**: Never hardcode credentials. Use `.env` variables and ensure `DATABASE_URL` (pooler) and `DIRECT_URL` (direct) are correctly mapped in production (Vercel).
+
