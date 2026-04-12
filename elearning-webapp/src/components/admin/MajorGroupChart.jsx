@@ -14,7 +14,7 @@ const TYPE_COLORS = {
 
 const MajorGroupChart = ({ data, onSelectGroup }) => {
   return (
-    <div className="card flex min-w-0 flex-col p-6 h-full">
+    <div className="card flex min-w-0 flex-col p-6 h-full card-no-lift">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <PieIcon size={20} className="text-indigo-600" />

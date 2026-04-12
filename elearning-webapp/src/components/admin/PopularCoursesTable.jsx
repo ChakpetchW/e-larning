@@ -2,7 +2,7 @@ import React from 'react';
 
 const PopularCoursesTable = ({ courses }) => {
   return (
-    <div className="card p-6 lg:col-span-2 overflow-hidden">
+    <div className="card p-6 lg:col-span-2 overflow-hidden card-no-lift">
       <h3 className="text-lg font-bold mb-6">คอร์สยอดนิยม</h3>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">

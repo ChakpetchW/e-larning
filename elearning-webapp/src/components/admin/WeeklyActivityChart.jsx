@@ -6,7 +6,7 @@ import {
 
 const WeeklyActivityChart = ({ data }) => {
   return (
-    <div className="card flex min-w-0 flex-col p-6">
+    <div className="card flex min-w-0 flex-col p-6 card-no-lift">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
           <BarChart2 size={20} className="text-primary" />

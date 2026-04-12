@@ -8,7 +8,7 @@ const COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
 
 const CategoryDistributionChart = ({ data, totalCourses }) => {
   return (
-    <div className="card flex min-w-0 flex-col p-6">
+    <div className="card flex min-w-0 flex-col p-6 card-no-lift">
       <div className="flex items-center gap-2 mb-6">
         <PieIcon size={20} className="text-warning" />
         <h3 className="text-lg font-bold">สัดส่วนตามหมวดหมู่ (Categories)</h3>

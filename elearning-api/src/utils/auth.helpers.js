@@ -1,6 +1,59 @@
 const ADMIN_PANEL_ROLES = ['admin', 'manager'];
 const MANAGED_USER_ROLES = ['user', 'manager'];
 
+const isExpiredAt = (value, referenceDate = new Date()) => {
+    if (!value) {
+        return false;
+    }
+
+    const expiryDate = value instanceof Date ? value : new Date(value);
+
+    if (Number.isNaN(expiryDate.getTime())) {
+        return false;
+    }
+
+    return expiryDate <= referenceDate;
+};
+
+const buildTimedVisibilityWhere = ({
+    referenceDate = new Date(),
+    expiresAtField = 'expiredAt',
+    temporaryFlagField = 'isTemporary'
+} = {}) => {
+    const visibleTimeClauses = [
+        { [expiresAtField]: null },
+        { [expiresAtField]: { gt: referenceDate } }
+    ];
+
+    if (!temporaryFlagField) {
+        return {
+            OR: visibleTimeClauses
+        };
+    }
+
+    return {
+        OR: [
+            { [temporaryFlagField]: false },
+            ...visibleTimeClauses
+        ]
+    };
+};
+
+const isTimedEntityExpired = (
+    entity,
+    { referenceDate = new Date(), expiresAtField = 'expiredAt', temporaryFlagField = 'isTemporary' } = {}
+) => {
+    if (!entity) {
+        return false;
+    }
+
+    if (temporaryFlagField && entity[temporaryFlagField] === false) {
+        return false;
+    }
+
+    return isExpiredAt(entity[expiresAtField], referenceDate);
+};
+
 /**
  * Standardizes the user record into a clean object with consistent field names.
  * Used for mapping Prisma results to the format expected by the frontend/logic.
@@ -106,13 +159,7 @@ const buildVisibilityWhere = (actor, { status = 'PUBLISHED', referenceDate = new
     }
 
     // Temporary items visibility logic
-    const temporaryWhere = {
-        OR: [
-            { isTemporary: false },
-            { expiredAt: null },
-            { expiredAt: { gt: referenceDate } }
-        ]
-    };
+    const temporaryWhere = buildTimedVisibilityWhere({ referenceDate });
 
     const departmentConditions = [{ departmentAccess: { none: {} } }];
     if (actor.departmentId) {
@@ -151,7 +198,7 @@ const canAccessEntity = (actor, entity, referenceDate = new Date()) => {
     if (actor.isAdmin) return true;
 
     // 1. Temporary status check
-    if (entity.isTemporary && entity.expiredAt && new Date(entity.expiredAt) <= referenceDate) {
+    if (isTimedEntityExpired(entity, { referenceDate })) {
         return false;
     }
 
@@ -187,12 +234,73 @@ const canAccessEntity = (actor, entity, referenceDate = new Date()) => {
     return actorTierOrder <= Math.max(...requiredOrders);
 };
 
+const buildGoalVisibilityWhere = (
+    actor,
+    { referenceDate = new Date(), includeExpired = false, includeAllScopes = false } = {}
+) => {
+    const filters = [{ status: 'ACTIVE' }];
+
+    if (!includeExpired) {
+        filters.push(buildTimedVisibilityWhere({
+            referenceDate,
+            expiresAtField: 'expiryDate',
+            temporaryFlagField: null
+        }));
+    }
+
+    if (!(includeAllScopes && actor.isAdmin)) {
+        const scopeClauses = [{ scope: 'GLOBAL' }];
+
+        if (actor.departmentId) {
+            scopeClauses.push({
+                scope: 'DEPARTMENT',
+                departmentId: actor.departmentId
+            });
+        }
+
+        filters.push({
+            OR: scopeClauses
+        });
+    }
+
+    return filters.length === 1 ? filters[0] : { AND: filters };
+};
+
+const canAccessGoal = (
+    actor,
+    goal,
+    { referenceDate = new Date(), includeExpired = false, includeAllScopes = false } = {}
+) => {
+    if (!goal || goal.status !== 'ACTIVE') {
+        return false;
+    }
+
+    if (!includeExpired && isTimedEntityExpired(goal, {
+        referenceDate,
+        expiresAtField: 'expiryDate',
+        temporaryFlagField: null
+    })) {
+        return false;
+    }
+
+    if (!(includeAllScopes && actor.isAdmin) && goal.scope === 'DEPARTMENT' && goal.departmentId !== actor.departmentId) {
+        return false;
+    }
+
+    return true;
+};
+
 module.exports = {
     getActorContext,
     mapUserRecord,
     buildUserManagementWhere,
     buildVisibilityWhere,
     canAccessEntity,
+    buildGoalVisibilityWhere,
+    canAccessGoal,
+    buildTimedVisibilityWhere,
+    isExpiredAt,
+    isTimedEntityExpired,
     ADMIN_PANEL_ROLES,
     MANAGED_USER_ROLES
 };

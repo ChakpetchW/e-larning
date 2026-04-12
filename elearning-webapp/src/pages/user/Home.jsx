@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { PlayCircle, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
-import { formatThaiFullDate } from '../../utils/dateUtils';
+import { filterVisibleGoals, filterVisibleTimedItems, formatThaiFullDate } from '../../utils/dateUtils';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
 import SectionHeader from '../../components/common/SectionHeader';
@@ -37,12 +37,15 @@ const Home = () => {
           userAPI.getPoints(),
           userAPI.getGoals()
         ]);
-        setCourses(Array.isArray(courseRes?.data) ? courseRes.data : []);
-        setCategories(Array.isArray(catRes?.data) ? catRes.data : []);
+        const referenceDate = new Date();
+        const visibleCourses = filterVisibleTimedItems(courseRes?.data, referenceDate);
+        const visibleCategories = filterVisibleTimedItems(catRes?.data, referenceDate);
+        const visibleGoals = filterVisibleGoals(goalsRes?.data, referenceDate);
+
+        setCourses(visibleCourses);
+        setCategories(visibleCategories);
         setPoints(pointsRes?.data?.balance || 0);
-        
-        const goals = Array.isArray(goalsRes?.data) ? goalsRes.data : [];
-        setActiveGoals(goals); 
+        setActiveGoals(visibleGoals);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {

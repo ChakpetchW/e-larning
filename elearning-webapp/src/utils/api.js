@@ -167,7 +167,7 @@ export const adminAPI = {
   updateSetting: (key, value) => api.patch(`/settings/${key}`, { value }),
   
   // Goals
-  getGoals: () => api.get('/goals'),
+  getGoals: () => api.get('/goals?includeExpired=true'),
   createGoal: (data) => api.post('/goals', data),
   deleteGoal: (id) => api.delete(`/goals/${id}`),
   getGoalReport: (id) => api.get(`/goals/${id}/report`),

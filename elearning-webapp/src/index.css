@@ -156,6 +156,9 @@
     transform: translateY(-2px);
     border-color: rgba(226, 232, 240, 0.8);
   }
+  .card-no-lift:hover {
+    transform: none !important;
+  }
   .badge {
     @apply inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider leading-none transition-all;
   }

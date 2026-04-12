@@ -1,5 +1,6 @@
 const prisma = require('../utils/prisma');
 const authHelpers = require('../utils/auth.helpers');
+const ErrorResponse = require('../utils/errorResponse');
 
 const createGoal = async (data, authUser) => {
     const { title, type, targetCount, expiryDate, scope, departmentId, courseIds } = data;
@@ -50,17 +51,16 @@ const createGoal = async (data, authUser) => {
     });
 };
 
-const getGoals = async (authUser) => {
+const getGoals = async (authUser, options = {}) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
-    
-    // All users (Admin, Manager, User) see their department's goals AND global goals
-    let where = {
-        OR: [
-            { scope: 'GLOBAL' },
-            { AND: [{ scope: 'DEPARTMENT' }, { departmentId: actor?.departmentId || null }] }
-        ],
-        status: 'ACTIVE'
-    };
+    const referenceDate = new Date();
+    const includeExpired = Boolean(options.includeExpired && actor.canAccessAdminPanel);
+    const includeAllScopes = Boolean(options.includeExpired && actor.isAdmin);
+    const where = authHelpers.buildGoalVisibilityWhere(actor, {
+        referenceDate,
+        includeExpired,
+        includeAllScopes
+    });
 
     return await prisma.learningGoal.findMany({
         where,
@@ -82,6 +82,7 @@ const getGoals = async (authUser) => {
 
 const getGoalDetails = async (id, authUser) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
+    const referenceDate = new Date();
 
     const goal = await prisma.learningGoal.findUnique({
         where: { id },
@@ -101,12 +102,8 @@ const getGoalDetails = async (id, authUser) => {
         }
     });
 
-    if (!goal || goal.status !== 'ACTIVE') {
-        throw new Error('Goal not found or inactive');
-    }
-
-    if (goal.scope === 'DEPARTMENT' && goal.departmentId !== actor.departmentId) {
-        throw new Error('Not authorized to view this goal');
+    if (!authHelpers.canAccessGoal(actor, goal, { referenceDate })) {
+        throw new ErrorResponse('Goal not found', 404);
     }
 
     return goal;

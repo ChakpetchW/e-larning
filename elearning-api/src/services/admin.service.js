@@ -125,7 +125,7 @@ const mapCourseRecord = (course) => {
     const { departmentAccess, tierAccess, ...rest } = course;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
-    const isArchived = Boolean(rest.isTemporary && rest.expiredAt && new Date(rest.expiredAt) <= new Date());
+    const isArchived = authHelpers.isTimedEntityExpired(rest);
 
     return {
         ...rest,
@@ -141,7 +141,7 @@ const mapCategoryRecord = (category) => {
     const { departmentAccess, tierAccess, ...rest } = category;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
-    const isArchived = Boolean(rest.isTemporary && rest.expiredAt && new Date(rest.expiredAt) <= new Date());
+    const isArchived = authHelpers.isTimedEntityExpired(rest);
 
     return {
         ...rest,
