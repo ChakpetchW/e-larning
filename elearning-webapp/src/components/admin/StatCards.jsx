@@ -33,7 +33,7 @@ const StatCards = ({ stats, isFullAdmin }) => {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {statCardsData.map((stat) => (
         <div key={stat.title} className="card p-6 flex items-center gap-5 card-no-lift hover:border-primary/20 transition-all group">
-          <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+          <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} transition-transform`}>
             {stat.icon}
           </div>
           <div>

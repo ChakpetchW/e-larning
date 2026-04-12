@@ -159,6 +159,12 @@
   .card-no-lift:hover {
     transform: none !important;
   }
+  /* Disable all card lift/movement in Admin Panel */
+  .admin-main .card:hover {
+    transform: none !important;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.02) !important;
+    border-color: rgba(226, 232, 240, 0.4) !important;
+  }
   .badge {
     @apply inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider leading-none transition-all;
   }
