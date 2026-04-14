@@ -203,9 +203,27 @@ const VideoPlayer = ({ url, onEnded }) => {
             controls: [
               'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'
             ],
-            settings: [],
-            youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 },
-            vimeo: { byline: false, portrait: false, title: false, transparent: false },
+            quality: {
+              default: 1080,
+              options: [4320, 2880, 2160, 1440, 1080, 720, 540, 480, 360, 240],
+              forced: true,
+              onChange: (e) => console.log('Quality changed to:', e),
+            },
+            youtube: { 
+              noCookie: true, 
+              rel: 0, 
+              showinfo: 0, 
+              iv_load_policy: 3, 
+              modestbranding: 1,
+              vq: 'hd1080' // YouTube quality hint
+            },
+            vimeo: { 
+              byline: false, 
+              portrait: false, 
+              title: false, 
+              transparent: false,
+              quality: '1080p' // Vimeo quality hint
+            },
           }}
           onEnd={onEnded}
           onError={() => setPlaybackError('error')}
