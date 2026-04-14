@@ -1,17 +1,35 @@
 import axios from 'axios';
+import { DEFAULT_VALUES } from './constants/defaults';
+import { API_DEFAULTS } from './constants/api';
 
 // Smart API URL Detection
 const getApiUrl = () => {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  const configuredApiUrl = import.meta.env.VITE_API_URL;
+  if (configuredApiUrl) return configuredApiUrl;
   if (typeof window !== 'undefined') {
-    // If running in browser on Vercel, use relative /api path
-    return `${window.location.origin}/api`;
+    return new URL(API_DEFAULTS.API_PATH, window.location.origin).toString();
   }
-  return 'http://localhost:5000/api';
+  return new URL(API_DEFAULTS.API_PATH, API_DEFAULTS.LOCAL_API_ORIGIN).toString();
+};
+
+const getBaseUrl = (apiUrl) => {
+  if (/^https?:\/\//i.test(apiUrl)) {
+    return new URL('.', apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`).toString().replace(/\/$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+
+  if (apiUrl.endsWith(API_DEFAULTS.API_PATH)) {
+    return apiUrl.slice(0, -API_DEFAULTS.API_PATH.length) || '';
+  }
+
+  return apiUrl.replace(/\/$/, '');
 };
 
 const API_URL = getApiUrl();
-const BASE_URL = API_URL.replace('/api', '');
+const BASE_URL = getBaseUrl(API_URL);
 
 export const getFullUrl = (url) => {
   if (!url) return '';
@@ -20,7 +38,7 @@ export const getFullUrl = (url) => {
   return url;
 };
 
-export const DEFAULT_COURSE_IMAGE = 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&q=80';
+export const DEFAULT_COURSE_IMAGE = DEFAULT_VALUES.DEFAULT_COURSE_IMAGE;
 const api = axios.create({
   baseURL: API_URL,
   headers: {

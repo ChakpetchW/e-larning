@@ -15,12 +15,14 @@ import {
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 import { useToast } from '../../context/ToastContext';
+import { FILTER_VALUES } from '../../utils/constants/filters';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const UserDetailModalContent = ({ loading, detail, onClose }) => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('learning');
-  const [filterMonth, setFilterMonth] = useState('ALL');
-  const [filterYear, setFilterYear] = useState('ALL');
+  const [filterMonth, setFilterMonth] = useState(FILTER_VALUES.ALL);
+  const [filterYear, setFilterYear] = useState(FILTER_VALUES.ALL);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -34,15 +36,15 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
 
   const filteredEnrollments = enrollments.filter(e => {
     const date = new Date(e.startedAt);
-    const monthMatch = filterMonth === 'ALL' || date.getMonth() === parseInt(filterMonth);
-    const yearMatch = filterYear === 'ALL' || date.getFullYear() === parseInt(filterYear);
+    const monthMatch = filterMonth === FILTER_VALUES.ALL || date.getMonth() === parseInt(filterMonth);
+    const yearMatch = filterYear === FILTER_VALUES.ALL || date.getFullYear() === parseInt(filterYear);
     return monthMatch && yearMatch;
   });
 
   const filteredPointsHistory = pointsHistory.filter(e => {
     const date = new Date(e.createdAt);
-    const monthMatch = filterMonth === 'ALL' || date.getMonth() === parseInt(filterMonth);
-    const yearMatch = filterYear === 'ALL' || date.getFullYear() === parseInt(filterYear);
+    const monthMatch = filterMonth === FILTER_VALUES.ALL || date.getMonth() === parseInt(filterMonth);
+    const yearMatch = filterYear === FILTER_VALUES.ALL || date.getFullYear() === parseInt(filterYear);
     return monthMatch && yearMatch;
   });
 
@@ -70,7 +72,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
       data.forEach(item => {
         const started = item.startedAt ? formatThaiDateTime(item.startedAt) : '-';
         const completed = item.completedAt ? formatThaiDateTime(item.completedAt) : '-';
-        const status = item.status === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน';
+        const status = item.status === ENROLLMENT_STATUS.COMPLETED ? 'เรียนจบแล้ว' : 'กำลังเรียน';
         csvContent += `"${item.course.title}","${item.course.categoryName || '-'}","${started}","${completed}","${Math.round(item.progressPercent || 0)}%","${status}"\n`;
       });
     } else {
@@ -184,7 +186,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                           value={filterMonth}
                           onChange={(e) => setFilterMonth(e.target.value)}
                         >
-                          <option value="ALL">ทุกเดือน</option>
+                          <option value={FILTER_VALUES.ALL}>ทุกเดือน</option>
                           {months.map((m, i) => (
                             <option key={i} value={i}>{m}</option>
                           ))}
@@ -195,7 +197,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                           value={filterYear}
                           onChange={(e) => setFilterYear(e.target.value)}
                         >
-                          <option value="ALL">ทุกปี</option>
+                          <option value={FILTER_VALUES.ALL}>ทุกปี</option>
                           {years.map(y => (
                             <option key={y} value={y}>{y}</option>
                           ))}
@@ -271,12 +273,12 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                               <td className="px-5 py-4">
                                 <span
                                   className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                                    enrollment.status === 'COMPLETED'
+                                    enrollment.status === ENROLLMENT_STATUS.COMPLETED
                                       ? 'bg-emerald-100 text-emerald-700'
                                       : 'bg-amber-100 text-amber-700'
                                   }`}
                                 >
-                                  {enrollment.status === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน'}
+                                  {enrollment.status === ENROLLMENT_STATUS.COMPLETED ? 'เรียนจบแล้ว' : 'กำลังเรียน'}
                                 </span>
                               </td>
                             </tr>
@@ -340,7 +342,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                     <span className="text-xs font-bold uppercase tracking-[0.18em]">เรียนจบ</span>
                   </div>
                   <div className="text-2xl font-black text-slate-900">
-                    {enrollments.filter((item) => item.status === 'COMPLETED').length}
+                    {enrollments.filter((item) => item.status === ENROLLMENT_STATUS.COMPLETED).length}
                   </div>
                 </div>
 

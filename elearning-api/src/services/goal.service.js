@@ -1,26 +1,28 @@
 const prisma = require('../utils/prisma');
 const authHelpers = require('../utils/auth.helpers');
 const ErrorResponse = require('../utils/errorResponse');
+const { GOAL_STATUS, ENROLLMENT_STATUS, USER_STATUS } = require('../utils/constants/statuses');
+const { GOAL_SCOPES } = require('../utils/constants/scopes');
 
 const createGoal = async (data, authUser) => {
     const { title, type, targetCount, expiryDate, scope, departmentId, courseIds } = data;
     
     // Validate scope
-    let finalScope = scope || 'GLOBAL';
+    let finalScope = scope || GOAL_SCOPES.GLOBAL;
     let finalDeptId = departmentId || null;
 
     const actor = await authHelpers.getActorContext(prisma, authUser);
 
     if (actor.isAdmin) {
-        finalScope = scope || (actor?.departmentId ? 'DEPARTMENT' : 'GLOBAL');
-        finalDeptId = finalScope === 'GLOBAL' ? null : (departmentId || actor?.departmentId);
+        finalScope = scope || (actor?.departmentId ? GOAL_SCOPES.DEPARTMENT : GOAL_SCOPES.GLOBAL);
+        finalDeptId = finalScope === GOAL_SCOPES.GLOBAL ? null : (departmentId || actor?.departmentId);
     } else {
         // Manager or other fallback
         if (actor.departmentId) {
-            finalScope = 'DEPARTMENT';
+            finalScope = GOAL_SCOPES.DEPARTMENT;
             finalDeptId = actor.departmentId;
         } else {
-            finalScope = 'GLOBAL';
+            finalScope = GOAL_SCOPES.GLOBAL;
             finalDeptId = null;
         }
     }
@@ -34,7 +36,7 @@ const createGoal = async (data, authUser) => {
                 expiryDate: expiryDate ? new Date(expiryDate) : null,
                 scope: finalScope,
                 departmentId: finalDeptId,
-                status: 'ACTIVE'
+                status: GOAL_STATUS.ACTIVE
             }
         });
 
@@ -120,7 +122,7 @@ const deleteGoal = async (id, authUser) => {
 
     return await prisma.learningGoal.update({
         where: { id },
-        data: { status: 'ARCHIVED' }
+        data: { status: GOAL_STATUS.ARCHIVED }
     });
 };
 
@@ -135,8 +137,8 @@ const getGoalReport = async (goalId, authUser) => {
     if (!goal) throw new Error('Goal not found');
 
     // Get users in scope
-    let userWhere = { status: 'ACTIVE' };
-    if (goal.scope === 'DEPARTMENT') {
+    let userWhere = { status: USER_STATUS.ACTIVE };
+    if (goal.scope === GOAL_SCOPES.DEPARTMENT) {
         userWhere.departmentId = goal.departmentId;
     }
 
@@ -160,7 +162,7 @@ const getGoalReport = async (goalId, authUser) => {
             completions = await prisma.userCourse.findMany({
                 where: {
                     userId: user.id,
-                    status: 'COMPLETED',
+                    status: ENROLLMENT_STATUS.COMPLETED,
                     completedAt: {
                         gte: windowStart,
                         lte: windowEnd
@@ -173,7 +175,7 @@ const getGoalReport = async (goalId, authUser) => {
                 where: {
                     userId: user.id,
                     courseId: { in: courseIds },
-                    status: 'COMPLETED',
+                    status: ENROLLMENT_STATUS.COMPLETED,
                     completedAt: {
                         gte: windowStart,
                         lte: windowEnd

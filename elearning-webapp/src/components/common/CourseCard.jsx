@@ -2,11 +2,12 @@ import React from 'react';
 import { ArrowUpRight, CheckCircle2, Clock, Layers3 } from 'lucide-react';
 import { DEFAULT_COURSE_IMAGE, getFullUrl } from '../../utils/api';
 import { formatThaiDateTime, formatThaiFullDate } from '../../utils/dateUtils';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 // Standard date utilities now imported from dateUtils
 
 const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
-  const isCompleted = variant === 'completed' || course.enrollmentStatus === 'COMPLETED';
+  const isCompleted = variant === 'completed' || course.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED;
   const isInProgress = course.isEnrolled && !isCompleted;
   const categoryLabel = course.category?.name || 'หมวดทั่วไป';
   const lessonCount = course.lessonsCount ?? (Array.isArray(course.lessons) ? course.lessons.length : 0);

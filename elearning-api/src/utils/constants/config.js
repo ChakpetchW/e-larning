@@ -1,0 +1,14 @@
+const SERVER_DEFAULTS = Object.freeze({
+    DEFAULT_PORT: 5000
+});
+
+const TRANSACTION_TIMEOUTS = Object.freeze({
+    DEFAULT_MAX_WAIT: 5000,
+    DEFAULT_TIMEOUT: 10000,
+    LONG_RUNNING_TIMEOUT: 15000
+});
+
+module.exports = {
+    SERVER_DEFAULTS,
+    TRANSACTION_TIMEOUTS
+};

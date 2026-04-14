@@ -10,6 +10,7 @@ const uploadRoutes = require('./routes/upload.routes');
 const settingRoutes = require('./routes/setting.routes');
 const goalRoutes = require('./routes/goal.routes');
 const errorHandler = require('./middleware/error');
+const { SERVER_DEFAULTS } = require('./utils/constants/config');
 
 const app = express();
 
@@ -39,7 +40,7 @@ app.use('/api/goals', goalRoutes);
 app.use(errorHandler);
 
 // Start Server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || SERVER_DEFAULTS.DEFAULT_PORT;
 try {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

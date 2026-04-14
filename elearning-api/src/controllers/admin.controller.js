@@ -1,6 +1,7 @@
 const AdminService = require('../services/admin.service');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
+const { REDEEM_STATUS } = require('../utils/constants/statuses');
 
 // DASHBOARD
 const getDashboardStats = asyncHandler(async (req, res) => {
@@ -173,7 +174,7 @@ const getRedeemRequests = asyncHandler(async (req, res) => {
 
 const updateRedeemStatus = asyncHandler(async (req, res) => {
   const { status, adminNote } = req.body;
-  if (!['APPROVED', 'REJECTED', 'FULFILLED'].includes(status)) {
+  if (![REDEEM_STATUS.APPROVED, REDEEM_STATUS.REJECTED, REDEEM_STATUS.FULFILLED].includes(status)) {
     throw new ErrorResponse('Invalid status', 400);
   }
   await AdminService.updateRedeemStatus(req.params.id, status, adminNote);

@@ -13,6 +13,7 @@ import HomeHero from '../../components/user/HomeHero';
 import MobileContinueCTA from '../../components/user/MobileContinueCTA';
 import HomeActivities from '../../components/user/HomeActivities';
 import HomeRewards from '../../components/user/HomeRewards';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ const Home = () => {
 
   const continueCourse = useMemo(() => {
     if (!Array.isArray(courses)) return null;
-    return courses.find(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS');
+    return courses.find(c => c.isEnrolled && c.enrollmentStatus === ENROLLMENT_STATUS.IN_PROGRESS);
   }, [courses]);
 
   const categorizedCourses = useMemo(() => {
@@ -84,7 +85,7 @@ const Home = () => {
       let completed;
       if (goal.type === 'ANY') {
         completed = courses.filter(c => 
-          c.enrollmentStatus === 'COMPLETED' && 
+          c.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED && 
           c.completedAt && 
           new Date(c.completedAt) >= windowStart && 
           new Date(c.completedAt) <= windowEnd
@@ -93,7 +94,7 @@ const Home = () => {
         const specificIds = goal.courses.map(gc => gc.courseId);
         completed = courses.filter(c => 
           specificIds.includes(c.id) &&
-          c.enrollmentStatus === 'COMPLETED' && 
+          c.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED && 
           c.completedAt && 
           new Date(c.completedAt) >= windowStart && 
           new Date(c.completedAt) <= windowEnd

@@ -2,6 +2,7 @@ const prisma = require('../utils/prisma');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authHelpers = require('../utils/auth.helpers');
+const { USER_STATUS } = require('../utils/constants/statuses');
 
 const mapPublicUser = authHelpers.mapUserRecord;
 
@@ -18,7 +19,7 @@ const login = async (email, password) => {
         throw new Error('อีเมล หรือ รหัสผ่านไม่ถูกต้อง');
     }
 
-    if (user.status !== 'ACTIVE') {
+    if (user.status !== USER_STATUS.ACTIVE) {
         throw new Error('บัญชีนี้ถูกระงับการใช้งาน');
     }
 

@@ -1,5 +1,6 @@
-const ADMIN_PANEL_ROLES = ['admin', 'manager'];
-const MANAGED_USER_ROLES = ['user', 'manager'];
+const { USER_ROLES, ADMIN_PANEL_ROLES, MANAGED_USER_ROLES } = require('./constants/roles');
+const { ENTITY_STATUS, GOAL_STATUS } = require('./constants/statuses');
+const { GOAL_SCOPES } = require('./constants/scopes');
 
 const isExpiredAt = (value, referenceDate = new Date()) => {
     if (!value) {
@@ -101,17 +102,17 @@ const getActorContext = async (prisma, authUser) => {
     // Role resolution: Admin is always Admin. 
     // Manager stays Manager. 
     // User can become effective Manager if their Tier has accessAdmin: true.
-    const effectiveRole = actor.role === 'admin'
-        ? 'admin'
-        : (actor.role === 'manager' || actor.tier?.accessAdmin)
-            ? 'manager'
-            : 'user';
+    const effectiveRole = actor.role === USER_ROLES.ADMIN
+        ? USER_ROLES.ADMIN
+        : (actor.role === USER_ROLES.MANAGER || actor.tier?.accessAdmin)
+            ? USER_ROLES.MANAGER
+            : USER_ROLES.USER;
 
     const mappedActor = {
         ...mapUserRecord(actor),
         effectiveRole,
-        isAdmin: effectiveRole === 'admin',
-        isManager: effectiveRole === 'manager',
+        isAdmin: effectiveRole === USER_ROLES.ADMIN,
+        isManager: effectiveRole === USER_ROLES.MANAGER,
         canAccessAdminPanel: ADMIN_PANEL_ROLES.includes(effectiveRole)
     };
 
@@ -138,7 +139,7 @@ const buildUserManagementWhere = (actor, extraWhere = {}) => {
 
     if (actor.isManager) {
         return {
-            role: 'user',
+            role: USER_ROLES.USER,
             departmentId: actor.departmentId,
             ...extraWhere
         };
@@ -152,7 +153,7 @@ const buildUserManagementWhere = (actor, extraWhere = {}) => {
  * Admins see everything (all statuses).
  * End users (and managers) see only PUBLISHED and within scope.
  */
-const buildVisibilityWhere = (actor, { status = 'PUBLISHED', referenceDate = new Date() } = {}) => {
+const buildVisibilityWhere = (actor, { status = ENTITY_STATUS.PUBLISHED, referenceDate = new Date() } = {}) => {
     // Admin override: See everything regardless of scope or temporary status
     if (actor.isAdmin) {
         return {};
@@ -203,7 +204,7 @@ const canAccessEntity = (actor, entity, referenceDate = new Date()) => {
     }
 
     // 2. Draft check for non-admins
-    if (entity.status && entity.status !== 'PUBLISHED') {
+    if (entity.status && entity.status !== ENTITY_STATUS.PUBLISHED) {
         return false;
     }
 
@@ -238,7 +239,7 @@ const buildGoalVisibilityWhere = (
     actor,
     { referenceDate = new Date(), includeExpired = false, includeAllScopes = false } = {}
 ) => {
-    const filters = [{ status: 'ACTIVE' }];
+    const filters = [{ status: GOAL_STATUS.ACTIVE }];
 
     if (!includeExpired) {
         filters.push(buildTimedVisibilityWhere({
@@ -249,11 +250,11 @@ const buildGoalVisibilityWhere = (
     }
 
     if (!(includeAllScopes && actor.isAdmin)) {
-        const scopeClauses = [{ scope: 'GLOBAL' }];
+        const scopeClauses = [{ scope: GOAL_SCOPES.GLOBAL }];
 
         if (actor.departmentId) {
             scopeClauses.push({
-                scope: 'DEPARTMENT',
+                scope: GOAL_SCOPES.DEPARTMENT,
                 departmentId: actor.departmentId
             });
         }
@@ -271,7 +272,7 @@ const canAccessGoal = (
     goal,
     { referenceDate = new Date(), includeExpired = false, includeAllScopes = false } = {}
 ) => {
-    if (!goal || goal.status !== 'ACTIVE') {
+    if (!goal || goal.status !== GOAL_STATUS.ACTIVE) {
         return false;
     }
 
@@ -283,7 +284,7 @@ const canAccessGoal = (
         return false;
     }
 
-    if (!(includeAllScopes && actor.isAdmin) && goal.scope === 'DEPARTMENT' && goal.departmentId !== actor.departmentId) {
+    if (!(includeAllScopes && actor.isAdmin) && goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId !== actor.departmentId) {
         return false;
     }
 

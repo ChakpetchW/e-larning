@@ -5,6 +5,14 @@ const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
 const ErrorResponse = require('../utils/errorResponse');
 const authHelpers = require('../utils/auth.helpers');
+const {
+    ENTITY_STATUS,
+    ENROLLMENT_STATUS,
+    QUIZ_ATTEMPT_STATUS,
+    REWARD_STATUS,
+    REDEEM_STATUS
+} = require('../utils/constants/statuses');
+const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 
 const SUPABASE_BUCKET = 'uploads';
 const DOCUMENT_SIGNED_URL_TTL_SECONDS = 90;
@@ -184,7 +192,10 @@ const getUserVisibilityContext = (userId) => authHelpers.getActorContext(prisma,
 
 const buildCategoryVisibilityWhere = (userContext, referenceDate = new Date()) => authHelpers.buildVisibilityWhere(userContext, { status: null, referenceDate });
 
-const buildCourseVisibilityWhere = (userContext, referenceDate = new Date()) => authHelpers.buildVisibilityWhere(userContext, { status: 'PUBLISHED', referenceDate });
+const buildCourseVisibilityWhere = (userContext, referenceDate = new Date()) => authHelpers.buildVisibilityWhere(
+    userContext,
+    { status: ENTITY_STATUS.PUBLISHED, referenceDate }
+);
 
 const getVisibleCourseQuery = async (userId) => {
     return getUserVisibilityContext(userId);
@@ -523,7 +534,7 @@ const enrollCourse = async (userId, courseId) => {
         data: {
             userId,
             courseId,
-            status: 'IN_PROGRESS',
+            status: ENROLLMENT_STATUS.IN_PROGRESS,
             progressPercent: 0
         }
     });
@@ -573,7 +584,7 @@ const updateLessonProgress = async (userId, lessonId, progress) => {
         }
     });
 
-    if (isCompleted && enrollment.status !== 'COMPLETED') {
+    if (isCompleted && enrollment.status !== ENROLLMENT_STATUS.COMPLETED) {
         const allLessons = await prisma.lesson.findMany({
             where: { courseId: lesson.courseId }
         });
@@ -589,14 +600,14 @@ const updateLessonProgress = async (userId, lessonId, progress) => {
         const updateData = { progressPercent: newProgressPercent };
 
         if (newProgressPercent === 100) {
-            updateData.status = 'COMPLETED';
+            updateData.status = ENROLLMENT_STATUS.COMPLETED;
             updateData.completedAt = new Date();
 
             if (lesson.course.points > 0) {
                 const existingPoints = await prisma.pointsLedger.findFirst({
                     where: {
                         userId,
-                        sourceType: 'course',
+                        sourceType: POINT_SOURCE_TYPES.COURSE,
                         sourceId: lesson.courseId
                     }
                 });
@@ -605,7 +616,7 @@ const updateLessonProgress = async (userId, lessonId, progress) => {
                     await prisma.pointsLedger.create({
                         data: {
                             userId,
-                            sourceType: 'course',
+                            sourceType: POINT_SOURCE_TYPES.COURSE,
                             sourceId: lesson.courseId,
                             points: lesson.course.points,
                             note: `Completed course: ${lesson.course.title}`
@@ -667,7 +678,7 @@ const submitQuiz = async (userId, lessonId, answers) => {
         where: {
             userId,
             lessonId,
-            status: 'PASSED'
+            status: QUIZ_ATTEMPT_STATUS.PASSED
         }
     });
 
@@ -676,7 +687,7 @@ const submitQuiz = async (userId, lessonId, answers) => {
             userId,
             lessonId,
             score: scorePercent,
-            status: passed ? 'PASSED' : 'FAILED'
+            status: passed ? QUIZ_ATTEMPT_STATUS.PASSED : QUIZ_ATTEMPT_STATUS.FAILED
         }
     });
 
@@ -688,7 +699,7 @@ const submitQuiz = async (userId, lessonId, answers) => {
         const existingQuizPoints = await prisma.pointsLedger.findFirst({
             where: {
                 userId,
-                sourceType: 'quiz',
+                sourceType: POINT_SOURCE_TYPES.QUIZ,
                 sourceId: lessonId
             }
         });
@@ -697,7 +708,7 @@ const submitQuiz = async (userId, lessonId, answers) => {
             await prisma.pointsLedger.create({
                 data: {
                     userId,
-                    sourceType: 'quiz',
+                    sourceType: POINT_SOURCE_TYPES.QUIZ,
                     sourceId: lessonId,
                     points: lesson.points,
                     note: `Passed quiz: ${lesson.title}`
@@ -738,7 +749,7 @@ const submitQuiz = async (userId, lessonId, answers) => {
             }
         });
 
-        if (enrollment && enrollment.status !== 'COMPLETED') {
+        if (enrollment && enrollment.status !== ENROLLMENT_STATUS.COMPLETED) {
             const allLessons = await prisma.lesson.findMany({
                 where: { courseId: lesson.courseId }
             });
@@ -754,14 +765,14 @@ const submitQuiz = async (userId, lessonId, answers) => {
             const updateData = { progressPercent: newProgressPercent };
 
             if (newProgressPercent === 100) {
-                updateData.status = 'COMPLETED';
+                updateData.status = ENROLLMENT_STATUS.COMPLETED;
                 updateData.completedAt = new Date();
 
                 if (lesson.course.points > 0) {
                     const existingPoints = await prisma.pointsLedger.findFirst({
                         where: {
                             userId,
-                            sourceType: 'course',
+                            sourceType: POINT_SOURCE_TYPES.COURSE,
                             sourceId: lesson.courseId
                         }
                     });
@@ -770,7 +781,7 @@ const submitQuiz = async (userId, lessonId, answers) => {
                         await prisma.pointsLedger.create({
                             data: {
                                 userId,
-                                sourceType: 'course',
+                                sourceType: POINT_SOURCE_TYPES.COURSE,
                                 sourceId: lesson.courseId,
                                 points: lesson.course.points,
                                 note: `Completed course: ${lesson.course.title}`
@@ -822,7 +833,7 @@ const getPointsHistory = async (userId) => {
 
 const getRewardsData = async (userId) => {
     const rewards = await prisma.reward.findMany({
-        where: { status: 'ACTIVE' },
+        where: { status: REWARD_STATUS.ACTIVE },
         orderBy: { pointsCost: 'asc' }
     });
 
@@ -831,7 +842,7 @@ const getRewardsData = async (userId) => {
         where: {
             userId,
             status: {
-                not: 'REJECTED'
+                not: REDEEM_STATUS.REJECTED
             }
         },
         _count: {
@@ -855,7 +866,7 @@ const requestRedeem = async (userId, rewardId) => {
         where: { id: rewardId }
     });
 
-    if (!reward || reward.status !== 'ACTIVE' || reward.stock <= 0) {
+    if (!reward || reward.status !== REWARD_STATUS.ACTIVE || reward.stock <= 0) {
         throw new Error('Reward unavailable or out of stock');
     }
 
@@ -864,7 +875,7 @@ const requestRedeem = async (userId, rewardId) => {
             userId,
             rewardId,
             status: {
-                not: 'REJECTED'
+                not: REDEEM_STATUS.REJECTED
             }
         }
     });
@@ -895,7 +906,7 @@ const requestRedeem = async (userId, rewardId) => {
         await tx.pointsLedger.create({
             data: {
                 userId,
-                sourceType: 'redeem',
+                sourceType: POINT_SOURCE_TYPES.REDEEM,
                 sourceId: request.id,
                 points: -reward.pointsCost,
                 note: `Redeemed: ${reward.name}`

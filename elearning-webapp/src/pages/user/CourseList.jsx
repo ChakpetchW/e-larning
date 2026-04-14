@@ -8,6 +8,7 @@ import CourseCard from '../../components/common/CourseCard';
 import SearchInput from '../../components/common/SearchInput';
 import CategoryPills from '../../components/common/CategoryPills';
 import FilterSidebar from '../../components/common/FilterSidebar';
+import { FILTER_VALUES } from '../../utils/constants/filters';
 
 const CourseList = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const CourseList = () => {
   const [categories, setCategories] = useState([]);
   
   // Filter & Search State
-  const [activeCat, setActiveCat] = useState(urlCategory || 'All');
+  const [activeCat, setActiveCat] = useState(urlCategory || FILTER_VALUES.ALL_LABEL);
   const [searchQuery, setSearchQuery] = useState('');
   const [status, setStatus] = useState(searchParams.get('status') || 'all');
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'a-z'
@@ -43,7 +44,7 @@ const CourseList = () => {
         ]);
         setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : []);
         setCategories([
-          { id: 'ALL', name: 'All' }, 
+          { id: FILTER_VALUES.ALL, name: FILTER_VALUES.ALL_LABEL }, 
           ...(Array.isArray(catRes?.data) ? catRes.data : [])
         ]);
       } catch (error) {
@@ -92,7 +93,7 @@ const CourseList = () => {
             className="group relative flex h-[46px] w-[46px] sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-primary"
           >
             <Filter size={20} className="group-hover:text-primary" />
-            {(activeCat !== 'All' || sortBy !== 'newest') && (
+            {(activeCat !== FILTER_VALUES.ALL_LABEL || sortBy !== 'newest') && (
               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full"></span>
             )}
           </button>
@@ -135,7 +136,7 @@ const CourseList = () => {
             <h3 className="font-bold text-gray-600 text-lg mb-1">ไม่พบคอร์สที่ค้นหา</h3>
             <p className="text-sm text-gray-400">ลองเปลี่ยนคำค้นหา หรือใช้ตัวกรองหมวดหมู่อื่นดูสิ</p>
             <button 
-              onClick={() => { setSearchQuery(''); setActiveCat('All'); setStatus('all'); setSortBy('newest'); }}
+              onClick={() => { setSearchQuery(''); setActiveCat(FILTER_VALUES.ALL_LABEL); setStatus('all'); setSortBy('newest'); }}
               className="mt-6 px-6 py-2 bg-primary/10 text-primary font-bold rounded-full hover:bg-primary hover:text-white transition-colors"
             >
               ล้างตัวกรองทั้งหมด
@@ -155,14 +156,14 @@ const CourseList = () => {
         setActiveCat={setActiveCat}
         status={status}
         setStatus={setStatus}
-        onReset={() => { setActiveCat('All'); setSearchQuery(''); setStatus('all'); setSortBy('newest'); }}
+        onReset={() => { setActiveCat(FILTER_VALUES.ALL_LABEL); setSearchQuery(''); setStatus('all'); setSortBy('newest'); }}
       />
 
       {/* Categories Search Modal */}
       <CategorySearchModal 
         isOpen={isCatModalOpen}
         onClose={() => setIsCatModalOpen(false)}
-        categories={categories.filter(c => c.id !== 'ALL')}
+        categories={categories.filter(c => c.id !== FILTER_VALUES.ALL)}
         courses={courses}
         onSelect={(catName) => setActiveCat(catName)}
       />

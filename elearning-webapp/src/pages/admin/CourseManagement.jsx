@@ -13,6 +13,8 @@ import LessonModal from '../../components/admin/LessonModal';
 import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
 import CourseFilters from '../../components/admin/CourseFilters';
 import CourseTable from '../../components/admin/CourseTable';
+import { FILTER_VALUES } from '../../utils/constants/filters';
+import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 
 const getDefaultCourseForm = () => ({
   title: '',
@@ -54,8 +56,8 @@ const CourseManagement = () => {
   const [tiers, setTiers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
-  const [courseView, setCourseView] = useState('ACTIVE');
+  const [selectedCategory, setSelectedCategory] = useState(FILTER_VALUES.ALL);
+  const [courseView, setCourseView] = useState(ENTITY_VIEW_STATUS.ACTIVE);
 
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -330,8 +332,8 @@ const CourseManagement = () => {
   const filteredCourses = useMemo(() => (
     courses.filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'ALL' || course.categoryId === selectedCategory;
-      const matchesView = courseView === 'ARCHIVED' ? Boolean(course.isArchived) : !course.isArchived;
+      const matchesCategory = selectedCategory === FILTER_VALUES.ALL || course.categoryId === selectedCategory;
+      const matchesView = courseView === ENTITY_VIEW_STATUS.ARCHIVED ? Boolean(course.isArchived) : !course.isArchived;
       return matchesSearch && matchesCategory && matchesView;
     })
   ), [courseView, courses, searchTerm, selectedCategory]);

@@ -1,25 +1,26 @@
 import React from 'react';
 import { Award, Shield, User as UserIcon } from 'lucide-react';
 import { getRoleLabel } from '../../utils/roles';
+import { USER_STATUS } from '../../utils/constants/statuses';
 
 const ProfileStats = ({ user, points }) => {
   const statBoxes = [
     {
-      label: 'แต้มสะสม',
+      label: 'เนเธ•เนเธกเธชเธฐเธชเธก',
       value: points.toLocaleString(),
       icon: <Award size={18} className="text-warning" />,
       color: 'text-warning',
       bg: 'bg-orange-50',
     },
     {
-      label: 'สถานะ',
-      value: user?.status === 'ACTIVE' ? 'ปกติ' : '-',
+      label: 'เธชเธ–เธฒเธเธฐ',
+      value: user?.status === USER_STATUS.ACTIVE ? 'เธเธเธ•เธด' : '-',
       icon: <Shield size={18} className="text-primary" />,
       color: 'text-primary',
       bg: 'bg-indigo-50',
     },
     {
-      label: 'บทบาท',
+      label: 'เธเธ—เธเธฒเธ—',
       value: getRoleLabel(user),
       icon: <UserIcon size={18} className="text-success" />,
       color: 'text-success',
