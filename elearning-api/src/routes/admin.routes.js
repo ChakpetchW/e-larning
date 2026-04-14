@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
 const { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminPanelAccess } = require('../middleware/auth');
@@ -6,6 +6,7 @@ const { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminPanelAccess } = r
 router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access the admin panel
 
 router.get('/dashboard', adminController.getDashboardStats);
+router.get('/utils/youtube-info', adminController.getYoutubeInfo);
 
 router.get('/users', adminController.getUsers);
 router.get('/users/:id/details', adminController.getUserDetails);

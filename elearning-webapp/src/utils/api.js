@@ -189,6 +189,9 @@ export const adminAPI = {
   createGoal: (data) => api.post('/goals', data),
   deleteGoal: (id) => api.delete(`/goals/${id}`),
   getGoalReport: (id) => api.get(`/goals/${id}/report`),
+
+  // YouTube Utils
+  fetchYoutubeInfo: (url) => api.get(`/admin/utils/youtube-info?url=${encodeURIComponent(url)}`),
 };
 
 export default api;

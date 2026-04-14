@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
-import { X, Upload, FileText, Play } from 'lucide-react';
+import { X, Upload, FileText, Play, Zap, Loader2 } from 'lucide-react';
 import QuizBuilder from './QuizBuilder';
 import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
+import { adminAPI } from '../../utils/api';
+import { useState } from 'react';
 
 const LessonModal = ({
   isOpen,
@@ -17,8 +18,28 @@ const LessonModal = ({
   isEditing = false,
 }) => {
   const docInputRef = useRef(null);
+  const [fetchingInfo, setFetchingInfo] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleFetchYoutubeInfo = async () => {
+    if (!lessonForm.contentUrl) return;
+    
+    try {
+      setFetchingInfo(true);
+      const response = await adminAPI.fetchYoutubeInfo(lessonForm.contentUrl);
+      if (response.data && response.data.duration) {
+        setLessonForm({ ...lessonForm, duration: response.data.duration });
+      }
+    } catch (error) {
+      console.error('Fetch YouTube info error:', error);
+    } finally {
+      setFetchingInfo(false);
+    }
+  };
+
+  const isYoutubeUrl = lessonForm.contentUrl && 
+    (lessonForm.contentUrl.includes('youtube.com') || lessonForm.contentUrl.includes('youtu.be'));
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -32,14 +53,32 @@ const LessonModal = ({
           <label className="mb-1 block text-sm font-bold text-gray-700">
             ลิงก์วิดีโอ (YouTube / Vimeo)
           </label>
-          <div className="flex flex-col gap-1.5">
-            <input
-              type="text"
-              className="form-input w-full"
-              value={lessonForm.contentUrl}
-              onChange={(event) => setLessonForm({ ...lessonForm, contentUrl: event.target.value })}
-              placeholder="https://www.youtube.com/watch?v=... หรือ https://vimeo.com/..."
-            />
+              <div className="flex flex-col gap-1.5">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="form-input w-full"
+                value={lessonForm.contentUrl}
+                onChange={(event) => setLessonForm({ ...lessonForm, contentUrl: event.target.value })}
+                placeholder="https://www.youtube.com/watch?v=... หรือ https://vimeo.com/..."
+              />
+              {isYoutubeUrl && (
+                <button
+                  type="button"
+                  onClick={handleFetchYoutubeInfo}
+                  disabled={fetchingInfo}
+                  className="btn btn-primary btn-sm shrink-0 flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700"
+                  title="ดึงเวลาจาก YouTube"
+                >
+                  {fetchingInfo ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Zap size={14} fill="currentColor" />
+                  )}
+                  <span className="hidden sm:inline">ดึงเวลา</span>
+                </button>
+              )}
+            </div>
             <p className="flex items-center gap-1 text-[10px] text-muted">
               <Play size={10} /> รองรับลิงก์ YouTube และ Vimeo
             </p>
@@ -141,6 +180,25 @@ const LessonModal = ({
                     <option value="article">บทความเนื้อหา</option>
                     <option value="quiz">แบบทดสอบ (Quiz)</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-bold text-gray-700">ระยะเวลา (นาที)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      className="form-input w-full"
+                      value={lessonForm.duration || 0}
+                      onChange={(event) => setLessonForm({ 
+                        ...lessonForm, 
+                        duration: parseInt(event.target.value, 10) || 0 
+                      })}
+                      min="0"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                      นาที
+                    </div>
+                  </div>
                 </div>
 
                 {lessonForm.type !== 'quiz' ? (

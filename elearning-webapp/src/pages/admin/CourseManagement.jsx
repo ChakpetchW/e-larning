@@ -44,6 +44,7 @@ const getDefaultLessonForm = (order = 0) => ({
   order,
   points: 0,
   passScore: 60,
+  duration: 0,
   questions: [],
 });
 
