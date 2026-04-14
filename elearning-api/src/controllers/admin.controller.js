@@ -3,21 +3,6 @@ const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 const { REDEEM_STATUS } = require('../utils/constants/statuses');
 
-// UTILS
-const getYoutubeInfo = asyncHandler(async (req, res) => {
-  const { url } = req.query;
-  const { fetchYouTubeDuration } = require('../utils/youtube');
-  
-  const duration = await fetchYouTubeDuration(url);
-  
-  if (duration === null) {
-    const ErrorResponse = require('../utils/errorResponse');
-    throw new ErrorResponse('Could not fetch video information', 400);
-  }
-  
-  res.json({ success: true, data: { duration } });
-});
-
 // DASHBOARD
 const getDashboardStats = asyncHandler(async (req, res) => {
   const stats = await AdminService.getDashboardStats(req.user);
@@ -267,6 +252,5 @@ module.exports = {
   updateLesson,
   deleteLesson,
   reorderLessons,
-  getCourseQuizAttempts,
-  getYoutubeInfo
+  getCourseQuizAttempts
 };
