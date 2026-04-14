@@ -6,21 +6,21 @@ import { USER_STATUS } from '../../utils/constants/statuses';
 const ProfileStats = ({ user, points }) => {
   const statBoxes = [
     {
-      label: 'เนเธ•เนเธกเธชเธฐเธชเธก',
+      label: 'แต้มสะสม',
       value: points.toLocaleString(),
       icon: <Award size={18} className="text-warning" />,
       color: 'text-warning',
       bg: 'bg-orange-50',
     },
     {
-      label: 'เธชเธ–เธฒเธเธฐ',
-      value: user?.status === USER_STATUS.ACTIVE ? 'เธเธเธ•เธด' : '-',
+      label: 'สถานะ',
+      value: user?.status === USER_STATUS.ACTIVE ? 'ปกติ' : '-',
       icon: <Shield size={18} className="text-primary" />,
       color: 'text-primary',
       bg: 'bg-indigo-50',
     },
     {
-      label: 'เธเธ—เธเธฒเธ—',
+      label: 'บทบาท',
       value: getRoleLabel(user),
       icon: <UserIcon size={18} className="text-success" />,
       color: 'text-success',

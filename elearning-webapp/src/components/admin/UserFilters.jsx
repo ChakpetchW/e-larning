@@ -18,7 +18,7 @@ const UserFilters = ({
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
         <input
           type="text"
-          placeholder="เธเนเธเธซเธฒเธเธทเนเธญ เธซเธฃเธทเธญเธญเธตเน€เธกเธฅ..."
+          placeholder="ค้นหาชื่อ หรืออีเมล..."
           value={searchTerm}
           onChange={(event) => onSearchChange(event.target.value)}
           className="w-full rounded-md border border-border bg-gray-50 py-2 pl-10 pr-4 text-sm outline-none focus:border-primary"
@@ -30,7 +30,7 @@ const UserFilters = ({
         value={selectedDepartment}
         onChange={(event) => onDepartmentChange(event.target.value)}
       >
-        <option value={FILTER_VALUES.ALL}>เธ—เธธเธเนเธเธเธ</option>
+        <option value={FILTER_VALUES.ALL}>ทุกแผนก</option>
         {departments.map((department) => (
           <option key={department.id} value={department.id}>
             {department.name}
@@ -43,7 +43,7 @@ const UserFilters = ({
         value={selectedTier}
         onChange={(event) => onTierChange(event.target.value)}
       >
-        <option value={FILTER_VALUES.ALL}>เธ”—เธธเธเธฃเธฐเธ”เธฑเธ</option>
+        <option value={FILTER_VALUES.ALL}>ทุกระดับ</option>
         {tiers.map((tier) => (
           <option key={tier.id} value={tier.id}>
             {tier.name}

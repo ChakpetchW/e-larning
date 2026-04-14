@@ -18,7 +18,7 @@ const CourseFilters = ({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         {[
-          { key: ENTITY_VIEW_STATUS.ACTIVE, label: `เธเธญเธฃเนเธชเธ—เธตเนเน€เธเธขเนเธเธฃเนเธญเธขเธนเน (${activeCount})`, icon: LayoutGrid },
+          { key: ENTITY_VIEW_STATUS.ACTIVE, label: `คอร์สที่เผยแพร่อยู่ (${activeCount})`, icon: LayoutGrid },
           { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `Archive (${archivedCount})`, icon: Archive },
         ].map(({ key, label, icon: Icon }) => (
           <button
@@ -43,7 +43,7 @@ const CourseFilters = ({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input
               type="text"
-              placeholder="เธเนเธเธซเธฒเธเธญเธฃเนเธช..."
+              placeholder="ค้นหาคอร์ส..."
               className="w-full rounded-md border border-border bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
@@ -55,7 +55,7 @@ const CourseFilters = ({
             value={selectedCategory}
             onChange={(event) => setSelectedCategory(event.target.value)}
           >
-            <option value={FILTER_VALUES.ALL}>เธ—เธธเธเธซเธกเธงเธ”เธซเธกเธนเน</option>
+            <option value={FILTER_VALUES.ALL}>ทุกหมวดหมู่</option>
             {categories.filter((category) => !category.isArchived).map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}

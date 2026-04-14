@@ -1,4 +1,4 @@
----
+﻿---
 name: normalize
 description: Normalize design to match your design system and ensure consistency
 ---
@@ -20,7 +20,7 @@ Before making changes, deeply understand the context:
 2. **Analyze the current feature**: Assess what works and what doesn't:
    - Where does it deviate from design system patterns?
    - Which inconsistencies are cosmetic vs. functional?
-   - What's the root cause—missing tokens, one-off implementations, or conceptual misalignment?
+   - What's the root causeโ€”missing tokens, one-off implementations, or conceptual misalignment?
 
 3. **Create a normalization plan**: Define specific changes that will align the feature with the design system:
    - Which components can be replaced with design system equivalents?
@@ -48,7 +48,7 @@ Systematically address all inconsistencies across these dimensions:
 - Introduce new patterns that diverge from the design system
 - Compromise accessibility for visual consistency
 
-This is not an exhaustive list—apply judgment to identify all areas needing normalization.
+This is not an exhaustive listโ€”apply judgment to identify all areas needing normalization.
 
 ## Clean Up
 

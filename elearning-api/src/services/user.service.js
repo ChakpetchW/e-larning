@@ -1,4 +1,4 @@
-const prisma = require('../utils/prisma');
+﻿const prisma = require('../utils/prisma');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
@@ -310,7 +310,7 @@ const updateProfile = async (userId, data) => {
         const validPassword = await bcrypt.compare(currentPassword, user.password);
 
         if (!validPassword) {
-            throw new Error('เธฃเธซเธฑเธชเธเนเธฒเธเธเธฑเธเธเธธเธเธฑเธเนเธกเนเธ–เธนเธเธ•เนเธญเธ');
+            throw new Error('รหัสผ่านปัจจุบันไม่ถูกต้อง');
         }
 
         dataToUpdate.password = await bcrypt.hash(newPassword, 10);
@@ -881,7 +881,7 @@ const requestRedeem = async (userId, rewardId) => {
     });
 
     if (userRedeemed >= reward.maxPerUser) {
-        throw new Error('เธเธธเธ“เนเธฅเธเธฃเธฒเธเธงเธฑเธฅเธเธตเนเธเธฃเธเธ•เธฒเธกเธชเธดเธ—เธเธดเธ—เธตเนเธเธณเธซเธเธ”เนเธฅเนเธง');
+        throw new Error('คุณแลกรางวัลนี้ครบตามสิทธิที่กำหนดแล้ว');
     }
 
     const balanceResult = await prisma.pointsLedger.aggregate({

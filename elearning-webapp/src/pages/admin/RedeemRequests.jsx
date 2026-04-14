@@ -32,10 +32,10 @@ const RedeemRequests = () => {
   };
 
   const handleUpdateStatus = async (id, status) => {
-    const actionLabel = status === REDEEM_STATUS.APPROVED ? 'เธญเธเธธเธกเธฑเธ•เธด' : 'เธเธเธดเน€เธชเธ';
+    const actionLabel = status === REDEEM_STATUS.APPROVED ? 'อนุมัติ' : 'ปฏิเสธ';
     const ok = await confirm({
-      title: `เธขเธทเธเธขเธฑเธเธเธฒเธฃ${actionLabel}`,
-      message: `เธขเธทเธเธขเธฑเธเธเธฒเธฃ${actionLabel}เธเธณเธเธญเธเธตเน?`,
+      title: `ยืนยันการ${actionLabel}`,
+      message: `ยืนยันการ${actionLabel}คำขอนี้?`,
       confirmLabel: actionLabel,
       variant: status === REDEEM_STATUS.APPROVED ? 'primary' : 'danger',
     });
@@ -43,22 +43,22 @@ const RedeemRequests = () => {
 
     try {
       await adminAPI.updateRedeemStatus(id, status);
-      toast.success('เธญเธฑเธเน€เธ”เธ•เธชเธ–เธฒเธเธฐเธชเธณเน€เธฃเนเธ');
+      toast.success('อัปเดตสถานะสำเร็จ');
       fetchRequests();
     } catch (error) {
       console.error('Update redeem error:', error);
-      toast.error('เธญเธฑเธเน€เธ”เธ•เธชเธ–เธฒเธเธฐเธฅเนเธกเน€เธซเธฅเธง');
+      toast.error('อัปเดตสถานะล้มเหลว');
     }
   };
 
   const columns = [
-    { label: 'เธฃเธซเธฑเธชเธญเนเธฒเธเธญเธดเธ' },
-    { label: 'เธเธนเนเนเธฅเธเธฃเธฒเธเธงเธฑเธฅ' },
-    { label: 'เธเธญเธเธฃเธฒเธเธงเธฑเธฅ' },
-    { label: 'เนเธ•เนเธกเธ—เธตเนเนเธเน', className: 'text-right' },
-    { label: 'เธงเธฑเธเน€เธงเธฅเธฒเธ—เธตเนเธเธญ' },
-    { label: 'เธชเธ–เธฒเธเธฐ' },
-    { label: 'เธเธฑเธ”เธเธฒเธฃ', className: 'text-center' }
+    { label: 'รหัสอ้างอิง' },
+    { label: 'ผู้แลกรางวัล' },
+    { label: 'ของรางวัล' },
+    { label: 'แต้มที่ใช้', className: 'text-right' },
+    { label: 'วันเวลาที่ขอ' },
+    { label: 'สถานะ' },
+    { label: 'จัดการ', className: 'text-center' }
   ];
 
   const filteredRequests = requests.filter((request) => (
@@ -70,8 +70,8 @@ const RedeemRequests = () => {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title="เธฃเธฒเธขเธเธฒเธฃเนเธฅเธเธเธญเธเธฃเธฒเธเธงเธฑเธฅ"
-        subtitle="เธ•เธฃเธงเธเธชเธญเธเนเธฅเธฐเธญเธเธธเธกเธฑเธ•เธดเธเธณเธเธญเนเธฅเธเธเธญเธขเธ—เนเน€เธเนเธเธเธญเธเธฃเธฒเธเธงเธฑเธฅเธเธฒเธเธเธเธฑเธเธเธฒเธ"
+        title="รายการแลกของรางวัล"
+        subtitle="ตรวจสอบและอนุมัติคำขอแลกพอยท์เป็นของรางวัลจากพนักงาน"
       />
 
       <div className="flex gap-2">
@@ -79,13 +79,13 @@ const RedeemRequests = () => {
           onClick={() => setFilter(REDEEM_STATUS.PENDING)}
           className={`badge text-xs font-black uppercase tracking-wider px-4 py-2 transition-all ${filter === REDEEM_STATUS.PENDING ? 'badge-primary scale-105' : 'bg-white text-muted border border-border hover:bg-gray-50'}`}
         >
-          เธฃเธญเธญเธเธธเธกเธฑเธ•เธด ({pendingCount})
+          รออนุมัติ ({pendingCount})
         </button>
         <button
           onClick={() => setFilter(FILTER_VALUES.ALL)}
           className={`badge text-xs font-black uppercase tracking-wider px-4 py-2 transition-all ${filter === FILTER_VALUES.ALL ? 'badge-primary scale-105' : 'bg-white text-muted border border-border hover:bg-gray-50'}`}
         >
-          เธเธฃเธฐเธงเธฑเธ•เธดเธ—เธฑเนเธเธซเธกเธ”
+          ประวัติทั้งหมด
         </button>
       </div>
 
@@ -104,15 +104,15 @@ const RedeemRequests = () => {
             <td className="p-4 text-sm text-right font-black text-warning">{req.reward?.pointsCost}</td>
             <td className="p-4 text-sm text-muted">{new Date(req.requestedAt || req.createdAt).toLocaleString('th-TH')}</td>
             <td className="p-4">
-              {req.status === REDEEM_STATUS.PENDING && <span className="badge badge-warning text-[10px] font-bold"><Clock size={12} className="mr-1" /> เธฃเธญเธ”เธณเน€เธเธดเธเธเธฒเธฃ</span>}
-              {req.status === REDEEM_STATUS.APPROVED && <span className="badge badge-success text-[10px] font-bold">เธญเธเธธเธกเธฑเธ•เธดเนเธฅเนเธง</span>}
-              {req.status === REDEEM_STATUS.REJECTED && <span className="badge badge-danger text-[10px] font-bold">เธเธเธดเน€เธชเธ</span>}
+              {req.status === REDEEM_STATUS.PENDING && <span className="badge badge-warning text-[10px] font-bold"><Clock size={12} className="mr-1" /> รอดำเนินการ</span>}
+              {req.status === REDEEM_STATUS.APPROVED && <span className="badge badge-success text-[10px] font-bold">อนุมัติแล้ว</span>}
+              {req.status === REDEEM_STATUS.REJECTED && <span className="badge badge-danger text-[10px] font-bold">ปฏิเสธ</span>}
             </td>
             <td className="p-4 text-center">
               {req.status === REDEEM_STATUS.PENDING ? (
                 <div className="flex justify-center gap-2">
-                  <button onClick={() => handleUpdateStatus(req.id, REDEEM_STATUS.APPROVED)} className="p-2 bg-success-bg text-success hover:bg-success hover:text-white rounded-lg transition-all" title="เธญเธเธธเธกเธฑเธ•เธด"><Check size={18} /></button>
-                  <button onClick={() => handleUpdateStatus(req.id, REDEEM_STATUS.REJECTED)} className="p-2 bg-danger-bg text-danger hover:bg-danger hover:text-white rounded-lg transition-all" title="เธเธเธดเน€เธชเธ"><X size={18} /></button>
+                  <button onClick={() => handleUpdateStatus(req.id, REDEEM_STATUS.APPROVED)} className="p-2 bg-success-bg text-success hover:bg-success hover:text-white rounded-lg transition-all" title="อนุมัติ"><Check size={18} /></button>
+                  <button onClick={() => handleUpdateStatus(req.id, REDEEM_STATUS.REJECTED)} className="p-2 bg-danger-bg text-danger hover:bg-danger hover:text-white rounded-lg transition-all" title="ปฏิเสธ"><X size={18} /></button>
                 </div>
               ) : (
                 <span className="text-slate-300 text-xs font-black">PROCESSED</span>
