@@ -1161,7 +1161,8 @@ const createLesson = async (data) => {
         ...lessonData,
         order: parseInteger(lessonData.order, 0),
         points: parseInteger(lessonData.points, 0),
-        passScore: parseInteger(lessonData.passScore, 0)
+        passScore: parseInteger(lessonData.passScore, 0),
+        duration: lessonData.duration ? String(lessonData.duration) : undefined
     };
 
     if (lessonData.type === 'quiz' && questions && questions.length > 0) {
@@ -1203,7 +1204,8 @@ const updateLesson = async (id, data) => {
         ...lessonData,
         order: parseInteger(lessonData.order, 0),
         points: parseInteger(lessonData.points, 0),
-        passScore: parseInteger(lessonData.passScore, 0)
+        passScore: parseInteger(lessonData.passScore, 0),
+        duration: lessonData.duration ? String(lessonData.duration) : undefined
     };
 
     if (lessonData.type === 'quiz' && questions && questions.length > 0) {
