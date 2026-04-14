@@ -16,7 +16,8 @@ const LessonProgressActions = ({
   const getLessonTypeLabel = (type) => {
     if (type === 'quiz') return 'แบบทดสอบ';
     if (type === 'video') return 'วิดีโอ';
-    if (type === 'pdf' || type === 'document' || type === 'article') return 'เอกสาร';
+    if (type === 'article') return 'บทความ';
+    if (type === 'pdf' || type === 'document') return 'เอกสาร';
     return 'เอกสาร';
   };
 
