@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlayCircle, Check, FileText, MonitorPlay, Bookmark, Clock } from 'lucide-react';
+import { PlayCircle, Check, FileText, MonitorPlay, Bookmark, Clock, BookOpen } from 'lucide-react';
 
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
