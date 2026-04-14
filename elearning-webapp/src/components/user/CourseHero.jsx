@@ -32,10 +32,6 @@ const CourseHero = ({
 
         <div className="grid gap-8 md:gap-10 lg:grid-cols-[minmax(0,1.5fr)_280px] lg:items-end">
           <div className="max-w-3xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/12 px-4 py-1.5 text-[12px] font-black tracking-[0.05em] text-primary-light">
-              <BookOpen size={14} />
-              หลักสูตรแนะนำ
-            </div>
             <h1 className="mb-4 text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl md:text-[2.85rem]">
               {course.title}
             </h1>
