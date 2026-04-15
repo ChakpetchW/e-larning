@@ -1,4 +1,4 @@
----
+﻿---
 name: animate
 description: Review a feature and enhance it with purposeful animations, micro-interactions, and motion effects that improve usability and delight.
 ---
@@ -69,7 +69,7 @@ Add motion systematically across these categories:
 ### Micro-interactions
 - **Button feedback**:
   - Hover: Subtle scale (1.02-1.05), color shift, shadow increase
-  - Click: Quick scale down then up (0.95 → 1), ripple effect
+  - Click: Quick scale down then up (0.95 โ’ 1), ripple effect
   - Loading: Spinner or pulse state
 - **Form interactions**:
   - Input focus: Border color transition, slight scale or glow
@@ -163,12 +163,12 @@ Use appropriate techniques for each animation:
 ```
 
 **NEVER**:
-- Use bounce or elastic easing curves—they feel dated and draw attention to the animation itself
-- Animate layout properties (width, height, top, left)—use transform instead
-- Use durations over 500ms for feedback—it feels laggy
-- Animate without purpose—every animation needs a reason
-- Ignore `prefers-reduced-motion`—this is an accessibility violation
-- Animate everything—animation fatigue makes interfaces feel exhausting
+- Use bounce or elastic easing curvesโ€”they feel dated and draw attention to the animation itself
+- Animate layout properties (width, height, top, left)โ€”use transform instead
+- Use durations over 500ms for feedbackโ€”it feels laggy
+- Animate without purposeโ€”every animation needs a reason
+- Ignore `prefers-reduced-motion`โ€”this is an accessibility violation
+- Animate everythingโ€”animation fatigue makes interfaces feel exhausting
 - Block interaction during animations unless intentional
 
 ## Verify Quality

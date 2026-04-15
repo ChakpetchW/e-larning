@@ -1,6 +1,10 @@
 const prisma = require('../utils/prisma');
 const bcrypt = require('bcrypt');
 const authHelpers = require('../utils/auth.helpers');
+const { USER_ROLES } = require('../utils/constants/roles');
+const { ENTITY_STATUS, ENROLLMENT_STATUS, REDEEM_STATUS } = require('../utils/constants/statuses');
+const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
+const { TRANSACTION_TIMEOUTS } = require('../utils/constants/config');
 
 const courseInclude = {
     category: true,
@@ -29,7 +33,7 @@ const userInclude = {
         select: {
             enrollments: {
                 where: {
-                    status: 'COMPLETED'
+                    status: ENROLLMENT_STATUS.COMPLETED
                 }
             }
         }
@@ -154,14 +158,14 @@ const mapCategoryRecord = (category) => {
     };
 };
 
-const ADMIN_PANEL_ROLES = ['admin', 'manager'];
-const MANAGED_USER_ROLES = ['user', 'manager'];
-
 const getActorContext = (authUser) => authHelpers.getActorContext(prisma, authUser);
 
 const buildAdminManagedUsersWhere = (actor, extraWhere = {}) => authHelpers.buildUserManagementWhere(actor, extraWhere);
 
-const buildDepartmentVisibleCourseWhere = (departmentId) => authHelpers.buildVisibilityWhere({ departmentId, isManager: true }, { status: 'PUBLISHED' });
+const buildDepartmentVisibleCourseWhere = (departmentId) => authHelpers.buildVisibilityWhere(
+    { departmentId, isManager: true },
+    { status: ENTITY_STATUS.PUBLISHED }
+);
 
 const buildScopedUserWhere = async (actor, targetUserId) => {
     const where = authHelpers.buildUserManagementWhere(actor);
@@ -182,13 +186,13 @@ const buildPointsHistory = async (userId) => {
     }
 
     const courseIds = [...new Set(ledger
-        .filter((entry) => entry.sourceType === 'course' && entry.sourceId)
+        .filter((entry) => entry.sourceType === POINT_SOURCE_TYPES.COURSE && entry.sourceId)
         .map((entry) => entry.sourceId))];
     const lessonIds = [...new Set(ledger
-        .filter((entry) => entry.sourceType === 'quiz' && entry.sourceId)
+        .filter((entry) => entry.sourceType === POINT_SOURCE_TYPES.QUIZ && entry.sourceId)
         .map((entry) => entry.sourceId))];
     const redeemIds = [...new Set(ledger
-        .filter((entry) => ['redeem', 'reward_adjust'].includes(entry.sourceType) && entry.sourceId)
+        .filter((entry) => [POINT_SOURCE_TYPES.REDEEM, POINT_SOURCE_TYPES.REWARD_ADJUST].includes(entry.sourceType) && entry.sourceId)
         .map((entry) => entry.sourceId))];
 
     const [courses, lessons, redeems] = await Promise.all([
@@ -225,31 +229,31 @@ const buildPointsHistory = async (userId) => {
     return ledger.map((entry) => {
         let sourceLabel = entry.note || 'Point activity';
 
-        if (entry.sourceType === 'course') {
+        if (entry.sourceType === POINT_SOURCE_TYPES.COURSE) {
             sourceLabel = courseMap[entry.sourceId]?.title
                 ? `Completed course: ${courseMap[entry.sourceId].title}`
                 : (entry.note || 'Completed course');
         }
 
-        if (entry.sourceType === 'quiz') {
+        if (entry.sourceType === POINT_SOURCE_TYPES.QUIZ) {
             sourceLabel = lessonMap[entry.sourceId]?.title
                 ? `Passed quiz: ${lessonMap[entry.sourceId].title}`
                 : (entry.note || 'Passed quiz');
         }
 
-        if (entry.sourceType === 'redeem') {
+        if (entry.sourceType === POINT_SOURCE_TYPES.REDEEM) {
             sourceLabel = redeemMap[entry.sourceId]?.reward?.name
                 ? `Redeemed reward: ${redeemMap[entry.sourceId].reward.name}`
                 : (entry.note || 'Redeemed reward');
         }
 
-        if (entry.sourceType === 'reward_adjust') {
+        if (entry.sourceType === POINT_SOURCE_TYPES.REWARD_ADJUST) {
             sourceLabel = redeemMap[entry.sourceId]?.reward?.name
                 ? `Reward adjustment: ${redeemMap[entry.sourceId].reward.name}`
                 : (entry.note || 'Reward adjustment');
         }
 
-        if (entry.sourceType === 'admin_edit') {
+        if (entry.sourceType === POINT_SOURCE_TYPES.ADMIN_EDIT) {
             sourceLabel = entry.note || 'Admin adjusted points';
         }
 
@@ -323,7 +327,7 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
     }
 
     if (baseData.role !== undefined) {
-        if (!['user', 'manager', 'admin'].includes(baseData.role)) {
+        if (![USER_ROLES.USER, USER_ROLES.MANAGER, USER_ROLES.ADMIN].includes(baseData.role)) {
             throw new Error('Invalid role');
         }
         data.role = baseData.role;
@@ -485,23 +489,23 @@ const saveCategoryVisibility = async (tx, categoryId, visibleToAll, visibleDepar
 // DASHBOARD
 const getDashboardStats = async (authUser) => {
     const actor = await getActorContext(authUser);
-    const isManager = actor.role === 'manager';
+    const isManager = actor.role === USER_ROLES.MANAGER;
     const managedUsersWhere = buildAdminManagedUsersWhere(actor);
     const visibleCourseWhere = isManager
         ? buildDepartmentVisibleCourseWhere(actor.departmentId)
-        : { status: 'PUBLISHED' };
+        : { status: ENTITY_STATUS.PUBLISHED };
 
     const [totalUsers, activeCourses, totalEnrollments, categories] = await Promise.all([
         prisma.user.count({ where: managedUsersWhere }),
         prisma.course.count({ where: visibleCourseWhere }),
         prisma.userCourse.count({
             where: isManager
-                ? {
-                    user: {
-                        departmentId: actor.departmentId,
-                        role: 'user'
-                    }
-                }
+                                ? {
+                                    user: {
+                                        departmentId: actor.departmentId,
+                                        role: USER_ROLES.USER
+                                    }
+                                }
                 : undefined
         }),
         prisma.category.findMany({
@@ -527,7 +531,7 @@ const getDashboardStats = async (authUser) => {
                             where: {
                                 user: {
                                     departmentId: actor.departmentId,
-                                    role: 'user'
+                                    role: USER_ROLES.USER
                                 }
                             }
                         }
@@ -562,7 +566,7 @@ const getDashboardStats = async (authUser) => {
                 ? {
                     user: {
                         departmentId: actor.departmentId,
-                        role: 'user'
+                        role: USER_ROLES.USER
                     }
                 }
                 : {})
@@ -603,7 +607,7 @@ const getDashboardStats = async (authUser) => {
                             where: {
                                 user: {
                                     departmentId: actor.departmentId,
-                                    role: 'user'
+                                    role: USER_ROLES.USER
                                 }
                             }
                         }
@@ -746,7 +750,7 @@ const createUser = async (inputData) => prisma.$transaction(async (tx) => {
         const user = await tx.user.create({
             data: {
                 ...data,
-                role: inputData.role || 'user'
+                role: inputData.role || USER_ROLES.USER
             },
             include: {
                 departmentRef: true,
@@ -758,7 +762,7 @@ const createUser = async (inputData) => prisma.$transaction(async (tx) => {
             await tx.pointsLedger.create({
                 data: {
                     userId: user.id,
-                    sourceType: 'admin_edit',
+                    sourceType: POINT_SOURCE_TYPES.ADMIN_EDIT,
                     points: data.pointsBalance,
                     note: 'Initial balance set during user creation'
                 }
@@ -771,8 +775,8 @@ const createUser = async (inputData) => prisma.$transaction(async (tx) => {
         throw error;
     }
 }, {
-    maxWait: 5000,
-    timeout: 10000
+    maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
+    timeout: TRANSACTION_TIMEOUTS.DEFAULT_TIMEOUT
 });
 
 const updateUser = async (id, inputData) => prisma.$transaction(async (tx) => {
@@ -791,7 +795,7 @@ const updateUser = async (id, inputData) => prisma.$transaction(async (tx) => {
                 await tx.pointsLedger.create({
                     data: {
                         userId: id,
-                        sourceType: 'admin_edit',
+                        sourceType: POINT_SOURCE_TYPES.ADMIN_EDIT,
                         points: difference,
                         note: `Admin adjusted balance by ${difference} (Target: ${targetBalance})`
                     }
@@ -814,8 +818,8 @@ const updateUser = async (id, inputData) => prisma.$transaction(async (tx) => {
         throw error;
     }
 }, {
-    maxWait: 5000,
-    timeout: 10000
+    maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
+    timeout: TRANSACTION_TIMEOUTS.DEFAULT_TIMEOUT
 });
 
 const deleteUser = async (id) => prisma.user.delete({ where: { id } });
@@ -825,7 +829,7 @@ const getDepartments = async (authUser) => {
     const actor = await getActorContext(authUser);
 
     return prisma.department.findMany({
-        where: actor.role === 'manager' && actor.departmentId
+        where: actor.role === USER_ROLES.MANAGER && actor.departmentId
             ? { id: actor.departmentId }
             : undefined,
         orderBy: { name: 'asc' }
@@ -921,8 +925,8 @@ const createCourse = async (input) => prisma.$transaction(async (tx) => {
         throw error;
     }
 }, {
-    maxWait: 5000, 
-    timeout: 15000 
+    maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT, 
+    timeout: TRANSACTION_TIMEOUTS.LONG_RUNNING_TIMEOUT 
 });
 
 const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
@@ -947,8 +951,8 @@ const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
         throw error;
     }
 }, {
-    maxWait: 5000,
-    timeout: 15000
+    maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
+    timeout: TRANSACTION_TIMEOUTS.LONG_RUNNING_TIMEOUT
 });
 
 const republishCourse = async (id) => {
@@ -957,7 +961,7 @@ const republishCourse = async (id) => {
         data: {
             isTemporary: false,
             expiredAt: null,
-            status: 'PUBLISHED'
+            status: ENTITY_STATUS.PUBLISHED
         },
         include: courseInclude
     });
@@ -1100,11 +1104,11 @@ const updateRedeemStatus = async (id, status, adminNote) => {
 
     return prisma.$transaction(async (tx) => {
         try {
-            if (status === 'REJECTED' && request.status !== 'REJECTED') {
+            if (status === REDEEM_STATUS.REJECTED && request.status !== REDEEM_STATUS.REJECTED) {
                 await tx.pointsLedger.create({
                     data: {
                         userId: request.userId,
-                        sourceType: 'reward_adjust',
+                        sourceType: POINT_SOURCE_TYPES.REWARD_ADJUST,
                         sourceId: request.id,
                         points: request.pointsCost,
                         note: `Refund for rejected redeem: ${id}`
@@ -1134,8 +1138,8 @@ const updateRedeemStatus = async (id, status, adminNote) => {
             throw error;
         }
     }, {
-        maxWait: 5000,
-        timeout: 10000
+        maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
+        timeout: TRANSACTION_TIMEOUTS.DEFAULT_TIMEOUT
     });
 };
 
@@ -1157,7 +1161,8 @@ const createLesson = async (data) => {
         ...lessonData,
         order: parseInteger(lessonData.order, 0),
         points: parseInteger(lessonData.points, 0),
-        passScore: parseInteger(lessonData.passScore, 0)
+        passScore: parseInteger(lessonData.passScore, 0),
+        duration: lessonData.duration ? String(lessonData.duration) : undefined
     };
 
     if (lessonData.type === 'quiz' && questions && questions.length > 0) {
@@ -1199,7 +1204,8 @@ const updateLesson = async (id, data) => {
         ...lessonData,
         order: parseInteger(lessonData.order, 0),
         points: parseInteger(lessonData.points, 0),
-        passScore: parseInteger(lessonData.passScore, 0)
+        passScore: parseInteger(lessonData.passScore, 0),
+        duration: lessonData.duration ? String(lessonData.duration) : undefined
     };
 
     if (lessonData.type === 'quiz' && questions && questions.length > 0) {

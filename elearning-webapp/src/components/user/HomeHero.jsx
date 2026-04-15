@@ -1,5 +1,6 @@
 import React from 'react';
 import { PlayCircle, Target } from 'lucide-react';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const HomeHero = ({ 
   user, 
@@ -37,13 +38,13 @@ const HomeHero = ({
             <div className="flex flex-col text-left">
               <p className="mb-1 text-[11px] font-semibold tracking-[0.04em] text-slate-500">กําลังเรียน</p>
               <p className="text-2xl font-bold text-slate-800">
-                {courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length}
+                {courses.filter(c => c.isEnrolled && c.enrollmentStatus === ENROLLMENT_STATUS.IN_PROGRESS).length}
               </p>
             </div>
             <div className="flex flex-col text-left">
               <p className="mb-1 text-[11px] font-semibold tracking-[0.04em] text-slate-500">เรียนจบแล้ว</p>
               <p className="text-2xl font-bold text-slate-800">
-                {courses.filter(c => c.enrollmentStatus === 'COMPLETED').length}
+                {courses.filter(c => c.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED).length}
               </p>
             </div>
             <div className="flex flex-col text-left">

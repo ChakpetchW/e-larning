@@ -53,7 +53,6 @@ router.put('/lessons/:id', adminController.updateLesson);
 router.delete('/lessons/:id', adminController.deleteLesson);
 
 // Quiz Reports
-// Quiz Reports
 router.get('/courses/:courseId/quiz-reports', adminController.getCourseQuizAttempts);
 
 module.exports = router;

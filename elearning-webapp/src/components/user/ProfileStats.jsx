@@ -1,6 +1,7 @@
 import React from 'react';
 import { Award, Shield, User as UserIcon } from 'lucide-react';
 import { getRoleLabel } from '../../utils/roles';
+import { USER_STATUS } from '../../utils/constants/statuses';
 
 const ProfileStats = ({ user, points }) => {
   const statBoxes = [
@@ -13,7 +14,7 @@ const ProfileStats = ({ user, points }) => {
     },
     {
       label: 'สถานะ',
-      value: user?.status === 'ACTIVE' ? 'ปกติ' : '-',
+      value: user?.status === USER_STATUS.ACTIVE ? 'ปกติ' : '-',
       icon: <Shield size={18} className="text-primary" />,
       color: 'text-primary',
       bg: 'bg-indigo-50',

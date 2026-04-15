@@ -1,65 +1,81 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+
 const authHelpers = require('../src/utils/auth.helpers');
+const { USER_ROLES } = require('../src/utils/constants/roles');
+const { ENTITY_STATUS } = require('../src/utils/constants/statuses');
 
-// Minimal mock prisma for testing
-const mockPrisma = {
-  user: {
-    findUnique: jest.fn()
-  }
-};
+const createPrisma = (userRecord) => ({
+    user: {
+        findUnique: async () => userRecord
+    }
+});
 
-describe('auth.helpers', () => {
-  describe('getActorContext', () => {
-    it('should resolve actor context for admin', async () => {
-      const authUser = { userId: 'admin-1', role: 'admin' };
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'admin-1',
-        role: 'admin',
-        departmentId: null
-      });
+test('getActorContext resolves actor context for admin users', async () => {
+    const actor = await authHelpers.getActorContext(
+        createPrisma({
+            id: 'admin-1',
+            role: USER_ROLES.ADMIN,
+            departmentId: null,
+            departmentRef: null,
+            tier: null,
+            createdAt: new Date('2026-04-01T00:00:00.000Z')
+        }),
+        { userId: 'admin-1', role: USER_ROLES.ADMIN }
+    );
 
-      const actor = await authHelpers.getActorContext(mockPrisma, authUser);
-      expect(actor.role).toBe('admin');
-    });
+    assert.equal(actor.role, USER_ROLES.ADMIN);
+    assert.equal(actor.effectiveRole, USER_ROLES.ADMIN);
+    assert.equal(actor.isAdmin, true);
+    assert.equal(actor.canAccessAdminPanel, true);
+});
 
-    it('should resolve actor context for manager with department', async () => {
-      const authUser = { userId: 'mgr-1', role: 'manager' };
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'mgr-1',
-        role: 'manager',
-        departmentId: 'dept-A'
-      });
+test('getActorContext resolves manager scope with department information', async () => {
+    const actor = await authHelpers.getActorContext(
+        createPrisma({
+            id: 'mgr-1',
+            role: USER_ROLES.MANAGER,
+            departmentId: 'dept-a',
+            departmentRef: { id: 'dept-a', name: 'Operations' },
+            tier: { id: 'tier-1', name: 'Manager', accessAdmin: false, order: 2 },
+            createdAt: new Date('2026-04-01T00:00:00.000Z')
+        }),
+        { userId: 'mgr-1', role: USER_ROLES.MANAGER }
+    );
 
-      const actor = await authHelpers.getActorContext(mockPrisma, authUser);
-      expect(actor.departmentId).toBe('dept-A');
-    });
-  });
+    assert.equal(actor.departmentId, 'dept-a');
+    assert.equal(actor.department, 'Operations');
+    assert.equal(actor.effectiveRole, USER_ROLES.MANAGER);
+    assert.equal(actor.isManager, true);
+    assert.equal(actor.canAccessAdminPanel, true);
+});
 
-  describe('canAccessEntity', () => {
-    it('should allow admin access to everything', () => {
-      const actor = { role: 'admin' };
-      const entity = { isTemporary: false, status: 'DRAFT' };
-      expect(authHelpers.canAccessEntity(actor, entity)).toBe(true);
-    });
+test('canAccessEntity allows admin access regardless of non-published status', () => {
+    const actor = { isAdmin: true };
+    const entity = { isTemporary: false, status: ENTITY_STATUS.DRAFT };
 
-    it('should deny user access to expired temporary content', () => {
-      const actor = { role: 'user', departmentId: 'dept-A' };
-      const entity = { 
-        isTemporary: true, 
-        expiredAt: new Date(Date.now() - 10000),
-        status: 'PUBLISHED',
+    assert.equal(authHelpers.canAccessEntity(actor, entity), true);
+});
+
+test('canAccessEntity denies expired temporary content for end users', () => {
+    const actor = { isAdmin: false, isManager: false, departmentId: 'dept-a', tier: null };
+    const entity = {
+        isTemporary: true,
+        expiredAt: new Date(Date.now() - 10_000),
+        status: ENTITY_STATUS.PUBLISHED,
         visibleToAll: true
-      };
-      expect(authHelpers.canAccessEntity(actor, entity)).toBe(false);
-    });
+    };
 
-    it('should allow user access to department-scoped content', () => {
-      const actor = { role: 'user', departmentId: 'dept-A' };
-      const entity = { 
-        status: 'PUBLISHED',
+    assert.equal(authHelpers.canAccessEntity(actor, entity), false);
+});
+
+test('canAccessEntity allows department-scoped published content for matching users', () => {
+    const actor = { isAdmin: false, isManager: false, departmentId: 'dept-a', tier: null };
+    const entity = {
+        status: ENTITY_STATUS.PUBLISHED,
         visibleToAll: false,
-        departmentAccess: [{ departmentId: 'dept-A' }]
-      };
-      expect(authHelpers.canAccessEntity(actor, entity)).toBe(true);
-    });
-  });
+        departmentAccess: [{ departmentId: 'dept-a' }]
+    };
+
+    assert.equal(authHelpers.canAccessEntity(actor, entity), true);
 });

@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { USER_ROLES, ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -19,7 +20,7 @@ const verifyToken = (req, res, next) => {
 };
 
 const verifyAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (req.user && req.user.role === USER_ROLES.ADMIN) {
     next();
   } else {
     res.status(403).json({ message: 'Superadmin access required' });
@@ -41,7 +42,7 @@ const verifyAdminPanelAccess = async (req, res, next) => {
       include: { tier: true }
     });
 
-    if (user && (['admin', 'manager'].includes(user.role) || user.tier?.accessAdmin)) {
+    if (user && (ADMIN_PANEL_ROLES.includes(user.role) || user.tier?.accessAdmin)) {
       // Update req.user with latest data for downstream use
       req.user.role = user.role;
       req.user.tier = user.tier;

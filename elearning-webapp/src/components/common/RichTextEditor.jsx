@@ -107,21 +107,11 @@ const RichTextEditor = ({
         heading: false,
         horizontalRule: false,
       }),
-      UnderlineExtension,
       TextStyle,
       Color,
       RichTextImage.configure({
         inline: false,
         allowBase64: false,
-      }),
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-        defaultProtocol: 'https',
-        HTMLAttributes: {
-          target: '_blank',
-          rel: 'noopener noreferrer nofollow',
-        },
       }),
     ],
     content: normalizedValue,

@@ -1,25 +1,25 @@
----
+﻿---
 name: architecture-pro-hygiene
 description: Master Guide for production-grade architectural standards, sustainable component decomposition, strict type safety, and secure, centralized logic patterns.
 ---
 
-# 🛡️ Architecture Pro Hygiene Master Guide
+# ๐ก๏ธ Architecture Pro Hygiene Master Guide
 
 This skill is the definitive source of truth for maintaining the architectural integrity of the e-learning platform. All AI assistants must adhere to these standards to ensure zero technical debt accumulation and a premium user experience.
 
 ---
 
-## 1. 🏗️ Component Sustainability & Clean Code
+## 1. ๐—๏ธ Component Sustainability & Clean Code
 
 Files exceeding 400 lines are considered "Architectural Debt". 
 
-### ✅ The Modular Pattern:
+### โ… The Modular Pattern:
 When a component grows, decompose it according to this hierarchy:
 1.  **Container/Page**: Orchestrates data fetching, high-level state, and passes props down.
 2.  **Custom Hooks**: Isolate side effects, complex form logic, and API calls (e.g., `useCourseActions.ts`).
 3.  **Sub-components**: Pure presentational UI modules.
 
-### ❌ Anti-Patterns to Avoid:
+### โ Anti-Patterns to Avoid:
 - Inlining massive `useEffect` or `useMemo` blocks inside a large component.
 - Mixing Admin-only UI and User-facing UI in the same file.
 - Direct API calls inside the `render` block (all calls must go through a Service layer or data fetching library).
@@ -27,11 +27,11 @@ When a component grows, decompose it according to this hierarchy:
 
 ---
 
-## 2. 🔐 Centralized Authorization, Security & Validation
+## 2. ๐” Centralized Authorization, Security & Validation
 
 Security must be **Declarative**, **Centralized**, and **Validated**.
 
-### ✅ Backend Service Pattern:
+### โ… Backend Service Pattern:
 Every service method must validate inputs via a schema (e.g., Zod) and resolve the "Actor" first.
 
 ```typescript
@@ -58,7 +58,7 @@ export const executeAction = async (payload: any, authUser: UserContext) => {
 };
 ```
 
-### ❌ Anti-Patterns to Avoid:
+### โ Anti-Patterns to Avoid:
 - Trusts client payloads without Zod/Yup validation.
 - Catching errors locally and returning successful 200 responses with error messages (Always throw a proper Error context).
 - Manually checking `if (user.role === 'admin')` inside endpoints.
@@ -66,28 +66,28 @@ export const executeAction = async (payload: any, authUser: UserContext) => {
 
 ---
 
-## 3. 🎨 Premium UX Feedback & Modern UI Standards
+## 3. ๐จ Premium UX Feedback & Modern UI Standards
 
 Maintaining a "Premium, Futuristic, and Elegant" feel requires high-performance interaction patterns.
 
-### ✅ User Interaction Pattern:
+### โ… User Interaction Pattern:
 - **Notifications**: Always use `useToast()` -> `toast.success()`, `toast.error()`.
 - **Confirmations**: Always use `useConfirm()` -> `const ok = await confirm({ title: 'Danger', variant: 'danger' })`.
 - **Loading States**: Prefer Skeleton Loaders over blocky loading spinners to avoid layout shifts.
 - **Styling**: Always use semantic tokens (e.g., `text-primary-500`, `bg-dark-900`) to ensure seamless Dark Mode support. Utilize `backdrop-blur-md` for floating elements (modals/navbars) to maintain an elegant depth.
 
-### ❌ Anti-Patterns to Avoid:
+### โ Anti-Patterns to Avoid:
 - Using `window.alert()` or `window.confirm()`.
 - Hardcoding hex colors (e.g., `#FF0000`).
 - Abrupt UI changes without smooth transitions.
 
 ---
 
-## 4. 🌐 Native-First Localization (i18n)
+## 4. ๐ Native-First Localization (i18n)
 
 The project is designed for multilingual support. Zero hardcoded display literals should exist in JSX.
 
-### ✅ Localization Rules:
+### โ… Localization Rules:
 1.  **Define Key**: `admin.user_management.delete_confirm`
 2.  **Update Locale**: Add to `src/locales/th.json` and ensure a fallback in `en.json`.
 3.  **Use Hook**:
@@ -98,34 +98,34 @@ The project is designed for multilingual support. Zero hardcoded display literal
 
 ---
 
-## 5. 📅 Date & Formatting Standardization
+## 5. ๐“… Date & Formatting Standardization
 
 Global standard for Thai Buddhist Era (B.E.) and generic formatting.
 
-### ✅ Standard Usage:
+### โ… Standard Usage:
 - **Display Date**: `formatDisplayDate(date)`
 - **Full Date/Time**: `formatFullDateTime(date)`
 - **Thai Year**: Always ensure `toThaiYear` is used for B.E. displays in Thai context.
 
 ---
 
-## 6. 🔌 Database Hygiene (Prisma)
+## 6. ๐” Database Hygiene (Prisma)
 
 Prevent connection leaks, credential exposure, and performance bottlenecks.
 
-### ✅ Environment & Query Contract:
+### โ… Environment & Query Contract:
 - `DATABASE_URL`: Port **6543** (PgBouncer/Pooling) - for runtime serverless calls.
 - `DIRECT_URL`: Port **5432** (Direct) - for migrations and build-time schema checks.
 - **Performance**: Always be mindful of **N+1 query problems**. Use `include` or `select` judiciously to fetch relations in a single query.
 
-### ❌ Anti-Patterns to Avoid:
+### โ Anti-Patterns to Avoid:
 - Committing the `.env` file.
 - Running `prisma db push` in production; always use the CI/CD pipeline (`prisma migrate deploy`).
 - Over-fetching fields (e.g., `select: { password: true }` in public maps).
 
 ---
 
-## 7. 🚦 Final Project Rules Checklist
+## 7. ๐ฆ Final Project Rules Checklist
 
 Before submitting any code change, verify:
 - [ ] File size is < 400 lines (Component properly decomposed).

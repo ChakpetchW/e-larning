@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search } from 'lucide-react';
+import { FILTER_VALUES } from '../../utils/constants/filters';
 
 const UserFilters = ({
   searchTerm,
@@ -29,7 +30,7 @@ const UserFilters = ({
         value={selectedDepartment}
         onChange={(event) => onDepartmentChange(event.target.value)}
       >
-        <option value="ALL">ทุกแผนก</option>
+        <option value={FILTER_VALUES.ALL}>ทุกแผนก</option>
         {departments.map((department) => (
           <option key={department.id} value={department.id}>
             {department.name}
@@ -42,7 +43,7 @@ const UserFilters = ({
         value={selectedTier}
         onChange={(event) => onTierChange(event.target.value)}
       >
-        <option value="ALL">ทุกระดับ</option>
+        <option value={FILTER_VALUES.ALL}>ทุกระดับ</option>
         {tiers.map((tier) => (
           <option key={tier.id} value={tier.id}>
             {tier.name}

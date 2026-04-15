@@ -1,4 +1,4 @@
----
+﻿---
 name: adapt
 description: Adapt designs to work across different screen sizes, devices, contexts, or platforms. Ensures consistent experience across varied environments.
 ---
@@ -33,7 +33,7 @@ Understand what needs adaptation and why:
 
 Create context-appropriate strategy:
 
-### Mobile Adaptation (Desktop → Mobile)
+### Mobile Adaptation (Desktop โ’ Mobile)
 
 **Layout Strategy**:
 - Single column instead of multi-column
@@ -74,7 +74,7 @@ Create context-appropriate strategy:
 - Side navigation drawers
 - Multi-column forms where appropriate
 
-### Desktop Adaptation (Mobile → Desktop)
+### Desktop Adaptation (Mobile โ’ Desktop)
 
 **Layout Strategy**:
 - Multi-column layouts (use horizontal space)
@@ -95,7 +95,7 @@ Create context-appropriate strategy:
 - Richer visualizations
 - More detailed descriptions
 
-### Print Adaptation (Screen → Print)
+### Print Adaptation (Screen โ’ Print)
 
 **Layout Strategy**:
 - Page breaks at logical points
@@ -109,7 +109,7 @@ Create context-appropriate strategy:
 - Include metadata (print date, page title)
 - Convert charts to print-friendly versions
 
-### Email Adaptation (Web → Email)
+### Email Adaptation (Web โ’ Email)
 
 **Layout Strategy**:
 - Narrow width (600px max)

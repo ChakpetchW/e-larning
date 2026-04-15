@@ -1,4 +1,4 @@
----
+﻿---
 name: polish
 description: Final quality pass before shipping. Fixes alignment, spacing, consistency, and detail issues that separate good from great.
 ---
@@ -62,8 +62,8 @@ Work through these dimensions methodically:
 - **Theme consistency**: Works in all theme variants
 - **Color meaning**: Same colors mean same things throughout
 - **Accessible focus**: Focus indicators visible with sufficient contrast
-- **Tinted neutrals**: No pure gray or pure black—add subtle color tint (0.01 chroma)
-- **Gray on color**: Never put gray text on colored backgrounds—use a shade of that color or transparency
+- **Tinted neutrals**: No pure gray or pure blackโ€”add subtle color tint (0.01 chroma)
+- **Gray on color**: Never put gray text on colored backgroundsโ€”use a shade of that color or transparency
 
 ### Interaction States
 
@@ -83,7 +83,7 @@ Every interactive element needs all states:
 ### Micro-interactions & Transitions
 
 - **Smooth transitions**: All state changes animated appropriately (150-300ms)
-- **Consistent easing**: Use ease-out-quart/quint/expo for natural deceleration. Never bounce or elastic—they feel dated.
+- **Consistent easing**: Use ease-out-quart/quint/expo for natural deceleration. Never bounce or elasticโ€”they feel dated.
 - **No jank**: 60fps animations, only animate transform and opacity
 - **Appropriate motion**: Motion serves purpose, not decoration
 - **Reduced motion**: Respects `prefers-reduced-motion`

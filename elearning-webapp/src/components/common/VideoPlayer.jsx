@@ -26,6 +26,7 @@ const plyrCustomStyles = `
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    border-radius: 50%;
   }
   .plyr--video .plyr__control.plyr__tab-focus,
   .plyr--video .plyr__control:hover,
@@ -201,11 +202,28 @@ const VideoPlayer = ({ url, onEnded }) => {
             iconUrl: plyrSprite,
             fullscreen: { iosNative: true },
             controls: [
-              'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'
+              'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'
             ],
-            settings: [],
-            youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 },
-            vimeo: { byline: false, portrait: false, title: false, transparent: false },
+            settings: ['quality', 'speed'],
+            quality: {
+              default: 1080,
+              // Let provider auto-populate options
+            },
+            youtube: { 
+              noCookie: true, 
+              rel: 0, 
+              showinfo: 0, 
+              iv_load_policy: 3, 
+              modestbranding: 1,
+              vq: 'hd1080'
+            },
+            vimeo: { 
+              byline: false, 
+              portrait: false, 
+              title: false, 
+              transparent: false,
+              quality: '1080p'
+            },
           }}
           onEnd={onEnded}
           onError={() => setPlaybackError('error')}

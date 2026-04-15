@@ -3,6 +3,7 @@ import { Search, Clock, ArrowRight, BookOpen, PlayCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import CourseCard from '../../components/common/CourseCard';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const OngoingCourses = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const OngoingCourses = () => {
         const response = await userAPI.getCourses();
         const coursesData = Array.isArray(response?.data) ? response.data : [];
         // Filter for courses that are enrolled and in progress
-        setCourses(coursesData.filter((course) => course.isEnrolled && course.enrollmentStatus === 'IN_PROGRESS'));
+        setCourses(coursesData.filter((course) => course.isEnrolled && course.enrollmentStatus === ENROLLMENT_STATUS.IN_PROGRESS));
       } catch (error) {
         console.error('Fetch ongoing courses error:', error);
       } finally {

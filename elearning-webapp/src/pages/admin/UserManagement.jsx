@@ -9,6 +9,8 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { canEditAdminUsers } from '../../utils/roles';
 import { useToast } from '../../context/ToastContext';
 import useConfirm from '../../hooks/useConfirm';
+import { USER_ROLES } from '../../utils/constants/roles';
+import { FILTER_VALUES } from '../../utils/constants/filters';
 
 // Sub-components
 import UserFilters from '../../components/admin/UserFilters';
@@ -18,7 +20,7 @@ const getDefaultFormData = () => ({
   name: '',
   email: '',
   password: '',
-  role: 'user',
+  role: USER_ROLES.USER,
   departmentId: '',
   tierId: '',
   employmentDate: '',
@@ -42,8 +44,8 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [referenceLoading, setReferenceLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('ALL');
-  const [selectedTier, setSelectedTier] = useState('ALL');
+  const [selectedDepartment, setSelectedDepartment] = useState(FILTER_VALUES.ALL);
+  const [selectedTier, setSelectedTier] = useState(FILTER_VALUES.ALL);
 
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -168,7 +170,7 @@ const UserManagement = () => {
       name: user.name,
       email: user.email,
       password: '',
-      role: user.role || 'user',
+      role: user.role || USER_ROLES.USER,
       departmentId: user.departmentId || '',
       tierId: user.tierId || '',
       employmentDate: formatDateForInput(user.employmentDate),
@@ -238,10 +240,10 @@ const UserManagement = () => {
         user.email.toLowerCase().includes(keyword);
 
       const matchesDepartment =
-        selectedDepartment === 'ALL' || user.departmentId === selectedDepartment;
+        selectedDepartment === FILTER_VALUES.ALL || user.departmentId === selectedDepartment;
 
       const matchesTier =
-        selectedTier === 'ALL' || user.tierId === selectedTier;
+        selectedTier === FILTER_VALUES.ALL || user.tierId === selectedTier;
 
       return matchesKeyword && matchesDepartment && matchesTier;
     })

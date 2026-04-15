@@ -10,6 +10,7 @@ import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { useToast } from '../../context/ToastContext';
 import useConfirm from '../../hooks/useConfirm';
+import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 
 const getDefaultCategoryForm = () => ({
   name: '',
@@ -37,7 +38,7 @@ const CategoryManagementModal = ({
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [categoryForm, setCategoryForm] = useState(getDefaultCategoryForm());
   const [editingCategoryId, setEditingCategoryId] = useState(null);
-  const [categoryView, setCategoryView] = useState('ACTIVE');
+  const [categoryView, setCategoryView] = useState(ENTITY_VIEW_STATUS.ACTIVE);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -106,7 +107,7 @@ const CategoryManagementModal = ({
   };
 
   const handleMoveCategory = async (index, direction) => {
-    if (categoryView === 'ARCHIVED') return;
+    if (categoryView === ENTITY_VIEW_STATUS.ARCHIVED) return;
 
     const activeCategories = categories.filter((category) => !category.isArchived);
     const reordered = [...activeCategories];
@@ -131,7 +132,7 @@ const CategoryManagementModal = ({
   };
 
   const filteredCategories = useMemo(() => (
-    categories.filter((category) => (categoryView === 'ARCHIVED' ? Boolean(category.isArchived) : !category.isArchived))
+    categories.filter((category) => (categoryView === ENTITY_VIEW_STATUS.ARCHIVED ? Boolean(category.isArchived) : !category.isArchived))
   ), [categories, categoryView]);
 
   if (!isOpen) return null;
@@ -159,8 +160,8 @@ const CategoryManagementModal = ({
 
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {[
-              { key: 'ACTIVE', label: `หมวดหมู่ที่เผยแพร่อยู่ (${categories.filter((c) => !c.isArchived).length})`, icon: LayoutGrid },
-              { key: 'ARCHIVED', label: `Archive (${categories.filter((c) => c.isArchived).length})`, icon: Archive },
+              { key: ENTITY_VIEW_STATUS.ACTIVE, label: `หมวดหมู่ที่เผยแพร่อยู่ (${categories.filter((c) => !c.isArchived).length})`, icon: LayoutGrid },
+              { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `Archive (${categories.filter((c) => c.isArchived).length})`, icon: Archive },
             ].map(({ key, label }) => (
               <button
                 key={key}
@@ -172,7 +173,7 @@ const CategoryManagementModal = ({
                     : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                 }`}
               >
-                {key === 'ACTIVE' ? <LayoutGrid size={16} /> : <Archive size={16} />}
+                {key === ENTITY_VIEW_STATUS.ACTIVE ? <LayoutGrid size={16} /> : <Archive size={16} />}
                 {label}
               </button>
             ))}
@@ -509,7 +510,7 @@ const CategoryManagementModal = ({
                       <div className="flex flex-col rounded-lg border border-slate-100 bg-slate-50 overflow-hidden shadow-sm">
                         <button
                           type="button"
-                          disabled={categoryView === 'ARCHIVED' || index === 0}
+                          disabled={categoryView === ENTITY_VIEW_STATUS.ARCHIVED || index === 0}
                           onClick={() => handleMoveCategory(index, -1)}
                           className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all border-b border-slate-100"
                         >
@@ -517,7 +518,7 @@ const CategoryManagementModal = ({
                         </button>
                         <button
                           type="button"
-                          disabled={categoryView === 'ARCHIVED' || index === filteredCategories.length - 1}
+                          disabled={categoryView === ENTITY_VIEW_STATUS.ARCHIVED || index === filteredCategories.length - 1}
                           onClick={() => handleMoveCategory(index, 1)}
                           className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all"
                         >

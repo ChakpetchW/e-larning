@@ -3,6 +3,7 @@ import { Search, CheckCircle2, ArrowRight, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import CourseCard from '../../components/common/CourseCard';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const CompletedCourses = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const CompletedCourses = () => {
       try {
         const response = await userAPI.getCourses();
         const coursesData = Array.isArray(response?.data) ? response.data : [];
-        setCourses(coursesData.filter((course) => course.enrollmentStatus === 'COMPLETED'));
+        setCourses(coursesData.filter((course) => course.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED));
       } catch (error) {
         console.error('Fetch completed courses error:', error);
       } finally {

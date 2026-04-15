@@ -1,5 +1,6 @@
 import React from 'react';
 import { PlayCircle, CheckCircle, ChevronRight } from 'lucide-react';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const ProfileActivities = ({ courses, onNavigate }) => {
   return (
@@ -7,7 +8,7 @@ const ProfileActivities = ({ courses, onNavigate }) => {
       <h4 className="mb-2 pl-2 text-xs font-bold tracking-[0.04em] text-gray-500">
         กิจกรรมการเรียน
       </h4>
-      
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button
           type="button"
@@ -20,7 +21,7 @@ const ProfileActivities = ({ courses, onNavigate }) => {
           <p className="text-[10px] md:text-[11px] font-bold tracking-[0.04em] text-slate-500">กำลังเรียนอยู่</p>
           <div className="mt-1 flex w-full items-end justify-between">
             <h5 className="text-lg md:text-xl font-black text-slate-800">
-              {courses.filter(c => c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS').length} คอร์ส
+              {courses.filter((course) => course.isEnrolled && course.enrollmentStatus === ENROLLMENT_STATUS.IN_PROGRESS).length} คอร์ส
             </h5>
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-50 opacity-0 transition-opacity group-hover:opacity-100">
               <ChevronRight size={16} className="text-slate-400" />
@@ -39,7 +40,7 @@ const ProfileActivities = ({ courses, onNavigate }) => {
           <p className="text-[10px] md:text-[11px] font-bold tracking-[0.04em] text-slate-500">เรียนจบแล้ว</p>
           <div className="mt-1 flex w-full items-end justify-between">
             <h5 className="text-lg md:text-xl font-black text-slate-800">
-              {courses.filter(c => c.enrollmentStatus === 'COMPLETED').length} คอร์ส
+              {courses.filter((course) => course.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED).length} คอร์ส
             </h5>
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-50 opacity-0 transition-opacity group-hover:opacity-100">
               <ChevronRight size={16} className="text-slate-400" />

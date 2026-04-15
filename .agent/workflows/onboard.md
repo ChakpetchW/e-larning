@@ -1,4 +1,4 @@
----
+﻿---
 name: onboard
 description: Design or improve onboarding flows, empty states, and first-time user experiences. Helps users get started successfully and understand value quickly.
 ---
@@ -166,7 +166,7 @@ Projects help you organize your work and collaborate with your team.
 **Help patterns**:
 - `?` icon near complex features
 - "Learn more" links in tooltips
-- Keyboard shortcut hints (`⌘K` shown on search box)
+- Keyboard shortcut hints (`โK` shown on search box)
 
 ## Empty State Design
 

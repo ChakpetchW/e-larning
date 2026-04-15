@@ -1,11 +1,14 @@
+import { FILTER_VALUES } from './constants/filters';
+import { ENROLLMENT_STATUS } from './constants/statuses';
+
 /**
  * Utility for filtering and sorting courses consistently across the app.
  */
-export const filterCourses = (courses, { activeCat = 'All', searchQuery = '', status = 'all' }) => {
+export const filterCourses = (courses, { activeCat = FILTER_VALUES.ALL_LABEL, searchQuery = '', status = 'all' }) => {
   if (!courses) return [];
   
   return courses.filter(c => {
-    const matchCat = activeCat === 'All' || c.category?.name === activeCat;
+    const matchCat = activeCat === FILTER_VALUES.ALL_LABEL || c.category?.name === activeCat;
     const searchLower = searchQuery.toLowerCase();
     const matchSearch = c.title.toLowerCase().includes(searchLower) || 
                       (c.description && c.description.toLowerCase().includes(searchLower));
@@ -13,9 +16,9 @@ export const filterCourses = (courses, { activeCat = 'All', searchQuery = '', st
     // Status Filter
     let matchStatus = true;
     if (status === 'enrolled') {
-      matchStatus = c.isEnrolled && c.enrollmentStatus === 'IN_PROGRESS';
+      matchStatus = c.isEnrolled && c.enrollmentStatus === ENROLLMENT_STATUS.IN_PROGRESS;
     } else if (status === 'completed') {
-      matchStatus = c.enrollmentStatus === 'COMPLETED';
+      matchStatus = c.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED;
     } else if (status === 'not_started') {
       matchStatus = !c.isEnrolled;
     }

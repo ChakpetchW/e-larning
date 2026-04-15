@@ -127,7 +127,7 @@ const CourseDetail = () => {
   const documentLessons = useMemo(
     () =>
       course?.lessons?.filter(
-        (lesson) => lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'article',
+        (lesson) => lesson.type === 'pdf' || lesson.type === 'document',
       ) || [],
     [course],
   );

@@ -7,6 +7,7 @@ import { isSuperAdmin } from '../../utils/roles';
 import { useToast } from '../../context/ToastContext';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { REWARD_STATUS } from '../../utils/constants/statuses';
 
 const DEFAULT_REWARD_FORM = {
   name: '',
@@ -84,7 +85,7 @@ const RewardsManagement = () => {
         await adminAPI.updateReward(editingId, { ...rewardForm });
         toast.success('อัปเดตรางวัลสำเร็จ');
       } else {
-        await adminAPI.createReward({ ...rewardForm, status: 'ACTIVE' });
+        await adminAPI.createReward({ ...rewardForm, status: REWARD_STATUS.ACTIVE });
         toast.success('เพิ่มรางวัลสำเร็จ');
       }
 

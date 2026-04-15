@@ -1,9 +1,10 @@
 import React from 'react';
-import { PlayCircle, Check, FileText, MonitorPlay, Bookmark, Clock } from 'lucide-react';
+import { PlayCircle, Check, FileText, MonitorPlay, Bookmark, Clock, BookOpen } from 'lucide-react';
 
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
-  if (type === 'pdf' || type === 'document' || type === 'article') return 'เอกสาร';
+  if (type === 'article') return 'บทความ';
+  if (type === 'pdf' || type === 'document') return 'เอกสาร';
   return 'วิดีโอ';
 };
 
@@ -74,7 +75,9 @@ const CourseOutline = ({ course, onNavigate }) => {
                 <span className="flex items-center gap-1.5">
                   {lesson.type === 'quiz' ? (
                     <Check size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />
-                  ) : (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'article') ? (
+                  ) : lesson.type === 'article' ? (
+                    <BookOpen size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />
+                  ) : (lesson.type === 'pdf' || lesson.type === 'document') ? (
                     <FileText size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />
                   ) : (
                     <MonitorPlay size={14} className={course.isEnrolled ? "group-hover:text-primary/70" : ""} />

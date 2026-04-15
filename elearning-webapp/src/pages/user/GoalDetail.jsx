@@ -4,6 +4,7 @@ import { Target, ArrowLeft, Calendar, BookOpen, CheckCircle2, Clock } from 'luci
 import { userAPI } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import CourseCard from '../../components/common/CourseCard';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const GoalDetail = () => {
     const { id } = useParams();
@@ -41,7 +42,7 @@ const GoalDetail = () => {
         let completed;
         if (goal.type === 'ANY') {
             completed = courses.filter(c => 
-                c.enrollmentStatus === 'COMPLETED' && 
+                c.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED && 
                 c.completedAt && 
                 new Date(c.completedAt) >= windowStart && 
                 new Date(c.completedAt) <= windowEnd
@@ -50,7 +51,7 @@ const GoalDetail = () => {
             const specificIds = goal.courses.map(gc => gc.courseId);
             completed = courses.filter(c => 
                 specificIds.includes(c.id) &&
-                c.enrollmentStatus === 'COMPLETED' && 
+                c.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED && 
                 c.completedAt && 
                 new Date(c.completedAt) >= windowStart && 
                 new Date(c.completedAt) <= windowEnd

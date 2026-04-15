@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
-import { X, Upload, FileText, Play } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { X, Upload, FileText, Play, Loader2 } from 'lucide-react';
 import QuizBuilder from './QuizBuilder';
 import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
+import { adminAPI } from '../../utils/api';
 
 const LessonModal = ({
   isOpen,
@@ -141,6 +142,25 @@ const LessonModal = ({
                     <option value="article">บทความเนื้อหา</option>
                     <option value="quiz">แบบทดสอบ (Quiz)</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-bold text-gray-700">ระยะเวลา (นาที)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      className="form-input w-full"
+                      value={lessonForm.duration || 0}
+                      onChange={(event) => setLessonForm({ 
+                        ...lessonForm, 
+                        duration: parseInt(event.target.value, 10) || 0 
+                      })}
+                      min="0"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                      นาที
+                    </div>
+                  </div>
                 </div>
 
                 {lessonForm.type !== 'quiz' ? (
