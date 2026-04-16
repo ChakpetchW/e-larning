@@ -142,7 +142,6 @@ const LessonPlayer = () => {
 
   const handleQuizSubmit = async () => {
     if (Object.keys(answers).length < (lesson.questions?.length || 0)) {
-      toast.warning('กรุณาตอบคำถามให้ครบทุกข้อ');
       return;
     }
 
@@ -152,19 +151,12 @@ const LessonPlayer = () => {
       setQuizResult(response.data);
       setShouldScrollToQuizResult(true);
 
-      if (response.data.passed) {
-        toast.success(`ยินดีด้วย! คุณผ่านแบบทดสอบด้วยคะแนน ${response.data.scorePercent}%`);
-      } else {
-        toast.error(`เสียใจด้วย คุณยังไม่ผ่านเกณฑ์ (ได้ ${response.data.scorePercent}%)`);
-      }
-
       if (response.data.isCompleted) {
         setCompleted(true);
         syncCompletedLessonState();
       }
     } catch (error) {
       console.error('Submit quiz error:', error);
-      toast.error('เกิดข้อผิดพลาดในการส่งคำตอบ');
     } finally {
       setUpdating(false);
     }
