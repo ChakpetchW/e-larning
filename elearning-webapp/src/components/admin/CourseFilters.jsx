@@ -3,6 +3,7 @@ import { LayoutGrid, Archive, Search } from 'lucide-react';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 import ViewToggleTabs from '../common/ViewToggleTabs';
+import CustomSelect from '../common/CustomSelect';
 
 const CourseFilters = ({
   courseView,
@@ -39,18 +40,18 @@ const CourseFilters = ({
             />
           </div>
 
-          <select
-            className="cursor-pointer rounded-md border border-border bg-white px-3 py-2 text-sm text-muted focus:outline-none"
+          <CustomSelect
+            size="sm"
+            className="w-full sm:w-64"
             value={selectedCategory}
             onChange={(event) => setSelectedCategory(event.target.value)}
-          >
-            <option value={FILTER_VALUES.ALL}>ทุกหมวดหมู่</option>
-            {categories.filter((category) => !category.isArchived).map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: FILTER_VALUES.ALL, label: 'ทุกหมวดหมู่' },
+              ...categories
+                .filter((category) => !category.isArchived)
+                .map((category) => ({ value: category.id, label: category.name }))
+            ]}
+          />
         </div>
       </div>
     </div>

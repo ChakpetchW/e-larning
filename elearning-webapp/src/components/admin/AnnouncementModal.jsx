@@ -5,6 +5,7 @@ import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
 import QuizBuilder from '../admin/QuizBuilder';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
+import CustomSelect from '../common/CustomSelect';
 
 const AnnouncementModal = ({
   isOpen,
@@ -104,7 +105,7 @@ const AnnouncementModal = ({
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
-        <div className="card flex h-full w-full max-w-6xl flex-col overflow-hidden border border-gray-100 bg-white p-0 shadow-2xl">
+        <div className="card flex h-full w-full max-w-6xl flex-col border border-gray-100 bg-white p-0 shadow-2xl">
           <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 p-4">
             <h4 className="text-lg font-bold">{isEditing ? 'แก้ไขประกาศ' : 'สร้างประกาศใหม่'}</h4>
             <button type="button" onClick={onClose} className="text-muted hover:text-gray-900">
@@ -178,22 +179,19 @@ const AnnouncementModal = ({
                 )}
 
                 <div className={isFullAdmin && form.scope === 'GLOBAL' ? 'hidden' : ''}>
-                  <label className="mb-1 block text-sm font-bold text-gray-700">แผนก</label>
-
                   {isFullAdmin ? (
-                    <select
-                      className="form-input w-full"
+                    <CustomSelect
+                      label="แผนก"
+                      placeholder="เลือกแผนก..."
                       value={form.departmentId}
                       onChange={(event) => setForm((current) => ({ ...current, departmentId: event.target.value }))}
-                    >
-                      <option value="">เลือกแผนก</option>
-                      {departments.map((department) => (
-                        <option key={department.id} value={department.id}>
-                          {department.name}
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        { value: '', label: 'เลือกแผนก' },
+                        ...departments.map((department) => ({ value: department.id, label: department.name }))
+                      ]}
+                    />
                   ) : (
+
                     <div className="flex items-center gap-2 rounded-xl border border-primary/10 bg-primary/5 px-4 py-3 ">
                       <CheckCircle2 size={16} className="text-primary" />
                       <span className="text-sm font-bold text-primary">
@@ -203,19 +201,17 @@ const AnnouncementModal = ({
                   )}
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-sm font-bold text-gray-700">ชนิดหน้า</label>
-                  <select
-                    className="form-input w-full"
+                  <CustomSelect
+                    label="ชนิดหน้า"
                     value={form.type}
                     onChange={(event) => setForm((current) => ({ ...current, type: event.target.value }))}
-                  >
-                    <option value="video">วิดีโอ</option>
-                    <option value="pdf">เอกสาร</option>
-                    <option value="article">บทความ</option>
-                    <option value="quiz">แบบทดสอบ</option>
-                  </select>
-                </div>
+                    options={[
+                      { value: 'video', label: 'วิดีโอ' },
+                      { value: 'pdf', label: 'เอกสาร' },
+                      { value: 'article', label: 'บทความ' },
+                      { value: 'quiz', label: 'แบบทดสอบ' }
+                    ]}
+                  />
 
                 <div className="md:col-span-2">
                   <CustomDateTimePicker

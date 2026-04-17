@@ -7,6 +7,7 @@ import { adminAPI } from '../../utils/api';
 import { toUTCISOString, toLocalInputValue, formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
+import CustomSelect from '../common/CustomSelect';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { useToast } from '../../context/ToastContext';
 import useConfirm from '../../hooks/useConfirm';
@@ -146,7 +147,7 @@ const CategoryManagementModal = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="category-modal-title"
-          className="card flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden bg-white p-6 shadow-xl"
+          className="card flex max-h-[90vh] w-full max-w-4xl flex-col bg-white p-6 shadow-xl"
         >
           <div className="mb-4 flex items-center justify-between">
             <h3 id="category-modal-title" className="text-xl font-bold">จัดการหมวดหมู่</h3>
@@ -204,27 +205,19 @@ const CategoryManagementModal = ({
               </div>
 
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">กลุ่มหลัก (Module)</label>
-
-              <div className="relative">
-                <select
-                  value={categoryForm.type}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, type: e.target.value })}
-                  className="w-full appearance-none bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all cursor-pointer"
-                >
-                  <option value="KM_COURSE">Knowledge & Course Management</option>
-                  <option value="LEARNING_ASSESS">Learning Experience & Assessment</option>
-                  <option value="INCENTIVE_REWARD">Incentive & Reward System</option>
-                  <option value="TRACKING_ANALYTICS">Tracking & Analytics</option>
-                  <option value="GOAL_PATH">Goal Setting & Learning Path</option>
-                  <option value="INTERNAL_COMM">Internal Communication</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-                  <ChevronDown size={18} />
-                </div>
-              </div>
-            </div>
+            <CustomSelect
+              label="กลุ่มหลัก (Module)"
+              value={categoryForm.type}
+              onChange={(e) => setCategoryForm({ ...categoryForm, type: e.target.value })}
+              options={[
+                { value: 'KM_COURSE', label: 'Knowledge & Course Management' },
+                { value: 'LEARNING_ASSESS', label: 'Learning Experience & Assessment' },
+                { value: 'INCENTIVE_REWARD', label: 'Incentive & Reward System' },
+                { value: 'TRACKING_ANALYTICS', label: 'Tracking & Analytics' },
+                { value: 'GOAL_PATH', label: 'Goal Setting & Learning Path' },
+                { value: 'INTERNAL_COMM', label: 'Internal Communication' }
+              ]}
+            />
 
 
 

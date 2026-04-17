@@ -3,6 +3,7 @@ import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers,
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
+import CustomSelect from '../common/CustomSelect';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 
 const CourseBasicInfoForm = ({
@@ -34,13 +35,13 @@ const CourseBasicInfoForm = ({
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">หมวดหมู่</label>
-          <select required className="form-input w-full" value={courseForm.categoryId} onChange={(e) => setCourseForm({ ...courseForm, categoryId: e.target.value })}>
-            <option value="">เลือกหมวดหมู่</option>
-            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-          </select>
-        </div>
+        <CustomSelect
+          label="หมวดหมู่"
+          placeholder="เลือกหมวดหมู่..."
+          value={courseForm.categoryId}
+          onChange={(e) => setCourseForm({ ...courseForm, categoryId: e.target.value })}
+          options={categories.map(cat => ({ value: cat.id, label: cat.name }))}
+        />
         <div className="space-y-1.5">
           <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">แต้มรางวัล (Points)</label>
           <div className="relative group">
