@@ -44,7 +44,7 @@ const AnnouncementCard = ({ announcement, onClick, className = '' }) => {
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 text-white">
             <div className="min-w-0">
               <p className="text-[11px] font-bold tracking-[0.04em] text-amber-100/95">
-                สำหรับ{announcement.department?.name || 'แผนกของคุณ'}
+                สำหรับแผนก {announcement.department?.name || 'ของคุณ'}
               </p>
               <p className="mt-1 text-sm font-semibold text-white/95">
                 คลิกเพื่ออ่านประกาศทันที
