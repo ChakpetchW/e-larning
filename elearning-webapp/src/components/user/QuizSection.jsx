@@ -131,7 +131,7 @@ const QuizSection = ({
           </span>
           <button
             onClick={() => { setQuizResult(null); setAnswers({}); setShowSummary(true); }}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 hover:bg-slate-900 hover:text-white transition-all"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-normal text-slate-600 hover:bg-slate-900 hover:text-white transition-all"
           >
             ทำใหม่
           </button>
