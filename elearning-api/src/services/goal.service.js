@@ -111,6 +111,21 @@ const getGoalDetails = async (id, authUser) => {
     return goal;
 };
 
+const archiveGoal = async (id, authUser) => {
+    const actor = await authHelpers.getActorContext(prisma, authUser);
+    const goal = await prisma.learningGoal.findUnique({ where: { id } });
+    if (!goal) throw new Error('Goal not found');
+
+    if (goal.departmentId !== null && goal.departmentId !== actor.departmentId) {
+        throw new Error('Not authorized to archive this goal');
+    }
+
+    return await prisma.learningGoal.update({
+        where: { id },
+        data: { status: GOAL_STATUS.ARCHIVED }
+    });
+};
+
 const deleteGoal = async (id, authUser) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
@@ -120,9 +135,8 @@ const deleteGoal = async (id, authUser) => {
         throw new Error('Not authorized to delete this goal');
     }
 
-    return await prisma.learningGoal.update({
-        where: { id },
-        data: { status: GOAL_STATUS.ARCHIVED }
+    return await prisma.learningGoal.delete({
+        where: { id }
     });
 };
 
@@ -136,7 +150,6 @@ const getGoalReport = async (goalId, authUser) => {
 
     if (!goal) throw new Error('Goal not found');
 
-    // Get users in scope
     let userWhere = { status: USER_STATUS.ACTIVE };
     if (goal.scope === GOAL_SCOPES.DEPARTMENT) {
         userWhere.departmentId = goal.departmentId;
@@ -210,6 +223,7 @@ module.exports = {
     createGoal,
     getGoals,
     getGoalDetails,
+    archiveGoal,
     deleteGoal,
     getGoalReport
 };

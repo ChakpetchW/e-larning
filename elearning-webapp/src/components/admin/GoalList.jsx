@@ -1,9 +1,11 @@
-import React from 'react';
-import { Calendar, FileText, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, FileText, Trash2, Archive, RotateCcw } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminTable from './AdminTable';
+import AdminActionMenu from './AdminActionMenu';
 
-const GoalList = ({ goals, columns, onViewReport, onDeleteGoal }) => {
+const GoalList = ({ goals, columns, onViewReport, onDeleteGoal, onArchiveGoal }) => {
+  const [openDropdownId, setOpenDropdownId] = useState(null);
   return (
     <div className="card">
       <AdminTable 
@@ -50,24 +52,34 @@ const GoalList = ({ goals, columns, onViewReport, onDeleteGoal }) => {
               </span>
             </td>
             <td className="p-4 text-right">
-              <div className="flex justify-end gap-2">
-                <button 
-                  type="button"
-                  onClick={() => onViewReport(goal)} 
-                  className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors" 
-                  title="ดูรายงาน"
-                >
-                  <FileText size={18} />
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => onDeleteGoal(goal.id)} 
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" 
-                  title="ลบเป้าหมาย"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
+                <AdminActionMenu
+                  isOpen={openDropdownId === goal.id}
+                  onToggle={() => setOpenDropdownId(openDropdownId === goal.id ? null : goal.id)}
+                  actions={[
+                    {
+                      icon: FileText,
+                      label: 'ดูรายงาน',
+                      onClick: () => onViewReport(goal),
+                      className: 'text-slate-600 hover:bg-blue-50 hover:text-blue-600',
+                      iconClassName: 'bg-blue-50 text-blue-500 group-hover:bg-blue-100',
+                    },
+                    {
+                      hidden: goal.status === 'ARCHIVED',
+                      icon: Archive,
+                      label: 'เก็บเข้าคลัง',
+                      onClick: () => onArchiveGoal(goal.id),
+                      className: 'text-slate-600 hover:bg-amber-50 hover:text-amber-600',
+                      iconClassName: 'bg-amber-50 text-amber-500 group-hover:bg-amber-100',
+                    },
+                    {
+                      icon: Trash2,
+                      label: 'ลบเป้าหมาย',
+                      onClick: () => onDeleteGoal(goal.id),
+                      className: 'text-slate-500 hover:bg-red-50 hover:text-red-600 mt-1 border-t border-slate-100/60 pt-2',
+                      iconClassName: 'bg-red-50 text-red-500 group-hover:bg-red-100',
+                    }
+                  ]}
+                />
             </td>
           </tr>
         )}

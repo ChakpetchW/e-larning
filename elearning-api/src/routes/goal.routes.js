@@ -13,6 +13,7 @@ router.get('/:id', goalController.getGoalDetails);
 router.use(verifyAdminPanelAccess);
 router.post('/', goalController.createGoal);
 router.get('/:id/report', goalController.getGoalReport);
+router.put('/:id/archive', goalController.archiveGoal);
 router.delete('/:id', goalController.deleteGoal);
 
 module.exports = router;

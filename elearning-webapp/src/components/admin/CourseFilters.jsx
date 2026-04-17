@@ -2,6 +2,7 @@ import React from 'react';
 import { LayoutGrid, Archive, Search } from 'lucide-react';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
+import ViewToggleTabs from '../common/ViewToggleTabs';
 
 const CourseFilters = ({
   courseView,
@@ -16,26 +17,14 @@ const CourseFilters = ({
 }) => {
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
-        {[
+      <ViewToggleTabs
+        viewMode={courseView}
+        setViewMode={setCourseView}
+        tabs={[
           { key: ENTITY_VIEW_STATUS.ACTIVE, label: `คอร์สที่เผยแพร่อยู่ (${activeCount})`, icon: LayoutGrid },
           { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `Archive (${archivedCount})`, icon: Archive },
-        ].map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setCourseView(key)}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all ${
-              courseView === key
-                ? 'bg-slate-900 text-white shadow-lg'
-                : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-            }`}
-          >
-            <Icon size={16} />
-            {label}
-          </button>
-        ))}
-      </div>
+        ]}
+      />
 
       <div className="card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border p-4">

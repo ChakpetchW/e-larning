@@ -1,20 +1,19 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Archive, BellPlus, CalendarClock, Edit3, History, Search, Trash2, Upload, X, MoreHorizontal, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { BellPlus, CalendarClock, Search } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../utils/imageUtils';
 import { canEditAdminUsers } from '../../utils/roles';
 import useConfirm from '../../hooks/useConfirm';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
-import AdminActionMenu from '../../components/admin/AdminActionMenu';
-import AdminTable from '../../components/admin/AdminTable';
-import ModalPortal from '../../components/common/ModalPortal';
-import RichTextEditor from '../../components/common/RichTextEditor';
-import QuizBuilder from '../../components/admin/QuizBuilder';
-import CustomDateTimePicker from '../../components/common/CustomDateTimePicker';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
-import { formatThaiDateTime } from '../../utils/dateUtils';
+import ViewToggleTabs from '../../components/common/ViewToggleTabs';
+
+// Sub-components
+import AnnouncementTable from '../../components/admin/AnnouncementTable';
+import AnnouncementModal from '../../components/admin/AnnouncementModal';
+import AnnouncementHistoryModal from '../../components/admin/AnnouncementHistoryModal';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 
 const getDefaultForm = (departmentId = '') => ({
   title: '',
@@ -30,18 +29,10 @@ const getDefaultForm = (departmentId = '') => ({
   expiredAt: '',
 });
 
-const getTypeLabel = (type) => {
-  if (type === 'video') return 'วิดีโอ';
-  if (type === 'quiz') return 'แบบทดสอบ';
-  if (type === 'pdf' || type === 'document') return 'เอกสาร';
-  return 'บทความ';
-};
-// Using shared AdminActionMenu
-
 const AnnouncementManagement = () => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
-  const docInputRef = useRef(null);
+  
   const [user] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
   const isFullAdmin = canEditAdminUsers(user);
 
@@ -55,8 +46,6 @@ const AnnouncementManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
   const [form, setForm] = useState(getDefaultForm());
-  const [openDropdownId, setOpenDropdownId] = useState(null);
-  const dropdownRef = useRef(null);
   
   // History Modal State
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -64,13 +53,13 @@ const AnnouncementManagement = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [currentAnnouncementTitle, setCurrentAnnouncementTitle] = useState('');
 
-  // Handle click outside to close dropdown
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const [announcementRes, departmentRes] = await Promise.all([
         adminAPI.getAnnouncements(),
         adminAPI.getDepartments(),
@@ -81,9 +70,13 @@ const AnnouncementManagement = () => {
 
       setAnnouncements(nextAnnouncements);
       setDepartments(nextDepartments);
-      setForm((current) => current.departmentId || !nextDepartments.length
-        ? current
-        : { ...current, departmentId: isFullAdmin ? nextDepartments[0].id : user?.departmentId });
+      
+      // Initialize form with first department if not set
+      setForm((current) => {
+        if (current.departmentId) return current;
+        if (!nextDepartments.length) return current;
+        return { ...current, departmentId: isFullAdmin ? nextDepartments[0].id : user?.departmentId };
+      });
     } catch (error) {
       console.error('Fetch announcement data error:', error);
       toast.error('ไม่สามารถโหลดข้อมูลประกาศได้');
@@ -233,21 +226,6 @@ const AnnouncementManagement = () => {
     }
   };
 
-  const handleViewHistory = async (announcement) => {
-    try {
-      setHistoryLoading(true);
-      setCurrentAnnouncementTitle(announcement.title);
-      setShowHistoryModal(true);
-      const response = await adminAPI.getAnnouncementHistory(announcement.id);
-      setHistoryData(Array.isArray(response.data) ? response.data : []);
-    } catch (error) {
-      console.error('View history error:', error);
-      toast.error('ไม่สามารถโหลดข้อมูลประวัติได้');
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
-
   const handleDelete = async (announcement) => {
     const ok = await confirm({
       title: 'ยืนยันการลบประกาศ',
@@ -268,6 +246,21 @@ const AnnouncementManagement = () => {
     }
   };
 
+  const handleViewHistory = async (announcement) => {
+    try {
+      setHistoryLoading(true);
+      setCurrentAnnouncementTitle(announcement.title);
+      setShowHistoryModal(true);
+      const response = await adminAPI.getAnnouncementHistory(announcement.id);
+      setHistoryData(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('View history error:', error);
+      toast.error('ไม่สามารถโหลดข้อมูลประวัติได้');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   const filteredAnnouncements = useMemo(() => {
     const now = new Date();
     return announcements.filter((announcement) => {
@@ -278,8 +271,10 @@ const AnnouncementManagement = () => {
 
       const isArchived = announcement.expiredAt ? new Date(announcement.expiredAt) <= now : false;
       const matchesView = viewMode === ENTITY_VIEW_STATUS.ARCHIVED ? isArchived : !isArchived;
+
       const keyword = `${announcement.title} ${announcement.department?.name || ''}`.toLowerCase();
       const matchesSearch = keyword.includes(searchTerm.toLowerCase());
+
       return matchesView && matchesSearch;
     });
   }, [announcements, searchTerm, viewMode, isFullAdmin, user?.departmentId]);
@@ -308,63 +303,6 @@ const AnnouncementManagement = () => {
     { label: 'จัดการ', className: 'w-[100px] text-right' },
   ];
 
-  const renderSourceField = () => {
-    if (form.type === 'video') {
-      return (
-        <div>
-          <label className="mb-1 block text-sm font-bold text-gray-700">ลิงก์วิดีโอ</label>
-          <input
-            type="text"
-            className="form-input w-full"
-            value={form.contentUrl}
-            onChange={(event) => setForm((current) => ({ ...current, contentUrl: event.target.value }))}
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
-        </div>
-      );
-    }
-
-    if (form.type === 'pdf' || form.type === 'document') {
-      return (
-        <div>
-          <label className="mb-1 block text-sm font-bold text-gray-700">ไฟล์เอกสาร</label>
-          <input
-            ref={docInputRef}
-            type="file"
-            className="hidden"
-            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-            onChange={handleDocUpload}
-          />
-          <div className="flex gap-2">
-            <input
-              type="text"
-              className="form-input flex-1 font-mono text-xs"
-              value={form.contentUrl}
-              onChange={(event) => setForm((current) => ({ ...current, contentUrl: event.target.value }))}
-              placeholder="URL หรืออัปโหลดไฟล์"
-            />
-            <button
-              type="button"
-              onClick={() => docInputRef.current?.click()}
-              className="btn btn-outline btn-sm gap-1"
-              disabled={uploading}
-            >
-              <Upload size={14} />
-              อัปโหลด
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3">
-        <p className="text-sm font-bold text-primary">เนื้อหาประกาศจะแสดงจาก editor ด้านล่าง</p>
-        <p className="mt-1 text-xs text-muted">เหมาะสำหรับบทความประกาศหรือข้อความสำคัญที่ต้องการจัดรูปแบบ</p>
-      </div>
-    );
-  };
-
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <AdminPageHeader
@@ -379,26 +317,14 @@ const AnnouncementManagement = () => {
       />
 
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center gap-2">
-          {[
-            { key: ENTITY_VIEW_STATUS.ACTIVE, label: `ประกาศที่ยังใช้งาน (${activeCount})` },
-            { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `หมดอายุแล้ว (${archivedCount})` },
-          ].map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setViewMode(item.key)}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all ${
-                viewMode === item.key
-                  ? 'bg-slate-900 text-white shadow-lg'
-                  : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-              }`}
-            >
-              <CalendarClock size={16} />
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <ViewToggleTabs
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          tabs={[
+            { key: ENTITY_VIEW_STATUS.ACTIVE, label: `ประกาศที่ยังใช้งาน (${activeCount})`, icon: CalendarClock },
+            { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `หมดอายุแล้ว (${archivedCount})`, icon: CalendarClock },
+          ]}
+        />
 
         <div className="card overflow-hidden">
           <div className="flex items-center gap-3 border-b border-border p-4">
@@ -414,321 +340,44 @@ const AnnouncementManagement = () => {
             </div>
           </div>
         </div>
+
+        <AnnouncementTable
+          data={filteredAnnouncements}
+          columns={columns}
+          loading={loading}
+          viewMode={viewMode}
+          onViewHistory={handleViewHistory}
+          onEdit={openEditModal}
+          onArchive={handleArchive}
+          onDelete={handleDelete}
+        />
       </div>
 
-      <AdminTable
-        columns={columns}
-        data={filteredAnnouncements}
-        loading={loading}
-        emptyMessage="ยังไม่มีประกาศในรายการนี้"
-        renderRow={(announcement) => (
-          <tr key={announcement.id} className="border-b border-slate-100 align-top">
-            <td className="p-4">
-              <div className="max-w-xl">
-                <p className="font-bold text-slate-900">{announcement.title}</p>
-                <p className="mt-1 text-sm text-slate-500">{announcement.description || 'ไม่มีคำอธิบายเพิ่มเติม'}</p>
-              </div>
-            </td>
-            <td className="p-4 text-sm font-medium text-slate-600">
-              {announcement.department?.name || '-'}
-            </td>
-            <td className="p-4">
-              <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-black text-primary">
-                {getTypeLabel(announcement.type)}
-              </span>
-            </td>
-            <td className="p-4 text-sm font-medium text-slate-600">
-              {announcement.expiredAt ? formatThaiDateTime(announcement.expiredAt, true) : '-'}
-            </td>
-            <td className="p-4">
-              <div className="flex justify-end">
-                <AdminActionMenu
-                  isOpen={openDropdownId === announcement.id}
-                  onToggle={() => setOpenDropdownId(openDropdownId === announcement.id ? null : announcement.id)}
-                  actions={[
-                    {
-                      icon: History,
-                      label: 'ประวัติการเข้าอ่าน',
-                      onClick: () => handleViewHistory(announcement),
-                      className: 'text-slate-600 hover:bg-blue-50 hover:text-blue-600',
-                      iconClassName: 'bg-blue-50 text-blue-500 group-hover:bg-blue-100',
-                    },
-                    {
-                      icon: Edit3,
-                      label: 'แก้ไขประกาศ',
-                      onClick: () => openEditModal(announcement),
-                      className: 'text-slate-600 hover:bg-slate-50 hover:text-primary',
-                      iconClassName: 'bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary',
-                    },
-                    {
-                      hidden: viewMode !== ENTITY_VIEW_STATUS.ACTIVE,
-                      icon: Archive,
-                      label: 'เก็บเข้าคลัง',
-                      onClick: () => handleArchive(announcement),
-                      className: 'text-slate-600 hover:bg-amber-50 hover:text-amber-600',
-                      iconClassName: 'bg-amber-50 text-amber-500 group-hover:bg-amber-100',
-                    },
-                    {
-                      icon: Trash2,
-                      label: 'ลบประกาศ',
-                      onClick: () => handleDelete(announcement),
-                      className: 'text-slate-500 hover:bg-red-50 hover:text-red-600 mt-1 border-t border-slate-100/60 pt-2',
-                      iconClassName: 'bg-red-50 text-red-500 group-hover:bg-red-100',
-                    }
-                  ]}
-                />
-              </div>
-            </td>
-          </tr>
-        )}
+      <AnnouncementModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        isEditing={!!editingAnnouncement}
+        form={form}
+        setForm={setForm}
+        onSave={handleSave}
+        onImageUpload={handleImageUpload}
+        onDocUpload={handleDocUpload}
+        onEditorImageUpload={handleEditorImageUpload}
+        isFullAdmin={isFullAdmin}
+        user={user}
+        departments={departments}
+        uploading={uploading}
       />
 
-      <ModalPortal isOpen={showModal}>
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
-          <div className="card flex h-full w-full max-w-6xl flex-col overflow-hidden border border-gray-100 bg-white p-0 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 p-4">
-              <h4 className="text-lg font-bold">{editingAnnouncement ? 'แก้ไขประกาศ' : 'สร้างประกาศใหม่'}</h4>
-              <button type="button" onClick={() => setShowModal(false)} className="text-muted hover:text-gray-900">
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSave} className="flex flex-1 flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="md:col-span-2">
-                    <label className="mb-1 block text-sm font-bold text-gray-700">ชื่อประกาศ</label>
-                    <input
-                      required
-                      type="text"
-                      className="form-input w-full"
-                      value={form.title}
-                      onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                      placeholder="เช่น แจ้งปิดระบบชั่วคราวสำหรับแผนกขาย"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="mb-1 block text-sm font-bold text-gray-700">คำอธิบายสั้น</label>
-                    <textarea
-                      rows={3}
-                      className="form-input w-full"
-                      value={form.description}
-                      onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
-                      placeholder="สรุปสั้น ๆ เพื่อแสดงบนการ์ดประกาศ"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm font-bold text-gray-700">แผนก</label>
-                    {isFullAdmin ? (
-                      <select
-                        className="form-input w-full"
-                        value={form.departmentId}
-                        onChange={(event) => setForm((current) => ({ ...current, departmentId: event.target.value }))}
-                      >
-                        <option value="">เลือกแผนก</option>
-                        {departments.map((department) => (
-                          <option key={department.id} value={department.id}>
-                            {department.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <div className="flex items-center gap-2 rounded-xl border border-primary/10 bg-primary/5 px-4 py-3 ">
-                        <CheckCircle2 size={16} className="text-primary" />
-                        <span className="text-sm font-bold text-primary">
-                          แผนกของคุณ: {user?.department || 'กำลังโหลด...'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm font-bold text-gray-700">ชนิดหน้า</label>
-                    <select
-                      className="form-input w-full"
-                      value={form.type}
-                      onChange={(event) => setForm((current) => ({ ...current, type: event.target.value }))}
-                    >
-                      <option value="video">วิดีโอ</option>
-                      <option value="pdf">เอกสาร</option>
-                      <option value="article">บทความ</option>
-                      <option value="quiz">แบบทดสอบ</option>
-                    </select>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <CustomDateTimePicker
-                      value={form.expiredAt}
-                      onChange={(event) => setForm((current) => ({ ...current, expiredAt: event.target.value }))}
-                      label="วันหมดอายุของประกาศ"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="mb-1 block text-sm font-bold text-gray-700">ภาพหน้าปก</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        className="form-input flex-1"
-                        value={form.image}
-                        onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))}
-                        placeholder="URL ของภาพหน้าปก"
-                      />
-                      <label className="btn btn-outline btn-sm gap-1 cursor-pointer">
-                        <Upload size={14} />
-                        อัปโหลด
-                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                      </label>
-                    </div>
-                  </div>
-
-                  {form.type !== 'quiz' && (
-                    <div>
-                      <label className="mb-1 block text-sm font-bold text-gray-700">ระยะเวลาโดยประมาณ (นาที)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        className="form-input w-full"
-                        value={form.duration || 0}
-                        onChange={(event) => setForm((current) => ({ ...current, duration: Number(event.target.value) || 0 }))}
-                      />
-                    </div>
-                  )}
-
-                  <div className={form.type === 'quiz' ? 'md:col-span-2' : ''}>
-                    {renderSourceField()}
-                  </div>
-
-                  {form.type !== 'quiz' ? (
-                    <div className="md:col-span-2">
-                      <label className="mb-1 block text-sm font-bold text-gray-700">เนื้อหาประกาศ</label>
-                      <RichTextEditor
-                        label="Announcement content editor"
-                        value={form.content || ''}
-                        onChange={(content) => setForm((current) => ({ ...current, content }))}
-                        onImageUpload={handleEditorImageUpload}
-                        imageUploading={editorImageUploading}
-                        minHeight={260}
-                      />
-                    </div>
-                  ) : (
-                    <div className="relative mt-2 flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm md:col-span-2">
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
-                          <label className="mb-1 block text-sm font-bold text-gray-700">เกณฑ์ผ่าน (%)</label>
-                          <input
-                            type="number"
-                            className="form-input w-full"
-                            value={form.passScore}
-                            onChange={(event) => setForm((current) => ({ ...current, passScore: Number(event.target.value) || 0 }))}
-                          />
-                        </div>
-                        <div className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3 text-sm text-primary">
-                          Quiz สำหรับประกาศจะใช้เพื่อแสดงผลและประเมินทันที โดยไม่ผูกแต้มคอร์ส
-                        </div>
-                      </div>
-
-                      <QuizBuilder
-                        questions={form.questions}
-                        onChange={(questions) => setForm((current) => ({ ...current, questions }))}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-3 border-t border-gray-100 bg-gray-50 p-4">
-                <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline flex-1 py-3">
-                  ยกเลิก
-                </button>
-                <button type="submit" className="btn btn-primary flex-1 py-3 font-bold" disabled={uploading}>
-                  {editingAnnouncement ? 'บันทึกการแก้ไข' : 'สร้างประกาศ'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </ModalPortal>
+      <AnnouncementHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        title={currentAnnouncementTitle}
+        loading={historyLoading}
+        historyData={historyData}
+      />
 
       <ConfirmDialog {...ConfirmDialogProps} />
-
-      {/* History Modal */}
-      <ModalPortal isOpen={showHistoryModal}>
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
-          <div className="card flex h-full max-h-[80vh] w-full max-w-4xl flex-col overflow-hidden border border-gray-100 bg-white p-0 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 p-4">
-              <div>
-                <h4 className="text-lg font-bold">ประวัติการเข้าอ่านประกาศ</h4>
-                <p className="text-sm text-muted">{currentAnnouncementTitle}</p>
-              </div>
-              <button type="button" onClick={() => setShowHistoryModal(false)} className="text-muted hover:text-gray-900">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-0">
-              {historyLoading ? (
-                <div className="flex h-32 items-center justify-center text-muted">กำลังโหลดข้อมูล...</div>
-              ) : historyData.length === 0 ? (
-                <div className="flex h-32 items-center justify-center text-muted">ยังไม่มีผู้เข้าอ่าน</div>
-              ) : (
-                <table className="w-full text-left">
-                  <thead className="sticky top-0 bg-gray-50 text-xs font-bold uppercase text-slate-500">
-                    <tr>
-                      <th className="px-6 py-4">ผู้เข้าอ่าน</th>
-                      <th className="px-6 py-4">แผนก</th>
-                      <th className="px-6 py-4">วันที่เข้าอ่าน</th>
-                      <th className="px-6 py-4">คะแนนสอบ</th>
-                      <th className="px-6 py-4">สถานะ</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {historyData.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-slate-900">{item.user?.name}</span>
-                            <span className="text-xs text-muted">{item.user?.email}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{item.user?.department || '-'}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{formatThaiDateTime(item.viewedAt, true)}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">
-                          {item.score !== null ? `${item.score}%` : '-'}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          {item.passed === true && (
-                            <span className="inline-flex rounded-full bg-success/10 px-2 py-1 text-[10px] font-black uppercase text-success">
-                              ผ่าน
-                            </span>
-                          )}
-                          {item.passed === false && (
-                            <span className="inline-flex rounded-full bg-danger/10 px-2 py-1 text-[10px] font-black uppercase text-danger">
-                              ไม่ผ่าน
-                            </span>
-                          )}
-                          {item.passed === null && (
-                            <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase text-slate-500">
-                              อ่านแล้ว
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-            <div className="border-t border-gray-100 bg-gray-50 p-4 text-right">
-              <button type="button" onClick={() => setShowHistoryModal(false)} className="btn btn-outline px-8">
-                ปิด
-              </button>
-            </div>
-          </div>
-        </div>
-      </ModalPortal>
     </div>
   );
 };
