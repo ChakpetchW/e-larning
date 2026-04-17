@@ -3,6 +3,7 @@ import { X, Upload, FileText, Play, Loader2 } from 'lucide-react';
 import QuizBuilder from './QuizBuilder';
 import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
+import CustomSelect from '../common/CustomSelect';
 import { adminAPI } from '../../utils/api';
 
 const LessonModal = ({
@@ -107,7 +108,7 @@ const LessonModal = ({
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md animate-fade-in lg:p-8">
-        <div className="card flex h-full w-full max-w-6xl flex-col overflow-hidden border border-gray-100 bg-white p-0 shadow-2xl">
+        <div className="card flex h-full w-full max-w-6xl flex-col border border-gray-100 bg-white p-0 shadow-2xl">
           <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 p-4">
             <h4 className="text-lg font-bold">{isEditing ? 'แก้ไขบทเรียน' : 'เพิ่มบทเรียนใหม่'}</h4>
             <button type="button" onClick={onClose} className="text-muted hover:text-gray-900">
@@ -130,19 +131,17 @@ const LessonModal = ({
                   />
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-sm font-bold text-gray-700">ประเภทเนื้อหา</label>
-                  <select
-                    className="form-input w-full"
-                    value={lessonForm.type}
-                    onChange={(event) => setLessonForm({ ...lessonForm, type: event.target.value })}
-                  >
-                    <option value="video">วิดีโอ (YouTube / Vimeo)</option>
-                    <option value="pdf">เอกสาร (PDF/Link)</option>
-                    <option value="article">บทความเนื้อหา</option>
-                    <option value="quiz">แบบทดสอบ (Quiz)</option>
-                  </select>
-                </div>
+                <CustomSelect
+                  label="ประเภทเนื้อหา"
+                  value={lessonForm.type}
+                  onChange={(event) => setLessonForm({ ...lessonForm, type: event.target.value })}
+                  options={[
+                    { value: 'video', label: 'วิดีโอ (YouTube / Vimeo)' },
+                    { value: 'pdf', label: 'เอกสาร (PDF/Link)' },
+                    { value: 'article', label: 'บทความเนื้อหา' },
+                    { value: 'quiz', label: 'แบบทดสอบ (Quiz)' }
+                  ]}
+                />
 
                 <div>
                   <label className="mb-1 block text-sm font-bold text-gray-700">ระยะเวลา (นาที)</label>

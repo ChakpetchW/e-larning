@@ -2,6 +2,7 @@ import React from 'react';
 import { Target, X, Search } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
+import CustomSelect from '../common/CustomSelect';
 
 const CreateGoalModal = ({
   isOpen,
@@ -22,7 +23,7 @@ const CreateGoalModal = ({
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
-        <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-slide-up">
+        <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl animate-slide-up">
           <div className="p-6 border-b border-border flex justify-between items-center">
             <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
               <Target className="text-primary" />
@@ -50,32 +51,26 @@ const CreateGoalModal = ({
               <div className="space-y-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">การขยายผล (Scope)</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-500">ขอบเขตเป้าหมาย</label>
-                    <select 
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium"
-                      value={formData.scope}
-                      onChange={e => setFormData({...formData, scope: e.target.value})}
-                    >
-                      <option value="GLOBAL">ทั้งองค์กร (Global)</option>
-                      <option value="DEPARTMENT">เฉพาะแผนก (Department)</option>
-                    </select>
-                  </div>
+                  <CustomSelect
+                    label="ขอบเขตเป้าหมาย"
+                    value={formData.scope}
+                    onChange={e => setFormData({...formData, scope: e.target.value})}
+                    options={[
+                      { value: 'GLOBAL', label: 'ทั้งองค์กร (Global)' },
+                      { value: 'DEPARTMENT', label: 'เฉพาะแผนก (Department)' }
+                    ]}
+                  />
                   {formData.scope === 'DEPARTMENT' && (
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-500">ระบุแผนก</label>
-                      <select 
-                        required
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium"
-                        value={formData.departmentId}
-                        onChange={e => setFormData({...formData, departmentId: e.target.value})}
-                      >
-                        <option value="">-- เลือกแผนก --</option>
-                        {departments.map(dept => (
-                          <option key={dept.id} value={dept.id}>{dept.name}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <CustomSelect
+                      label="ระบุแผนก"
+                      required
+                      value={formData.departmentId}
+                      onChange={e => setFormData({...formData, departmentId: e.target.value})}
+                      options={[
+                        { value: '', label: '-- เลือกแผนก --' },
+                        ...departments.map(dept => ({ value: dept.id, label: dept.name }))
+                      ]}
+                    />
                   )}
                 </div>
               </div>

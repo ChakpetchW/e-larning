@@ -3,6 +3,7 @@ import { Search, X, Users, Filter, CalendarDays } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
+import CustomSelect from '../common/CustomSelect';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const getStatusBadge = (status) => {
@@ -89,7 +90,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
-        <div className="card flex h-full w-full max-w-6xl flex-col overflow-hidden border border-slate-100 bg-white p-0 shadow-2xl">
+        <div className="card flex h-full w-full max-w-6xl flex-col border border-slate-100 bg-white p-0 shadow-2xl">
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
@@ -107,70 +108,44 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
 
           <div className="border-b border-slate-100 bg-white p-5">
             <div className="flex flex-wrap items-end gap-4">
-              <div className="flex-1 min-w-[200px]">
-                <label className="mb-1.5 block text-xs font-bold text-slate-500">แผนก</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-                    <Filter size={16} />
-                  </div>
-                  <select
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm font-medium text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    value={filters.departmentId}
-                    onChange={(e) => setFilters({ ...filters, departmentId: e.target.value })}
-                  >
-                    <option value="">ทั้งหมด</option>
-                    {departments.map(d => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <CustomSelect
+                label="แผนก"
+                className="flex-1 min-w-[200px]"
+                value={filters.departmentId}
+                onChange={(e) => setFilters({ ...filters, departmentId: e.target.value })}
+                options={[
+                  { value: '', label: 'ทั้งหมด' },
+                  ...departments.map((d) => ({ value: d.id, label: d.name }))
+                ]}
+              />
 
-              <div className="w-full sm:w-48">
-                <label className="mb-1.5 block text-xs font-bold text-slate-500">ระดับผู้ใช้งาน</label>
-                <select
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-4 text-sm font-medium text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  value={filters.tierId}
-                  onChange={(e) => setFilters({ ...filters, tierId: e.target.value })}
-                >
-                  <option value="">ทั้งหมด</option>
-                  {tiers.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
-              </div>
+              <CustomSelect
+                label="ระดับผู้ใช้งาน"
+                className="w-full sm:w-48"
+                value={filters.tierId}
+                onChange={(e) => setFilters({ ...filters, tierId: e.target.value })}
+                options={[
+                  { value: '', label: 'ทั้งหมด' },
+                  ...tiers.map((t) => ({ value: t.id, label: t.name }))
+                ]}
+              />
 
-              <div className="w-full sm:w-40">
-                <label className="mb-1.5 block text-xs font-bold text-slate-500">เดือน</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-                    <CalendarDays size={16} />
-                  </div>
-                  <select
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm font-medium text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    value={filters.month}
-                    onChange={(e) => setFilters({ ...filters, month: e.target.value })}
-                  >
-                    {months.map(m => (
-                      <option key={m.value} value={m.value}>{m.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <CustomSelect
+                label="เดือน"
+                className="w-full sm:w-40"
+                value={filters.month}
+                onChange={(e) => setFilters({ ...filters, month: e.target.value })}
+                options={months}
+              />
 
-              <div className="w-full sm:w-32">
-                <label className="mb-1.5 block text-xs font-bold text-slate-500">ปี</label>
-                <select
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-4 text-sm font-medium text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                  value={filters.year}
-                  onChange={(e) => setFilters({ ...filters, year: e.target.value })}
-                  disabled={!filters.month}
-                >
-                  {years.map(y => (
-                    <option key={y.value} value={y.value}>{y.label}</option>
-                  ))}
-                </select>
-              </div>
+              <CustomSelect
+                label="ปี"
+                className="w-full sm:w-32"
+                value={filters.year}
+                disabled={!filters.month}
+                onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+                options={years}
+              />
 
               <button
                 type="button"
