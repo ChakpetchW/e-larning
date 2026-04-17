@@ -234,13 +234,7 @@ const CategoryManagementModal = ({
                 { value: 'INCENTIVE_REWARD', label: 'Incentive & Reward System' },
                 { value: 'TRACKING_ANALYTICS', label: 'Tracking & Analytics' },
                 { value: 'GOAL_PATH', label: 'Goal Setting & Learning Path' },
-                { value: 'INTERNAL_COMM', label: 'Internal Communication' },
-                { value: 'BUSINESS', label: 'Business & Business Acumen' },
-                { value: 'SOFT_SKILLS', label: 'Soft Skills / Core Skills' },
-                { value: 'FUNCTIONAL', label: 'Functional / Technical Skills' },
-                { value: 'LEADERSHIP', label: 'Leadership & Management' },
-                { value: 'COMPLIANCE', label: 'Compliance & Standard' },
-                { value: 'DIGITAL', label: 'Digital & Future Skills' }
+                { value: 'INTERNAL_COMM', label: 'Internal Communication' }
               ]}
             />
 
@@ -506,13 +500,7 @@ const CategoryManagementModal = ({
                                  category.type === 'INCENTIVE_REWARD' ? 'Incentive' :
                                  category.type === 'TRACKING_ANALYTICS' ? 'Tracking' :
                                  category.type === 'GOAL_PATH' ? 'Goal & Path' :
-                                 category.type === 'INTERNAL_COMM' ? 'Comm' : 
-                                 category.type === 'BUSINESS' ? 'Business' :
-                                 category.type === 'SOFT_SKILLS' ? 'Soft Skill' :
-                                 category.type === 'FUNCTIONAL' ? 'Functional' :
-                                 category.type === 'LEADERSHIP' ? 'Leadership' :
-                                 category.type === 'COMPLIANCE' ? 'Compliance' :
-                                 category.type === 'DIGITAL' ? 'Digital' : category.type}
+                                 category.type === 'INTERNAL_COMM' ? 'Comm' : category.type}
                               </span>
                             )}
                           </div>
