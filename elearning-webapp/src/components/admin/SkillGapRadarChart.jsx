@@ -17,21 +17,23 @@ const SkillGapRadarChart = ({ data }) => {
     'INTERNAL_COMM': 'Communication'
   };
 
-  const chartData = (data || []).map(item => ({
-    subject: categoryMap[item.type] || item.type,
-    A: item.average_mastery || 0,
-    fullMark: 100,
-  }));
+  const allTypes = [
+    'KM_COURSE',
+    'LEARNING_ASSESS',
+    'INCENTIVE_REWARD',
+    'TRACKING_ANALYTICS',
+    'GOAL_PATH',
+    'INTERNAL_COMM'
+  ];
 
-  // Ensure we have at least 3 points for a radar chart
-  if (chartData.length < 3) {
-    const placeholders = ['Functional', 'Soft Skills', 'Leadership'].map(p => ({
-      subject: p,
-      A: 0,
-      fullMark: 100
-    }));
-    chartData.push(...placeholders.slice(0, 3 - chartData.length));
-  }
+  const chartData = allTypes.map(type => {
+    const item = (data || []).find(d => d.type === type);
+    return {
+      subject: categoryMap[type] || type,
+      A: item ? (item.average_mastery || 0) : 0,
+      fullMark: 100,
+    };
+  });
 
   return (
     <div className="card flex min-w-0 flex-col p-6 card-no-lift">
