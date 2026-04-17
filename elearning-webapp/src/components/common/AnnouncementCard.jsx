@@ -58,26 +58,28 @@ const AnnouncementCard = ({ announcement, onClick, className = '' }) => {
         </div>
 
         <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-          <h3 className="line-clamp-2 text-[1.08rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-amber-700">
-            {announcement.title}
-          </h3>
+          <div className="flex flex-1 flex-col">
+            <h3 className="line-clamp-2 text-[1.08rem] font-black leading-[1.35] text-slate-900 transition-colors group-hover:text-amber-700">
+              {announcement.title}
+            </h3>
 
-          {announcement.description && (
-            <p className="mt-3 line-clamp-3 text-sm font-medium leading-6 text-slate-500">
-              {announcement.description}
-            </p>
-          )}
+            {announcement.description && (
+              <p className="mt-3 line-clamp-3 text-sm font-medium leading-6 text-slate-500">
+                {announcement.description}
+              </p>
+            )}
 
-          <div className="mt-4 flex items-center justify-between border-t border-amber-100/80 pt-4">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-              <CalendarClock size={14} className="text-amber-600" />
-              <span>
-                หมดอายุ {announcement.expiredAt ? formatThaiDateTime(announcement.expiredAt, true) : 'ไม่กำหนด'}
+            <div className="mt-auto flex items-center justify-between border-t border-amber-100/80 pt-4">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                <CalendarClock size={14} className="text-amber-600" />
+                <span>
+                  หมดอายุ {announcement.expiredAt ? formatThaiDateTime(announcement.expiredAt, true) : 'ไม่กำหนด'}
+                </span>
+              </div>
+              <span className="text-[11px] font-black uppercase tracking-[0.08em] text-amber-700">
+                Announcement
               </span>
             </div>
-            <span className="text-[11px] font-black uppercase tracking-[0.08em] text-amber-700">
-              Announcement
-            </span>
           </div>
         </div>
       </button>

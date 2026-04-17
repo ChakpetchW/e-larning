@@ -31,7 +31,7 @@ const HomeHero = ({
             </span> 👋
           </h1>
           <p className="mb-8 max-w-xl text-base md:text-lg font-medium text-slate-600 leading-relaxed">
-            พร้อมที่จะอัปเกรดทักษะของคุณแล้วหรือยัง? วันนี้มีบทเรียนใหม่ๆ รอคุณอยู่มากมาย
+            พร้อมที่จะอัปเกรดทักษะของคุณแล้วหรือยัง? วันนี้มีบทเรียนใหม่ๆ <br />รอคุณอยู่มากมาย
           </p>
           
           <div className="flex flex-wrap justify-center lg:justify-start gap-x-8 gap-y-4 w-full pt-6 border-t border-slate-300/50">
