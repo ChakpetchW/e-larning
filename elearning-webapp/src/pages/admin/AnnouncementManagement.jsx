@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BellPlus, CalendarClock, Edit3, Search, Trash2, Upload, X } from 'lucide-react';
+import { Archive, BellPlus, CalendarClock, Edit3, History, Search, Trash2, Upload, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../utils/imageUtils';
@@ -53,6 +53,12 @@ const AnnouncementManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
   const [form, setForm] = useState(getDefaultForm());
+  
+  // History Modal State
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyData, setHistoryData] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [currentAnnouncementTitle, setCurrentAnnouncementTitle] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -202,23 +208,38 @@ const AnnouncementManagement = () => {
     }
   };
 
-  const handleDelete = async (announcement) => {
+  const handleArchive = async (announcement) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบประกาศ',
-      message: `ต้องการลบประกาศ "${announcement.title}" ใช่หรือไม่?`,
-      confirmLabel: 'ลบประกาศ',
-      variant: 'danger',
+      title: 'ต้องการเก็บประกาศลงกรุ?',
+      message: `ประกาศ "${announcement.title}" จะหมดอายุทันทีและถูกย้ายไปยังแท็บ "หมดอายุแล้ว" คุณต้องการดำเนินการต่อใช่หรือไม่?`,
+      confirmLabel: 'แจ้งหมดอายุ',
+      variant: 'warning',
     });
 
     if (!ok) return;
 
     try {
-      await adminAPI.deleteAnnouncement(announcement.id);
-      toast.success('ลบประกาศเรียบร้อย');
-      setAnnouncements((current) => current.filter((item) => item.id !== announcement.id));
+      await adminAPI.archiveAnnouncement(announcement.id);
+      toast.success('ย้ายประกาศลงกรุเรียบร้อย');
+      await fetchData();
     } catch (error) {
-      console.error('Delete announcement error:', error);
-      toast.error(error.response?.data?.message || 'ลบประกาศไม่สำเร็จ');
+      console.error('Archive announcement error:', error);
+      toast.error('ไม่สามารถเก็บประกาศลงกรุได้');
+    }
+  };
+
+  const handleViewHistory = async (announcement) => {
+    try {
+      setHistoryLoading(true);
+      setCurrentAnnouncementTitle(announcement.title);
+      setShowHistoryModal(true);
+      const response = await adminAPI.getAnnouncementHistory(announcement.id);
+      setHistoryData(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('View history error:', error);
+      toast.error('ไม่สามารถโหลดข้อมูลประวัติได้');
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -381,11 +402,21 @@ const AnnouncementManagement = () => {
               {announcement.expiredAt ? formatThaiDateTime(announcement.expiredAt, true) : '-'}
             </td>
             <td className="p-4">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => handleViewHistory(announcement)} className="btn btn-outline btn-sm gap-1 bg-blue-50/50 text-blue-600 border-blue-200">
+                  <History size={14} />
+                  ประวัติ
+                </button>
                 <button type="button" onClick={() => openEditModal(announcement)} className="btn btn-outline btn-sm gap-1">
                   <Edit3 size={14} />
                   แก้ไข
                 </button>
+                {viewMode === ENTITY_VIEW_STATUS.ACTIVE && (
+                  <button type="button" onClick={() => handleArchive(announcement)} className="btn btn-outline btn-sm gap-1 text-warning border-warning/30">
+                    <Archive size={14} />
+                    เก็บลงกรุ
+                  </button>
+                )}
                 <button type="button" onClick={() => handleDelete(announcement)} className="btn btn-outline btn-sm gap-1 text-danger border-danger/30">
                   <Trash2 size={14} />
                   ลบ
@@ -558,6 +589,82 @@ const AnnouncementManagement = () => {
       </ModalPortal>
 
       <ConfirmDialog {...ConfirmDialogProps} />
+
+      {/* History Modal */}
+      <ModalPortal isOpen={showHistoryModal}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
+          <div className="card flex h-full max-h-[80vh] w-full max-w-4xl flex-col overflow-hidden border border-gray-100 bg-white p-0 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 p-4">
+              <div>
+                <h4 className="text-lg font-bold">ประวัติการเข้าอ่านประกาศ</h4>
+                <p className="text-sm text-muted">{currentAnnouncementTitle}</p>
+              </div>
+              <button type="button" onClick={() => setShowHistoryModal(false)} className="text-muted hover:text-gray-900">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-0">
+              {historyLoading ? (
+                <div className="flex h-32 items-center justify-center text-muted">กำลังโหลดข้อมูล...</div>
+              ) : historyData.length === 0 ? (
+                <div className="flex h-32 items-center justify-center text-muted">ยังไม่มีผู้เข้าอ่าน</div>
+              ) : (
+                <table className="w-full text-left">
+                  <thead className="sticky top-0 bg-gray-50 text-xs font-bold uppercase text-slate-500">
+                    <tr>
+                      <th className="px-6 py-4">ผู้เข้าอ่าน</th>
+                      <th className="px-6 py-4">แผนก</th>
+                      <th className="px-6 py-4">วันที่เข้าอ่าน</th>
+                      <th className="px-6 py-4">คะแนนสอบ</th>
+                      <th className="px-6 py-4">สถานะ</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {historyData.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50">
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-900">{item.user?.name}</span>
+                            <span className="text-xs text-muted">{item.user?.email}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{item.user?.department || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{formatThaiDateTime(item.viewedAt, true)}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {item.score !== null ? `${item.score}%` : '-'}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {item.passed === true && (
+                            <span className="inline-flex rounded-full bg-success/10 px-2 py-1 text-[10px] font-black uppercase text-success">
+                              ผ่าน
+                            </span>
+                          )}
+                          {item.passed === false && (
+                            <span className="inline-flex rounded-full bg-danger/10 px-2 py-1 text-[10px] font-black uppercase text-danger">
+                              ไม่ผ่าน
+                            </span>
+                          )}
+                          {item.passed === null && (
+                            <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase text-slate-500">
+                              อ่านแล้ว
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="border-t border-gray-100 bg-gray-50 p-4 text-right">
+              <button type="button" onClick={() => setShowHistoryModal(false)} className="btn btn-outline px-8">
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      </ModalPortal>
     </div>
   );
 };

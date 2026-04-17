@@ -1465,6 +1465,59 @@ const getCourseQuizAttempts = async (courseId) => {
     }));
 };
 
+const archiveAnnouncement = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const where = buildAnnouncementWhereForActor(actor, { id });
+
+    return prisma.announcement.update({
+        where: { id },
+        data: {
+            expiredAt: new Date()
+        }
+    });
+};
+
+const getAnnouncementHistory = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const where = buildAnnouncementWhereForActor(actor, { id });
+
+    const announcement = await prisma.announcement.findFirst({
+        where
+    });
+
+    if (!announcement) {
+        throw new Error('Announcement not found');
+    }
+
+    const views = await prisma.announcementView.findMany({
+        where: { announcementId: id },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    department: true,
+                    departmentRef: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: { viewedAt: 'desc' }
+    });
+
+    return views.map((view) => ({
+        ...view,
+        user: {
+            ...view.user,
+            department: view.user.departmentRef?.name || view.user.department || null
+        }
+    }));
+};
+
 module.exports = {
     getDashboardStats,
     getUsers,
@@ -1486,10 +1539,9 @@ module.exports = {
     updateCourse,
     republishCourse,
     deleteCourse,
-    getAdminAnnouncements,
-    createAnnouncement,
-    updateAnnouncement,
     deleteAnnouncement,
+    archiveAnnouncement,
+    getAnnouncementHistory,
     getCategories,
     createCategory,
     updateCategory,

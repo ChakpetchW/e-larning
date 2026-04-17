@@ -155,6 +155,8 @@ export const adminAPI = {
 
   getAnnouncements: () => api.get('/admin/announcements'),
   createAnnouncement: (data) => api.post('/admin/announcements', data),
+  getAnnouncementHistory: (id) => api.get(`/admin/announcements/${id}/history`),
+  archiveAnnouncement: (id) => api.put(`/admin/announcements/${id}/archive`),
   updateAnnouncement: (id, data) => api.put(`/admin/announcements/${id}`, data),
   deleteAnnouncement: (id) => api.delete(`/admin/announcements/${id}`),
 

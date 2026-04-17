@@ -32,6 +32,7 @@ model User {
   redeems       RedeemRequest[]
   QuizAttempt   QuizAttempt[]
   createdAnnouncements Announcement[] @relation("AnnouncementCreator")
+  announcementViews   AnnouncementView[] @relation("UserAnnouncementViews")
 }
 
 model Course {
@@ -90,6 +91,7 @@ model Announcement {
   department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   creator    User?      @relation("AnnouncementCreator", fields: [createdById], references: [id], onDelete: SetNull)
   questions  AnnouncementQuestion[]
+  views      AnnouncementView[] @relation("AnnouncementViews")
 }
 
 model Category {
@@ -349,4 +351,19 @@ model SystemSetting {
   id    String @id @default(uuid())
   key   String @unique
   value String
+}
+
+model AnnouncementView {
+  id             String   @id @default(uuid())
+  announcementId String
+  userId         String
+  score          Int?     // For quiz type
+  passed         Boolean? // For quiz type
+  viewedAt       DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  announcement Announcement @relation("AnnouncementViews", fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation("UserAnnouncementViews", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, announcementId])
 }

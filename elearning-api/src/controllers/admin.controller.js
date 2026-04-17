@@ -130,9 +130,14 @@ const updateAnnouncement = asyncHandler(async (req, res) => {
   res.json({ success: true, data: announcement });
 });
 
-const deleteAnnouncement = asyncHandler(async (req, res) => {
-  await AdminService.deleteAnnouncement(req.params.id, req.user);
-  res.json({ success: true, message: 'Announcement deleted' });
+const archiveAnnouncement = asyncHandler(async (req, res) => {
+  const result = await AdminService.archiveAnnouncement(req.params.id, req.user);
+  res.json({ success: true, data: result });
+});
+
+const getAnnouncementHistory = asyncHandler(async (req, res) => {
+  const history = await AdminService.getAnnouncementHistory(req.params.id, req.user);
+  res.json({ success: true, data: history });
 });
 
 // CATEGORIES
@@ -242,10 +247,9 @@ module.exports = {
   updateCourse,
   republishCourse,
   deleteCourse,
-  getAdminAnnouncements,
-  createAnnouncement,
-  updateAnnouncement,
   deleteAnnouncement,
+  archiveAnnouncement,
+  getAnnouncementHistory,
   getCategories,
   createCategory,
   updateCategory,

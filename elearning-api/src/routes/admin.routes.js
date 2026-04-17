@@ -24,7 +24,7 @@ router.put('/tiers/reorder', verifySuperAdmin, adminController.reorderTiers);
 router.put('/tiers/:id', verifySuperAdmin, adminController.updateTier);
 router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 
-router.get('/courses', verifySuperAdmin, adminController.getAdminCourses);
+router.get('/courses', adminController.getAdminCourses);
 router.post('/courses', verifySuperAdmin, adminController.createCourse);
 router.put('/courses/:id/republish', verifySuperAdmin, adminController.republishCourse);
 router.put('/courses/:id', verifySuperAdmin, adminController.updateCourse);
@@ -32,6 +32,8 @@ router.delete('/courses/:id', verifySuperAdmin, adminController.deleteCourse);
 
 router.get('/announcements', adminController.getAdminAnnouncements);
 router.post('/announcements', adminController.createAnnouncement);
+router.get('/announcements/:id/history', adminController.getAnnouncementHistory);
+router.put('/announcements/:id/archive', adminController.archiveAnnouncement);
 router.put('/announcements/:id', adminController.updateAnnouncement);
 router.delete('/announcements/:id', adminController.deleteAnnouncement);
 

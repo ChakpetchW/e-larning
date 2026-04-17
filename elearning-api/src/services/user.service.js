@@ -1,4 +1,4 @@
-﻿const prisma = require('../utils/prisma');
+const prisma = require('../utils/prisma');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
@@ -543,6 +543,24 @@ const getAnnouncementDetails = async (announcementId, userId) => {
     if (!announcement || !canAccessAnnouncement(announcement, userContext, referenceDate)) {
         return null;
     }
+
+    // Record attendance / view
+    await prisma.announcementView.upsert({
+        where: {
+            userId_announcementId: {
+                userId,
+                announcementId
+            }
+        },
+        update: {
+            viewedAt: new Date()
+        },
+        create: {
+            userId,
+            announcementId,
+            viewedAt: new Date()
+        }
+    });
 
     return {
         ...announcement,
@@ -1223,11 +1241,34 @@ const submitAnnouncementQuiz = async (userId, announcementId, answers) => {
 
     const passScore = announcement.passScore || 60;
     const scorePercent = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 100;
+    const passed = scorePercent >= passScore;
+
+    // Record quiz result in attendance
+    await prisma.announcementView.upsert({
+        where: {
+            userId_announcementId: {
+                userId,
+                announcementId
+            }
+        },
+        update: {
+            score: scorePercent,
+            passed: passed,
+            updatedAt: new Date()
+        },
+        create: {
+            userId,
+            announcementId,
+            score: scorePercent,
+            passed: passed,
+            viewedAt: new Date()
+        }
+    });
 
     return {
         score,
         scorePercent,
-        passed: scorePercent >= passScore,
+        passed,
         passScore,
         correctAnswers,
         earnedQuizPoints: 0,
