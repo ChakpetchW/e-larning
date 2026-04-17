@@ -24,6 +24,11 @@ router.put('/tiers/reorder', verifySuperAdmin, adminController.reorderTiers);
 router.put('/tiers/:id', verifySuperAdmin, adminController.updateTier);
 router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 
+router.get('/instructor-presets', verifySuperAdmin, adminController.getInstructorPresets);
+router.post('/instructor-presets', verifySuperAdmin, adminController.createInstructorPreset);
+router.put('/instructor-presets/:id', verifySuperAdmin, adminController.updateInstructorPreset);
+router.delete('/instructor-presets/:id', verifySuperAdmin, adminController.deleteInstructorPreset);
+
 router.get('/courses', adminController.getAdminCourses);
 router.post('/courses', verifySuperAdmin, adminController.createCourse);
 router.put('/courses/:id/republish', verifySuperAdmin, adminController.republishCourse);

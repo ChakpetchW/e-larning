@@ -10,6 +10,7 @@ const { ANNOUNCEMENT_SCOPES } = require('../utils/constants/scopes');
 
 const courseInclude = {
     category: true,
+    instructorPreset: true,
     departmentAccess: {
         include: {
             department: true
@@ -147,7 +148,7 @@ const sanitizeName = (value, entityLabel) => {
 const mapUserRecord = authHelpers.mapUserRecord;
 
 const mapCourseRecord = (course) => {
-    const { departmentAccess, tierAccess, ...rest } = course;
+    const { departmentAccess, tierAccess, instructorPreset, ...rest } = course;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
     const isArchived = authHelpers.isTimedEntityExpired(rest);
@@ -155,6 +156,7 @@ const mapCourseRecord = (course) => {
     return {
         ...rest,
         isArchived,
+        instructorPreset,
         visibleDepartments,
         visibleDepartmentIds: visibleDepartments.map((department) => department.id),
         visibleTiers,
@@ -335,6 +337,22 @@ const ensureReferenceIdsExist = async (tx, modelName, ids) => {
     }
 };
 
+const ensureInstructorPresetExists = async (tx, id) => {
+    if (!id) {
+        return null;
+    }
+
+    const preset = await tx.instructorPreset.findUnique({
+        where: { id }
+    });
+
+    if (!preset) {
+        throw new Error('Instructor preset not found');
+    }
+
+    return preset;
+};
+
 const buildTemporaryStateData = (input) => {
     const isTemporary = Boolean(input.isTemporary);
     const expiredAt = parseOptionalDate(input.expiredAt);
@@ -408,6 +426,7 @@ const buildCourseMutationPayload = async (tx, input) => {
     const visibleDepartmentIds = normalizeIdArray(input.visibleDepartmentIds);
     const visibleTierIds = normalizeIdArray(input.visibleTierIds);
     const categoryId = normalizeNullableId(input.categoryId);
+    const instructorPresetId = normalizeNullableId(input.instructorPresetId);
     const temporaryState = buildTemporaryStateData(input);
 
     // Using sequential await instead of Promise.all to prevent "Transaction already closed" 
@@ -415,20 +434,22 @@ const buildCourseMutationPayload = async (tx, input) => {
     await ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds);
     await ensureReferenceIdsExist(tx, 'tier', visibleTierIds);
     await ensureReferenceName(tx, 'category', categoryId);
+    const instructorPreset = await ensureInstructorPresetExists(tx, instructorPresetId);
 
     const data = {
         title: input.title,
         description: input.description || null,
         categoryId,
+        instructorPresetId: instructorPreset?.id || null,
         points: parseInteger(input.points, 0),
         status: input.status || undefined,
         image: input.image || null,
         visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true,
         ...temporaryState,
-        instructorName: input.instructorName || null,
-        instructorRole: input.instructorRole || null,
-        instructorAvatar: input.instructorAvatar || null,
-        instructorBio: input.instructorBio || null,
+        instructorName: input.instructorName || instructorPreset?.name || null,
+        instructorRole: input.instructorRole || instructorPreset?.role || null,
+        instructorAvatar: input.instructorAvatar || instructorPreset?.avatar || null,
+        instructorBio: input.instructorBio || instructorPreset?.bio || null,
         previewVideoUrl: input.previewVideoUrl || null,
         totalDuration: input.totalDuration || null,
         whatYouWillLearn: input.whatYouWillLearn || null,
@@ -997,6 +1018,37 @@ const reorderTiers = async (tierIds) => prisma.$transaction(
         data: { order: index }
     }))
 );
+
+// INSTRUCTORS
+const getInstructorPresets = async () => prisma.instructorPreset.findMany({
+    orderBy: [
+        { name: 'asc' },
+        { createdAt: 'desc' }
+    ]
+});
+
+const createInstructorPreset = async (input) => prisma.instructorPreset.create({
+    data: {
+        name: sanitizeName(input.name, 'Instructor preset'),
+        role: input.role || null,
+        avatar: input.avatar || null,
+        bio: input.bio || null
+    }
+});
+
+const updateInstructorPreset = async (id, input) => prisma.instructorPreset.update({
+    where: { id },
+    data: {
+        name: sanitizeName(input.name, 'Instructor preset'),
+        role: input.role || null,
+        avatar: input.avatar || null,
+        bio: input.bio || null
+    }
+});
+
+const deleteInstructorPreset = async (id) => prisma.instructorPreset.delete({
+    where: { id }
+});
 
 
 // COURSES
@@ -1671,6 +1723,10 @@ module.exports = {
     updateTier,
     deleteTier,
     reorderTiers,
+    getInstructorPresets,
+    createInstructorPreset,
+    updateInstructorPreset,
+    deleteInstructorPreset,
     getAdminCourses,
     createCourse,
     updateCourse,

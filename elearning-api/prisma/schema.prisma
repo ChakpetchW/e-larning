@@ -40,6 +40,7 @@ model Course {
   title       String
   description String?
   categoryId  String?
+  instructorPresetId String?
   points      Int      @default(0)
   status      String   @default("DRAFT") // "DRAFT" | "PUBLISHED"
   image       String?
@@ -64,11 +65,24 @@ model Course {
   updatedAt   DateTime @updatedAt
 
   category    Category?    @relation(fields: [categoryId], references: [id])
+  instructorPreset InstructorPreset? @relation(fields: [instructorPresetId], references: [id], onDelete: SetNull)
   lessons     Lesson[]
   enrollments UserCourse[]
   departmentAccess CourseDepartmentAccess[]
   tierAccess       CourseTierAccess[]
   learningGoals    GoalCourse[]
+}
+
+model InstructorPreset {
+  id        String   @id @default(uuid())
+  name      String
+  role      String?
+  avatar    String?
+  bio       String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses Course[]
 }
 
 model Announcement {

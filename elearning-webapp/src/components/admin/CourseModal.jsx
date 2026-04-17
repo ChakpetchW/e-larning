@@ -27,6 +27,7 @@ const CourseModal = ({
   courseForm,
   setCourseForm,
   categories,
+  instructorPresets,
   departments,
   tiers,
   lessons,
@@ -112,6 +113,7 @@ const CourseModal = ({
                 courseForm={courseForm}
                 setCourseForm={setCourseForm}
                 categories={categories}
+                instructorPresets={instructorPresets}
                 departments={departments}
                 tiers={tiers}
                 onSaveCourse={onSaveCourse}

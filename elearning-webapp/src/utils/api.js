@@ -146,6 +146,11 @@ export const adminAPI = {
   deleteTier: (id) => api.delete(`/admin/tiers/${id}`),
   reorderTiers: (tierIds) => api.put('/admin/tiers/reorder', { tierIds }),
 
+  getInstructorPresets: () => api.get('/admin/instructor-presets'),
+  createInstructorPreset: (data) => api.post('/admin/instructor-presets', data),
+  updateInstructorPreset: (id, data) => api.put(`/admin/instructor-presets/${id}`, data),
+  deleteInstructorPreset: (id) => api.delete(`/admin/instructor-presets/${id}`),
+
 
   getCourses: () => api.get('/admin/courses'),
   createCourse: (data) => api.post('/admin/courses', data),

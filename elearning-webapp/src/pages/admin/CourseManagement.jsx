@@ -23,8 +23,10 @@ const getDefaultCourseForm = () => ({
   categoryId: '',
   points: 100,
   image: '',
+  instructorPresetId: '',
   instructorName: 'ทีมวิทยากรผู้เชี่ยวชาญ',
   instructorRole: 'Enterprise Instructor',
+  instructorAvatar: '',
   instructorBio: '',
   previewVideoUrl: '',
   totalDuration: '',
@@ -56,6 +58,7 @@ const CourseManagement = () => {
   const [categories, setCategories] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [tiers, setTiers] = useState([]);
+  const [instructorPresets, setInstructorPresets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(FILTER_VALUES.ALL);
@@ -86,17 +89,19 @@ const CourseManagement = () => {
 
   const fetchData = async () => {
     try {
-      const [courseResponse, categoryResponse, departmentResponse, tierResponse] = await Promise.all([
+      const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse] = await Promise.all([
         adminAPI.getCourses(),
         adminAPI.getCategories(),
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
+        adminAPI.getInstructorPresets(),
       ]);
 
       setCourses(courseResponse.data);
       setCategories(categoryResponse.data);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
+      setInstructorPresets(instructorPresetResponse.data);
     } catch (error) {
       console.error('Fetch course management data error:', error);
       toast.error('ไม่สามารถโหลดข้อมูลได้');
@@ -128,8 +133,10 @@ const CourseManagement = () => {
       categoryId: course.categoryId || '',
       points: course.points || 0,
       image: course.image || '',
+      instructorPresetId: course.instructorPresetId || '',
       instructorName: course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ',
       instructorRole: course.instructorRole || 'Enterprise Instructor',
+      instructorAvatar: course.instructorAvatar || '',
       instructorBio: course.instructorBio || '',
       previewVideoUrl: course.previewVideoUrl || '',
       totalDuration: course.totalDuration || '',
@@ -417,6 +424,7 @@ const CourseManagement = () => {
         courseForm={courseForm}
         setCourseForm={setCourseForm}
         categories={selectableCategories}
+        instructorPresets={instructorPresets}
         departments={departments}
         tiers={tiers}
         lessons={lessons}

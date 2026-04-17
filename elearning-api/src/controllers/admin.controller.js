@@ -87,6 +87,27 @@ const reorderTiers = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Tiers reordered successfully' });
 });
 
+// INSTRUCTOR PRESETS
+const getInstructorPresets = asyncHandler(async (req, res) => {
+  const presets = await AdminService.getInstructorPresets();
+  res.json({ success: true, data: presets });
+});
+
+const createInstructorPreset = asyncHandler(async (req, res) => {
+  const preset = await AdminService.createInstructorPreset(req.body);
+  res.status(201).json({ success: true, data: preset });
+});
+
+const updateInstructorPreset = asyncHandler(async (req, res) => {
+  const preset = await AdminService.updateInstructorPreset(req.params.id, req.body);
+  res.json({ success: true, data: preset });
+});
+
+const deleteInstructorPreset = asyncHandler(async (req, res) => {
+  await AdminService.deleteInstructorPreset(req.params.id);
+  res.json({ success: true, message: 'Instructor preset deleted successfully' });
+});
+
 
 // COURSES
 const getAdminCourses = asyncHandler(async (req, res) => {
@@ -309,6 +330,10 @@ module.exports = {
   updateTier,
   deleteTier,
   reorderTiers,
+  getInstructorPresets,
+  createInstructorPreset,
+  updateInstructorPreset,
+  deleteInstructorPreset,
   getCourseLessons,
   createLesson,
   updateLesson,
