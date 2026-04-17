@@ -20,7 +20,9 @@ const getDefaultForm = (departmentId = '') => ({
   description: '',
   image: '',
   departmentId,
+  scope: 'DEPARTMENT', // 'GLOBAL' | 'DEPARTMENT'
   type: 'article',
+
   contentUrl: '',
   content: '',
   duration: 0,
@@ -109,7 +111,9 @@ const AnnouncementManagement = () => {
       passScore: announcement.passScore || 60,
       questions: announcement.questions || [],
       expiredAt: announcement.expiredAt || '',
+      scope: announcement.scope || 'DEPARTMENT',
     });
+
     setShowModal(true);
   };
 
@@ -177,17 +181,20 @@ const AnnouncementManagement = () => {
       return;
     }
 
-    if (!form.departmentId) {
+    if (form.scope === 'DEPARTMENT' && !form.departmentId) {
       toast.error('กรุณาเลือกแผนก');
       return;
     }
+
 
     try {
       const payload = {
         ...form,
         duration: Number(form.duration) || 0,
         passScore: Number(form.passScore) || 60,
+        departmentId: form.scope === 'GLOBAL' ? null : form.departmentId,
       };
+
 
       if (editingAnnouncement) {
         await adminAPI.updateAnnouncement(editingAnnouncement.id, payload);
@@ -285,9 +292,10 @@ const AnnouncementManagement = () => {
     const now = new Date();
     return announcements.filter((announcement) => {
       // 1. Role-based department access
-      if (!isFullAdmin && announcement.departmentId !== user?.departmentId) {
+      if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) {
         return false;
       }
+
 
       const isArchived = announcement.expiredAt ? new Date(announcement.expiredAt) <= now : false;
       const matchesView = viewMode === ENTITY_VIEW_STATUS.ARCHIVED ? isArchived : !isArchived;
@@ -301,16 +309,18 @@ const AnnouncementManagement = () => {
 
   const activeCount = useMemo(
     () => announcements.filter((announcement) => {
-      if (!isFullAdmin && announcement.departmentId !== user?.departmentId) return false;
+      if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) return false;
       return !announcement.expiredAt || new Date(announcement.expiredAt) > new Date();
+
     }).length,
     [announcements, isFullAdmin, user?.departmentId],
   );
 
   const archivedCount = useMemo(
     () => announcements.filter((announcement) => {
-      if (!isFullAdmin && announcement.departmentId !== user?.departmentId) return false;
+      if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) return false;
       return announcement.expiredAt && new Date(announcement.expiredAt) <= new Date();
+
     }).length,
     [announcements, isFullAdmin, user?.departmentId],
   );

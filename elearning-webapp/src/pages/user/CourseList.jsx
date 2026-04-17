@@ -5,7 +5,6 @@ import { userAPI } from '../../utils/api';
 import { filterCourses, sortCourses } from '../../utils/courseFilters';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
-import AnnouncementCard from '../../components/common/AnnouncementCard';
 import SearchInput from '../../components/common/SearchInput';
 import CategoryPills from '../../components/common/CategoryPills';
 import FilterSidebar from '../../components/common/FilterSidebar';
@@ -17,7 +16,6 @@ const CourseList = () => {
   const urlCategory = searchParams.get('category');
   
   const [courses, setCourses] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
   
   // Filter & Search State
@@ -40,13 +38,11 @@ const CourseList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [coursesRes, catRes, announcementRes] = await Promise.all([
+        const [coursesRes, catRes] = await Promise.all([
           userAPI.getCourses(),
           userAPI.getCategories(),
-          userAPI.getAnnouncements(),
         ]);
         setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : []);
-        setAnnouncements(Array.isArray(announcementRes?.data) ? announcementRes.data : []);
         setCategories([
           { id: FILTER_VALUES.ALL, name: FILTER_VALUES.ALL_LABEL }, 
           ...(Array.isArray(catRes?.data) ? catRes.data : [])
@@ -122,26 +118,6 @@ const CourseList = () => {
       )}
 
       {/* Course List Grid */}
-      {!loading && announcements.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">Department Announcements</p>
-              <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900">ประกาศสำคัญสำหรับแผนกของคุณ</h3>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {announcements.map((announcement) => (
-              <AnnouncementCard
-                key={announcement.id}
-                announcement={announcement}
-                onClick={() => navigate(`/user/announcements/${announcement.id}`)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4 mb-10 relative z-10">
         {!loading && filtered.length > 0 ? (
           filtered.map(course => (

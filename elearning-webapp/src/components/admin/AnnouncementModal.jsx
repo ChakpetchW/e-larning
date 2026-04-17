@@ -1,5 +1,6 @@
 import React from 'react';
-import { X, Upload, CheckCircle2 } from 'lucide-react';
+import { X, Upload, CheckCircle2, Globe, Users } from 'lucide-react';
+
 import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
 import QuizBuilder from '../admin/QuizBuilder';
@@ -137,8 +138,49 @@ const AnnouncementModal = ({
                   />
                 </div>
 
-                <div>
+                </div>
+                
+                {isFullAdmin && (
+                  <div className="md:col-span-2">
+                    <label className="mb-2 block text-sm font-bold text-gray-700">กลุ่มเป้าหมาย (Scope)</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setForm(current => ({ ...current, scope: 'GLOBAL', departmentId: null }))}
+                        className={`flex items-center justify-center gap-3 rounded-xl border-2 p-4 transition-all ${
+                          form.scope === 'GLOBAL'
+                            ? 'border-primary bg-primary/5 text-primary shadow-sm'
+                            : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
+                        }`}
+                      >
+                        <Globe size={20} className={form.scope === 'GLOBAL' ? 'text-primary' : 'text-slate-400'} />
+                        <div className="text-left">
+                          <p className="text-sm font-bold">ทั้งองค์กร (Global)</p>
+                          <p className="text-xs opacity-80">แสดงให้พนักงานทุกคนเห็น</p>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setForm(current => ({ ...current, scope: 'DEPARTMENT', departmentId: departments[0]?.id || '' }))}
+                        className={`flex items-center justify-center gap-3 rounded-xl border-2 p-4 transition-all ${
+                          form.scope === 'DEPARTMENT'
+                            ? 'border-primary bg-primary/5 text-primary shadow-sm'
+                            : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
+                        }`}
+                      >
+                        <Users size={20} className={form.scope === 'DEPARTMENT' ? 'text-primary' : 'text-slate-400'} />
+                        <div className="text-left">
+                          <p className="text-sm font-bold">เฉพาะแผนก (Department)</p>
+                          <p className="text-xs opacity-80">แสดงเฉพาะแผนกที่เลือก</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className={isFullAdmin && form.scope === 'GLOBAL' ? 'hidden' : ''}>
                   <label className="mb-1 block text-sm font-bold text-gray-700">แผนก</label>
+
                   {isFullAdmin ? (
                     <select
                       className="form-input w-full"

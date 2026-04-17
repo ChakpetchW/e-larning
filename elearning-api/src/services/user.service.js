@@ -13,6 +13,8 @@ const {
     REDEEM_STATUS
 } = require('../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
+const { ANNOUNCEMENT_SCOPES } = require('../utils/constants/scopes');
+
 
 const SUPABASE_BUCKET = 'uploads';
 const DOCUMENT_SIGNED_URL_TTL_SECONDS = 90;
@@ -241,11 +243,17 @@ const buildAnnouncementVisibilityWhere = (userContext, referenceDate = new Date(
                 expiresAtField: 'expiredAt',
                 temporaryFlagField: null
             }),
-            userContext.departmentId
-                ? { departmentId: userContext.departmentId }
-                : { id: '__no_visible_announcements__' }
+            {
+                OR: [
+                    { scope: ANNOUNCEMENT_SCOPES.GLOBAL },
+                    userContext.departmentId
+                        ? { departmentId: userContext.departmentId }
+                        : { id: '__no_visible_specific_announcements__' }
+                ]
+            }
         ]
     };
+
 };
 
 const canAccessAnnouncement = (announcement, userContext, referenceDate = new Date()) => {
@@ -265,7 +273,12 @@ const canAccessAnnouncement = (announcement, userContext, referenceDate = new Da
         return false;
     }
 
+    if (announcement.scope === ANNOUNCEMENT_SCOPES.GLOBAL) {
+        return true;
+    }
+
     return !!userContext.departmentId && announcement.departmentId === userContext.departmentId;
+
 };
 
 const isProtectedAnnouncementDocument = (announcement) => (

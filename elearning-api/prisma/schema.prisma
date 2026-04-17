@@ -81,14 +81,15 @@ model Announcement {
   content     String?  @db.Text
   duration    String?
   passScore   Int?
-  departmentId String
+  scope       String   @default("DEPARTMENT") // "GLOBAL" | "DEPARTMENT"
+  departmentId String?
   createdById String?
   status      String   @default("PUBLISHED")
   expiredAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   creator    User?      @relation("AnnouncementCreator", fields: [createdById], references: [id], onDelete: SetNull)
   questions  AnnouncementQuestion[]
   views      AnnouncementView[] @relation("AnnouncementViews")

@@ -40,7 +40,7 @@ const AnnouncementTable = ({
             </div>
           </td>
           <td className="p-4 text-sm font-medium text-slate-600">
-            {announcement.department?.name || '-'}
+            {announcement.scope === 'GLOBAL' ? 'ทั้งองค์กร' : (announcement.department?.name || '-')}
           </td>
           <td className="p-4">
             <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-black text-primary">

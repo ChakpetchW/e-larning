@@ -5,6 +5,8 @@ const { USER_ROLES } = require('../utils/constants/roles');
 const { ENTITY_STATUS, ENROLLMENT_STATUS, REDEEM_STATUS } = require('../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 const { TRANSACTION_TIMEOUTS } = require('../utils/constants/config');
+const { ANNOUNCEMENT_SCOPES } = require('../utils/constants/scopes');
+
 
 const courseInclude = {
     category: true,
@@ -532,13 +534,22 @@ const buildAnnouncementQuestionsCreate = (questions = []) => questions.map((ques
 
 const buildAnnouncementMutationPayload = async (tx, actor, input) => {
     const requestedDepartmentId = normalizeNullableId(input.departmentId);
-    const departmentId = actor.isManager ? actor.departmentId : requestedDepartmentId;
-
-    if (!departmentId) {
-        throw new Error('Department is required');
+    const scope = (input.scope || ANNOUNCEMENT_SCOPES.DEPARTMENT).toUpperCase();
+    
+    // Only admins can create GLOBAL announcements
+    const effectiveScope = actor.isAdmin ? scope : ANNOUNCEMENT_SCOPES.DEPARTMENT;
+    
+    let departmentId = null;
+    if (effectiveScope === ANNOUNCEMENT_SCOPES.DEPARTMENT) {
+        departmentId = actor.isManager ? actor.departmentId : requestedDepartmentId;
+        
+        if (!departmentId) {
+            throw new Error('Department is required for department-scoped announcements');
+        }
+        
+        await ensureReferenceName(tx, 'department', departmentId);
     }
 
-    await ensureReferenceName(tx, 'department', departmentId);
 
     const type = String(input.type || 'article').trim().toLowerCase();
     const questions = Array.isArray(input.questions) ? input.questions : [];
@@ -554,9 +565,11 @@ const buildAnnouncementMutationPayload = async (tx, actor, input) => {
             content: input.content || null,
             duration: input.duration ? String(input.duration) : null,
             passScore: type === 'quiz' ? parseInteger(input.passScore, 60) : null,
+            scope: effectiveScope,
             departmentId,
             status: input.status || ENTITY_STATUS.PUBLISHED,
             expiredAt: parseOptionalDate(input.expiredAt, 'Announcement expiration date')
+
         },
         formattedQuestions
     };
@@ -565,10 +578,14 @@ const buildAnnouncementMutationPayload = async (tx, actor, input) => {
 const buildAnnouncementWhereForActor = (actor, extraWhere = {}) => (
     actor.isManager
         ? {
-            departmentId: actor.departmentId,
+            OR: [
+                { scope: ANNOUNCEMENT_SCOPES.GLOBAL },
+                { departmentId: actor.departmentId }
+            ],
             ...extraWhere
         }
         : extraWhere
+
 );
 
 // DASHBOARD
