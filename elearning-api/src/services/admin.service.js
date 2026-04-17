@@ -785,6 +785,91 @@ const getDashboardStats = async (authUser) => {
     };
 };
 
+// ADVANCED DASHBOARD ANALYTICS
+const getAdvancedAnalytics = async (authUser) => {
+    const actor = await getActorContext(authUser);
+    const isManager = actor.role === USER_ROLES.MANAGER;
+    const departmentId = isManager ? actor.departmentId : null;
+
+    // 1. Skill Gap Analysis (Mastery by Category Type)
+    // For simplicity in this implementation, we aggregate the MAX scores recorded in QuizAttempt.
+    // In a real production scale, we might pre-aggregate this into a Performance table.
+    const skillGapStats = await prisma.$queryRaw`
+        SELECT 
+            c.type,
+            AVG(sub.max_score) as average_mastery
+        FROM "Category" c
+        JOIN "Course" co ON co."categoryId" = c.id
+        JOIN (
+            SELECT "userId", "lessonId", MAX(score) as max_score
+            FROM "QuizAttempt"
+            GROUP BY "userId", "lessonId"
+        ) sub ON sub."lessonId" IN (
+            SELECT id FROM "Lesson" l WHERE l."courseId" = co.id
+        )
+        GROUP BY c.type
+    `;
+
+    // 2. Department Benchmarking
+    const departmentBenchmark = await prisma.$queryRaw`
+        SELECT 
+            d.name as name,
+            ROUND(CAST(COUNT(CASE WHEN uc.status = 'COMPLETED' THEN 1 END) * 100.0 / NULLIF(COUNT(uc.id), 0) AS NUMERIC), 2) as completion_rate
+        FROM "Department" d
+        LEFT JOIN "User" u ON u."departmentId" = d.id
+        LEFT JOIN "UserCourse" uc ON uc."userId" = u.id
+        GROUP BY d.id, d.name
+        ORDER BY completion_rate DESC
+    `;
+
+    // 3. Incentive ROI (Points Distributed vs Completion Count)
+    const roiTrend = await prisma.$queryRaw`
+        SELECT 
+            TO_CHAR(pl."createdAt", 'Mon YYYY') as month,
+            SUM(CASE WHEN pl.points > 0 THEN pl.points ELSE 0 END) as points,
+            (SELECT COUNT(*) FROM "UserCourse" WHERE status = 'COMPLETED' AND TO_CHAR("completedAt", 'Mon YYYY') = TO_CHAR(pl."createdAt", 'Mon YYYY')) as completions
+        FROM "PointsLedger" pl
+        GROUP BY month
+        ORDER BY MIN(pl."createdAt") DESC
+        LIMIT 6
+    `;
+
+    // 4. At-Risk Learners (Deadlines)
+    const now = new Date();
+    const threeDaysLater = new Date();
+    threeDaysLater.setDate(now.getDate() + 3);
+
+    const atRisk = await prisma.userCourse.findMany({
+        where: {
+            status: { not: 'COMPLETED' },
+            deadline: {
+                lte: threeDaysLater,
+                not: null
+            },
+            ...(isManager ? { user: { departmentId: actor.departmentId } } : {})
+        },
+        include: {
+            user: { select: { name: true, department: true } },
+            course: { select: { title: true } }
+        },
+        orderBy: { deadline: 'asc' },
+        take: 5
+    });
+
+    return {
+        skillGap: skillGapStats,
+        benchmarking: departmentBenchmark,
+        roiTrend,
+        atRisk: atRisk.map(item => ({
+            name: item.user.name,
+            department: item.user.department,
+            course: item.course.title,
+            deadline: item.deadline,
+            isOverdue: item.deadline < now
+        }))
+    };
+};
+
 // USERS
 const getUsers = async (authUser) => {
     const actor = await getActorContext(authUser);
@@ -1709,6 +1794,7 @@ const getAnnouncementHistory = async (id, authUser) => {
 
 module.exports = {
     getDashboardStats,
+    getAdvancedAnalytics,
     getUsers,
     getUserDetails,
     createUser,
