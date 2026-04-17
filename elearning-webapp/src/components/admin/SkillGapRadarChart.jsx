@@ -9,12 +9,12 @@ import {
 const SkillGapRadarChart = ({ data }) => {
   // Map backend types to display names
   const categoryMap = {
-    'KM_COURSE': 'KM & Course',
-    'LEARNING_ASSESS': 'Experience & Assessment',
-    'INCENTIVE_REWARD': 'Incentive & Reward',
+    'KM_COURSE': 'Knowledge & Course Management',
+    'LEARNING_ASSESS': 'Learning Experience & Assessment',
+    'INCENTIVE_REWARD': 'Incentive & Reward System',
     'TRACKING_ANALYTICS': 'Tracking & Analytics',
-    'GOAL_PATH': 'Goal & Path',
-    'INTERNAL_COMM': 'Communication'
+    'GOAL_PATH': 'Goal Setting & Learning Path',
+    'INTERNAL_COMM': 'Internal Communication'
   };
 
   const allTypes = [
@@ -28,9 +28,10 @@ const SkillGapRadarChart = ({ data }) => {
 
   const chartData = allTypes.map(type => {
     const item = (data || []).find(d => d.type === type);
+    const rawMastery = item ? (item.average_mastery || 0) : 0;
     return {
       subject: categoryMap[type] || type,
-      A: item ? (item.average_mastery || 0) : 0,
+      A: Number(rawMastery.toFixed(1)),
       fullMark: 100,
     };
   });
