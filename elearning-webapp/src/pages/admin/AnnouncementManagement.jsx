@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Archive, BellPlus, CalendarClock, Edit3, History, Search, Trash2, Upload, X } from 'lucide-react';
+import { Archive, BellPlus, CalendarClock, Edit3, History, Search, Trash2, Upload, X, MoreHorizontal, CheckCircle2 } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../utils/imageUtils';
@@ -36,6 +36,81 @@ const getTypeLabel = (type) => {
   return 'บทความ';
 };
 
+const ActionMenu = ({ announcement, viewMode, onViewHistory, onEdit, onArchive, onDelete, isOpen, onToggle, menuRef }) => {
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+        className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
+          isOpen ? 'bg-slate-900 shadow-lg text-white' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+        }`}
+      >
+        <MoreHorizontal size={20} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-11 z-[70] w-52 overflow-hidden rounded-2xl border border-slate-100 bg-white/95 p-1.5 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.15)] backdrop-blur-xl animate-fade-in origin-top-right">
+          <button
+            type="button"
+            onClick={() => {
+              onViewHistory();
+              onToggle();
+            }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
+          >
+            <History size={16} />
+            ประวัติการเข้าอ่าน
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => {
+              onEdit();
+              onToggle();
+            }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 hover:text-primary"
+          >
+            <Edit3 size={16} />
+            แก้ไขประกาศ
+          </button>
+
+          {viewMode === ENTITY_VIEW_STATUS.ACTIVE && (
+            <button
+              type="button"
+              onClick={() => {
+                onArchive();
+                onToggle();
+              }}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-warning transition-colors hover:bg-amber-50"
+            >
+              <Archive size={16} />
+              เก็บเข้าคลัง
+            </button>
+          )}
+
+          <div className="my-1 h-px bg-slate-100" />
+          
+          <button
+            type="button"
+            onClick={() => {
+              onDelete();
+              onToggle();
+            }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-danger transition-colors hover:bg-red-50"
+          >
+            <Trash2 size={16} />
+            ลบประกาศ
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AnnouncementManagement = () => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
@@ -53,12 +128,25 @@ const AnnouncementManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
   const [form, setForm] = useState(getDefaultForm());
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const dropdownRef = useRef(null);
   
   // History Modal State
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [currentAnnouncementTitle, setCurrentAnnouncementTitle] = useState('');
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdownId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -78,7 +166,7 @@ const AnnouncementManagement = () => {
       setDepartments(nextDepartments);
       setForm((current) => current.departmentId || !nextDepartments.length
         ? current
-        : { ...current, departmentId: nextDepartments[0].id });
+        : { ...current, departmentId: isFullAdmin ? nextDepartments[0].id : user?.departmentId });
     } catch (error) {
       console.error('Fetch announcement data error:', error);
       toast.error('ไม่สามารถโหลดข้อมูลประกาศได้');
@@ -89,7 +177,7 @@ const AnnouncementManagement = () => {
 
   const resetForm = () => {
     setEditingAnnouncement(null);
-    setForm(getDefaultForm(departments[0]?.id || user?.departmentId || ''));
+    setForm(getDefaultForm(isFullAdmin ? (departments[0]?.id || '') : user?.departmentId));
   };
 
   const openCreateModal = () => {
@@ -103,7 +191,7 @@ const AnnouncementManagement = () => {
       title: announcement.title || '',
       description: announcement.description || '',
       image: announcement.image || '',
-      departmentId: announcement.departmentId || departments[0]?.id || '',
+      departmentId: announcement.departmentId || (isFullAdmin ? (departments[0]?.id || '') : user?.departmentId) || '',
       type: announcement.type || 'article',
       contentUrl: announcement.contentUrl || '',
       content: announcement.content || '',
@@ -243,30 +331,64 @@ const AnnouncementManagement = () => {
     }
   };
 
+  const handleDelete = async (announcement) => {
+    const ok = await confirm({
+      title: 'ยืนยันการลบประกาศ',
+      message: `คุณต้องการลบประกาศ "${announcement.title}" ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteAnnouncement(announcement.id);
+      toast.success('ลบประกาศเรียบร้อย');
+      await fetchData();
+    } catch (error) {
+      console.error('Delete announcement error:', error);
+      toast.error('ไม่สามารถลบประกาศได้');
+    }
+  };
+
   const filteredAnnouncements = useMemo(() => {
     const now = new Date();
     return announcements.filter((announcement) => {
+      // 1. Role-based department access
+      if (!isFullAdmin && announcement.departmentId !== user?.departmentId) {
+        return false;
+      }
+
       const isArchived = announcement.expiredAt ? new Date(announcement.expiredAt) <= now : false;
       const matchesView = viewMode === ENTITY_VIEW_STATUS.ARCHIVED ? isArchived : !isArchived;
       const keyword = `${announcement.title} ${announcement.department?.name || ''}`.toLowerCase();
       const matchesSearch = keyword.includes(searchTerm.toLowerCase());
       return matchesView && matchesSearch;
     });
-  }, [announcements, searchTerm, viewMode]);
+  }, [announcements, searchTerm, viewMode, isFullAdmin, user?.departmentId]);
 
   const activeCount = useMemo(
-    () => announcements.filter((announcement) => !announcement.expiredAt || new Date(announcement.expiredAt) > new Date()).length,
-    [announcements],
+    () => announcements.filter((announcement) => {
+      if (!isFullAdmin && announcement.departmentId !== user?.departmentId) return false;
+      return !announcement.expiredAt || new Date(announcement.expiredAt) > new Date();
+    }).length,
+    [announcements, isFullAdmin, user?.departmentId],
   );
 
-  const archivedCount = announcements.length - activeCount;
+  const archivedCount = useMemo(
+    () => announcements.filter((announcement) => {
+      if (!isFullAdmin && announcement.departmentId !== user?.departmentId) return false;
+      return announcement.expiredAt && new Date(announcement.expiredAt) <= new Date();
+    }).length,
+    [announcements, isFullAdmin, user?.departmentId],
+  );
 
   const columns = [
     { label: 'ประกาศ' },
     { label: 'แผนก', className: 'min-w-[140px]' },
     { label: 'ชนิดหน้า', className: 'min-w-[120px]' },
     { label: 'หมดอายุ', className: 'min-w-[180px]' },
-    { label: 'จัดการ', className: 'w-[260px]' },
+    { label: 'จัดการ', className: 'w-[100px] text-right' },
   ];
 
   const renderSourceField = () => {
@@ -402,25 +524,18 @@ const AnnouncementManagement = () => {
               {announcement.expiredAt ? formatThaiDateTime(announcement.expiredAt, true) : '-'}
             </td>
             <td className="p-4">
-              <div className="flex flex-row items-center gap-2">
-                <button type="button" onClick={() => handleViewHistory(announcement)} className="btn btn-outline h-9 px-3 gap-1 bg-blue-50/50 text-blue-600 border-blue-200 text-xs">
-                  <History size={14} />
-                  ประวัติ
-                </button>
-                <button type="button" onClick={() => openEditModal(announcement)} className="btn btn-outline h-9 px-3 gap-1 text-xs">
-                  <Edit3 size={14} />
-                  แก้ไข
-                </button>
-                {viewMode === ENTITY_VIEW_STATUS.ACTIVE && (
-                  <button type="button" onClick={() => handleArchive(announcement)} className="btn btn-outline h-9 px-3 gap-1 text-warning border-warning/30 text-xs">
-                    <Archive size={14} />
-                    เก็บเข้าคลัง
-                  </button>
-                )}
-                <button type="button" onClick={() => handleDelete(announcement)} className="btn btn-outline h-9 px-3 gap-1 text-danger border-danger/30 text-xs">
-                  <Trash2 size={14} />
-                  ลบ
-                </button>
+              <div className="flex justify-end">
+                <ActionMenu
+                  announcement={announcement}
+                  viewMode={viewMode}
+                  isOpen={openDropdownId === announcement.id}
+                  onToggle={() => setOpenDropdownId(openDropdownId === announcement.id ? null : announcement.id)}
+                  onViewHistory={() => handleViewHistory(announcement)}
+                  onEdit={() => openEditModal(announcement)}
+                  onArchive={() => handleArchive(announcement)}
+                  onDelete={() => handleDelete(announcement)}
+                  menuRef={openDropdownId === announcement.id ? dropdownRef : null}
+                />
               </div>
             </td>
           </tr>
@@ -465,19 +580,27 @@ const AnnouncementManagement = () => {
 
                   <div>
                     <label className="mb-1 block text-sm font-bold text-gray-700">แผนก</label>
-                    <select
-                      className="form-input w-full"
-                      value={form.departmentId}
-                      onChange={(event) => setForm((current) => ({ ...current, departmentId: event.target.value }))}
-                      disabled={!isFullAdmin && departments.length <= 1}
-                    >
-                      <option value="">เลือกแผนก</option>
-                      {departments.map((department) => (
-                        <option key={department.id} value={department.id}>
-                          {department.name}
-                        </option>
-                      ))}
-                    </select>
+                    {isFullAdmin ? (
+                      <select
+                        className="form-input w-full"
+                        value={form.departmentId}
+                        onChange={(event) => setForm((current) => ({ ...current, departmentId: event.target.value }))}
+                      >
+                        <option value="">เลือกแผนก</option>
+                        {departments.map((department) => (
+                          <option key={department.id} value={department.id}>
+                            {department.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="flex items-center gap-2 rounded-xl border border-primary/10 bg-primary/5 px-4 py-3 ">
+                        <CheckCircle2 size={16} className="text-primary" />
+                        <span className="text-sm font-bold text-primary">
+                          แผนกของคุณ: {user?.department || 'กำลังโหลด...'}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div>
