@@ -65,7 +65,7 @@ const CustomSelect = ({
 
         {isOpen && (
           <div 
-            className="absolute left-0 top-full z-[999] mt-2 w-full max-h-64 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
+            className="absolute left-0 top-full z-[999] mt-2 min-w-full w-max max-w-[16rem] max-h-64 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
           >
             {options.length === 0 ? (
               <div className="px-4 py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">

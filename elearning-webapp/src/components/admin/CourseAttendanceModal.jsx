@@ -132,7 +132,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
 
               <CustomSelect
                 label="เดือน"
-                className="w-full sm:w-40"
+                className="w-full sm:w-44"
                 value={filters.month}
                 onChange={(e) => setFilters({ ...filters, month: e.target.value })}
                 options={months}
@@ -140,7 +140,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
 
               <CustomSelect
                 label="ปี"
-                className="w-full sm:w-32"
+                className="w-full sm:w-36"
                 value={filters.year}
                 disabled={!filters.month}
                 onChange={(e) => setFilters({ ...filters, year: e.target.value })}

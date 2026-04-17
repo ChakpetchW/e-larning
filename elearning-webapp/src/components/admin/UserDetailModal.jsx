@@ -182,7 +182,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                       {/* Filter Controls */}
                       <div className="flex items-center gap-2">
                         <CustomSelect
-                          className="w-32"
+                          className="w-44"
                           size="sm"
                           value={filterMonth}
                           onChange={(e) => setFilterMonth(e.target.value)}
@@ -192,7 +192,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                           ]}
                         />
                         <CustomSelect
-                          className="w-24"
+                          className="w-36"
                           size="sm"
                           value={filterYear}
                           onChange={(e) => setFilterYear(e.target.value)}
