@@ -146,7 +146,7 @@ const CategoryManagementModal = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="category-modal-title"
-          className="card flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden bg-white p-6 shadow-xl"
+          className="card flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden bg-white p-6 shadow-xl"
         >
           <div className="mb-4 flex items-center justify-between">
             <h3 id="category-modal-title" className="text-xl font-bold">จัดการหมวดหมู่</h3>
@@ -189,52 +189,49 @@ const CategoryManagementModal = ({
             }`}
           >
             <div className="flex items-center justify-between px-1">
-              <span className={`text-[10px] font-black uppercase tracking-widest ${editingCategoryId ? 'text-primary' : 'text-slate-400'}`}>
-                {editingCategoryId ? 'กำลังแก้ไขหมวดหมู่' : 'สร้างหมวดหมู่ใหม่'}
-              </span>
-              {editingCategoryId && (
-                <button 
-                  type="button"
-                  onClick={resetCategoryEditor}
-                  className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
-                >
-                  ยกเลิกการแก้ไข
-                </button>
-              )}
+                <label className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  {editingCategoryId ? 'กำลังแก้ไขหมวดหมู่' : 'สร้างหมวดหมู่ใหม่'}
+                </label>
+                {editingCategoryId && (
+                  <button 
+                    type="button"
+                    onClick={resetCategoryEditor}
+                    className="text-xs font-bold text-primary hover:underline uppercase tracking-widest"
+                  >
+                    ยกเลิกการแก้ไข
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* Major Group Selection */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">กลุ่มหลัก (Module)</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-1.5 bg-white border border-slate-100 rounded-2xl w-full">
-                {[
-                  { value: 'KM_COURSE', label: '1. KM & Course', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
-                  { value: 'LEARNING_ASSESS', label: '2. Exp & Assess', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
-                  { value: 'INCENTIVE_REWARD', label: '3. Incentive', color: 'text-amber-600 bg-amber-50 border-amber-200' },
-                  { value: 'TRACKING_ANALYTICS', label: '4. Tracking', color: 'text-blue-600 bg-blue-50 border-blue-200' },
-                  { value: 'GOAL_PATH', label: '5. Goal & Path', color: 'text-purple-600 bg-purple-50 border-purple-200' },
-                  { value: 'INTERNAL_COMM', label: '6. Communication', color: 'text-rose-600 bg-rose-50 border-rose-200' }
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setCategoryForm({ ...categoryForm, type: opt.value })}
-                    className={`px-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-tight transition-all border ${
-                      categoryForm.type === opt.value
-                        ? opt.color + ' shadow-sm scale-[1.02]'
-                        : 'text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">กลุ่มหลัก (Module)</label>
+
+              <div className="relative">
+                <select
+                  value={categoryForm.type}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, type: e.target.value })}
+                  className="w-full appearance-none bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all cursor-pointer"
+                >
+                  <option value="KM_COURSE">Knowledge & Course Management</option>
+                  <option value="LEARNING_ASSESS">Learning Experience & Assessment</option>
+                  <option value="INCENTIVE_REWARD">Incentive & Reward System</option>
+                  <option value="TRACKING_ANALYTICS">Tracking & Analytics</option>
+                  <option value="GOAL_PATH">Goal Setting & Learning Path</option>
+                  <option value="INTERNAL_COMM">Internal Communication</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                  <ChevronDown size={18} />
+                </div>
               </div>
             </div>
 
 
+
             <div className="flex flex-col gap-3 md:flex-row md:items-end">
               <div className="flex-1 space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">ชื่อหมวดหมู่</label>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">ชื่อหมวดหมู่</label>
+
                 <input
                   required
                   type="text"
@@ -247,8 +244,9 @@ const CategoryManagementModal = ({
                 />
               </div>
 
-              <div className="w-full md:w-56 space-y-1.5" ref={iconPickerRef}>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">ไอคอนแสดงผล</label>
+              <div className="w-full md:w-64 space-y-1.5" ref={iconPickerRef}>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">ไอคอนแสดงผล</label>
+
                 <div className="relative">
                   <button
                     type="button"
@@ -290,9 +288,10 @@ const CategoryManagementModal = ({
                               <div className={`${isSelected ? 'text-white' : 'text-slate-600'}`}>
                                 <Icon size={20} />
                               </div>
-                              <span className={`text-[8px] font-black uppercase tracking-tighter truncate w-full text-center ${isSelected ? 'text-white/90' : 'text-slate-400'}`}>
+                              <span className="text-[10px] font-black uppercase tracking-tighter truncate w-full text-center">
                                 {iconName}
                               </span>
+
                             </button>
                           );
                         })}
@@ -321,7 +320,8 @@ const CategoryManagementModal = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="text-[11px] font-black uppercase tracking-widest text-amber-900/70">หมวดหมู่ชั่วคราว</p>
+                      <p className="text-xs font-black uppercase tracking-widest text-amber-900/70">หมวดหมู่ชั่วคราว</p>
+
                       <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                     </div>
                     <p className="mt-1.5 text-sm font-medium leading-relaxed text-amber-900/80">
@@ -393,7 +393,8 @@ const CategoryManagementModal = ({
             {!categoryForm.visibleToAll && (
               <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-3">  
                 <div>
-                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">แผนก (Department)</p>
+                  <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">แผนก (Department)</p>
+
                   <div className="flex flex-wrap gap-1.5">
                     {departments.map((dept) => {
                       const isSelected = (categoryForm.visibleDepartmentIds || []).includes(dept.id);
@@ -410,7 +411,8 @@ const CategoryManagementModal = ({
                                 : [...ids, dept.id],
                             });
                           }}
-                          className={`rounded-full px-3 py-1 text-[11px] font-bold transition-all ${
+                          className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+
                             isSelected
                               ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
                               : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
@@ -424,7 +426,8 @@ const CategoryManagementModal = ({
                 </div>
 
                 <div>
-                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">ระดับผู้ใช้งาน (Tier)</p>
+                  <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">ระดับผู้ใช้งาน (Tier)</p>
+
                   <div className="flex flex-wrap gap-1.5">
                     {tiers.map((tier) => {
                       const isSelected = (categoryForm.visibleTierIds || []).includes(tier.id);
@@ -441,7 +444,8 @@ const CategoryManagementModal = ({
                                 : [...ids, tier.id],
                             });
                           }}
-                          className={`rounded-full px-3 py-1 text-[11px] font-bold transition-all ${
+                          className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+
                             isSelected
                               ? 'bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/30'
                               : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
@@ -480,7 +484,7 @@ const CategoryManagementModal = ({
                           <div className="flex items-center gap-2">
                             {category.name}
                             {category.type && (
-                              <span className={`rounded-md px-1.5 py-0.5 text-[7px] font-black uppercase ring-1 ring-inset ${
+                              <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-black uppercase ring-1 ring-inset ${
                                 category.type === 'KM_COURSE' ? 'text-indigo-600 bg-indigo-50 ring-indigo-200' :
                                 category.type === 'LEARNING_ASSESS' ? 'text-emerald-600 bg-emerald-50 ring-emerald-200' :
                                 category.type === 'INCENTIVE_REWARD' ? 'text-amber-600 bg-amber-50 ring-amber-200' :
@@ -489,6 +493,7 @@ const CategoryManagementModal = ({
                                 category.type === 'INTERNAL_COMM' ? 'text-rose-600 bg-rose-50 ring-rose-200' :
                                 'text-slate-500 bg-slate-50 ring-slate-200'
                               }`}>
+
                                 {category.type === 'KM_COURSE' ? 'KM & Course' :
                                  category.type === 'LEARNING_ASSESS' ? 'Exp & Assess' :
                                  category.type === 'INCENTIVE_REWARD' ? 'Incentive' :
