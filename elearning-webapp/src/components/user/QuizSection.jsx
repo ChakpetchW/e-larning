@@ -124,14 +124,14 @@ const QuizSection = ({
         <div className={`flex items-center justify-between rounded-2xl px-5 py-3 border ${
           quizResult.passed ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
         }`}>
-          <span className={`text-sm font-black ${
+          <span className={`text-base font-normal ${
             quizResult.passed ? 'text-emerald-700' : 'text-red-700'
           }`}>
             {quizResult.passed ? `✅ ผ่าน — ${quizResult.scorePercent}%` : `❌ ไม่ผ่าน — ${quizResult.scorePercent}%`}
           </span>
           <button
             onClick={() => { setQuizResult(null); setAnswers({}); setShowSummary(true); }}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-normal text-slate-600 hover:bg-slate-900 hover:text-white transition-all"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base font-normal text-slate-600 hover:bg-slate-900 hover:text-white transition-all"
           >
             ทำใหม่
           </button>
