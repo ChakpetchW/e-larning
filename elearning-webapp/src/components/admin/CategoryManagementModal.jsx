@@ -15,7 +15,8 @@ import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 const getDefaultCategoryForm = () => ({
   name: '',
   icon: 'Grid',
-  type: 'FUNCTION',
+  type: 'KM_COURSE',
+
   order: 0,
   visibleToAll: true,
   visibleDepartmentIds: [],
@@ -204,21 +205,24 @@ const CategoryManagementModal = ({
 
             {/* Major Group Selection */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">กลุ่มหลัก (Major Group)</label>
-              <div className="flex gap-2 p-1 bg-white border border-slate-100 rounded-2xl w-fit">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">กลุ่มหลัก (Module)</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-1.5 bg-white border border-slate-100 rounded-2xl w-full">
                 {[
-                  { value: 'LEADERSHIP', label: 'Leadership', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
-                  { value: 'FUNCTION', label: 'Function', color: 'text-slate-600 bg-slate-50 border-slate-200' },
-                  { value: 'INNOVATION', label: 'Innovation', color: 'text-amber-600 bg-amber-50 border-amber-200' }
+                  { value: 'KM_COURSE', label: '1. KM & Course', color: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+                  { value: 'LEARNING_ASSESS', label: '2. Exp & Assess', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+                  { value: 'INCENTIVE_REWARD', label: '3. Incentive', color: 'text-amber-600 bg-amber-50 border-amber-200' },
+                  { value: 'TRACKING_ANALYTICS', label: '4. Tracking', color: 'text-blue-600 bg-blue-50 border-blue-200' },
+                  { value: 'GOAL_PATH', label: '5. Goal & Path', color: 'text-purple-600 bg-purple-50 border-purple-200' },
+                  { value: 'INTERNAL_COMM', label: '6. Communication', color: 'text-rose-600 bg-rose-50 border-rose-200' }
                 ].map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => setCategoryForm({ ...categoryForm, type: opt.value })}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                    className={`px-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-tight transition-all border ${
                       categoryForm.type === opt.value
-                        ? opt.color + ' border shadow-sm scale-105'
-                        : 'text-slate-400 hover:text-slate-600'
+                        ? opt.color + ' shadow-sm scale-[1.02]'
+                        : 'text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50'
                     }`}
                   >
                     {opt.label}
@@ -226,6 +230,7 @@ const CategoryManagementModal = ({
                 ))}
               </div>
             </div>
+
 
             <div className="flex flex-col gap-3 md:flex-row md:items-end">
               <div className="flex-1 space-y-1.5">
@@ -475,14 +480,24 @@ const CategoryManagementModal = ({
                           <div className="flex items-center gap-2">
                             {category.name}
                             {category.type && (
-                              <span className={`rounded-md px-1.5 py-0.5 text-[8px] font-black uppercase ring-1 ring-inset ${
-                                category.type === 'LEADERSHIP' ? 'text-indigo-600 bg-indigo-50 ring-indigo-200' :
-                                category.type === 'INNOVATION' ? 'text-amber-600 bg-amber-50 ring-amber-200' :
+                              <span className={`rounded-md px-1.5 py-0.5 text-[7px] font-black uppercase ring-1 ring-inset ${
+                                category.type === 'KM_COURSE' ? 'text-indigo-600 bg-indigo-50 ring-indigo-200' :
+                                category.type === 'LEARNING_ASSESS' ? 'text-emerald-600 bg-emerald-50 ring-emerald-200' :
+                                category.type === 'INCENTIVE_REWARD' ? 'text-amber-600 bg-amber-50 ring-amber-200' :
+                                category.type === 'TRACKING_ANALYTICS' ? 'text-blue-600 bg-blue-50 ring-blue-200' :
+                                category.type === 'GOAL_PATH' ? 'text-purple-600 bg-purple-50 ring-purple-200' :
+                                category.type === 'INTERNAL_COMM' ? 'text-rose-600 bg-rose-50 ring-rose-200' :
                                 'text-slate-500 bg-slate-50 ring-slate-200'
                               }`}>
-                                {category.type}
+                                {category.type === 'KM_COURSE' ? 'KM & Course' :
+                                 category.type === 'LEARNING_ASSESS' ? 'Exp & Assess' :
+                                 category.type === 'INCENTIVE_REWARD' ? 'Incentive' :
+                                 category.type === 'TRACKING_ANALYTICS' ? 'Tracking' :
+                                 category.type === 'GOAL_PATH' ? 'Goal & Path' :
+                                 category.type === 'INTERNAL_COMM' ? 'Comm' : category.type}
                               </span>
                             )}
+
                           </div>
                         </div>
                         <div className="mt-1 flex flex-wrap gap-1">
@@ -533,8 +548,9 @@ const CategoryManagementModal = ({
                             setCategoryForm({
                               name: category.name,
                               icon: category.icon || 'Grid',
-                              type: category.type || 'FUNCTION',
+                              type: category.type || 'KM_COURSE',
                               order: category.order,
+
                               visibleToAll: category.visibleToAll ?? true,
                               visibleDepartmentIds: category.visibleDepartmentIds || [],
                               visibleTierIds: category.visibleTierIds || [],

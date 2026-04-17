@@ -175,9 +175,10 @@ const mapCategoryRecord = (category) => {
         visibleDepartmentIds: visibleDepartments.map((department) => department.id),
         visibleTiers,
         visibleTierIds: visibleTiers.map((tier) => tier.id),
-        type: rest.type || 'FUNCTION'
+        type: rest.type || 'KM_COURSE'
     };
 };
+
 
 const mapAnnouncementRecord = (announcement) => {
     const { creator, questions, ...rest } = announcement;
@@ -483,8 +484,9 @@ const buildCategoryMutationPayload = async (tx, input) => {
         data: {
             name: sanitizeName(input.name, 'Category'),
             icon: input.icon || 'Grid',
-            type: input.type || 'FUNCTION',
+            type: input.type || 'KM_COURSE',
             order: parseInteger(input.order, 0),
+
             visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true,
             ...temporaryState
         },
@@ -720,14 +722,18 @@ const getDashboardStats = async (authUser) => {
     });
 
     const typeMap = {
-        'LEADERSHIP': { name: 'Leadership', value: 0, enrollmentCount: 0, courses: [] },
-        'FUNCTION': { name: 'Function', value: 0, enrollmentCount: 0, courses: [] },
-        'INNOVATION': { name: 'Innovation', value: 0, enrollmentCount: 0, courses: [] }
+        'KM_COURSE': { name: 'Knowledge & Course Management', value: 0, enrollmentCount: 0, courses: [] },
+        'LEARNING_ASSESS': { name: 'Learning Experience & Assessment', value: 0, enrollmentCount: 0, courses: [] },
+        'INCENTIVE_REWARD': { name: 'Incentive & Reward System', value: 0, enrollmentCount: 0, courses: [] },
+        'TRACKING_ANALYTICS': { name: 'Tracking & Analytics', value: 0, enrollmentCount: 0, courses: [] },
+        'GOAL_PATH': { name: 'Goal Setting & Learning Path', value: 0, enrollmentCount: 0, courses: [] },
+        'INTERNAL_COMM': { name: 'Internal Communication', value: 0, enrollmentCount: 0, courses: [] }
     };
 
     coursesByType.forEach(course => {
-        const typeKey = course.category?.type || 'FUNCTION';
-        const group = typeMap[typeKey] || typeMap['FUNCTION'];
+        const typeKey = course.category?.type || 'KM_COURSE';
+        const group = typeMap[typeKey] || typeMap['KM_COURSE'];
+
         
         group.value += 1;
         group.enrollmentCount += course._count.enrollments;
