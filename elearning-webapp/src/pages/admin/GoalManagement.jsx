@@ -5,6 +5,8 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { useToast } from '../../context/ToastContext';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
+
 
 // Sub-components
 // Sub-components
@@ -25,7 +27,8 @@ const GoalManagement = () => {
     const [reportLoading, setReportLoading] = useState(false);
     const [departments, setDepartments] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
-    const [viewMode, setViewMode] = useState('ACTIVE');
+    const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
+
 
     
     // Form state
@@ -177,7 +180,8 @@ const GoalManagement = () => {
         return goals.filter(g => g.status === 'ARCHIVED' || (g.expiryDate && new Date(g.expiryDate) <= now));
     }, [goals]);
 
-    const displayGoals = viewMode === 'ACTIVE' ? activeGoals : archivedGoals;
+    const displayGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
+
 
     const columns = [
         { label: 'ชื่อเป้าหมาย' },
@@ -213,19 +217,22 @@ const GoalManagement = () => {
                 viewMode={viewMode}
                 setViewMode={setViewMode}
                 tabs={[
-                    { key: 'ACTIVE', label: `กำลังใช้งาน (${activeGoals.length})`, icon: CalendarClock },
-                    { key: 'ARCHIVED', label: `เก็บเข้าคลัง (${archivedGoals.length})`, icon: CalendarClock }
+                    { key: ENTITY_VIEW_STATUS.ACTIVE, label: `กำลังใช้งาน (${activeGoals.length})`, icon: CalendarClock },
+                    { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เก็บเข้าคลัง (${archivedGoals.length})`, icon: CalendarClock }
                 ]}
             />
+
 
             <GoalList 
                 goals={displayGoals}
                 columns={columns}
+                viewMode={viewMode}
                 onViewReport={handleViewReport}
                 onDeleteGoal={handleDeleteGoal}
                 onArchiveGoal={handleArchiveGoal}
                 onRepublishGoal={handleRepublishGoal}
             />
+
 
             <CreateGoalModal 
                 isOpen={isModalOpen}

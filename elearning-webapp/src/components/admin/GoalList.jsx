@@ -3,8 +3,11 @@ import { Calendar, FileText, Trash2, Archive, RotateCcw } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminTable from './AdminTable';
 import AdminActionMenu from './AdminActionMenu';
+import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 
-const GoalList = ({ goals, columns, onViewReport, onDeleteGoal, onArchiveGoal, onRepublishGoal }) => {
+
+const GoalList = ({ goals, columns, viewMode, onViewReport, onDeleteGoal, onArchiveGoal, onRepublishGoal }) => {
+
   const [openDropdownId, setOpenDropdownId] = useState(null);
   return (
     <div className="card">
@@ -65,7 +68,7 @@ const GoalList = ({ goals, columns, onViewReport, onDeleteGoal, onArchiveGoal, o
                       iconClassName: 'bg-blue-50 text-blue-500 group-hover:bg-blue-100',
                     },
                     {
-                      hidden: goal.status === 'ARCHIVED',
+                      hidden: viewMode === ENTITY_VIEW_STATUS.ARCHIVED,
                       icon: Archive,
                       label: 'เก็บเข้าคลัง',
                       onClick: () => onArchiveGoal(goal.id),
@@ -73,13 +76,14 @@ const GoalList = ({ goals, columns, onViewReport, onDeleteGoal, onArchiveGoal, o
                       iconClassName: 'bg-amber-50 text-amber-500 group-hover:bg-amber-100',
                     },
                     {
-                      hidden: goal.status !== 'ARCHIVED',
+                      hidden: viewMode !== ENTITY_VIEW_STATUS.ARCHIVED,
                       icon: RotateCcw,
                       label: 'นำกลับมาใช้งาน',
                       onClick: () => onRepublishGoal(goal.id),
                       className: 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-600',
                       iconClassName: 'bg-emerald-50 text-emerald-500 group-hover:bg-emerald-100',
                     },
+
                     {
                       icon: Trash2,
                       label: 'ลบเป้าหมาย',
