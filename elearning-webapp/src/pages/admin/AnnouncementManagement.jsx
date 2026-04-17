@@ -210,9 +210,9 @@ const AnnouncementManagement = () => {
 
   const handleArchive = async (announcement) => {
     const ok = await confirm({
-      title: 'ต้องการเก็บประกาศลงกรุ?',
+      title: 'ต้องการเก็บประกาศเข้าคลัง?',
       message: `ประกาศ "${announcement.title}" จะหมดอายุทันทีและถูกย้ายไปยังแท็บ "หมดอายุแล้ว" คุณต้องการดำเนินการต่อใช่หรือไม่?`,
-      confirmLabel: 'แจ้งหมดอายุ',
+      confirmLabel: 'เก็บเข้าคลัง',
       variant: 'warning',
     });
 
@@ -220,11 +220,11 @@ const AnnouncementManagement = () => {
 
     try {
       await adminAPI.archiveAnnouncement(announcement.id);
-      toast.success('ย้ายประกาศลงกรุเรียบร้อย');
+      toast.success('เก็บประกาศเข้าคลังเรียบร้อย');
       await fetchData();
     } catch (error) {
       console.error('Archive announcement error:', error);
-      toast.error('ไม่สามารถเก็บประกาศลงกรุได้');
+      toast.error('ไม่สามารถเก็บประกาศเข้าคลังได้');
     }
   };
 
@@ -266,7 +266,7 @@ const AnnouncementManagement = () => {
     { label: 'แผนก', className: 'min-w-[140px]' },
     { label: 'ชนิดหน้า', className: 'min-w-[120px]' },
     { label: 'หมดอายุ', className: 'min-w-[180px]' },
-    { label: 'จัดการ', className: 'w-[160px]' },
+    { label: 'จัดการ', className: 'w-[260px]' },
   ];
 
   const renderSourceField = () => {
@@ -402,22 +402,22 @@ const AnnouncementManagement = () => {
               {announcement.expiredAt ? formatThaiDateTime(announcement.expiredAt, true) : '-'}
             </td>
             <td className="p-4">
-              <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={() => handleViewHistory(announcement)} className="btn btn-outline btn-sm gap-1 bg-blue-50/50 text-blue-600 border-blue-200">
+              <div className="flex flex-row items-center gap-2">
+                <button type="button" onClick={() => handleViewHistory(announcement)} className="btn btn-outline h-9 px-3 gap-1 bg-blue-50/50 text-blue-600 border-blue-200 text-xs">
                   <History size={14} />
                   ประวัติ
                 </button>
-                <button type="button" onClick={() => openEditModal(announcement)} className="btn btn-outline btn-sm gap-1">
+                <button type="button" onClick={() => openEditModal(announcement)} className="btn btn-outline h-9 px-3 gap-1 text-xs">
                   <Edit3 size={14} />
                   แก้ไข
                 </button>
                 {viewMode === ENTITY_VIEW_STATUS.ACTIVE && (
-                  <button type="button" onClick={() => handleArchive(announcement)} className="btn btn-outline btn-sm gap-1 text-warning border-warning/30">
+                  <button type="button" onClick={() => handleArchive(announcement)} className="btn btn-outline h-9 px-3 gap-1 text-warning border-warning/30 text-xs">
                     <Archive size={14} />
-                    เก็บลงกรุ
+                    เก็บเข้าคลัง
                   </button>
                 )}
-                <button type="button" onClick={() => handleDelete(announcement)} className="btn btn-outline btn-sm gap-1 text-danger border-danger/30">
+                <button type="button" onClick={() => handleDelete(announcement)} className="btn btn-outline h-9 px-3 gap-1 text-danger border-danger/30 text-xs">
                   <Trash2 size={14} />
                   ลบ
                 </button>
