@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Archive, BellPlus, CalendarClock, Edit3, History, Search, Trash2, Upload, X, MoreHorizontal, CheckCircle2 } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
