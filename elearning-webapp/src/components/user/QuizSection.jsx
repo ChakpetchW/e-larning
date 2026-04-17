@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { CheckCircle, ChevronDown } from 'lucide-react';
+import React from 'react';
+import { CheckCircle } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 const QuizSection = ({
@@ -15,7 +15,6 @@ const QuizSection = ({
   quizRewardPoints
 }) => {
   const toast = useToast();
-  const [showSummary, setShowSummary] = useState(true);
 
   if (!lesson || !lesson.questions) return null;
 
@@ -37,7 +36,7 @@ const QuizSection = ({
         </div>
       )}
 
-      {quizResult && showSummary && (
+      {quizResult && (
         <div ref={quizResultRef} className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3.5rem] border-2 transition-all duration-500 shadow-2xl flex flex-col items-center gap-5 text-center p-8 md:p-12 ${
           quizResult.passed
             ? 'bg-gradient-to-br from-emerald-50 to-white border-emerald-200'
@@ -98,45 +97,22 @@ const QuizSection = ({
             </div>
           )}
 
-          {/* Action buttons */}
-          <div className="relative z-10 flex flex-col sm:flex-row gap-3 mt-4 w-full sm:w-auto">
-            {quizResult.passed ? (
-              <button
-                onClick={() => setShowSummary(false)}
-                className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-sm font-black tracking-[0.04em] text-slate-700 shadow-sm transition-all hover:border-slate-900 hover:bg-slate-900 hover:text-white"
-              >
-                <ChevronDown size={16} /> ดูข้อที่ถูก/ผิด
-              </button>
-            ) : (
-              <button
-                onClick={() => { setQuizResult(null); setAnswers({}); setShowSummary(true); }}
-                className="rounded-2xl bg-red-600 px-8 py-4 text-sm font-black tracking-[0.04em] text-white shadow-lg shadow-red-200 transition-all hover:bg-red-700"
-              >
-                ทำควิซอีกครั้ง
-              </button>
-            )}
+          {/* Action button */}
+          <div className="relative z-10 mt-4">
+            <button
+              onClick={() => { setQuizResult(null); setAnswers({}); }}
+              className={`rounded-2xl px-8 py-4 text-sm font-black tracking-[0.04em] text-white shadow-lg transition-all ${
+                quizResult.passed
+                  ? 'bg-emerald-600 shadow-emerald-200 hover:bg-emerald-700'
+                  : 'bg-red-600 shadow-red-200 hover:bg-red-700'
+              }`}
+            >
+              {quizResult.passed ? 'ทบทวนอีกครั้ง' : 'ทำควิซอีกครั้ง'}
+            </button>
           </div>
         </div>
       )}
 
-      {/* Review banner when summary is hidden */}
-      {quizResult && !showSummary && (
-        <div className={`flex items-center justify-between rounded-2xl px-5 py-3 border ${
-          quizResult.passed ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
-        }`}>
-          <span className={`text-base font-normal ${
-            quizResult.passed ? 'text-emerald-700' : 'text-red-700'
-          }`}>
-            {quizResult.passed ? `✅ ผ่าน — ${quizResult.scorePercent}%` : `❌ ไม่ผ่าน — ${quizResult.scorePercent}%`}
-          </span>
-          <button
-            onClick={() => { setQuizResult(null); setAnswers({}); setShowSummary(true); }}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base font-normal text-slate-600 hover:bg-slate-900 hover:text-white transition-all"
-          >
-            ทำใหม่
-          </button>
-        </div>
-      )}
 
       <div className="flex flex-col gap-6">
         {lesson.questions?.map((q, idx) => {
