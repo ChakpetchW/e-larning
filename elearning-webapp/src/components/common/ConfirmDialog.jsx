@@ -80,7 +80,7 @@ const ConfirmDialog = ({
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-message"
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 animate-in zoom-in-95 duration-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-in zoom-in-95 duration-200 overflow-hidden">
         {/* Header */}
         <div className="flex items-start gap-4 p-6 pb-2">
           <div className={`shrink-0 p-2.5 rounded-xl ${variantStyles[variant]?.iconBg || 'bg-red-50'}`}>

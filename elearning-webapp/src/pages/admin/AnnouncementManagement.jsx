@@ -39,9 +39,9 @@ const getTypeLabel = (type) => {
 const ActionMenu = ({ announcement, viewMode, onViewHistory, onEdit, onArchive, onDelete, isOpen, onToggle }) => {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [coords, setCoords] = useState(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       setCoords({
@@ -66,6 +66,8 @@ const ActionMenu = ({ announcement, viewMode, onViewHistory, onEdit, onArchive, 
         window.removeEventListener('scroll', handleScroll, true);
         document.removeEventListener('mousedown', handleClickOutside);
       };
+    } else {
+      setCoords(null);
     }
   }, [isOpen, onToggle]);
 
@@ -87,11 +89,11 @@ const ActionMenu = ({ announcement, viewMode, onViewHistory, onEdit, onArchive, 
         <MoreHorizontal size={18} />
       </button>
 
-      {isOpen && (
+      {isOpen && coords && (
         <ModalPortal isOpen={isOpen} lockScroll={false}>
           <div 
             ref={menuRef}
-            className="fixed z-[9999] w-48 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200 origin-top-right"
+            className="fixed z-[9999] w-48 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200"
             style={{
               top: `${coords.top + 8}px`,
               left: `${coords.left - 192}px`,
