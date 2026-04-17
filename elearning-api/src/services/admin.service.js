@@ -1054,6 +1054,99 @@ const republishCourse = async (id) => {
     return mapCourseRecord(course);
 };
 
+const archiveCourse = async (id) => {
+    const pastDate = new Date();
+    pastDate.setMinutes(pastDate.getMinutes() - 5);
+    
+    const course = await prisma.course.update({
+        where: { id },
+        data: {
+            isTemporary: true,
+            expiredAt: pastDate
+        },
+        include: courseInclude
+    });
+
+    return mapCourseRecord(course);
+};
+
+const getCourseHistory = async (courseId, filters = {}) => {
+    const { departmentId, tierId, month, year } = filters;
+    
+    const whereClause = {
+        courseId
+    };
+
+    const userWhere = {};
+    if (departmentId) userWhere.departmentId = departmentId;
+    if (tierId) userWhere.tierId = tierId;
+    if (Object.keys(userWhere).length > 0) {
+        whereClause.user = userWhere;
+    }
+
+    if (month && year) {
+        const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+        const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59, 999);
+        whereClause.startedAt = {
+            gte: startDate,
+            lte: endDate
+        };
+    }
+
+    const enrollments = await prisma.userCourse.findMany({
+        where: whereClause,
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    departmentRef: {
+                        select: { name: true }
+                    },
+                    tier: {
+                        select: { name: true }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            startedAt: 'desc'
+        }
+    });
+
+    const userIds = enrollments.map(e => e.user.id);
+    const quizAttemptsContext = await prisma.quizAttempt.findMany({
+        where: {
+            userId: { in: userIds },
+            lesson: { courseId }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+
+    const quizMap = {};
+    quizAttemptsContext.forEach(attempt => {
+        if (!quizMap[attempt.userId]) {
+            quizMap[attempt.userId] = attempt;
+        }
+    });
+
+    return enrollments.map(enrollment => ({
+        id: enrollment.id,
+        user: {
+            id: enrollment.user.id,
+            name: enrollment.user.name,
+            department: enrollment.user.departmentRef?.name || '-',
+            tier: enrollment.user.tier?.name || '-'
+        },
+        status: enrollment.status,
+        progressPercent: enrollment.progressPercent,
+        startedAt: enrollment.startedAt,
+        completedAt: enrollment.completedAt,
+        quizScore: quizMap[enrollment.user.id]?.score ?? null,
+        quizPassed: quizMap[enrollment.user.id]?.status === 'PASSED'
+    }));
+};
+
 const deleteCourse = async (id) => prisma.course.delete({ where: { id } });
 
 // ANNOUNCEMENTS
@@ -1538,6 +1631,8 @@ module.exports = {
     createCourse,
     updateCourse,
     republishCourse,
+    archiveCourse,
+    getCourseHistory,
     deleteCourse,
     getAdminAnnouncements,
     createAnnouncement,

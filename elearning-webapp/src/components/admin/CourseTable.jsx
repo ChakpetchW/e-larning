@@ -1,8 +1,10 @@
-import React from 'react';
-import { RotateCcw, Edit, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { RotateCcw, Edit, Trash2, History, Archive } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
+import AdminActionMenu from './AdminActionMenu';
 
-const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish }) => {
+const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHistory, onArchive }) => {
+  const [openDropdownId, setOpenDropdownId] = useState(null);
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
@@ -70,33 +72,50 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish }) => {
                 )}
               </td>
               <td className="p-4 text-right">
-                <div className="flex justify-end gap-2">
-                  {course.isArchived && (
-                    <button
-                      type="button"
-                      onClick={() => onRepublish(course.id)}
-                      className="rounded p-1.5 text-emerald-600 hover:bg-emerald-50"
-                      title="Republish"
-                    >
-                      <RotateCcw size={16} />
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => onEdit(course)}
-                    className="rounded p-1.5 text-blue-600 hover:bg-blue-50"
-                    title="Edit"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(course.id)}
-                    className="rounded p-1.5 text-danger hover:bg-red-50"
-                    title="Delete"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                <div className="flex justify-end">
+                  <AdminActionMenu
+                    isOpen={openDropdownId === course.id}
+                    onToggle={() => setOpenDropdownId(openDropdownId === course.id ? null : course.id)}
+                    actions={[
+                      {
+                        icon: History,
+                        label: 'ประวัติการเข้าเรียน',
+                        onClick: () => onViewHistory(course),
+                        className: 'text-slate-600 hover:bg-blue-50 hover:text-blue-600',
+                        iconClassName: 'bg-blue-50 text-blue-500 group-hover:bg-blue-100',
+                      },
+                      {
+                        icon: Edit,
+                        label: 'แก้ไขคอร์สเรียน',
+                        onClick: () => onEdit(course),
+                        className: 'text-slate-600 hover:bg-slate-50 hover:text-primary',
+                        iconClassName: 'bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary',
+                      },
+                      {
+                        hidden: course.isArchived,
+                        icon: Archive,
+                        label: 'เก็บเข้าคลัง',
+                        onClick: () => onArchive(course.id),
+                        className: 'text-slate-600 hover:bg-amber-50 hover:text-amber-600',
+                        iconClassName: 'bg-amber-50 text-amber-500 group-hover:bg-amber-100',
+                      },
+                      {
+                        hidden: !course.isArchived,
+                        icon: RotateCcw,
+                        label: 'นำกลับมาใช้งาน',
+                        onClick: () => onRepublish(course.id),
+                        className: 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-600',
+                        iconClassName: 'bg-emerald-50 text-emerald-500 group-hover:bg-emerald-100',
+                      },
+                      {
+                        icon: Trash2,
+                        label: 'ลบคอร์สเรียน',
+                        onClick: () => onDelete(course.id),
+                        className: 'text-slate-500 hover:bg-red-50 hover:text-red-600 mt-1 border-t border-slate-100/60 pt-2',
+                        iconClassName: 'bg-red-50 text-red-500 group-hover:bg-red-100',
+                      }
+                    ]}
+                  />
                 </div>
               </td>
             </tr>

@@ -151,6 +151,8 @@ export const adminAPI = {
   createCourse: (data) => api.post('/admin/courses', data),
   updateCourse: (id, data) => api.put(`/admin/courses/${id}`, data),
   republishCourse: (id) => api.put(`/admin/courses/${id}/republish`),
+  archiveCourse: (id) => api.put(`/admin/courses/${id}/archive`),
+  getCourseHistory: (id, params) => api.get(`/admin/courses/${id}/history`, { params }),
   deleteCourse: (id) => api.delete(`/admin/courses/${id}`),
 
   getAnnouncements: () => api.get('/admin/announcements'),

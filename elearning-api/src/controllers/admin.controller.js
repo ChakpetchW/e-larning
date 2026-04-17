@@ -109,6 +109,17 @@ const republishCourse = asyncHandler(async (req, res) => {
   res.json({ success: true, data: course });
 });
 
+const archiveCourse = asyncHandler(async (req, res) => {
+  const course = await AdminService.archiveCourse(req.params.id);
+  res.json({ success: true, data: course });
+});
+
+const getCourseHistory = asyncHandler(async (req, res) => {
+  const history = await AdminService.getCourseHistory(req.params.courseId || req.params.id, req.query);
+  res.json({ success: true, data: history });
+});
+
+
 const deleteCourse = asyncHandler(async (req, res) => {
   await AdminService.deleteCourse(req.params.id);
   res.json({ success: true, message: 'Course deleted' });
@@ -251,6 +262,8 @@ module.exports = {
   createCourse,
   updateCourse,
   republishCourse,
+  archiveCourse,
+  getCourseHistory,
   deleteCourse,
   getAdminAnnouncements,
   createAnnouncement,

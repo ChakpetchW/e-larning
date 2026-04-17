@@ -6,6 +6,7 @@ import { compressImage } from '../../utils/imageUtils';
 import { canEditAdminUsers } from '../../utils/roles';
 import useConfirm from '../../hooks/useConfirm';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
+import AdminActionMenu from '../../components/admin/AdminActionMenu';
 import AdminTable from '../../components/admin/AdminTable';
 import ModalPortal from '../../components/common/ModalPortal';
 import RichTextEditor from '../../components/common/RichTextEditor';
@@ -35,136 +36,7 @@ const getTypeLabel = (type) => {
   if (type === 'pdf' || type === 'document') return 'เอกสาร';
   return 'บทความ';
 };
-
-const ActionMenu = ({ announcement, viewMode, onViewHistory, onEdit, onArchive, onDelete, isOpen, onToggle }) => {
-  const triggerRef = useRef(null);
-  const menuRef = useRef(null);
-  const [coords, setCoords] = useState(null);
-
-  useLayoutEffect(() => {
-    if (isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setCoords({
-        top: rect.bottom + window.scrollY,
-        left: rect.right + window.scrollX,
-      });
-
-      const handleScroll = () => onToggle();
-      const handleClickOutside = (event) => {
-        if (
-          menuRef.current && !menuRef.current.contains(event.target) &&
-          triggerRef.current && !triggerRef.current.contains(event.target)
-        ) {
-          onToggle();
-        }
-      };
-
-      window.addEventListener('scroll', handleScroll, true);
-      document.addEventListener('mousedown', handleClickOutside);
-      
-      return () => {
-        window.removeEventListener('scroll', handleScroll, true);
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    } else {
-      setCoords(null);
-    }
-  }, [isOpen, onToggle]);
-
-  return (
-    <>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggle();
-        }}
-        className={`flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-200 ${
-          isOpen 
-            ? 'bg-slate-900 border-slate-900 shadow-lg text-white scale-90' 
-            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 shadow-sm active:scale-95'
-        }`}
-      >
-        <MoreHorizontal size={18} />
-      </button>
-
-      {isOpen && coords && (
-        <ModalPortal isOpen={isOpen} lockScroll={false}>
-          <div 
-            ref={menuRef}
-            className="fixed z-[9999] w-48 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200"
-            style={{
-              top: `${coords.top + 8}px`,
-              left: `${coords.left - 192}px`,
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                onViewHistory();
-                onToggle();
-              }}
-              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-blue-50 hover:text-blue-600 active:scale-98"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-500 group-hover:bg-blue-100 transition-colors">
-                <History size={15} />
-              </div>
-              <span>ประวัติการเข้าอ่าน</span>
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => {
-                onEdit();
-                onToggle();
-              }}
-              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 hover:text-primary active:scale-98"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                <Edit3 size={15} />
-              </div>
-              <span>แก้ไขประกาศ</span>
-            </button>
-
-            {viewMode === ENTITY_VIEW_STATUS.ACTIVE && (
-              <button
-                type="button"
-                onClick={() => {
-                  onArchive();
-                  onToggle();
-                }}
-                className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-amber-50 hover:text-amber-600 active:scale-98"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-500 group-hover:bg-amber-100 transition-colors">
-                  <Archive size={15} />
-                </div>
-                <span>เก็บเข้าคลัง</span>
-              </button>
-            )}
-
-            <div className="my-1.5 h-px bg-slate-100/80 mx-2" />
-            
-            <button
-              type="button"
-              onClick={() => {
-                onDelete();
-                onToggle();
-              }}
-              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-500 transition-all hover:bg-red-50 hover:text-red-600 active:scale-98"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-500 group-hover:bg-red-100 transition-colors">
-                <Trash2 size={15} />
-              </div>
-              <span>ลบประกาศ</span>
-            </button>
-          </div>
-        </ModalPortal>
-      )}
-    </>
-  );
-};
+// Using shared AdminActionMenu
 
 const AnnouncementManagement = () => {
   const toast = useToast();
@@ -570,15 +442,40 @@ const AnnouncementManagement = () => {
             </td>
             <td className="p-4">
               <div className="flex justify-end">
-                <ActionMenu
-                  announcement={announcement}
-                  viewMode={viewMode}
+                <AdminActionMenu
                   isOpen={openDropdownId === announcement.id}
                   onToggle={() => setOpenDropdownId(openDropdownId === announcement.id ? null : announcement.id)}
-                  onViewHistory={() => handleViewHistory(announcement)}
-                  onEdit={() => openEditModal(announcement)}
-                  onArchive={() => handleArchive(announcement)}
-                  onDelete={() => handleDelete(announcement)}
+                  actions={[
+                    {
+                      icon: History,
+                      label: 'ประวัติการเข้าอ่าน',
+                      onClick: () => handleViewHistory(announcement),
+                      className: 'text-slate-600 hover:bg-blue-50 hover:text-blue-600',
+                      iconClassName: 'bg-blue-50 text-blue-500 group-hover:bg-blue-100',
+                    },
+                    {
+                      icon: Edit3,
+                      label: 'แก้ไขประกาศ',
+                      onClick: () => openEditModal(announcement),
+                      className: 'text-slate-600 hover:bg-slate-50 hover:text-primary',
+                      iconClassName: 'bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary',
+                    },
+                    {
+                      hidden: viewMode !== ENTITY_VIEW_STATUS.ACTIVE,
+                      icon: Archive,
+                      label: 'เก็บเข้าคลัง',
+                      onClick: () => handleArchive(announcement),
+                      className: 'text-slate-600 hover:bg-amber-50 hover:text-amber-600',
+                      iconClassName: 'bg-amber-50 text-amber-500 group-hover:bg-amber-100',
+                    },
+                    {
+                      icon: Trash2,
+                      label: 'ลบประกาศ',
+                      onClick: () => handleDelete(announcement),
+                      className: 'text-slate-500 hover:bg-red-50 hover:text-red-600 mt-1 border-t border-slate-100/60 pt-2',
+                      iconClassName: 'bg-red-50 text-red-500 group-hover:bg-red-100',
+                    }
+                  ]}
                 />
               </div>
             </td>
