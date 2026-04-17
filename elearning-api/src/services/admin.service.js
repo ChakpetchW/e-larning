@@ -796,7 +796,7 @@ const getAdvancedAnalytics = async (authUser) => {
     // In a real production scale, we might pre-aggregate this into a Performance table.
     const skillGapStats = await prisma.$queryRaw`
         SELECT 
-            c.type,
+            c."type",
             AVG(sub.max_score) as average_mastery
         FROM "Category" c
         JOIN "Course" co ON co."categoryId" = c.id
@@ -807,7 +807,7 @@ const getAdvancedAnalytics = async (authUser) => {
         ) sub ON sub."lessonId" IN (
             SELECT id FROM "Lesson" l WHERE l."courseId" = co.id
         )
-        GROUP BY c.type
+        GROUP BY c."type"
     `;
 
     // 2. Department Benchmarking
@@ -826,10 +826,10 @@ const getAdvancedAnalytics = async (authUser) => {
     const roiTrend = await prisma.$queryRaw`
         SELECT 
             TO_CHAR(pl."createdAt", 'Mon YYYY') as month,
-            SUM(CASE WHEN pl.points > 0 THEN pl.points ELSE 0 END) as points,
+            SUM(CASE WHEN pl."points" > 0 THEN pl."points" ELSE 0 END) as points,
             (SELECT COUNT(*) FROM "UserCourse" WHERE status = 'COMPLETED' AND TO_CHAR("completedAt", 'Mon YYYY') = TO_CHAR(pl."createdAt", 'Mon YYYY')) as completions
         FROM "PointsLedger" pl
-        GROUP BY month
+        GROUP BY TO_CHAR(pl."createdAt", 'Mon YYYY')
         ORDER BY MIN(pl."createdAt") DESC
         LIMIT 6
     `;
