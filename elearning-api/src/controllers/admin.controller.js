@@ -146,6 +146,11 @@ const archiveAnnouncement = asyncHandler(async (req, res) => {
   res.json({ success: true, data: result });
 });
 
+const republishAnnouncement = asyncHandler(async (req, res) => {
+  const result = await AdminService.republishAnnouncement(req.params.id, req.user);
+  res.json({ success: true, data: result });
+});
+
 const getAnnouncementHistory = asyncHandler(async (req, res) => {
   const history = await AdminService.getAnnouncementHistory(req.params.id, req.user);
   res.json({ success: true, data: history });
@@ -270,6 +275,7 @@ module.exports = {
   updateAnnouncement,
   deleteAnnouncement,
   archiveAnnouncement,
+  republishAnnouncement,
   getAnnouncementHistory,
   getCategories,
   createCategory,

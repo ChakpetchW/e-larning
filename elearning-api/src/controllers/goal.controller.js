@@ -1,4 +1,4 @@
-﻿const goalService = require('../services/goal.service');
+const goalService = require('../services/goal.service');
 const asyncHandler = require('../middleware/async');
 
 const createGoal = asyncHandler(async (req, res) => {
@@ -35,6 +35,14 @@ const archiveGoal = asyncHandler(async (req, res) => {
     });
 });
 
+const republishGoal = asyncHandler(async (req, res) => {
+    await goalService.republishGoal(req.params.id, req.user);
+    res.json({
+        success: true,
+        message: 'Goal recovered successfully'
+    });
+});
+
 const deleteGoal = asyncHandler(async (req, res) => {
     await goalService.deleteGoal(req.params.id, req.user);
     res.json({
@@ -56,6 +64,7 @@ module.exports = {
     getGoals,
     getGoalDetails,
     archiveGoal,
+    republishGoal,
     deleteGoal,
     getGoalReport
 };

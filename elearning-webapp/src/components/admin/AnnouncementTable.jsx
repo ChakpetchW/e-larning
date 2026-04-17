@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { History, Edit3, Archive, Trash2 } from 'lucide-react';
+import { History, Edit3, Archive, Trash2, RotateCcw } from 'lucide-react';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminTable from './AdminTable';
@@ -20,6 +20,7 @@ const AnnouncementTable = ({
   onViewHistory,
   onEdit,
   onArchive,
+  onRepublish,
   onDelete
 }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -50,7 +51,7 @@ const AnnouncementTable = ({
             {announcement.expiredAt ? formatThaiDateTime(announcement.expiredAt, true) : '-'}
           </td>
           <td className="p-4">
-            <div className="flex justify-end">
+            <div className="flex justify-center">
               <AdminActionMenu
                 isOpen={openDropdownId === announcement.id}
                 onToggle={() => setOpenDropdownId(openDropdownId === announcement.id ? null : announcement.id)}
@@ -76,6 +77,14 @@ const AnnouncementTable = ({
                     onClick: () => onArchive(announcement),
                     className: 'text-slate-600 hover:bg-amber-50 hover:text-amber-600',
                     iconClassName: 'bg-amber-50 text-amber-500 group-hover:bg-amber-100',
+                  },
+                  {
+                    hidden: viewMode !== ENTITY_VIEW_STATUS.ARCHIVED,
+                    icon: RotateCcw,
+                    label: 'นำกลับมาใช้งาน',
+                    onClick: () => onRepublish(announcement),
+                    className: 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-600',
+                    iconClassName: 'bg-emerald-50 text-emerald-500 group-hover:bg-emerald-100',
                   },
                   {
                     icon: Trash2,

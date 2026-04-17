@@ -126,6 +126,17 @@ const GoalManagement = () => {
         }
     };
 
+    const handleRepublishGoal = async (id) => {
+        try {
+            await adminAPI.republishGoal(id);
+            toast.success('นำเป้าหมายกลับมาใช้งานสำเร็จ');
+            fetchData();
+        } catch (err) {
+            console.error('Failed to republish goal', err);
+            toast.error('ไม่สามารถนำเป้าหมายกลับมาใช้งานได้');
+        }
+    };
+
     const handleViewReport = async (goal) => {
         setReportGoal(goal);
         setReportLoading(true);
@@ -174,7 +185,7 @@ const GoalManagement = () => {
         { label: 'รายละเอียด' },
         { label: 'วันหมดอายุ' },
         { label: 'ขอบเขต' },
-        { label: 'จัดการ', className: 'text-right' }
+        { label: 'จัดการ', className: 'text-center' }
     ];
 
     if (loading) {
@@ -213,6 +224,7 @@ const GoalManagement = () => {
                 onViewReport={handleViewReport}
                 onDeleteGoal={handleDeleteGoal}
                 onArchiveGoal={handleArchiveGoal}
+                onRepublishGoal={handleRepublishGoal}
             />
 
             <CreateGoalModal 

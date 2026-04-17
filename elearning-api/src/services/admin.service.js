@@ -1570,6 +1570,18 @@ const archiveAnnouncement = async (id, authUser) => {
     });
 };
 
+const republishAnnouncement = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const where = buildAnnouncementWhereForActor(actor, { id });
+
+    return prisma.announcement.update({
+        where: { id },
+        data: {
+            expiredAt: null
+        }
+    });
+};
+
 const getAnnouncementHistory = async (id, authUser) => {
     const actor = await getActorContext(authUser);
     const where = buildAnnouncementWhereForActor(actor, { id });
@@ -1639,6 +1651,7 @@ module.exports = {
     updateAnnouncement,
     deleteAnnouncement,
     archiveAnnouncement,
+    republishAnnouncement,
     getAnnouncementHistory,
     getCategories,
     createCategory,

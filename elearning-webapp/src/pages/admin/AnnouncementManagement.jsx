@@ -226,6 +226,26 @@ const AnnouncementManagement = () => {
     }
   };
 
+  const handleRepublish = async (announcement) => {
+    const ok = await confirm({
+      title: 'ต้องการนำประกาศกลับมาใช้งาน?',
+      message: `ประกาศ "${announcement.title}" จะถูกย้ายกลับไปยังแท็บ "ประกาศที่ยังใช้งาน" คุณต้องการดำเนินการต่อใช่หรือไม่?`,
+      confirmLabel: 'นำกลับมาใช้งาน',
+      variant: 'primary',
+    });
+
+    if (!ok) return;
+
+    try {
+      await adminAPI.republishAnnouncement(announcement.id);
+      toast.success('นำประกาศกลับมาใช้งานเรียบร้อย');
+      await fetchData();
+    } catch (error) {
+      console.error('Republish announcement error:', error);
+      toast.error('ไม่สามารถนำประกาศกลับมาใช้งานได้');
+    }
+  };
+
   const handleDelete = async (announcement) => {
     const ok = await confirm({
       title: 'ยืนยันการลบประกาศ',
@@ -300,7 +320,7 @@ const AnnouncementManagement = () => {
     { label: 'แผนก', className: 'min-w-[140px]' },
     { label: 'ชนิดหน้า', className: 'min-w-[120px]' },
     { label: 'หมดอายุ', className: 'min-w-[180px]' },
-    { label: 'จัดการ', className: 'w-[100px] text-right' },
+    { label: 'จัดการ', className: 'w-[100px] text-center' },
   ];
 
   return (
@@ -349,6 +369,7 @@ const AnnouncementManagement = () => {
           onViewHistory={handleViewHistory}
           onEdit={openEditModal}
           onArchive={handleArchive}
+          onRepublish={handleRepublish}
           onDelete={handleDelete}
         />
       </div>

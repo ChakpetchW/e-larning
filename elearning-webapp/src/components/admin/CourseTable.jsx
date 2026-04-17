@@ -29,7 +29,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
             <th className="p-4 font-medium">ชื่อคอร์ส</th>
             <th className="p-4 font-medium">หมวดหมู่</th>
             <th className="p-4 font-medium">สิทธิ์การเห็น</th>
-            <th className="p-4 font-medium text-right">จัดการ</th>
+            <th className="p-4 font-medium text-center">จัดการ</th>
           </tr>
         </thead>
         <tbody>
@@ -71,8 +71,8 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
                   </div>
                 )}
               </td>
-              <td className="p-4 text-right">
-                <div className="flex justify-end">
+              <td className="p-4 text-center">
+                <div className="flex justify-center">
                   <AdminActionMenu
                     isOpen={openDropdownId === course.id}
                     onToggle={() => setOpenDropdownId(openDropdownId === course.id ? null : course.id)}

@@ -35,6 +35,7 @@ router.delete('/courses/:id', verifySuperAdmin, adminController.deleteCourse);
 router.get('/announcements', adminController.getAdminAnnouncements);
 router.post('/announcements', adminController.createAnnouncement);
 router.get('/announcements/:id/history', adminController.getAnnouncementHistory);
+router.put('/announcements/:id/republish', adminController.republishAnnouncement);
 router.put('/announcements/:id/archive', adminController.archiveAnnouncement);
 router.put('/announcements/:id', adminController.updateAnnouncement);
 router.delete('/announcements/:id', adminController.deleteAnnouncement);

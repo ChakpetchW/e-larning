@@ -159,6 +159,7 @@ export const adminAPI = {
   createAnnouncement: (data) => api.post('/admin/announcements', data),
   getAnnouncementHistory: (id) => api.get(`/admin/announcements/${id}/history`),
   archiveAnnouncement: (id) => api.put(`/admin/announcements/${id}/archive`),
+  republishAnnouncement: (id) => api.put(`/admin/announcements/${id}/republish`),
   updateAnnouncement: (id, data) => api.put(`/admin/announcements/${id}`, data),
   deleteAnnouncement: (id) => api.delete(`/admin/announcements/${id}`),
 
@@ -202,6 +203,7 @@ export const adminAPI = {
   getGoals: () => api.get('/goals?includeExpired=true'),
   createGoal: (data) => api.post('/goals', data),
   archiveGoal: (id) => api.put(`/goals/${id}/archive`),
+  republishGoal: (id) => api.put(`/goals/${id}/republish`),
   deleteGoal: (id) => api.delete(`/goals/${id}`),
   getGoalReport: (id) => api.get(`/goals/${id}/report`),
 

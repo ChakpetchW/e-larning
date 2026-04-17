@@ -4,7 +4,7 @@ import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminTable from './AdminTable';
 import AdminActionMenu from './AdminActionMenu';
 
-const GoalList = ({ goals, columns, onViewReport, onDeleteGoal, onArchiveGoal }) => {
+const GoalList = ({ goals, columns, onViewReport, onDeleteGoal, onArchiveGoal, onRepublishGoal }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   return (
     <div className="card">
@@ -51,7 +51,8 @@ const GoalList = ({ goals, columns, onViewReport, onDeleteGoal, onArchiveGoal })
                 {goal.scope === 'GLOBAL' ? 'ทั้งองค์กร' : `แผนก ${goal.department?.name || 'ของคุณ'}`}
               </span>
             </td>
-            <td className="p-4 text-right">
+            <td className="p-4 text-center">
+              <div className="flex justify-center">
                 <AdminActionMenu
                   isOpen={openDropdownId === goal.id}
                   onToggle={() => setOpenDropdownId(openDropdownId === goal.id ? null : goal.id)}
@@ -72,15 +73,24 @@ const GoalList = ({ goals, columns, onViewReport, onDeleteGoal, onArchiveGoal })
                       iconClassName: 'bg-amber-50 text-amber-500 group-hover:bg-amber-100',
                     },
                     {
+                      hidden: goal.status !== 'ARCHIVED',
+                      icon: RotateCcw,
+                      label: 'นำกลับมาใช้งาน',
+                      onClick: () => onRepublishGoal(goal.id),
+                      className: 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-600',
+                      iconClassName: 'bg-emerald-50 text-emerald-500 group-hover:bg-emerald-100',
+                    },
+                    {
                       icon: Trash2,
                       label: 'ลบเป้าหมาย',
                       onClick: () => onDeleteGoal(goal.id),
                       className: 'text-slate-500 hover:bg-red-50 hover:text-red-600 mt-1 border-t border-slate-100/60 pt-2',
                       iconClassName: 'bg-red-50 text-red-500 group-hover:bg-red-100',
                     }
-                  ]}
-                />
-            </td>
+                ]}
+              />
+            </div>
+          </td>
           </tr>
         )}
       />
