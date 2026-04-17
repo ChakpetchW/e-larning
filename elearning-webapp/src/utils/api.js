@@ -96,7 +96,9 @@ export const authAPI = {
 
 export const userAPI = {
   getCourses: () => api.get('/user/courses'),
+  getAnnouncements: () => api.get('/user/announcements'),
   getCourseDetails: (id) => api.get(`/user/courses/${id}`),
+  getAnnouncementDetails: (id) => api.get(`/user/announcements/${id}`),
   enrollCourse: (id) => api.post(`/user/courses/${id}/enroll`),
   updateProgress: (lessonId, progress) => api.put(`/user/lessons/${lessonId}/progress`, { progress }),
   getPoints: () => api.get('/user/points'),
@@ -104,8 +106,11 @@ export const userAPI = {
   getCategories: () => api.get('/user/categories'),
   requestRedeem: (rewardId) => api.post(`/user/redeem/${rewardId}`),
   submitQuiz: (lessonId, data) => api.post(`/user/lessons/${lessonId}/quiz`, data),
+  submitAnnouncementQuiz: (announcementId, data) => api.post(`/user/announcements/${announcementId}/quiz`, data),
   getLessonQuestions: (lessonId) => api.get(`/user/lessons/${lessonId}/questions`),
+  getAnnouncementQuestions: (announcementId) => api.get(`/user/announcements/${announcementId}/questions`),
   getLessonDocumentAccess: (lessonId) => api.get(`/user/lessons/${lessonId}/document-access`),
+  getAnnouncementDocumentAccess: (announcementId) => api.get(`/user/announcements/${announcementId}/document-access`),
   updateProfile: (data) => api.put('/user/profile', data),
   getPointsHistory: () => api.get('/user/points'), // Alias for clarity
   uploadFile: (file) => {
@@ -147,6 +152,11 @@ export const adminAPI = {
   updateCourse: (id, data) => api.put(`/admin/courses/${id}`, data),
   republishCourse: (id) => api.put(`/admin/courses/${id}/republish`),
   deleteCourse: (id) => api.delete(`/admin/courses/${id}`),
+
+  getAnnouncements: () => api.get('/admin/announcements'),
+  createAnnouncement: (data) => api.post('/admin/announcements', data),
+  updateAnnouncement: (id, data) => api.put(`/admin/announcements/${id}`, data),
+  deleteAnnouncement: (id) => api.delete(`/admin/announcements/${id}`),
 
   getCategories: () => api.get('/admin/categories'),
   createCategory: (data) => api.post('/admin/categories', data),

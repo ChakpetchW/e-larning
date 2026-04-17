@@ -31,6 +31,7 @@ model User {
   pointsLedger  PointsLedger[]
   redeems       RedeemRequest[]
   QuizAttempt   QuizAttempt[]
+  createdAnnouncements Announcement[] @relation("AnnouncementCreator")
 }
 
 model Course {
@@ -69,6 +70,28 @@ model Course {
   learningGoals    GoalCourse[]
 }
 
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  image       String?
+  type        String
+  contentUrl  String?
+  content     String?  @db.Text
+  duration    String?
+  passScore   Int?
+  departmentId String
+  createdById String?
+  status      String   @default("PUBLISHED")
+  expiredAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  creator    User?      @relation("AnnouncementCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  questions  AnnouncementQuestion[]
+}
+
 model Category {
   id        String   @id @default(uuid())
   name      String   @unique
@@ -95,6 +118,7 @@ model Department {
   courseAccess CourseDepartmentAccess[]
   categoryAccess CategoryDepartmentAccess[]
   learningGoals  LearningGoal[]
+  announcements  Announcement[]
 }
 
 model Tier {
@@ -204,6 +228,26 @@ model QuizAttempt {
 
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AnnouncementQuestion {
+  id             String @id @default(uuid())
+  announcementId String
+  text           String
+  order          Int    @default(0)
+  points         Int    @default(1)
+
+  announcement Announcement        @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  choices      AnnouncementChoice[]
+}
+
+model AnnouncementChoice {
+  id         String  @id @default(uuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+
+  question AnnouncementQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model UserCourse {

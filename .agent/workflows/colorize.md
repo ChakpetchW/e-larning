@@ -1,4 +1,4 @@
-﻿---
+---
 name: colorize
 description: Add strategic color to features that are too monochromatic or lack visual interest. Makes interfaces more engaging and expressive.
 ---
@@ -44,7 +44,7 @@ Analyze the current state and identify opportunities:
 
 If any of these are unclear from the codebase, STOP and call the notify_user tool to clarify.
 
-**CRITICAL**: More color โ  better. Strategic color beats rainbow vomit every time. Every color should have a purpose.
+**CRITICAL**: More color ≠ better. Strategic color beats rainbow vomit every time. Every color should have a purpose.
 
 ## Plan Color Strategy
 
@@ -132,8 +132,8 @@ Ensure color addition improves rather than overwhelms:
 **NEVER**:
 - Use every color in the rainbow (choose 2-4 colors beyond neutrals)
 - Apply color randomly without semantic meaning
-- Put gray text on colored backgroundsโ€”it looks washed out; use a darker shade of the background color or transparency instead
-- Use pure gray for neutralsโ€”add subtle color tint (warm or cool) for sophistication
+- Put gray text on colored backgrounds—it looks washed out; use a darker shade of the background color or transparency instead
+- Use pure gray for neutrals—add subtle color tint (warm or cool) for sophistication
 - Use pure black (`#000`) or pure white (`#fff`) for large areas
 - Violate WCAG contrast requirements
 - Use color as the only indicator (accessibility issue)

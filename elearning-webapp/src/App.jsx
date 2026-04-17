@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { canAccessAdminPanel } from './utils/roles';
+import { canAccessAdminPanel, canEditAdminUsers } from './utils/roles';
 
 // Layouts
 const UserLayout = lazy(() => import('./components/layout/UserLayout'));
@@ -15,6 +15,7 @@ const CourseList = lazy(() => import('./pages/user/CourseList'));
 const CompletedCourses = lazy(() => import('./pages/user/CompletedCourses'));
 const CourseDetail = lazy(() => import('./pages/user/CourseDetail'));
 const LessonPlayer = lazy(() => import('./pages/user/LessonPlayer'));
+const AnnouncementPlayer = lazy(() => import('./pages/user/AnnouncementPlayer'));
 const Rewards = lazy(() => import('./pages/user/Rewards'));
 const PointsHistory = lazy(() => import('./pages/user/PointsHistory'));
 const Profile = lazy(() => import('./pages/user/Profile'));
@@ -24,6 +25,7 @@ const GoalDetail = lazy(() => import('./pages/user/GoalDetail'));
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminCourses = lazy(() => import('./pages/admin/CourseManagement'));
+const AdminAnnouncements = lazy(() => import('./pages/admin/AnnouncementManagement'));
 const AdminUsers = lazy(() => import('./pages/admin/UserManagement'));
 const AdminRewards = lazy(() => import('./pages/admin/RewardsManagement'));
 const AdminRedeems = lazy(() => import('./pages/admin/RedeemRequests'));
@@ -47,6 +49,10 @@ import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
 
 function App() {
+  const currentUser = typeof window !== 'undefined' && localStorage.getItem('user')
+    ? JSON.parse(localStorage.getItem('user'))
+    : null;
+
   return (
     <LanguageProvider>
       <ToastProvider>
@@ -70,6 +76,7 @@ function App() {
             <Route index element={<Navigate to="home" replace />} />
             <Route path="home" element={<Home />} />
             <Route path="courses" element={<CourseList />} />
+            <Route path="announcements/:id" element={<AnnouncementPlayer />} />
             <Route path="ongoing" element={<OngoingCourses />} />
             <Route path="completed" element={<CompletedCourses />} />
             <Route path="courses/:id" element={<CourseDetail />} />
@@ -86,7 +93,8 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="courses" element={<AdminCourses />} />
+            <Route path="courses" element={canEditAdminUsers(currentUser) ? <AdminCourses /> : <Navigate to="/admin/announcements" replace />} />
+            <Route path="announcements" element={<AdminAnnouncements />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="rewards" element={<AdminRewards />} />
             <Route path="redeems" element={<AdminRedeems />} />

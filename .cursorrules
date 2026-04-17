@@ -24,7 +24,7 @@
         - **Left Side**: Always place the **Progress Bar** and **Percentage** here (left-aligned).
         - **Right Side**: Always place **Points** and **"แต้มรวม"** label here (right-aligned).
 
-- **Standard Clean Code & Architecture Rules (v1.7.0)**:
+- **Standard Clean Code & Architecture Rules (v1.8.3)**:
     - **No Blocking UI**: NEVER use `window.alert()` or `window.confirm()`. Use `useToast()` for notifications and `useConfirm()` for destructive actions.
     - **Auth & Permissions**: All backend services MUST use `authHelpers.getActorContext(prisma, authUser)` for actor resolution and `authHelpers.buildVisibilityWhere` for Prisma filtering. Never implement duplicate role-checking logic in local services.
     - **Visibility Scoping**: When fetching Courses or Categories, always apply the scoping logic from `auth.helpers.js` to ensure users only see content allowed for their Department or Tier.

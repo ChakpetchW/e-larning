@@ -1,4 +1,4 @@
-﻿---
+---
 name: simplify
 description: Strip designs to their essence by removing unnecessary complexity. Great design is simple, powerful, and clean.
 ---
@@ -72,7 +72,7 @@ Systematically remove complexity across these dimensions:
 - **Reduce color palette**: Use 1-2 colors plus neutrals, not 5-7 colors
 - **Limit typography**: One font family, 3-4 sizes maximum, 2-3 weights
 - **Remove decorations**: Eliminate borders, shadows, backgrounds that don't serve hierarchy or function
-- **Flatten structure**: Reduce nesting, remove unnecessary containersโ€”never nest cards inside cards
+- **Flatten structure**: Reduce nesting, remove unnecessary containers—never nest cards inside cards
 - **Remove unnecessary cards**: Cards aren't needed for basic layout; use spacing and alignment instead
 - **Consistent spacing**: Use one spacing scale, remove arbitrary gaps
 
@@ -105,9 +105,9 @@ Systematically remove complexity across these dimensions:
 - **Reduce variants**: Does that component need 12 variations, or can 3 cover 90% of cases?
 
 **NEVER**:
-- Remove necessary functionality (simplicity โ  feature-less)
+- Remove necessary functionality (simplicity ≠ feature-less)
 - Sacrifice accessibility for simplicity (clear labels and ARIA still required)
-- Make things so simple they're unclear (mystery โ  minimalism)
+- Make things so simple they're unclear (mystery ≠ minimalism)
 - Remove information users need to make decisions
 - Eliminate hierarchy completely (some things should stand out)
 - Oversimplify complex domains (match complexity to actual task complexity)
@@ -129,4 +129,4 @@ If you removed features or options:
 - Consider if they need alternative access points
 - Note any user feedback to monitor
 
-Remember: You have great taste and judgment. Simplification is an act of confidence - knowing what to keep and courage to remove the rest. As Antoine de Saint-Exupรฉry said: "Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away."
+Remember: You have great taste and judgment. Simplification is an act of confidence - knowing what to keep and courage to remove the rest. As Antoine de Saint-Exupéry said: "Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away."

@@ -1,4 +1,4 @@
-# 📝 Next Edit Tasks (v1.0.9+)
+# 📝 Next Edit Tasks (v1.8.3)
 
 Track here all reported bugs and UI/UX improvements to be addressed in the next iteration.
 

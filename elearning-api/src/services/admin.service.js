@@ -1,5 +1,5 @@
 const prisma = require('../utils/prisma');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const authHelpers = require('../utils/auth.helpers');
 const { USER_ROLES } = require('../utils/constants/roles');
 const { ENTITY_STATUS, ENROLLMENT_STATUS, REDEEM_STATUS } = require('../utils/constants/statuses');
@@ -22,6 +22,25 @@ const courseInclude = {
         select: {
             enrollments: true,
             lessons: true
+        }
+    }
+};
+
+const announcementInclude = {
+    department: true,
+    creator: {
+        select: {
+            id: true,
+            name: true,
+            email: true
+        }
+    },
+    questions: {
+        include: {
+            choices: true
+        },
+        orderBy: {
+            order: 'asc'
         }
     }
 };
@@ -155,6 +174,19 @@ const mapCategoryRecord = (category) => {
         visibleTiers,
         visibleTierIds: visibleTiers.map((tier) => tier.id),
         type: rest.type || 'FUNCTION'
+    };
+};
+
+const mapAnnouncementRecord = (announcement) => {
+    const { creator, questions, ...rest } = announcement;
+    const isArchived = authHelpers.isExpiredAt(rest.expiredAt);
+
+    return {
+        ...rest,
+        creator,
+        questions: questions || [],
+        questionCount: Array.isArray(questions) ? questions.length : 0,
+        isArchived
     };
 };
 
@@ -485,6 +517,59 @@ const saveCategoryVisibility = async (tx, categoryId, visibleToAll, visibleDepar
         });
     }
 };
+
+const buildAnnouncementQuestionsCreate = (questions = []) => questions.map((question, index) => ({
+    text: question.text,
+    order: index,
+    points: parseInteger(question.points, 1),
+    choices: {
+        create: (question.choices || []).map((choice) => ({
+            text: choice.text,
+            isCorrect: !!choice.isCorrect
+        }))
+    }
+}));
+
+const buildAnnouncementMutationPayload = async (tx, actor, input) => {
+    const requestedDepartmentId = normalizeNullableId(input.departmentId);
+    const departmentId = actor.isManager ? actor.departmentId : requestedDepartmentId;
+
+    if (!departmentId) {
+        throw new Error('Department is required');
+    }
+
+    await ensureReferenceName(tx, 'department', departmentId);
+
+    const type = String(input.type || 'article').trim().toLowerCase();
+    const questions = Array.isArray(input.questions) ? input.questions : [];
+    const formattedQuestions = type === 'quiz' ? buildAnnouncementQuestionsCreate(questions) : [];
+
+    return {
+        data: {
+            title: sanitizeName(input.title, 'Announcement'),
+            description: input.description || null,
+            image: input.image || null,
+            type,
+            contentUrl: input.contentUrl || null,
+            content: input.content || null,
+            duration: input.duration ? String(input.duration) : null,
+            passScore: type === 'quiz' ? parseInteger(input.passScore, 60) : null,
+            departmentId,
+            status: input.status || ENTITY_STATUS.PUBLISHED,
+            expiredAt: parseOptionalDate(input.expiredAt, 'Announcement expiration date')
+        },
+        formattedQuestions
+    };
+};
+
+const buildAnnouncementWhereForActor = (actor, extraWhere = {}) => (
+    actor.isManager
+        ? {
+            departmentId: actor.departmentId,
+            ...extraWhere
+        }
+        : extraWhere
+);
 
 // DASHBOARD
 const getDashboardStats = async (authUser) => {
@@ -971,6 +1056,95 @@ const republishCourse = async (id) => {
 
 const deleteCourse = async (id) => prisma.course.delete({ where: { id } });
 
+// ANNOUNCEMENTS
+const getAdminAnnouncements = async (authUser) => {
+    const actor = await getActorContext(authUser);
+    const announcements = await prisma.announcement.findMany({
+        where: buildAnnouncementWhereForActor(actor),
+        include: announcementInclude,
+        orderBy: [
+            { createdAt: 'desc' }
+        ]
+    });
+
+    return announcements.map(mapAnnouncementRecord);
+};
+
+const createAnnouncement = async (authUser, input) => prisma.$transaction(async (tx) => {
+    const actor = await getActorContext(authUser);
+    const { data, formattedQuestions } = await buildAnnouncementMutationPayload(tx, actor, input);
+
+    const announcement = await tx.announcement.create({
+        data: {
+            ...data,
+            createdById: actor.id,
+            questions: formattedQuestions.length > 0
+                ? {
+                    create: formattedQuestions
+                }
+                : undefined
+        },
+        include: announcementInclude
+    });
+
+    return mapAnnouncementRecord(announcement);
+}, {
+    maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
+    timeout: TRANSACTION_TIMEOUTS.LONG_RUNNING_TIMEOUT
+});
+
+const updateAnnouncement = async (id, authUser, input) => prisma.$transaction(async (tx) => {
+    const actor = await getActorContext(authUser);
+    const existingAnnouncement = await tx.announcement.findFirst({
+        where: buildAnnouncementWhereForActor(actor, { id }),
+        select: { id: true }
+    });
+
+    if (!existingAnnouncement) {
+        throw new Error('Announcement not found');
+    }
+
+    const { data, formattedQuestions } = await buildAnnouncementMutationPayload(tx, actor, input);
+
+    await tx.announcementQuestion.deleteMany({
+        where: { announcementId: id }
+    });
+
+    const announcement = await tx.announcement.update({
+        where: { id },
+        data: {
+            ...data,
+            questions: formattedQuestions.length > 0
+                ? {
+                    create: formattedQuestions
+                }
+                : undefined
+        },
+        include: announcementInclude
+    });
+
+    return mapAnnouncementRecord(announcement);
+}, {
+    maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
+    timeout: TRANSACTION_TIMEOUTS.LONG_RUNNING_TIMEOUT
+});
+
+const deleteAnnouncement = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const announcement = await prisma.announcement.findFirst({
+        where: buildAnnouncementWhereForActor(actor, { id }),
+        select: { id: true }
+    });
+
+    if (!announcement) {
+        throw new Error('Announcement not found');
+    }
+
+    return prisma.announcement.delete({
+        where: { id }
+    });
+};
+
 // CATEGORIES
 const getCategories = async () => {
     const categories = await prisma.category.findMany({
@@ -1312,6 +1486,10 @@ module.exports = {
     updateCourse,
     republishCourse,
     deleteCourse,
+    getAdminAnnouncements,
+    createAnnouncement,
+    updateAnnouncement,
+    deleteAnnouncement,
     getCategories,
     createCategory,
     updateCategory,

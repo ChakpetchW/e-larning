@@ -114,6 +114,27 @@ const deleteCourse = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Course deleted' });
 });
 
+// ANNOUNCEMENTS
+const getAdminAnnouncements = asyncHandler(async (req, res) => {
+  const announcements = await AdminService.getAdminAnnouncements(req.user);
+  res.json({ success: true, data: announcements });
+});
+
+const createAnnouncement = asyncHandler(async (req, res) => {
+  const announcement = await AdminService.createAnnouncement(req.user, req.body);
+  res.status(201).json({ success: true, data: announcement });
+});
+
+const updateAnnouncement = asyncHandler(async (req, res) => {
+  const announcement = await AdminService.updateAnnouncement(req.params.id, req.user, req.body);
+  res.json({ success: true, data: announcement });
+});
+
+const deleteAnnouncement = asyncHandler(async (req, res) => {
+  await AdminService.deleteAnnouncement(req.params.id, req.user);
+  res.json({ success: true, message: 'Announcement deleted' });
+});
+
 // CATEGORIES
 const getCategories = asyncHandler(async (req, res) => {
   const categories = await AdminService.getCategories();
@@ -221,6 +242,10 @@ module.exports = {
   updateCourse,
   republishCourse,
   deleteCourse,
+  getAdminAnnouncements,
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
   getCategories,
   createCategory,
   updateCategory,

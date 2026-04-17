@@ -5,6 +5,7 @@ import { userAPI } from '../../utils/api';
 import { filterVisibleGoals, filterVisibleTimedItems, formatThaiFullDate } from '../../utils/dateUtils';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
 import CourseCard from '../../components/common/CourseCard';
+import AnnouncementCard from '../../components/common/AnnouncementCard';
 import SectionHeader from '../../components/common/SectionHeader';
 import CategoryPills from '../../components/common/CategoryPills';
 
@@ -18,6 +19,7 @@ import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 const Home = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -32,18 +34,21 @@ const Home = () => {
         const userData = JSON.parse(localStorage.getItem('user'));
         setUser(userData);
         
-        const [courseRes, catRes, pointsRes, goalsRes] = await Promise.all([
+        const [courseRes, catRes, pointsRes, goalsRes, announcementRes] = await Promise.all([
           userAPI.getCourses(),
           userAPI.getCategories(),
           userAPI.getPoints(),
-          userAPI.getGoals()
+          userAPI.getGoals(),
+          userAPI.getAnnouncements(),
         ]);
         const referenceDate = new Date();
         const visibleCourses = filterVisibleTimedItems(courseRes?.data, referenceDate);
         const visibleCategories = filterVisibleTimedItems(catRes?.data, referenceDate);
         const visibleGoals = filterVisibleGoals(goalsRes?.data, referenceDate);
+        const visibleAnnouncements = filterVisibleTimedItems(announcementRes?.data, referenceDate);
 
         setCourses(visibleCourses);
+        setAnnouncements(visibleAnnouncements);
         setCategories(visibleCategories);
         setPoints(pointsRes?.data?.balance || 0);
         setActiveGoals(visibleGoals);
@@ -135,6 +140,26 @@ const Home = () => {
         continueCourse={continueCourse}
         onNavigate={navigate}
       />
+
+      {announcements.length > 0 && (
+        <section className="animate-slide-up space-y-5" style={{ animationDelay: '120ms' }}>
+          <div className="flex items-center justify-between px-1 md:px-2">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">Department Announcements</p>
+              <h3 className="mt-1 text-xl md:text-2xl font-bold tracking-tight text-slate-900">ประกาศล่าสุดของแผนกคุณ</h3>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {announcements.map((announcement) => (
+              <AnnouncementCard
+                key={announcement.id}
+                announcement={announcement}
+                onClick={() => navigate(`/user/announcements/${announcement.id}`)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {categories.length > 0 && (
          <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>

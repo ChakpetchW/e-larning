@@ -113,7 +113,12 @@ export const isExpiredAt = (value, referenceDate = new Date()) => {
 export const filterVisibleTimedItems = (items, referenceDate = new Date()) => {
   if (!Array.isArray(items)) return [];
 
-  return items.filter((item) => !item?.isTemporary || !isExpiredAt(item.expiredAt, referenceDate));
+  return items.filter((item) => {
+    if (!item) return false;
+    if (item.isTemporary === true) return !isExpiredAt(item.expiredAt, referenceDate);
+    if (item.isTemporary === false) return true;
+    return !isExpiredAt(item.expiredAt, referenceDate);
+  });
 };
 
 /**
