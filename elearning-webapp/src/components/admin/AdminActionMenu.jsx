@@ -12,13 +12,22 @@ import ModalPortal from '../common/ModalPortal';
 const AdminActionMenu = ({ isOpen, onToggle, actions = [] }) => {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
+  const [side, setSide] = useState('bottom'); // 'top' or 'bottom'
   const [coords, setCoords] = useState(null);
 
   useLayoutEffect(() => {
     if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const menuHeight = 260; // Approximate height for course actions menu
+      const spaceBelow = viewportHeight - rect.bottom;
+      
+      const shouldOpenUp = spaceBelow < menuHeight && rect.top > menuHeight;
+      setSide(shouldOpenUp ? 'top' : 'bottom');
+
       setCoords({
-        top: rect.bottom + window.scrollY,
+        top: rect.top + window.scrollY,
+        bottom: rect.bottom + window.scrollY,
         left: rect.right + window.scrollX,
       });
 
@@ -66,9 +75,12 @@ const AdminActionMenu = ({ isOpen, onToggle, actions = [] }) => {
         <ModalPortal isOpen={isOpen} lockScroll={false}>
           <div 
             ref={menuRef}
-            className="fixed z-[9999] w-52 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200"
+            className={`fixed z-[9999] w-52 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] backdrop-blur-xl animate-in fade-in duration-200 ${
+              side === 'top' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'
+            }`}
             style={{
-              top: `${coords.top + 8}px`,
+              top: side === 'top' ? 'auto' : `${coords.bottom + 8}px`,
+              bottom: side === 'top' ? `${window.innerHeight - (coords.top - window.scrollY) + 8}px` : 'auto',
               left: `${coords.left - 208}px`,
             }}
             onClick={(e) => e.stopPropagation()}
