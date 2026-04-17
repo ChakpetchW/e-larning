@@ -791,83 +791,142 @@ const getAdvancedAnalytics = async (authUser) => {
     const isManager = actor.role === USER_ROLES.MANAGER;
     const departmentId = isManager ? actor.departmentId : null;
 
-    // 1. Skill Gap Analysis (Mastery by Category Type)
-    // For simplicity in this implementation, we aggregate the MAX scores recorded in QuizAttempt.
-    // In a real production scale, we might pre-aggregate this into a Performance table.
-    const skillGapStats = await prisma.$queryRaw`
-        SELECT 
-            c."type",
-            AVG(sub.max_score) as average_mastery
-        FROM "Category" c
-        JOIN "Course" co ON co."categoryId" = c.id
-        JOIN (
-            SELECT "userId", "lessonId", MAX(score) as max_score
-            FROM "QuizAttempt"
-            GROUP BY "userId", "lessonId"
-        ) sub ON sub."lessonId" IN (
-            SELECT id FROM "Lesson" l WHERE l."courseId" = co.id
-        )
-        GROUP BY c."type"
-    `;
+    try {
+        // 1. Skill Gap Analysis (Mastery by Category Type)
+        // Note: Fetching raw data and aggregating in JS is safer than complex raw SQL in current env.
+        const categories = await prisma.category.findMany({
+            include: {
+                courses: {
+                    include: {
+                        lessons: {
+                            include: {
+                                quizAttempts: isManager 
+                                    ? { where: { user: { departmentId: actor.departmentId } } } 
+                                    : true
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-    // 2. Department Benchmarking
-    const departmentBenchmark = await prisma.$queryRaw`
-        SELECT 
-            d.name as name,
-            ROUND(CAST(COUNT(CASE WHEN uc.status = 'COMPLETED' THEN 1 END) * 100.0 / NULLIF(COUNT(uc.id), 0) AS NUMERIC), 2) as completion_rate
-        FROM "Department" d
-        LEFT JOIN "User" u ON u."departmentId" = d.id
-        LEFT JOIN "UserCourse" uc ON uc."userId" = u.id
-        GROUP BY d.id, d.name
-        ORDER BY completion_rate DESC
-    `;
+        const skillGapStats = categories.map(cat => {
+            const allAttempts = cat.courses.flatMap(c => c.lessons.flatMap(l => l.quizAttempts));
+            const totalScore = allAttempts.reduce((sum, attempt) => sum + attempt.score, 0);
+            const count = allAttempts.length;
+            return {
+                type: cat.type,
+                average_mastery: count > 0 ? totalScore / count : 0
+            };
+        });
 
-    // 3. Incentive ROI (Points Distributed vs Completion Count)
-    const roiTrend = await prisma.$queryRaw`
-        SELECT 
-            TO_CHAR(pl."createdAt", 'Mon YYYY') as month,
-            SUM(CASE WHEN pl."points" > 0 THEN pl."points" ELSE 0 END) as points,
-            (SELECT COUNT(*) FROM "UserCourse" WHERE status = 'COMPLETED' AND TO_CHAR("completedAt", 'Mon YYYY') = TO_CHAR(pl."createdAt", 'Mon YYYY')) as completions
-        FROM "PointsLedger" pl
-        GROUP BY TO_CHAR(pl."createdAt", 'Mon YYYY')
-        ORDER BY MIN(pl."createdAt") DESC
-        LIMIT 6
-    `;
+        // 2. Department Benchmarking
+        const departments = await prisma.department.findMany({
+            include: {
+                users: {
+                    include: {
+                        enrollments: {
+                            select: { status: true }
+                        }
+                    }
+                }
+            }
+        });
 
-    // 4. At-Risk Learners (Deadlines)
-    const now = new Date();
-    const threeDaysLater = new Date();
-    threeDaysLater.setDate(now.getDate() + 3);
+        const departmentBenchmark = departments.map(dept => {
+            const enrollments = dept.users.flatMap(u => u.enrollments);
+            const completed = enrollments.filter(e => e.status === 'COMPLETED').length;
+            const total = enrollments.length;
+            return {
+                name: dept.name,
+                completion_rate: total > 0 ? (completed * 100) / total : 0
+            };
+        }).sort((a, b) => b.completion_rate - a.completion_rate);
 
-    const atRisk = await prisma.userCourse.findMany({
-        where: {
-            status: { not: 'COMPLETED' },
-            deadline: {
-                lte: threeDaysLater,
-                not: null
+        // 3. Incentive ROI (Last 6 Months)
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const [pointsLedger, completions] = await Promise.all([
+            prisma.pointsLedger.findMany({
+                where: { createdAt: { gte: sixMonthsAgo }, points: { gt: 0 } },
+                select: { points: true, createdAt: true }
+            }),
+            prisma.userCourse.findMany({
+                where: { completedAt: { gte: sixMonthsAgo }, status: 'COMPLETED' },
+                select: { completedAt: true }
+            })
+        ]);
+
+        const roiTrend = [];
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            const monthStr = date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+            const monthKey = date.toISOString().slice(0, 7); // YYYY-MM
+
+            const monthPoints = pointsLedger
+                .filter(p => p.createdAt.toISOString().slice(0, 7) === monthKey)
+                .reduce((sum, p) => sum + p.points, 0);
+            
+            const monthCompletions = completions
+                .filter(c => c.completedAt.toISOString().slice(0, 7) === monthKey)
+                .length;
+
+            roiTrend.push({
+                month: monthStr,
+                points: monthPoints,
+                completions: monthCompletions
+            });
+        }
+
+        // 4. At-Risk Learners (Deadlines)
+        const now = new Date();
+        const threeDaysLater = new Date();
+        threeDaysLater.setDate(now.getDate() + 3);
+
+        const atRiskRaw = await prisma.userCourse.findMany({
+            where: {
+                status: { not: 'COMPLETED' },
+                deadline: {
+                    lte: threeDaysLater,
+                    not: null
+                },
+                ...(isManager ? { user: { departmentId: actor.departmentId } } : {})
             },
-            ...(isManager ? { user: { departmentId: actor.departmentId } } : {})
-        },
-        include: {
-            user: { select: { name: true, department: true } },
-            course: { select: { title: true } }
-        },
-        orderBy: { deadline: 'asc' },
-        take: 5
-    });
+            include: {
+                user: { select: { name: true, department: true } },
+                course: { select: { title: true } }
+            },
+            orderBy: { deadline: 'asc' },
+            take: 5
+        });
 
-    return {
-        skillGap: skillGapStats,
-        benchmarking: departmentBenchmark,
-        roiTrend,
-        atRisk: atRisk.map(item => ({
+        const atRisk = atRiskRaw.map(item => ({
             name: item.user.name,
             department: item.user.department,
             course: item.course.title,
             deadline: item.deadline,
             isOverdue: item.deadline < now
-        }))
-    };
+        }));
+
+        return {
+            skillGap: skillGapStats,
+            benchmarking: departmentBenchmark,
+            roiTrend,
+            atRisk
+        };
+    } catch (error) {
+        console.error('Error in getAdvancedAnalytics:', error);
+        // Return hollow structure instead of crashing to keep dashboard alive
+        return {
+            skillGap: [],
+            benchmarking: [],
+            roiTrend: [],
+            atRisk: []
+        };
+    }
+    }
 };
 
 // USERS

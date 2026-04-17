@@ -40,32 +40,36 @@ const SkillGapRadarChart = ({ data }) => {
         <h3 className="text-lg font-bold">Skill Gap Analysis (Org Mastery)</h3>
       </div>
       
-      <div className="h-[300px] w-full min-w-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-            <PolarGrid stroke="#e2e8f0" />
-            <PolarAngleAxis 
-              dataKey="subject" 
-              tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }}
-            />
-            <PolarRadiusAxis 
-              angle={30} 
-              domain={[0, 100]} 
-              tick={false}
-              axisLine={false}
-            />
-            <Radar
-              name="Mastery Level"
-              dataKey="A"
-              stroke="#6366f1"
-              fill="#6366f1"
-              fillOpacity={0.6}
-            />
-            <Tooltip 
-              contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
+      <div className="h-[300px] w-full min-w-0 flex items-center justify-center">
+        {(!data || data.length === 0) ? (
+          <div className="text-slate-400 text-sm italic">No mastery data reported yet</div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+              <PolarGrid stroke="#e2e8f0" />
+              <PolarAngleAxis 
+                dataKey="subject" 
+                tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }}
+              />
+              <PolarRadiusAxis 
+                angle={30} 
+                domain={[0, 100]} 
+                tick={false}
+                axisLine={false}
+              />
+              <Radar
+                name="Mastery Level"
+                dataKey="A"
+                stroke="#6366f1"
+                fill="#6366f1"
+                fillOpacity={0.6}
+              />
+              <Tooltip 
+                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        )}
       </div>
       
       <div className="mt-4 text-center">
