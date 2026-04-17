@@ -1,4 +1,4 @@
-﻿---
+---
 name: quieter
 description: Tone down overly bold or visually aggressive designs. Reduces intensity while maintaining design quality and impact.
 ---
@@ -67,11 +67,11 @@ Systematically reduce intensity across these dimensions:
 - **Reduce color variety**: Use fewer colors more thoughtfully
 - **Neutral dominance**: Let neutrals do more work, use color as accent (10% rule)
 - **Gentler contrasts**: High contrast only where it matters most
-- **Tinted grays**: Use warm or cool tinted grays instead of pure grayโ€”adds sophistication without loudness
+- **Tinted grays**: Use warm or cool tinted grays instead of pure gray—adds sophistication without loudness
 - **Never gray on color**: If you have gray text on a colored background, use a darker shade of that color or transparency instead
 
 ### Visual Weight Reduction
-- **Typography**: Reduce font weights (900 โ’ 600, 700 โ’ 500), decrease sizes where appropriate
+- **Typography**: Reduce font weights (900 → 600, 700 → 500), decrease sizes where appropriate
 - **Hierarchy through subtlety**: Use weight, size, and space instead of color and boldness
 - **White space**: Increase breathing room, reduce density
 - **Borders & lines**: Reduce thickness, decrease opacity, or remove entirely
@@ -86,7 +86,7 @@ Systematically reduce intensity across these dimensions:
 - **Reduce animation intensity**: Shorter distances (10-20px instead of 40px), gentler easing
 - **Remove decorative animations**: Keep functional motion, remove flourishes
 - **Subtle micro-interactions**: Replace dramatic effects with gentle feedback
-- **Refined easing**: Use ease-out-quart for smooth, understated motionโ€”never bounce or elastic
+- **Refined easing**: Use ease-out-quart for smooth, understated motion—never bounce or elastic
 - **Remove animations entirely** if they're not serving a clear purpose
 
 ### Composition Refinement
@@ -96,7 +96,7 @@ Systematically reduce intensity across these dimensions:
 
 **NEVER**:
 - Make everything the same size/weight (hierarchy still matters)
-- Remove all color (quiet โ  grayscale)
+- Remove all color (quiet ≠ grayscale)
 - Eliminate all personality (maintain character through refinement)
 - Sacrifice usability for aesthetics (functional elements still need clear affordances)
 - Make everything small and light (some anchors needed)

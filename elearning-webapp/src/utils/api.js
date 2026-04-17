@@ -96,7 +96,9 @@ export const authAPI = {
 
 export const userAPI = {
   getCourses: () => api.get('/user/courses'),
+  getAnnouncements: () => api.get('/user/announcements'),
   getCourseDetails: (id) => api.get(`/user/courses/${id}`),
+  getAnnouncementDetails: (id) => api.get(`/user/announcements/${id}`),
   enrollCourse: (id) => api.post(`/user/courses/${id}/enroll`),
   updateProgress: (lessonId, progress) => api.put(`/user/lessons/${lessonId}/progress`, { progress }),
   getPoints: () => api.get('/user/points'),
@@ -104,8 +106,11 @@ export const userAPI = {
   getCategories: () => api.get('/user/categories'),
   requestRedeem: (rewardId) => api.post(`/user/redeem/${rewardId}`),
   submitQuiz: (lessonId, data) => api.post(`/user/lessons/${lessonId}/quiz`, data),
+  submitAnnouncementQuiz: (announcementId, data) => api.post(`/user/announcements/${announcementId}/quiz`, data),
   getLessonQuestions: (lessonId) => api.get(`/user/lessons/${lessonId}/questions`),
+  getAnnouncementQuestions: (announcementId) => api.get(`/user/announcements/${announcementId}/questions`),
   getLessonDocumentAccess: (lessonId) => api.get(`/user/lessons/${lessonId}/document-access`),
+  getAnnouncementDocumentAccess: (announcementId) => api.get(`/user/announcements/${announcementId}/document-access`),
   updateProfile: (data) => api.put('/user/profile', data),
   getPointsHistory: () => api.get('/user/points'), // Alias for clarity
   uploadFile: (file) => {
@@ -141,17 +146,33 @@ export const adminAPI = {
   deleteTier: (id) => api.delete(`/admin/tiers/${id}`),
   reorderTiers: (tierIds) => api.put('/admin/tiers/reorder', { tierIds }),
 
+  getInstructorPresets: () => api.get('/admin/instructor-presets'),
+  createInstructorPreset: (data) => api.post('/admin/instructor-presets', data),
+  updateInstructorPreset: (id, data) => api.put(`/admin/instructor-presets/${id}`, data),
+  deleteInstructorPreset: (id) => api.delete(`/admin/instructor-presets/${id}`),
+
 
   getCourses: () => api.get('/admin/courses'),
   createCourse: (data) => api.post('/admin/courses', data),
   updateCourse: (id, data) => api.put(`/admin/courses/${id}`, data),
   republishCourse: (id) => api.put(`/admin/courses/${id}/republish`),
+  archiveCourse: (id) => api.put(`/admin/courses/${id}/archive`),
+  getCourseHistory: (id, params) => api.get(`/admin/courses/${id}/history`, { params }),
   deleteCourse: (id) => api.delete(`/admin/courses/${id}`),
+
+  getAnnouncements: () => api.get('/admin/announcements'),
+  createAnnouncement: (data) => api.post('/admin/announcements', data),
+  getAnnouncementHistory: (id) => api.get(`/admin/announcements/${id}/history`),
+  archiveAnnouncement: (id) => api.put(`/admin/announcements/${id}/archive`),
+  republishAnnouncement: (id) => api.put(`/admin/announcements/${id}/republish`),
+  updateAnnouncement: (id, data) => api.put(`/admin/announcements/${id}`, data),
+  deleteAnnouncement: (id) => api.delete(`/admin/announcements/${id}`),
 
   getCategories: () => api.get('/admin/categories'),
   createCategory: (data) => api.post('/admin/categories', data),
   updateCategory: (id, data) => api.put(`/admin/categories/${id}`, data),
   republishCategory: (id) => api.put(`/admin/categories/${id}/republish`),
+  archiveCategory: (id) => api.put(`/admin/categories/${id}/archive`),
   deleteCategory: (id) => api.delete(`/admin/categories/${id}`),
   reorderCategories: (data) => api.put('/admin/categories/reorder', data),
 
@@ -187,6 +208,8 @@ export const adminAPI = {
   // Goals
   getGoals: () => api.get('/goals?includeExpired=true'),
   createGoal: (data) => api.post('/goals', data),
+  archiveGoal: (id) => api.put(`/goals/${id}/archive`),
+  republishGoal: (id) => api.put(`/goals/${id}/republish`),
   deleteGoal: (id) => api.delete(`/goals/${id}`),
   getGoalReport: (id) => api.get(`/goals/${id}/report`),
 

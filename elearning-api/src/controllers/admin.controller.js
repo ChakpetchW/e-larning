@@ -87,6 +87,27 @@ const reorderTiers = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Tiers reordered successfully' });
 });
 
+// INSTRUCTOR PRESETS
+const getInstructorPresets = asyncHandler(async (req, res) => {
+  const presets = await AdminService.getInstructorPresets();
+  res.json({ success: true, data: presets });
+});
+
+const createInstructorPreset = asyncHandler(async (req, res) => {
+  const preset = await AdminService.createInstructorPreset(req.body);
+  res.status(201).json({ success: true, data: preset });
+});
+
+const updateInstructorPreset = asyncHandler(async (req, res) => {
+  const preset = await AdminService.updateInstructorPreset(req.params.id, req.body);
+  res.json({ success: true, data: preset });
+});
+
+const deleteInstructorPreset = asyncHandler(async (req, res) => {
+  await AdminService.deleteInstructorPreset(req.params.id);
+  res.json({ success: true, message: 'Instructor preset deleted successfully' });
+});
+
 
 // COURSES
 const getAdminCourses = asyncHandler(async (req, res) => {
@@ -109,9 +130,56 @@ const republishCourse = asyncHandler(async (req, res) => {
   res.json({ success: true, data: course });
 });
 
+const archiveCourse = asyncHandler(async (req, res) => {
+  const course = await AdminService.archiveCourse(req.params.id);
+  res.json({ success: true, data: course });
+});
+
+const getCourseHistory = asyncHandler(async (req, res) => {
+  const history = await AdminService.getCourseHistory(req.params.courseId || req.params.id, req.query);
+  res.json({ success: true, data: history });
+});
+
+
 const deleteCourse = asyncHandler(async (req, res) => {
   await AdminService.deleteCourse(req.params.id);
   res.json({ success: true, message: 'Course deleted' });
+});
+
+// ANNOUNCEMENTS
+const getAdminAnnouncements = asyncHandler(async (req, res) => {
+  const announcements = await AdminService.getAdminAnnouncements(req.user);
+  res.json({ success: true, data: announcements });
+});
+
+const createAnnouncement = asyncHandler(async (req, res) => {
+  const announcement = await AdminService.createAnnouncement(req.user, req.body);
+  res.status(201).json({ success: true, data: announcement });
+});
+
+const updateAnnouncement = asyncHandler(async (req, res) => {
+  const announcement = await AdminService.updateAnnouncement(req.params.id, req.user, req.body);
+  res.json({ success: true, data: announcement });
+});
+
+const archiveAnnouncement = asyncHandler(async (req, res) => {
+  const result = await AdminService.archiveAnnouncement(req.params.id, req.user);
+  res.json({ success: true, data: result });
+});
+
+const republishAnnouncement = asyncHandler(async (req, res) => {
+  const result = await AdminService.republishAnnouncement(req.params.id, req.user);
+  res.json({ success: true, data: result });
+});
+
+const getAnnouncementHistory = asyncHandler(async (req, res) => {
+  const history = await AdminService.getAnnouncementHistory(req.params.id, req.user);
+  res.json({ success: true, data: history });
+});
+
+const deleteAnnouncement = asyncHandler(async (req, res) => {
+  await AdminService.deleteAnnouncement(req.params.id, req.user);
+  res.json({ success: true, message: 'Announcement deleted' });
 });
 
 // CATEGORIES
@@ -132,6 +200,11 @@ const updateCategory = asyncHandler(async (req, res) => {
 
 const republishCategory = asyncHandler(async (req, res) => {
   const category = await AdminService.republishCategory(req.params.id);
+  res.json({ success: true, data: category });
+});
+
+const archiveCategory = asyncHandler(async (req, res) => {
+  const category = await AdminService.archiveCategory(req.params.id);
   res.json({ success: true, data: category });
 });
 
@@ -220,11 +293,21 @@ module.exports = {
   createCourse,
   updateCourse,
   republishCourse,
+  archiveCourse,
+  getCourseHistory,
   deleteCourse,
+  getAdminAnnouncements,
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
+  archiveAnnouncement,
+  republishAnnouncement,
+  getAnnouncementHistory,
   getCategories,
   createCategory,
   updateCategory,
   republishCategory,
+  archiveCategory,
   deleteCategory,
   reorderCategories,
   getAdminRewards,
@@ -247,6 +330,10 @@ module.exports = {
   updateTier,
   deleteTier,
   reorderTiers,
+  getInstructorPresets,
+  createInstructorPreset,
+  updateInstructorPreset,
+  deleteInstructorPreset,
   getCourseLessons,
   createLesson,
   updateLesson,

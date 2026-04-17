@@ -8,6 +8,7 @@ import {
   PlayCircle,
   BookOpen,
 } from 'lucide-react';
+import CustomSelect from '../common/CustomSelect';
 
 const BenefitListEditor = ({ value, onChange }) => {
   const tryParse = (rawValue) => {
@@ -46,22 +47,25 @@ const BenefitListEditor = ({ value, onChange }) => {
               <div className="rounded-xl bg-primary/10 p-2 text-primary">
                 <Icon size={22} />
               </div>
-              <select
-                className="cursor-pointer rounded-lg border-none bg-slate-100 px-3 py-1.5 text-xs font-black uppercase tracking-tight text-slate-600 focus:ring-0"
+              <CustomSelect
+                fullWidth={false}
+                size="sm"
+                className="w-40"
                 value={item.icon || 'MonitorPlay'}
                 onChange={(event) => {
                   const newItems = [...items];
                   newItems[index] = { ...item, icon: event.target.value };
                   update(newItems);
                 }}
-              >
-                <option value="MonitorPlay">วิดีโอ (Video)</option>
-                <option value="FileText">เอกสาร (File)</option>
-                <option value="InfIcon">ตลอดชีพ (Lifetime)</option>
-                <option value="Award">วุฒิบัตร (Award)</option>
-                <option value="PlayCircle">การเล่น (Play)</option>
-                <option value="BookOpen">บทเรียน (Lesson)</option>
-              </select>
+                options={[
+                  { value: 'MonitorPlay', label: 'วิดีโอ (Video)', icon: MonitorPlay },
+                  { value: 'FileText', label: 'เอกสาร (File)', icon: FileText },
+                  { value: 'InfIcon', label: 'ตลอดชีพ (Lifetime)', icon: InfIcon },
+                  { value: 'Award', label: 'วุฒิบัตร (Award)', icon: Award },
+                  { value: 'PlayCircle', label: 'การเล่น (Play)', icon: PlayCircle },
+                  { value: 'BookOpen', label: 'บทเรียน (Lesson)', icon: BookOpen }
+                ]}
+              />
               <div className="flex-1" />
               <button
                 type="button"

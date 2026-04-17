@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import { FILTER_VALUES } from '../../utils/constants/filters';
+import CustomSelect from '../common/CustomSelect';
 
 const UserFilters = ({
   searchTerm,
@@ -25,31 +26,25 @@ const UserFilters = ({
         />
       </div>
 
-      <select
-        className="rounded-md border border-border bg-white px-3 py-2 text-sm text-muted outline-none"
+      <CustomSelect
+        className="w-full lg:w-48"
         value={selectedDepartment}
         onChange={(event) => onDepartmentChange(event.target.value)}
-      >
-        <option value={FILTER_VALUES.ALL}>ทุกแผนก</option>
-        {departments.map((department) => (
-          <option key={department.id} value={department.id}>
-            {department.name}
-          </option>
-        ))}
-      </select>
+        options={[
+          { value: FILTER_VALUES.ALL, label: 'ทุกแผนก' },
+          ...departments.map((d) => ({ value: d.id, label: d.name }))
+        ]}
+      />
 
-      <select
-        className="rounded-md border border-border bg-white px-3 py-2 text-sm text-muted outline-none"
+      <CustomSelect
+        className="w-full lg:w-48"
         value={selectedTier}
         onChange={(event) => onTierChange(event.target.value)}
-      >
-        <option value={FILTER_VALUES.ALL}>ทุกระดับ</option>
-        {tiers.map((tier) => (
-          <option key={tier.id} value={tier.id}>
-            {tier.name}
-          </option>
-        ))}
-      </select>
+        options={[
+          { value: FILTER_VALUES.ALL, label: 'ทุกระดับ' },
+          ...tiers.map((t) => ({ value: t.id, label: t.name }))
+        ]}
+      />
     </div>
   );
 };

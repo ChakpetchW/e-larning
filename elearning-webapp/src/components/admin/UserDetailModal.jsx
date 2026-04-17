@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
+import CustomSelect from '../common/CustomSelect';
 import { useToast } from '../../context/ToastContext';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
@@ -100,7 +101,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
   return (
     <ModalPortal isOpen>
       <div className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
-      <div className="card flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
+      <div className="card flex max-h-[92vh] w-full max-w-5xl flex-col border border-slate-100 bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div>
             <h3 className="text-xl font-black text-slate-900">ประวัติผู้ใช้งานรายบุคคล</h3>
@@ -179,29 +180,27 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
 
                     <div className="flex flex-wrap items-center gap-3">
                       {/* Filter Controls */}
-                      <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary/20">
-                        <Filter size={14} className="text-slate-400" />
-                        <select 
-                          className="bg-transparent text-xs font-bold text-slate-600 outline-none"
+                      <div className="flex items-center gap-2">
+                        <CustomSelect
+                          className="w-44"
+                          size="sm"
                           value={filterMonth}
                           onChange={(e) => setFilterMonth(e.target.value)}
-                        >
-                          <option value={FILTER_VALUES.ALL}>ทุกเดือน</option>
-                          {months.map((m, i) => (
-                            <option key={i} value={i}>{m}</option>
-                          ))}
-                        </select>
-                        <div className="h-4 w-[1px] bg-slate-200" />
-                        <select 
-                          className="bg-transparent text-xs font-bold text-slate-600 outline-none"
+                          options={[
+                            { value: FILTER_VALUES.ALL, label: 'ทุกเดือน' },
+                            ...months.map((m, i) => ({ value: i.toString(), label: m }))
+                          ]}
+                        />
+                        <CustomSelect
+                          className="w-36"
+                          size="sm"
                           value={filterYear}
                           onChange={(e) => setFilterYear(e.target.value)}
-                        >
-                          <option value={FILTER_VALUES.ALL}>ทุกปี</option>
-                          {years.map(y => (
-                            <option key={y} value={y}>{y}</option>
-                          ))}
-                        </select>
+                          options={[
+                            { value: FILTER_VALUES.ALL, label: 'ทุกปี' },
+                            ...years.map(y => ({ value: y.toString(), label: (y + 543).toString() }))
+                          ]}
+                        />
                       </div>
 
                       <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">

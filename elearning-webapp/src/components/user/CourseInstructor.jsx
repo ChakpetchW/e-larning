@@ -19,6 +19,9 @@ const CourseInstructor = ({ course }) => {
         <div className="min-w-0">
           <h3 className="text-lg font-black text-slate-900">{course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ'}</h3>
           <p className="mt-1 text-sm font-bold text-primary">{course.instructorRole || 'วิทยากรประจำหลักสูตร'}</p>
+          {course.instructorBio && (
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">{course.instructorBio}</p>
+          )}
         </div>
       </div>
     </section>

@@ -2,13 +2,16 @@ import React from 'react';
 import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers, Users, GraduationCap, Video } from 'lucide-react';
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
+import InstructorPresetPicker from './InstructorPresetPicker';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
+import CustomSelect from '../common/CustomSelect';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 
 const CourseBasicInfoForm = ({
   courseForm,
   setCourseForm,
   categories,
+  instructorPresets,
   departments,
   tiers,
   onSaveCourse,
@@ -20,44 +23,47 @@ const CourseBasicInfoForm = ({
   return (
     <form onSubmit={onSaveCourse} className="flex flex-col gap-4">
       <div className="space-y-1.5">
-        <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">ชื่อคอร์ส</label>
+        <label className="ml-1 block text-sm font-black uppercase tracking-wider text-slate-700">ชื่อคอร์ส</label>
         <div className="relative group">
-          <Book className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
-          <input 
-            required 
-            type="text" 
-            className="form-input w-full pl-12" 
-            placeholder="ตั้งชื่อคอร์สให้ดึงดูดใจ..."
-            value={courseForm.title} 
-            onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} 
+          <Book className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" size={18} />
+          <input
+            required
+            type="text"
+            className="form-input w-full pl-12"
+            placeholder="ตั้งชื่อคอร์สให้น่าสนใจ..."
+            value={courseForm.title}
+            onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <CustomSelect
+          label="หมวดหมู่"
+          placeholder="เลือกหมวดหมู่..."
+          value={courseForm.categoryId}
+          onChange={(e) => setCourseForm({ ...courseForm, categoryId: e.target.value })}
+          options={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
+        />
+
         <div className="space-y-1.5">
-          <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">หมวดหมู่</label>
-          <select required className="form-input w-full" value={courseForm.categoryId} onChange={(e) => setCourseForm({ ...courseForm, categoryId: e.target.value })}>
-            <option value="">เลือกหมวดหมู่</option>
-            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-          </select>
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">แต้มรางวัล (Points)</label>
+          <label className="ml-1 block text-sm font-black uppercase tracking-wider text-slate-700">แต้มรางวัล (Points)</label>
           <div className="relative group">
-            <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber-500 transition-colors" size={18} />
-            <input 
-              type="number" 
-              className="form-input w-full pl-12" 
-              value={courseForm.points} 
-              onChange={(e) => setCourseForm({ ...courseForm, points: parseInt(e.target.value || 0) })} 
+            <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-amber-500" size={18} />
+            <input
+              type="number"
+              className="form-input w-full pl-12"
+              value={courseForm.points}
+              onChange={(e) => setCourseForm({ ...courseForm, points: parseInt(e.target.value || 0, 10) })}
             />
           </div>
         </div>
       </div>
+
       <div>
-        <div className="relative overflow-hidden rounded-[2rem] border border-amber-200/50 bg-gradient-to-br from-amber-50/80 to-amber-100/40 p-6 backdrop-blur-md shadow-sm transition-all hover:shadow-md mb-6">
+        <div className="relative mb-6 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-gradient-to-br from-amber-50/80 to-amber-100/40 p-6 shadow-sm backdrop-blur-md transition-all hover:shadow-md">
           <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-400/10 blur-2xl animate-pulse"></div>
-          <div className="absolute -left-4 -bottom-4 h-20 w-20 rounded-full bg-amber-300/10 blur-2xl animate-pulse delay-700"></div>
+          <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-amber-300/10 blur-2xl animate-pulse delay-700"></div>
 
           <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
             <div className="flex gap-4">
@@ -66,15 +72,15 @@ const CourseBasicInfoForm = ({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-[11px] font-black uppercase tracking-widest text-amber-900/70">คอร์สเรียนชั่วคราว</p>
+                  <p className="text-[11px] font-black uppercase tracking-widest text-amber-900/70">คอร์สชั่วคราว</p>
                   <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                 </div>
                 <p className="mt-1.5 text-sm font-medium leading-relaxed text-amber-900/80">
-                  คอร์สนี้จะถูกซ่อน <span className="font-bold">อัตโนมัติ</span> เมื่อถึงกำหนดเวลาที่ตั้งไว้
+                  คอร์สนี้จะถูกซ่อน <span className="font-bold">อัตโนมัติ</span> เมื่อถึงวันเวลาที่ตั้งไว้
                 </p>
               </div>
             </div>
-            
+
             <label className="group flex cursor-pointer select-none items-center gap-3 self-end rounded-2xl border border-amber-300/40 bg-white/80 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-amber-900 shadow-sm transition-all hover:bg-white hover:shadow-md active:scale-95 md:self-start">
               <div className="relative inline-flex h-5 w-5 items-center justify-center">
                 <input
@@ -87,40 +93,41 @@ const CourseBasicInfoForm = ({
                       expiredAt: event.target.checked ? courseForm.expiredAt : '',
                     })
                   }
-                  className="peer h-5 w-5 cursor-pointer appearance-none rounded-lg border-2 border-amber-300 transition-all checked:bg-amber-500 checked:border-transparent"
+                  className="peer h-5 w-5 cursor-pointer appearance-none rounded-lg border-2 border-amber-300 transition-all checked:border-transparent checked:bg-amber-500"
                 />
-                <Plus size={14} className="absolute text-white opacity-0 transition-opacity peer-checked:opacity-100 rotate-45" />
+                <Plus size={14} className="absolute rotate-45 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
               </div>
-              ใช้งานระบบชั่วคราว
+              ใช้งานแบบชั่วคราว
             </label>
           </div>
 
           {courseForm.isTemporary && (
-            <div className="mt-6 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="mt-6 animate-in slide-in-from-top-2 fade-in duration-300">
               <CustomDateTimePicker
                 value={courseForm.expiredAt}
                 onChange={(e) => setCourseForm({ ...courseForm, expiredAt: e.target.value })}
-                label="กำหนดวันและเวลาหมดอายุ (พ.ศ.)"
+                label="กำหนดวันและเวลาหมดอายุ"
               />
             </div>
           )}
         </div>
-        <label className="text-sm font-bold text-gray-700 block mb-1">รูปหน้าปกคอร์ส</label>
+
+        <label className="mb-1 block text-sm font-bold text-gray-700">รูปหน้าปกคอร์ส</label>
         <input type="file" ref={imageInputRef} accept="image/*" onChange={onImageUpload} className="hidden" />
 
         {courseForm.image ? (
-          <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+          <div className="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
             <img
               src={getFullUrl(courseForm.image) || DEFAULT_COURSE_IMAGE}
               alt="Course thumbnail"
-              className="w-full h-40 object-cover"
+              className="h-40 w-full object-cover"
               onError={(e) => { e.target.style.display = 'none'; }}
             />
-            <div className="flex gap-2 p-2 bg-white border-t border-gray-100">
+            <div className="flex gap-2 border-t border-gray-100 bg-white p-2">
               <button type="button" onClick={() => imageInputRef.current?.click()} className="btn btn-outline btn-sm flex-1 text-xs" disabled={uploading}>
                 <Upload size={14} /> เปลี่ยนรูป
               </button>
-              <button type="button" onClick={() => setCourseForm({ ...courseForm, image: '' })} className="btn btn-outline btn-sm text-xs text-danger border-danger/30">
+              <button type="button" onClick={() => setCourseForm({ ...courseForm, image: '' })} className="btn btn-outline btn-sm border-danger/30 text-xs text-danger">
                 <Trash2 size={14} /> ลบ
               </button>
             </div>
@@ -130,11 +137,11 @@ const CourseBasicInfoForm = ({
             type="button"
             onClick={() => imageInputRef.current?.click()}
             disabled={uploading}
-            className="w-full h-40 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-primary hover:text-primary transition-colors cursor-pointer"
+            className="flex h-40 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-primary hover:text-primary"
           >
             {uploading ? (
               <>
-                <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary"></div>
                 <span className="text-xs font-bold">กำลังอัปโหลด...</span>
               </>
             ) : (
@@ -147,16 +154,17 @@ const CourseBasicInfoForm = ({
           </button>
         )}
       </div>
+
       <div className="space-y-1.5">
-        <label className="text-sm font-black text-slate-700 block ml-1 uppercase tracking-wider">รายละเอียด (Description)</label>
+        <label className="ml-1 block text-sm font-black uppercase tracking-wider text-slate-700">รายละเอียด (Description)</label>
         <div className="relative group">
-          <FileText className="absolute left-4 top-4 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
-          <textarea 
-            rows={4} 
-            className="form-input w-full pl-12 resize-none" 
-            value={courseForm.description} 
-            onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} 
-            placeholder="เขียนรายละเอียดหลักสูตร ให้พนักงานอยากเรียน..." 
+          <FileText className="absolute left-4 top-4 text-slate-400 transition-colors group-focus-within:text-primary" size={18} />
+          <textarea
+            rows={4}
+            className="form-input w-full resize-none pl-12"
+            value={courseForm.description}
+            onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+            placeholder="เขียนรายละเอียดหลักสูตร เพื่อให้พนักงานเข้าใจว่าได้เรียนอะไรบ้าง..."
           />
         </div>
       </div>
@@ -187,7 +195,7 @@ const CourseBasicInfoForm = ({
             <span>
               <span className="block text-sm font-bold text-slate-900">เปิดให้ทุกคนเห็นคอร์สนี้</span>
               <span className="block text-xs text-slate-500">
-                ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกและระดับผู้ใช้งานด้านล่างในการคุมการมองเห็น
+                ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกและระดับผู้ใช้งานด้านล่างในการควบคุมการมองเห็น
               </span>
             </span>
           </label>
@@ -198,7 +206,7 @@ const CourseBasicInfoForm = ({
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="mb-3">
                 <h5 className="text-sm font-black text-slate-900">แผนกที่เห็นคอร์สได้</h5>
-                <p className="text-xs text-slate-500">ถ้าไม่เลือกแผนกเลย จะใช้เฉพาะระดับผู้ใช้งานในการคุมสิทธิ์</p>
+                <p className="text-xs text-slate-500">ถ้าไม่เลือกแผนกเลย ระบบจะใช้เฉพาะระดับผู้ใช้งานในการกำหนดสิทธิ์</p>
               </div>
               <div className="space-y-2">
                 {departments.length === 0 ? (
@@ -231,7 +239,7 @@ const CourseBasicInfoForm = ({
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="mb-3">
                 <h5 className="text-sm font-black text-slate-900">ระดับผู้ใช้งานที่เห็นคอร์สได้</h5>
-                <p className="text-xs text-slate-500">ถ้าเลือกทั้งแผนกและระดับผู้ใช้งาน ผู้ใช้ต้องผ่านเงื่อนไขที่กำหนด</p>
+                <p className="text-xs text-slate-500">ถ้าเลือกทั้งแผนกและระดับ ผู้ใช้ต้องผ่านทั้งสองเงื่อนไข</p>
               </div>
               <div className="space-y-2">
                 {tiers.length === 0 ? (
@@ -264,77 +272,157 @@ const CourseBasicInfoForm = ({
         )}
       </div>
 
-      <div className="mt-4 pt-6 border-t border-slate-100">
-        <h4 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
-           <Layers size={16}/> รายละเอียดหลักสูตรเพิ่มเติม (Premium Display)
+      <div className="mt-4 border-t border-slate-100 pt-6">
+        <h4 className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-wider text-primary">
+          <Layers size={16} /> รายละเอียดหลักสูตรเพิ่มเติม (Premium Display)
         </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-4 p-5 bg-slate-50 rounded-xl border border-slate-100">
-            <p className="text-xs font-black text-slate-400 uppercase mb-2 flex items-center gap-2">ข้อมูลผู้สอน</p>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50 p-5">
+            <p className="text-xs font-black uppercase text-slate-400">ข้อมูลผู้สอน</p>
+
+            <InstructorPresetPicker
+              presets={instructorPresets}
+              selectedPresetId={courseForm.instructorPresetId}
+              onSelect={(preset) =>
+                setCourseForm({
+                  ...courseForm,
+                  instructorPresetId: preset?.id || '',
+                  instructorName: preset?.name || '',
+                  instructorRole: preset?.role || '',
+                  instructorAvatar: preset?.avatar || '',
+                  instructorBio: preset?.bio || '',
+                })
+              }
+            />
+
+            {(courseForm.instructorAvatar || courseForm.instructorBio) && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                    {courseForm.instructorAvatar ? (
+                      <img
+                        src={getFullUrl(courseForm.instructorAvatar)}
+                        alt={courseForm.instructorName || 'Instructor'}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-slate-200 text-lg font-bold uppercase text-slate-400">
+                        {courseForm.instructorName?.charAt(0) || 'I'}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-black text-slate-900">{courseForm.instructorName || 'ยังไม่ได้เลือกวิทยากร'}</p>
+                    <p className="mt-1 text-xs font-medium text-primary">{courseForm.instructorRole || 'ยังไม่ได้ระบุตำแหน่ง'}</p>
+                    {courseForm.instructorBio && (
+                      <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-500">{courseForm.instructorBio}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div>
-              <label className="text-xs font-black text-slate-500 block mb-1.5 ml-1">ชื่อผู้สอน</label>
+              <label className="mb-1.5 ml-1 block text-xs font-black text-slate-500">ชื่อผู้สอน</label>
               <div className="relative group">
-                <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={16} />
-                <input type="text" placeholder="ระบุชื่อ-นามสกุล..." className="form-input w-full bg-white text-sm py-2.5 pl-10" value={courseForm.instructorName} onChange={(e) => setCourseForm({ ...courseForm, instructorName: e.target.value })} />
+                <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" size={16} />
+                <input
+                  type="text"
+                  placeholder="ระบุชื่อ-นามสกุล..."
+                  className="form-input w-full bg-white py-2.5 pl-10 text-sm"
+                  value={courseForm.instructorName}
+                  onChange={(e) =>
+                    setCourseForm({
+                      ...courseForm,
+                      instructorPresetId: '',
+                      instructorName: e.target.value,
+                    })
+                  }
+                />
               </div>
             </div>
+
             <div>
-              <label className="text-xs font-black text-slate-500 block mb-1.5 ml-1">ตำแหน่ง (Role)</label>
+              <label className="mb-1.5 ml-1 block text-xs font-black text-slate-500">ตำแหน่ง (Role)</label>
               <div className="relative group">
-                <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={16} />
-                <input type="text" placeholder="เช่น ผู้เชี่ยวชาญด้าน..." className="form-input w-full bg-white text-sm py-2.5 pl-10" value={courseForm.instructorRole} onChange={(e) => setCourseForm({ ...courseForm, instructorRole: e.target.value })} />
+                <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" size={16} />
+                <input
+                  type="text"
+                  placeholder="เช่น ผู้เชี่ยวชาญด้าน..."
+                  className="form-input w-full bg-white py-2.5 pl-10 text-sm"
+                  value={courseForm.instructorRole}
+                  onChange={(e) =>
+                    setCourseForm({
+                      ...courseForm,
+                      instructorPresetId: '',
+                      instructorRole: e.target.value,
+                    })
+                  }
+                />
               </div>
             </div>
           </div>
 
-          <div className="space-y-4 p-6 bg-slate-50 rounded-xl border border-slate-100">
-            <p className="text-sm font-black text-slate-400 uppercase mb-3">สื่อและสถิติหลักสูตร</p>
+          <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50 p-6">
+            <p className="mb-3 text-sm font-black uppercase text-slate-400">สื่อและสถิติหลักสูตร</p>
             <div>
-              <label className="text-sm font-black text-slate-600 block mb-2 ml-1">วิดีโอตัวอย่าง (YouTube URL)</label>
+              <label className="mb-2 ml-1 block text-sm font-black text-slate-600">วิดีโอตัวอย่าง (YouTube URL)</label>
               <div className="relative group">
-                <Video size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
-                <input type="text" placeholder="https://youtube.com/..." className="form-input w-full bg-white text-sm py-3 pl-10" value={courseForm.previewVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })} />
+                <Video size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
+                <input
+                  type="text"
+                  placeholder="https://youtube.com/..."
+                  className="form-input w-full bg-white py-3 pl-10 text-sm"
+                  value={courseForm.previewVideoUrl}
+                  onChange={(e) => setCourseForm({ ...courseForm, previewVideoUrl: e.target.value })}
+                />
               </div>
             </div>
             <div>
-              <label className="text-sm font-black text-slate-600 block mb-2 ml-1">ความยาวคอร์สทั้งหมด</label>
+              <label className="mb-2 ml-1 block text-sm font-black text-slate-600">ความยาวคอร์สทั้งหมด</label>
               <div className="relative group">
-                <Clock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
-                <input type="text" placeholder="เช่น 24 ชั่วโมง หรือ 120 นาที" className="form-input w-full bg-white text-sm py-3 pl-10" value={courseForm.totalDuration} onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })} />
+                <Clock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
+                <input
+                  type="text"
+                  placeholder="เช่น 24 ชั่วโมง หรือ 120 นาที"
+                  className="form-input w-full bg-white py-3 pl-10 text-sm"
+                  value={courseForm.totalDuration}
+                  onChange={(e) => setCourseForm({ ...courseForm, totalDuration: e.target.value })}
+                />
               </div>
             </div>
           </div>
 
-          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-slate-50 rounded-2xl border-2 border-slate-100 mt-4">
-             <div className="space-y-4">
-                <label className="text-xl font-black text-slate-900 flex items-center gap-2">
-                  <Plus size={22} className="text-emerald-500"/> สิ่งที่จะได้เรียนรู้ (Outcomes)
-                </label>
-                <OutcomeListEditor 
-                  value={courseForm.whatYouWillLearn} 
-                  onChange={(val) => setCourseForm({ ...courseForm, whatYouWillLearn: val })} 
-                />
-             </div>
+          <div className="mt-4 grid grid-cols-1 gap-8 rounded-2xl border-2 border-slate-100 bg-slate-50 p-8 md:col-span-2 md:grid-cols-2">
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 text-xl font-black text-slate-900">
+                <Plus size={22} className="text-emerald-500" /> สิ่งที่จะได้เรียนรู้ (Outcomes)
+              </label>
+              <OutcomeListEditor
+                value={courseForm.whatYouWillLearn}
+                onChange={(val) => setCourseForm({ ...courseForm, whatYouWillLearn: val })}
+              />
+            </div>
 
-             <div className="space-y-4">
-                <label className="text-xl font-black text-slate-900 flex items-center gap-2">
-                  <Layers size={22} className="text-primary"/> สิ่งที่จะได้รับพิเศษ (Benefits)
-                </label>
-                <BenefitListEditor 
-                  value={courseForm.whatYouWillGet} 
-                  onChange={(val) => setCourseForm({ ...courseForm, whatYouWillGet: val })} 
-                />
-             </div>
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 text-xl font-black text-slate-900">
+                <Layers size={22} className="text-primary" /> สิ่งที่จะได้รับพิเศษ (Benefits)
+              </label>
+              <BenefitListEditor
+                value={courseForm.whatYouWillGet}
+                onChange={(val) => setCourseForm({ ...courseForm, whatYouWillGet: val })}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="flex gap-4 mt-8 pt-6 border-t border-slate-100">
-        <button type="button" onClick={onClose} className="btn border-2 border-slate-200 bg-white px-8 text-xs font-black uppercase tracking-[0.15em] text-slate-500 hover:bg-slate-50 transition-all flex-1">
+      <div className="mt-8 flex gap-4 border-t border-slate-100 pt-6">
+        <button type="button" onClick={onClose} className="btn flex-1 border-2 border-slate-200 bg-white px-8 text-xs font-black uppercase tracking-[0.15em] text-slate-500 transition-all hover:bg-slate-50">
           ยกเลิก
         </button>
-        <button type="submit" className="btn btn-primary px-8 text-xs font-black uppercase tracking-[0.15em] shadow-xl flex-1">
+        <button type="submit" className="btn btn-primary flex-1 px-8 text-xs font-black uppercase tracking-[0.15em] shadow-xl">
           บันทึกข้อมูลคอร์ส
         </button>
       </div>

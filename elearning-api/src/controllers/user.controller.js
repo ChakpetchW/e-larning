@@ -9,6 +9,11 @@ const getCourses = asyncHandler(async (req, res) => {
   res.json({ success: true, data: courses });
 });
 
+const getAnnouncements = asyncHandler(async (req, res) => {
+  const announcements = await UserService.getAnnouncements(req.user.userId);
+  res.json({ success: true, data: announcements });
+});
+
 // Update user profile
 const updateProfile = asyncHandler(async (req, res) => {
   const updatedUser = await UserService.updateProfile(req.user.userId, req.body);
@@ -22,6 +27,14 @@ const getCourseDetails = asyncHandler(async (req, res) => {
     throw new ErrorResponse('Course not found', 404);
   }
   res.json({ success: true, data: course });
+});
+
+const getAnnouncementDetails = asyncHandler(async (req, res) => {
+  const announcement = await UserService.getAnnouncementDetails(req.params.id, req.user.userId);
+  if (!announcement) {
+    throw new ErrorResponse('Announcement not found', 404);
+  }
+  res.json({ success: true, data: announcement });
 });
 
 // Enroll in a course
@@ -39,6 +52,11 @@ const updateLessonProgress = asyncHandler(async (req, res) => {
 // Submit Quiz Answers
 const submitQuiz = asyncHandler(async (req, res) => {
   const result = await UserService.submitQuiz(req.user.userId, req.params.id, req.body.answers);
+  res.json({ success: true, data: result });
+});
+
+const submitAnnouncementQuiz = asyncHandler(async (req, res) => {
+  const result = await UserService.submitAnnouncementQuiz(req.user.userId, req.params.id, req.body.answers);
   res.json({ success: true, data: result });
 });
 
@@ -72,8 +90,18 @@ const getLessonQuestions = asyncHandler(async (req, res) => {
   res.json({ success: true, data: questions });
 });
 
+const getAnnouncementQuestions = asyncHandler(async (req, res) => {
+  const questions = await UserService.getAnnouncementQuestions(req.params.id, req.user.userId);
+  res.json({ success: true, data: questions });
+});
+
 const getLessonDocumentAccess = asyncHandler(async (req, res) => {
   const documentAccess = await UserService.getLessonDocumentAccess(req.user.userId, req.params.id);
+  res.json({ success: true, data: documentAccess });
+});
+
+const getAnnouncementDocumentAccess = asyncHandler(async (req, res) => {
+  const documentAccess = await UserService.getAnnouncementDocumentAccess(req.user.userId, req.params.id);
   res.json({ success: true, data: documentAccess });
 });
 
@@ -95,9 +123,29 @@ const getLessonDocumentStream = asyncHandler(async (req, res) => {
   Readable.fromWeb(upstreamResponse.body).pipe(res);
 });
 
+const getAnnouncementDocumentStream = asyncHandler(async (req, res) => {
+  const { upstreamResponse, fileName } = await UserService.getAnnouncementDocumentStream(req.params.id, req.query.token);
+  const contentType = upstreamResponse.headers.get('content-type') || 'application/octet-stream';
+  const contentLength = upstreamResponse.headers.get('content-length');
+  const sanitizedFileName = JSON.stringify(fileName || 'document');
+
+  res.setHeader('Content-Type', contentType);
+  res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+  res.setHeader('Content-Disposition', `inline; filename=${sanitizedFileName}`);
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+
+  if (contentLength) {
+    res.setHeader('Content-Length', contentLength);
+  }
+
+  Readable.fromWeb(upstreamResponse.body).pipe(res);
+});
+
 module.exports = {
   getCourses,
+  getAnnouncements,
   getCourseDetails,
+  getAnnouncementDetails,
   enrollCourse,
   updateLessonProgress,
   getPointsHistory,
@@ -105,8 +153,12 @@ module.exports = {
   requestRedeem,
   getCategories,
   submitQuiz,
+  submitAnnouncementQuiz,
   updateProfile,
   getLessonQuestions,
+  getAnnouncementQuestions,
   getLessonDocumentAccess,
-  getLessonDocumentStream
+  getLessonDocumentStream,
+  getAnnouncementDocumentAccess,
+  getAnnouncementDocumentStream
 };

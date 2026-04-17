@@ -4,6 +4,7 @@ import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserModal from '../../components/admin/UserModal';
 import ReferenceDataModal from '../../components/admin/ReferenceDataModal';
+import InstructorPresetModal from '../../components/admin/InstructorPresetModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { canEditAdminUsers } from '../../utils/roles';
@@ -41,6 +42,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [tiers, setTiers] = useState([]);
+  const [instructorPresets, setInstructorPresets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [referenceLoading, setReferenceLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,6 +55,7 @@ const UserManagement = () => {
 
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [showTierModal, setShowTierModal] = useState(false);
+  const [showInstructorPresetModal, setShowInstructorPresetModal] = useState(false);
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -84,12 +87,15 @@ const UserManagement = () => {
 
   const fetchReferenceData = async () => {
     try {
-      const [departmentResponse, tierResponse] = await Promise.all([
+      const requests = [
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
-      ]);
+        canEditUsers ? adminAPI.getInstructorPresets() : Promise.resolve({ data: [] }),
+      ];
+      const [departmentResponse, tierResponse, instructorPresetResponse] = await Promise.all(requests);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
+      setInstructorPresets(instructorPresetResponse.data);
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -230,6 +236,25 @@ const UserManagement = () => {
     }
   };
 
+  const handleInstructorPresetDelete = async (id, name) => {
+    const ok = await confirm({
+      title: 'ยืนยันการลบ preset วิทยากร',
+      message: `ต้องการลบ preset ของ "${name}" ใช่หรือไม่?`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteInstructorPreset(id);
+      toast.success('ลบ preset วิทยากรเรียบร้อย');
+      await fetchReferenceData();
+    } catch (error) {
+      console.error('Delete instructor preset error:', error);
+      toast.error(error.response?.data?.message || 'ลบ preset วิทยากรไม่สำเร็จ');
+    }
+  };
+
 
   const filteredUsers = useMemo(() => (
     users.filter((user) => {
@@ -278,6 +303,10 @@ const UserManagement = () => {
                 <button type="button" onClick={() => setShowTierModal(true)} className="btn btn-outline">
                   <Sparkles size={18} />
                   จัดการระดับผู้เรียน
+                </button>
+                <button type="button" onClick={() => setShowInstructorPresetModal(true)} className="btn btn-outline">
+                  <Sparkles size={18} />
+                  จัดการ preset วิทยากร
                 </button>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
@@ -346,6 +375,24 @@ const UserManagement = () => {
             onReorder={handleTierReorder}
             showAccessToggle={true}
           />
+
+          <InstructorPresetModal
+            isOpen={showInstructorPresetModal}
+            presets={instructorPresets}
+            loading={referenceLoading}
+            onClose={() => setShowInstructorPresetModal(false)}
+            onCreate={async (payload) => {
+              await adminAPI.createInstructorPreset(payload);
+              toast.success('สร้าง preset วิทยากรเรียบร้อย');
+              await fetchReferenceData();
+            }}
+            onUpdate={async (id, payload) => {
+              await adminAPI.updateInstructorPreset(id, payload);
+              toast.success('อัปเดต preset วิทยากรเรียบร้อย');
+              await fetchReferenceData();
+            }}
+            onDelete={handleInstructorPresetDelete}
+          />
         </>
       )}
 
@@ -359,7 +406,7 @@ const UserManagement = () => {
         }}
       />
 
-      <div className="card overflow-hidden">
+      <div className="card !overflow-visible">
         <UserFilters 
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}

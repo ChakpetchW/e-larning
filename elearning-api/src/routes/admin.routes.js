@@ -24,18 +24,34 @@ router.put('/tiers/reorder', verifySuperAdmin, adminController.reorderTiers);
 router.put('/tiers/:id', verifySuperAdmin, adminController.updateTier);
 router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 
-router.get('/courses', adminController.getAdminCourses);
-router.post('/courses', adminController.createCourse);
-router.put('/courses/:id/republish', adminController.republishCourse);
-router.put('/courses/:id', adminController.updateCourse);
-router.delete('/courses/:id', adminController.deleteCourse);
+router.get('/instructor-presets', verifySuperAdmin, adminController.getInstructorPresets);
+router.post('/instructor-presets', verifySuperAdmin, adminController.createInstructorPreset);
+router.put('/instructor-presets/:id', verifySuperAdmin, adminController.updateInstructorPreset);
+router.delete('/instructor-presets/:id', verifySuperAdmin, adminController.deleteInstructorPreset);
 
-router.get('/categories', adminController.getCategories);
-router.post('/categories', adminController.createCategory);
-router.put('/categories/reorder', adminController.reorderCategories);
-router.put('/categories/:id/republish', adminController.republishCategory);
-router.put('/categories/:id', adminController.updateCategory);
-router.delete('/categories/:id', adminController.deleteCategory);
+router.get('/courses', adminController.getAdminCourses);
+router.post('/courses', verifySuperAdmin, adminController.createCourse);
+router.put('/courses/:id/republish', verifySuperAdmin, adminController.republishCourse);
+router.put('/courses/:id/archive', verifySuperAdmin, adminController.archiveCourse);
+router.get('/courses/:id/history', verifySuperAdmin, adminController.getCourseHistory);
+router.put('/courses/:id', verifySuperAdmin, adminController.updateCourse);
+router.delete('/courses/:id', verifySuperAdmin, adminController.deleteCourse);
+
+router.get('/announcements', adminController.getAdminAnnouncements);
+router.post('/announcements', adminController.createAnnouncement);
+router.get('/announcements/:id/history', adminController.getAnnouncementHistory);
+router.put('/announcements/:id/republish', adminController.republishAnnouncement);
+router.put('/announcements/:id/archive', adminController.archiveAnnouncement);
+router.put('/announcements/:id', adminController.updateAnnouncement);
+router.delete('/announcements/:id', adminController.deleteAnnouncement);
+
+router.get('/categories', verifySuperAdmin, adminController.getCategories);
+router.post('/categories', verifySuperAdmin, adminController.createCategory);
+router.put('/categories/reorder', verifySuperAdmin, adminController.reorderCategories);
+router.put('/categories/:id/republish', verifySuperAdmin, adminController.republishCategory);
+router.put('/categories/:id/archive', verifySuperAdmin, adminController.archiveCategory);
+router.put('/categories/:id', verifySuperAdmin, adminController.updateCategory);
+router.delete('/categories/:id', verifySuperAdmin, adminController.deleteCategory);
 
 router.get('/rewards', verifySuperAdmin, adminController.getAdminRewards);
 router.post('/rewards', verifySuperAdmin, adminController.createReward);
@@ -46,13 +62,13 @@ router.get('/redeems', adminController.getRedeemRequests);
 router.put('/redeems/:id/status', adminController.updateRedeemStatus);
 
 // Lesson Management
-router.get('/courses/:courseId/lessons', adminController.getCourseLessons);
-router.put('/lessons/reorder', adminController.reorderLessons);
-router.post('/lessons', adminController.createLesson);
-router.put('/lessons/:id', adminController.updateLesson);
-router.delete('/lessons/:id', adminController.deleteLesson);
+router.get('/courses/:courseId/lessons', verifySuperAdmin, adminController.getCourseLessons);
+router.put('/lessons/reorder', verifySuperAdmin, adminController.reorderLessons);
+router.post('/lessons', verifySuperAdmin, adminController.createLesson);
+router.put('/lessons/:id', verifySuperAdmin, adminController.updateLesson);
+router.delete('/lessons/:id', verifySuperAdmin, adminController.deleteLesson);
 
 // Quiz Reports
-router.get('/courses/:courseId/quiz-reports', adminController.getCourseQuizAttempts);
+router.get('/courses/:courseId/quiz-reports', verifySuperAdmin, adminController.getCourseQuizAttempts);
 
 module.exports = router;

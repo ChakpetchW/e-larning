@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
+import ModalPortal from './ModalPortal';
 
 /**
  * ConfirmDialog — Premium confirmation modal replacing window.confirm().
@@ -71,68 +72,70 @@ const ConfirmDialog = ({
   };
 
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={handleOverlayClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-dialog-title"
-      aria-describedby="confirm-dialog-message"
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 animate-in zoom-in-95 duration-200 overflow-hidden">
-        {/* Header */}
-        <div className="flex items-start gap-4 p-6 pb-2">
-          <div className={`shrink-0 p-2.5 rounded-xl ${variantStyles[variant]?.iconBg || 'bg-red-50'}`}>
-            <AlertTriangle size={22} className={variantStyles[variant]?.icon || 'text-danger'} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3
-              id="confirm-dialog-title"
-              className="text-base font-bold text-slate-900"
+    <ModalPortal isOpen={isOpen}>
+      <div
+        ref={overlayRef}
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
+        onClick={handleOverlayClick}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-message"
+      >
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-in zoom-in-95 duration-200 overflow-hidden">
+          {/* Header */}
+          <div className="flex items-start gap-4 p-6 pb-2">
+            <div className={`shrink-0 p-2.5 rounded-xl ${variantStyles[variant]?.iconBg || 'bg-red-50'}`}>
+              <AlertTriangle size={22} className={variantStyles[variant]?.icon || 'text-danger'} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3
+                id="confirm-dialog-title"
+                className="text-base font-bold text-slate-900"
+              >
+                {title}
+              </h3>
+              <p
+                id="confirm-dialog-message"
+                className="mt-1 text-sm text-slate-500 leading-relaxed"
+              >
+                {message}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="shrink-0 p-1.5 -mt-1 -mr-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              aria-label="ปิด"
             >
-              {title}
-            </h3>
-            <p
-              id="confirm-dialog-message"
-              className="mt-1 text-sm text-slate-500 leading-relaxed"
-            >
-              {message}
-            </p>
+              <X size={16} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="shrink-0 p-1.5 -mt-1 -mr-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-            aria-label="ปิด"
-          >
-            <X size={16} />
-          </button>
-        </div>
 
-        {/* Actions */}
-        <div className="flex gap-3 p-6 pt-4">
-          <button
-            ref={cancelRef}
-            type="button"
-            onClick={onCancel}
-            className="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-colors"
-          >
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              onConfirm?.();
-              onCancel?.();
-            }}
-            className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${variantStyles[variant]?.btn || 'bg-danger text-white hover:bg-red-700'}`}
-          >
-            {confirmLabel}
-          </button>
+          {/* Actions */}
+          <div className="flex gap-3 p-6 pt-4">
+            <button
+              ref={cancelRef}
+              type="button"
+              onClick={onCancel}
+              className="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+            >
+              {cancelLabel}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onConfirm?.();
+                onCancel?.();
+              }}
+              className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-xl transition-colors ${variantStyles[variant]?.btn || 'bg-danger text-white hover:bg-red-700'}`}
+            >
+              {confirmLabel}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 };
 

@@ -27,11 +27,27 @@ const getGoalDetails = asyncHandler(async (req, res) => {
     });
 });
 
+const archiveGoal = asyncHandler(async (req, res) => {
+    await goalService.archiveGoal(req.params.id, req.user);
+    res.json({
+        success: true,
+        message: 'Goal archived successfully'
+    });
+});
+
+const republishGoal = asyncHandler(async (req, res) => {
+    await goalService.republishGoal(req.params.id, req.user);
+    res.json({
+        success: true,
+        message: 'Goal recovered successfully'
+    });
+});
+
 const deleteGoal = asyncHandler(async (req, res) => {
     await goalService.deleteGoal(req.params.id, req.user);
     res.json({
         success: true,
-        message: 'Goal archived successfully'
+        message: 'Goal deleted successfully'
     });
 });
 
@@ -47,6 +63,8 @@ module.exports = {
     createGoal,
     getGoals,
     getGoalDetails,
+    archiveGoal,
+    republishGoal,
     deleteGoal,
     getGoalReport
 };

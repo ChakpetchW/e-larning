@@ -40,7 +40,7 @@ const CourseList = () => {
       try {
         const [coursesRes, catRes] = await Promise.all([
           userAPI.getCourses(),
-          userAPI.getCategories()
+          userAPI.getCategories(),
         ]);
         setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : []);
         setCategories([

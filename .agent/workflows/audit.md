@@ -1,4 +1,4 @@
-﻿---
+---
 name: audit
 description: Perform comprehensive audit of interface quality across accessibility, performance, theming, and responsive design. Generates detailed report of issues with severity ratings and recommendations.
 ---

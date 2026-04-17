@@ -31,7 +31,7 @@ const HomeHero = ({
             </span> 👋
           </h1>
           <p className="mb-8 max-w-xl text-base md:text-lg font-medium text-slate-600 leading-relaxed">
-            พร้อมที่จะอัปเกรดทักษะของคุณแล้วหรือยัง? วันนี้มีบทเรียนใหม่ๆ รอคุณอยู่มากมาย
+            พร้อมที่จะอัปเกรดทักษะของคุณแล้วหรือยัง? วันนี้มีบทเรียนใหม่ๆ <br />รอคุณอยู่มากมาย
           </p>
           
           <div className="flex flex-wrap justify-center lg:justify-start gap-x-8 gap-y-4 w-full pt-6 border-t border-slate-300/50">
@@ -60,7 +60,7 @@ const HomeHero = ({
           {/* Visual Asset */}
           <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(180,83,9,0.14),transparent_34%),radial-gradient(circle_at_center,rgba(67,56,202,0.1),transparent_58%)] blur-3xl scale-110"></div>
           <img 
-            src="/assets/images/hero_premium.png" 
+            src="/assets/images/New-logo-scaleup_1.webp" 
             alt="Premium Learning Illustration" 
             className="hidden lg:block relative z-10 w-full max-w-[420px] object-contain drop-shadow-2xl animate-float"
           />

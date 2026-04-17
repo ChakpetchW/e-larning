@@ -1,6 +1,6 @@
 // Production seed - runs on every server start to ensure admin account exists
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 

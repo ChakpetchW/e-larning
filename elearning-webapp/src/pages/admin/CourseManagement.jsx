@@ -13,6 +13,7 @@ import LessonModal from '../../components/admin/LessonModal';
 import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
 import CourseFilters from '../../components/admin/CourseFilters';
 import CourseTable from '../../components/admin/CourseTable';
+import CourseAttendanceModal from '../../components/admin/CourseAttendanceModal';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 
@@ -22,8 +23,10 @@ const getDefaultCourseForm = () => ({
   categoryId: '',
   points: 100,
   image: '',
+  instructorPresetId: '',
   instructorName: 'ทีมวิทยากรผู้เชี่ยวชาญ',
   instructorRole: 'Enterprise Instructor',
+  instructorAvatar: '',
   instructorBio: '',
   previewVideoUrl: '',
   totalDuration: '',
@@ -55,6 +58,7 @@ const CourseManagement = () => {
   const [categories, setCategories] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [tiers, setTiers] = useState([]);
+  const [instructorPresets, setInstructorPresets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(FILTER_VALUES.ALL);
@@ -69,6 +73,9 @@ const CourseManagement = () => {
   const [quizReports, setQuizReports] = useState([]);
   const [loadingReports, setLoadingReports] = useState(false);
 
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [selectedHistoryCourse, setSelectedHistoryCourse] = useState(null);
+
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
   const [lessonForm, setLessonForm] = useState(getDefaultLessonForm());
@@ -82,17 +89,19 @@ const CourseManagement = () => {
 
   const fetchData = async () => {
     try {
-      const [courseResponse, categoryResponse, departmentResponse, tierResponse] = await Promise.all([
+      const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse] = await Promise.all([
         adminAPI.getCourses(),
         adminAPI.getCategories(),
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
+        adminAPI.getInstructorPresets(),
       ]);
 
       setCourses(courseResponse.data);
       setCategories(categoryResponse.data);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
+      setInstructorPresets(instructorPresetResponse.data);
     } catch (error) {
       console.error('Fetch course management data error:', error);
       toast.error('ไม่สามารถโหลดข้อมูลได้');
@@ -124,8 +133,10 @@ const CourseManagement = () => {
       categoryId: course.categoryId || '',
       points: course.points || 0,
       image: course.image || '',
+      instructorPresetId: course.instructorPresetId || '',
       instructorName: course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ',
       instructorRole: course.instructorRole || 'Enterprise Instructor',
+      instructorAvatar: course.instructorAvatar || '',
       instructorBio: course.instructorBio || '',
       previewVideoUrl: course.previewVideoUrl || '',
       totalDuration: course.totalDuration || '',
@@ -198,6 +209,22 @@ const CourseManagement = () => {
       console.error('Republish course error:', error);
       toast.error(error.response?.data?.message || 'ไม่สามารถนำคอร์สกลับมาเผยแพร่ได้');
     }
+  };
+
+  const handleArchiveCourse = async (id) => {
+    try {
+      await adminAPI.archiveCourse(id);
+      toast.success('เก็บเข้าคลังเรียบร้อย');
+      await fetchData();
+    } catch (error) {
+      console.error('Archive course error:', error);
+      toast.error('ไม่สามารถเก็บคอร์สเข้าคลังได้');
+    }
+  };
+
+  const handleViewHistory = (course) => {
+    setSelectedHistoryCourse(course);
+    setShowHistoryModal(true);
   };
 
   const handleDeleteCourse = async (id) => {
@@ -383,6 +410,8 @@ const CourseManagement = () => {
         onEdit={openEditCourse}
         onDelete={handleDeleteCourse}
         onRepublish={handleRepublishCourse}
+        onArchive={handleArchiveCourse}
+        onViewHistory={handleViewHistory}
       />
 
       <CourseModal
@@ -395,6 +424,7 @@ const CourseManagement = () => {
         courseForm={courseForm}
         setCourseForm={setCourseForm}
         categories={selectableCategories}
+        instructorPresets={instructorPresets}
         departments={departments}
         tiers={tiers}
         lessons={lessons}
@@ -425,6 +455,14 @@ const CourseManagement = () => {
         departments={departments}
         tiers={tiers}
         onRefresh={fetchData}
+      />
+
+      <CourseAttendanceModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        course={selectedHistoryCourse}
+        departments={departments}
+        tiers={tiers}
       />
 
       <LessonModal

@@ -93,7 +93,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
         </div>
   
         <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-          <div className="flex-1">
+          <div className="flex flex-1 flex-col">
             <div className="flex items-center gap-2.5">
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
                 <Layers3 size={13} className="text-slate-400" />
@@ -118,7 +118,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
               </div>
             )}
     
-            <div className="mt-4 flex items-end justify-between border-t border-slate-100 pt-4">
+            <div className="mt-auto flex items-end justify-between border-t border-slate-100 pt-4">
               <div className="flex-1">
                 {isInProgress && progressPercent > 0 && (
                   <div className="flex flex-col items-start w-full">

@@ -1,4 +1,4 @@
-﻿---
+---
 name: clarify
 description: Improve unclear UX copy, error messages, microcopy, labels, and instructions. Makes interfaces easier to understand and use.
 ---
@@ -151,7 +151,7 @@ Every piece of copy should follow these rules:
 
 **NEVER**:
 - Use jargon without explanation
-- Blame users ("You made an error" โ’ "This field is required")
+- Blame users ("You made an error" → "This field is required")
 - Be vague ("Something went wrong" without explanation)
 - Use passive voice unnecessarily
 - Write overly long explanations (be concise)

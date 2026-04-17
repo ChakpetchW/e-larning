@@ -1,15 +1,19 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, CalendarClock } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { useToast } from '../../context/ToastContext';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 
+
+// Sub-components
 // Sub-components
 import GoalList from '../../components/admin/GoalList';
 import CreateGoalModal from '../../components/admin/CreateGoalModal';
 import GoalReportModal from '../../components/admin/GoalReportModal';
+import ViewToggleTabs from '../../components/common/ViewToggleTabs';
 
 const GoalManagement = () => {
     const toast = useToast();
@@ -23,6 +27,9 @@ const GoalManagement = () => {
     const [reportLoading, setReportLoading] = useState(false);
     const [departments, setDepartments] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+    const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
+
+
     
     // Form state
     const [formData, setFormData] = useState({
@@ -111,6 +118,28 @@ const GoalManagement = () => {
         }
     };
 
+    const handleArchiveGoal = async (id) => {
+        try {
+            await adminAPI.archiveGoal(id);
+            toast.success('เก็บเป้าหมายเข้าคลังสำเร็จ');
+            fetchData();
+        } catch (err) {
+            console.error('Failed to archive goal', err);
+            toast.error('เก็บเป้าหมายไม่สำเร็จ');
+        }
+    };
+
+    const handleRepublishGoal = async (id) => {
+        try {
+            await adminAPI.republishGoal(id);
+            toast.success('นำเป้าหมายกลับมาใช้งานสำเร็จ');
+            fetchData();
+        } catch (err) {
+            console.error('Failed to republish goal', err);
+            toast.error('ไม่สามารถนำเป้าหมายกลับมาใช้งานได้');
+        }
+    };
+
     const handleViewReport = async (goal) => {
         setReportGoal(goal);
         setReportLoading(true);
@@ -141,13 +170,26 @@ const GoalManagement = () => {
         }));
     };
 
+    const activeGoals = useMemo(() => {
+        const now = new Date();
+        return goals.filter(g => g.status !== 'ARCHIVED' && (!g.expiryDate || new Date(g.expiryDate) > now));
+    }, [goals]);
+
+    const archivedGoals = useMemo(() => {
+        const now = new Date();
+        return goals.filter(g => g.status === 'ARCHIVED' || (g.expiryDate && new Date(g.expiryDate) <= now));
+    }, [goals]);
+
+    const displayGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
+
+
     const columns = [
         { label: 'ชื่อเป้าหมาย' },
         { label: 'ประเภท' },
         { label: 'รายละเอียด' },
         { label: 'วันหมดอายุ' },
         { label: 'ขอบเขต' },
-        { label: 'จัดการ', className: 'text-right' }
+        { label: 'จัดการ', className: 'text-center' }
     ];
 
     if (loading) {
@@ -171,12 +213,26 @@ const GoalManagement = () => {
                 }
             />
 
+            <ViewToggleTabs
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                tabs={[
+                    { key: ENTITY_VIEW_STATUS.ACTIVE, label: `กำลังใช้งาน (${activeGoals.length})`, icon: CalendarClock },
+                    { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เก็บเข้าคลัง (${archivedGoals.length})`, icon: CalendarClock }
+                ]}
+            />
+
+
             <GoalList 
-                goals={goals}
+                goals={displayGoals}
                 columns={columns}
+                viewMode={viewMode}
                 onViewReport={handleViewReport}
                 onDeleteGoal={handleDeleteGoal}
+                onArchiveGoal={handleArchiveGoal}
+                onRepublishGoal={handleRepublishGoal}
             />
+
 
             <CreateGoalModal 
                 isOpen={isModalOpen}

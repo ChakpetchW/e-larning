@@ -1,5 +1,5 @@
-﻿const prisma = require('../utils/prisma');
-const bcrypt = require('bcrypt');
+const prisma = require('../utils/prisma');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
@@ -13,6 +13,8 @@ const {
     REDEEM_STATUS
 } = require('../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
+const { ANNOUNCEMENT_SCOPES } = require('../utils/constants/scopes');
+
 
 const SUPABASE_BUCKET = 'uploads';
 const DOCUMENT_SIGNED_URL_TTL_SECONDS = 90;
@@ -58,7 +60,7 @@ const getStorageObjectRefFromContentUrl = (contentUrl) => {
     return null;
 };
 
-const createDocumentAccessToken = ({ userId, lessonId, contentUrl }) => {
+const createDocumentAccessToken = ({ userId, resourceType, resourceId, contentUrl }) => {
     const storageRef = getStorageObjectRefFromContentUrl(contentUrl);
     const sourceUrl = String(contentUrl || '').trim();
 
@@ -70,7 +72,8 @@ const createDocumentAccessToken = ({ userId, lessonId, contentUrl }) => {
         {
             type: 'document_access',
             userId,
-            lessonId,
+            resourceType,
+            resourceId,
             bucket: storageRef?.bucket || SUPABASE_BUCKET,
             path: storageRef?.path || null,
             sourceUrl: storageRef?.path ? null : sourceUrl
@@ -80,7 +83,7 @@ const createDocumentAccessToken = ({ userId, lessonId, contentUrl }) => {
     );
 };
 
-const verifyDocumentAccessToken = (token, lessonId) => {
+const verifyDocumentAccessToken = (token, { resourceType, resourceId }) => {
     if (!token) {
         throw new ErrorResponse('Document access token is required', 401);
     }
@@ -90,7 +93,8 @@ const verifyDocumentAccessToken = (token, lessonId) => {
 
         if (
             payload?.type !== 'document_access'
-            || payload?.lessonId !== lessonId
+            || payload?.resourceType !== resourceType
+            || payload?.resourceId !== resourceId
             || (!payload?.path && !payload?.sourceUrl)
         ) {
             throw new ErrorResponse('Invalid document access token', 401);
@@ -226,6 +230,61 @@ const getCourseRewardSummary = (course) => {
     };
 };
 
+const buildAnnouncementVisibilityWhere = (userContext, referenceDate = new Date()) => {
+    if (userContext.isAdmin) {
+        return {};
+    }
+
+    return {
+        AND: [
+            { status: ENTITY_STATUS.PUBLISHED },
+            authHelpers.buildTimedVisibilityWhere({
+                referenceDate,
+                expiresAtField: 'expiredAt',
+                temporaryFlagField: null
+            }),
+            {
+                OR: [
+                    { scope: ANNOUNCEMENT_SCOPES.GLOBAL },
+                    userContext.departmentId
+                        ? { departmentId: userContext.departmentId }
+                        : { id: '__no_visible_specific_announcements__' }
+                ]
+            }
+        ]
+    };
+
+};
+
+const canAccessAnnouncement = (announcement, userContext, referenceDate = new Date()) => {
+    if (!announcement) {
+        return false;
+    }
+
+    if (userContext.isAdmin) {
+        return true;
+    }
+
+    if (announcement.status !== ENTITY_STATUS.PUBLISHED) {
+        return false;
+    }
+
+    if (authHelpers.isExpiredAt(announcement.expiredAt, referenceDate)) {
+        return false;
+    }
+
+    if (announcement.scope === ANNOUNCEMENT_SCOPES.GLOBAL) {
+        return true;
+    }
+
+    return !!userContext.departmentId && announcement.departmentId === userContext.departmentId;
+
+};
+
+const isProtectedAnnouncementDocument = (announcement) => (
+    !!announcement?.contentUrl && !['video', 'quiz'].includes(String(announcement?.type || '').toLowerCase())
+);
+
 const getCourses = async (userId) => {
     const userContext = await getVisibleCourseQuery(userId);
     const referenceDate = new Date();
@@ -299,6 +358,40 @@ const getCourses = async (userId) => {
             ...rewardSummary
         };
     });
+};
+
+const getAnnouncements = async (userId) => {
+    const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
+    const announcements = await prisma.announcement.findMany({
+        where: buildAnnouncementVisibilityWhere(userContext, referenceDate),
+        include: {
+            department: true,
+            creator: {
+                select: {
+                    id: true,
+                    name: true
+                }
+            },
+            _count: {
+                select: {
+                    questions: true
+                }
+            }
+        },
+        orderBy: [
+            { createdAt: 'desc' }
+        ]
+    });
+
+    return announcements
+        .filter((announcement) => canAccessAnnouncement(announcement, userContext, referenceDate))
+        .map((announcement) => ({
+            ...announcement,
+            questionCount: announcement._count?.questions || 0,
+            isAnnouncement: true,
+            _count: undefined
+        }));
 };
 
 const updateProfile = async (userId, data) => {
@@ -436,6 +529,61 @@ const getCourseDetails = async (courseId, userId) => {
     };
 };
 
+const getAnnouncementDetails = async (announcementId, userId) => {
+    const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
+    const announcement = await prisma.announcement.findFirst({
+        where: {
+            id: announcementId,
+            ...buildAnnouncementVisibilityWhere(userContext, referenceDate)
+        },
+        include: {
+            department: true,
+            creator: {
+                select: {
+                    id: true,
+                    name: true
+                }
+            },
+            _count: {
+                select: {
+                    questions: true
+                }
+            }
+        }
+    });
+
+    if (!announcement || !canAccessAnnouncement(announcement, userContext, referenceDate)) {
+        return null;
+    }
+
+    // Record attendance / view
+    await prisma.announcementView.upsert({
+        where: {
+            userId_announcementId: {
+                userId,
+                announcementId
+            }
+        },
+        update: {
+            viewedAt: new Date()
+        },
+        create: {
+            userId,
+            announcementId,
+            viewedAt: new Date()
+        }
+    });
+
+    return {
+        ...announcement,
+        contentUrl: isProtectedAnnouncementDocument(announcement) ? null : announcement.contentUrl,
+        hasDocument: isProtectedAnnouncementDocument(announcement),
+        questionCount: announcement._count?.questions || 0,
+        _count: undefined
+    };
+};
+
 const getLessonDocumentAccess = async (userId, lessonId) => {
     const lesson = await prisma.lesson.findUnique({
         where: { id: lessonId },
@@ -470,7 +618,8 @@ const getLessonDocumentAccess = async (userId, lessonId) => {
 
     const token = createDocumentAccessToken({
         userId,
-        lessonId: lesson.id,
+        resourceType: 'lesson',
+        resourceId: lesson.id,
         contentUrl: lesson.contentUrl
     });
     const previewMeta = getDocumentPreviewMeta(lesson.contentUrl);
@@ -484,7 +633,60 @@ const getLessonDocumentAccess = async (userId, lessonId) => {
 };
 
 const getLessonDocumentStream = async (lessonId, token) => {
-    const documentAccessPayload = verifyDocumentAccessToken(token, lessonId);
+    const documentAccessPayload = verifyDocumentAccessToken(token, {
+        resourceType: 'lesson',
+        resourceId: lessonId
+    });
+    return getDocumentUpstreamResponse(documentAccessPayload);
+};
+
+const getAnnouncementDocumentAccess = async (userId, announcementId) => {
+    const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
+    const announcement = await prisma.announcement.findFirst({
+        where: {
+            id: announcementId,
+            ...buildAnnouncementVisibilityWhere(userContext, referenceDate)
+        },
+        select: {
+            id: true,
+            type: true,
+            contentUrl: true,
+            departmentId: true,
+            status: true,
+            expiredAt: true
+        }
+    });
+
+    if (!announcement || !canAccessAnnouncement(announcement, userContext, referenceDate)) {
+        throw new ErrorResponse('Announcement not found', 404);
+    }
+
+    if (!isProtectedAnnouncementDocument(announcement)) {
+        throw new ErrorResponse('Document not found for this announcement', 404);
+    }
+
+    const token = createDocumentAccessToken({
+        userId,
+        resourceType: 'announcement',
+        resourceId: announcement.id,
+        contentUrl: announcement.contentUrl
+    });
+    const previewMeta = getDocumentPreviewMeta(announcement.contentUrl);
+
+    return {
+        announcementId: announcement.id,
+        accessUrl: `/api/user/announcements/${announcement.id}/document-stream?token=${encodeURIComponent(token)}`,
+        expiresIn: DOCUMENT_ACCESS_TOKEN_TTL_SECONDS,
+        ...previewMeta
+    };
+};
+
+const getAnnouncementDocumentStream = async (announcementId, token) => {
+    const documentAccessPayload = verifyDocumentAccessToken(token, {
+        resourceType: 'announcement',
+        resourceId: announcementId
+    });
     return getDocumentUpstreamResponse(documentAccessPayload);
 };
 
@@ -980,18 +1182,132 @@ const getLessonQuestions = async (lessonId) => {
     return lesson?.questions || [];
 };
 
+const getAnnouncementQuestions = async (announcementId, userId) => {
+    const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
+    const announcement = await prisma.announcement.findFirst({
+        where: {
+            id: announcementId,
+            ...buildAnnouncementVisibilityWhere(userContext, referenceDate)
+        },
+        include: {
+            questions: {
+                include: {
+                    choices: {
+                        select: {
+                            id: true,
+                            questionId: true,
+                            text: true
+                        }
+                    }
+                },
+                orderBy: { order: 'asc' }
+            }
+        }
+    });
+
+    if (!announcement || !canAccessAnnouncement(announcement, userContext, referenceDate)) {
+        throw new Error('Announcement not found');
+    }
+
+    return announcement.questions || [];
+};
+
+const submitAnnouncementQuiz = async (userId, announcementId, answers) => {
+    const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
+    const announcement = await prisma.announcement.findFirst({
+        where: {
+            id: announcementId,
+            ...buildAnnouncementVisibilityWhere(userContext, referenceDate)
+        },
+        include: {
+            questions: {
+                include: {
+                    choices: true
+                }
+            }
+        }
+    });
+
+    if (!announcement || !canAccessAnnouncement(announcement, userContext, referenceDate) || announcement.type !== 'quiz') {
+        throw new Error('Announcement quiz not found');
+    }
+
+    let score = 0;
+    let totalPoints = 0;
+    const correctAnswers = {};
+
+    announcement.questions.forEach((question) => {
+        totalPoints += question.points;
+        const userChoiceId = answers[question.id];
+        const correctChoice = question.choices.find((choice) => choice.isCorrect);
+
+        if (correctChoice) {
+            correctAnswers[question.id] = correctChoice.id;
+
+            if (correctChoice.id === userChoiceId) {
+                score += question.points;
+            }
+        }
+    });
+
+    const passScore = announcement.passScore || 60;
+    const scorePercent = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 100;
+    const passed = scorePercent >= passScore;
+
+    // Record quiz result in attendance
+    await prisma.announcementView.upsert({
+        where: {
+            userId_announcementId: {
+                userId,
+                announcementId
+            }
+        },
+        update: {
+            score: scorePercent,
+            passed: passed,
+            updatedAt: new Date()
+        },
+        create: {
+            userId,
+            announcementId,
+            score: scorePercent,
+            passed: passed,
+            viewedAt: new Date()
+        }
+    });
+
+    return {
+        score,
+        scorePercent,
+        passed,
+        passScore,
+        correctAnswers,
+        earnedQuizPoints: 0,
+        earnedCoursePoints: 0,
+        earnedPoints: 0
+    };
+};
+
 module.exports = {
     getCourses,
+    getAnnouncements,
     updateProfile,
     getCourseDetails,
+    getAnnouncementDetails,
     enrollCourse,
     updateLessonProgress,
     submitQuiz,
+    submitAnnouncementQuiz,
     getPointsHistory,
     getRewardsData,
     requestRedeem,
     getCategories,
     getLessonQuestions,
+    getAnnouncementQuestions,
     getLessonDocumentAccess,
-    getLessonDocumentStream
+    getLessonDocumentStream,
+    getAnnouncementDocumentAccess,
+    getAnnouncementDocumentStream
 };

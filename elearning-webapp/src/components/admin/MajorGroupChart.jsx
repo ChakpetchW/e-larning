@@ -7,10 +7,14 @@ import {
 const COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
 
 const TYPE_COLORS = {
-  'LEADERSHIP': '#6366f1',
-  'FUNCTION': '#94a3b8',
-  'INNOVATION': '#f59e0b'
+  'KNOWLEDGE & COURSE MANAGEMENT': '#6366f1',
+  'LEARNING EXPERIENCE & ASSESSMENT': '#10b981',
+  'INCENTIVE & REWARD SYSTEM': '#f59e0b',
+  'TRACKING & ANALYTICS': '#3b82f6',
+  'GOAL SETTING & LEARNING PATH': '#8b5cf6',
+  'INTERNAL COMMUNICATION': '#f43f5e'
 };
+
 
 const MajorGroupChart = ({ data, onSelectGroup }) => {
   return (
@@ -18,8 +22,9 @@ const MajorGroupChart = ({ data, onSelectGroup }) => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <PieIcon size={20} className="text-indigo-600" />
-          <h3 className="text-lg font-bold">สถิติตามกลุ่มหลัก (Major Group)</h3>
+          <h3 className="text-lg font-bold">สถิติตามกลุ่มโมดูล (Module Stats)</h3>
         </div>
+
         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-2 py-1 rounded-md">คลิกดูรายละเอียด</span>
       </div>
       
@@ -53,9 +58,10 @@ const MajorGroupChart = ({ data, onSelectGroup }) => {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Major Groups</p>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Platform Modules</p>
             <p className="text-2xl font-black text-slate-800 leading-none">{(data || []).length}</p>
           </div>
+
         </div>
 
         <div className="flex-1 w-full space-y-3">

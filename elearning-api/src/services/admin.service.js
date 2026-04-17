@@ -1,13 +1,16 @@
 const prisma = require('../utils/prisma');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const authHelpers = require('../utils/auth.helpers');
 const { USER_ROLES } = require('../utils/constants/roles');
 const { ENTITY_STATUS, ENROLLMENT_STATUS, REDEEM_STATUS } = require('../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 const { TRANSACTION_TIMEOUTS } = require('../utils/constants/config');
+const { ANNOUNCEMENT_SCOPES } = require('../utils/constants/scopes');
+
 
 const courseInclude = {
     category: true,
+    instructorPreset: true,
     departmentAccess: {
         include: {
             department: true
@@ -22,6 +25,25 @@ const courseInclude = {
         select: {
             enrollments: true,
             lessons: true
+        }
+    }
+};
+
+const announcementInclude = {
+    department: true,
+    creator: {
+        select: {
+            id: true,
+            name: true,
+            email: true
+        }
+    },
+    questions: {
+        include: {
+            choices: true
+        },
+        orderBy: {
+            order: 'asc'
         }
     }
 };
@@ -126,7 +148,7 @@ const sanitizeName = (value, entityLabel) => {
 const mapUserRecord = authHelpers.mapUserRecord;
 
 const mapCourseRecord = (course) => {
-    const { departmentAccess, tierAccess, ...rest } = course;
+    const { departmentAccess, tierAccess, instructorPreset, ...rest } = course;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
     const isArchived = authHelpers.isTimedEntityExpired(rest);
@@ -134,6 +156,7 @@ const mapCourseRecord = (course) => {
     return {
         ...rest,
         isArchived,
+        instructorPreset,
         visibleDepartments,
         visibleDepartmentIds: visibleDepartments.map((department) => department.id),
         visibleTiers,
@@ -154,7 +177,21 @@ const mapCategoryRecord = (category) => {
         visibleDepartmentIds: visibleDepartments.map((department) => department.id),
         visibleTiers,
         visibleTierIds: visibleTiers.map((tier) => tier.id),
-        type: rest.type || 'FUNCTION'
+        type: rest.type || 'KM_COURSE'
+    };
+};
+
+
+const mapAnnouncementRecord = (announcement) => {
+    const { creator, questions, ...rest } = announcement;
+    const isArchived = authHelpers.isExpiredAt(rest.expiredAt);
+
+    return {
+        ...rest,
+        creator,
+        questions: questions || [],
+        questionCount: Array.isArray(questions) ? questions.length : 0,
+        isArchived
     };
 };
 
@@ -300,6 +337,22 @@ const ensureReferenceIdsExist = async (tx, modelName, ids) => {
     }
 };
 
+const ensureInstructorPresetExists = async (tx, id) => {
+    if (!id) {
+        return null;
+    }
+
+    const preset = await tx.instructorPreset.findUnique({
+        where: { id }
+    });
+
+    if (!preset) {
+        throw new Error('Instructor preset not found');
+    }
+
+    return preset;
+};
+
 const buildTemporaryStateData = (input) => {
     const isTemporary = Boolean(input.isTemporary);
     const expiredAt = parseOptionalDate(input.expiredAt);
@@ -373,6 +426,7 @@ const buildCourseMutationPayload = async (tx, input) => {
     const visibleDepartmentIds = normalizeIdArray(input.visibleDepartmentIds);
     const visibleTierIds = normalizeIdArray(input.visibleTierIds);
     const categoryId = normalizeNullableId(input.categoryId);
+    const instructorPresetId = normalizeNullableId(input.instructorPresetId);
     const temporaryState = buildTemporaryStateData(input);
 
     // Using sequential await instead of Promise.all to prevent "Transaction already closed" 
@@ -380,20 +434,22 @@ const buildCourseMutationPayload = async (tx, input) => {
     await ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds);
     await ensureReferenceIdsExist(tx, 'tier', visibleTierIds);
     await ensureReferenceName(tx, 'category', categoryId);
+    const instructorPreset = await ensureInstructorPresetExists(tx, instructorPresetId);
 
     const data = {
         title: input.title,
         description: input.description || null,
         categoryId,
+        instructorPresetId: instructorPreset?.id || null,
         points: parseInteger(input.points, 0),
         status: input.status || undefined,
         image: input.image || null,
         visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true,
         ...temporaryState,
-        instructorName: input.instructorName || null,
-        instructorRole: input.instructorRole || null,
-        instructorAvatar: input.instructorAvatar || null,
-        instructorBio: input.instructorBio || null,
+        instructorName: input.instructorName || instructorPreset?.name || null,
+        instructorRole: input.instructorRole || instructorPreset?.role || null,
+        instructorAvatar: input.instructorAvatar || instructorPreset?.avatar || null,
+        instructorBio: input.instructorBio || instructorPreset?.bio || null,
         previewVideoUrl: input.previewVideoUrl || null,
         totalDuration: input.totalDuration || null,
         whatYouWillLearn: input.whatYouWillLearn || null,
@@ -449,8 +505,9 @@ const buildCategoryMutationPayload = async (tx, input) => {
         data: {
             name: sanitizeName(input.name, 'Category'),
             icon: input.icon || 'Grid',
-            type: input.type || 'FUNCTION',
+            type: input.type || 'KM_COURSE',
             order: parseInteger(input.order, 0),
+
             visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true,
             ...temporaryState
         },
@@ -485,6 +542,74 @@ const saveCategoryVisibility = async (tx, categoryId, visibleToAll, visibleDepar
         });
     }
 };
+
+const buildAnnouncementQuestionsCreate = (questions = []) => questions.map((question, index) => ({
+    text: question.text,
+    order: index,
+    points: parseInteger(question.points, 1),
+    choices: {
+        create: (question.choices || []).map((choice) => ({
+            text: choice.text,
+            isCorrect: !!choice.isCorrect
+        }))
+    }
+}));
+
+const buildAnnouncementMutationPayload = async (tx, actor, input) => {
+    const requestedDepartmentId = normalizeNullableId(input.departmentId);
+    const scope = (input.scope || ANNOUNCEMENT_SCOPES.DEPARTMENT).toUpperCase();
+    
+    // Only admins can create GLOBAL announcements
+    const effectiveScope = actor.isAdmin ? scope : ANNOUNCEMENT_SCOPES.DEPARTMENT;
+    
+    let departmentId = null;
+    if (effectiveScope === ANNOUNCEMENT_SCOPES.DEPARTMENT) {
+        departmentId = actor.isManager ? actor.departmentId : requestedDepartmentId;
+        
+        if (!departmentId) {
+            throw new Error('Department is required for department-scoped announcements');
+        }
+        
+        await ensureReferenceName(tx, 'department', departmentId);
+    }
+
+
+    const type = String(input.type || 'article').trim().toLowerCase();
+    const questions = Array.isArray(input.questions) ? input.questions : [];
+    const formattedQuestions = type === 'quiz' ? buildAnnouncementQuestionsCreate(questions) : [];
+
+    return {
+        data: {
+            title: sanitizeName(input.title, 'Announcement'),
+            description: input.description || null,
+            image: input.image || null,
+            type,
+            contentUrl: input.contentUrl || null,
+            content: input.content || null,
+            duration: input.duration ? String(input.duration) : null,
+            passScore: type === 'quiz' ? parseInteger(input.passScore, 60) : null,
+            scope: effectiveScope,
+            departmentId,
+            status: input.status || ENTITY_STATUS.PUBLISHED,
+            expiredAt: parseOptionalDate(input.expiredAt, 'Announcement expiration date')
+
+        },
+        formattedQuestions
+    };
+};
+
+const buildAnnouncementWhereForActor = (actor, extraWhere = {}) => (
+    actor.isManager
+        ? {
+            OR: [
+                { scope: ANNOUNCEMENT_SCOPES.GLOBAL },
+                { departmentId: actor.departmentId }
+            ],
+            ...extraWhere
+        }
+        : extraWhere
+
+);
 
 // DASHBOARD
 const getDashboardStats = async (authUser) => {
@@ -618,14 +743,18 @@ const getDashboardStats = async (authUser) => {
     });
 
     const typeMap = {
-        'LEADERSHIP': { name: 'Leadership', value: 0, enrollmentCount: 0, courses: [] },
-        'FUNCTION': { name: 'Function', value: 0, enrollmentCount: 0, courses: [] },
-        'INNOVATION': { name: 'Innovation', value: 0, enrollmentCount: 0, courses: [] }
+        'KM_COURSE': { name: 'Knowledge & Course Management', value: 0, enrollmentCount: 0, courses: [] },
+        'LEARNING_ASSESS': { name: 'Learning Experience & Assessment', value: 0, enrollmentCount: 0, courses: [] },
+        'INCENTIVE_REWARD': { name: 'Incentive & Reward System', value: 0, enrollmentCount: 0, courses: [] },
+        'TRACKING_ANALYTICS': { name: 'Tracking & Analytics', value: 0, enrollmentCount: 0, courses: [] },
+        'GOAL_PATH': { name: 'Goal Setting & Learning Path', value: 0, enrollmentCount: 0, courses: [] },
+        'INTERNAL_COMM': { name: 'Internal Communication', value: 0, enrollmentCount: 0, courses: [] }
     };
 
     coursesByType.forEach(course => {
-        const typeKey = course.category?.type || 'FUNCTION';
-        const group = typeMap[typeKey] || typeMap['FUNCTION'];
+        const typeKey = course.category?.type || 'KM_COURSE';
+        const group = typeMap[typeKey] || typeMap['KM_COURSE'];
+
         
         group.value += 1;
         group.enrollmentCount += course._count.enrollments;
@@ -890,6 +1019,37 @@ const reorderTiers = async (tierIds) => prisma.$transaction(
     }))
 );
 
+// INSTRUCTORS
+const getInstructorPresets = async () => prisma.instructorPreset.findMany({
+    orderBy: [
+        { name: 'asc' },
+        { createdAt: 'desc' }
+    ]
+});
+
+const createInstructorPreset = async (input) => prisma.instructorPreset.create({
+    data: {
+        name: sanitizeName(input.name, 'Instructor preset'),
+        role: input.role || null,
+        avatar: input.avatar || null,
+        bio: input.bio || null
+    }
+});
+
+const updateInstructorPreset = async (id, input) => prisma.instructorPreset.update({
+    where: { id },
+    data: {
+        name: sanitizeName(input.name, 'Instructor preset'),
+        role: input.role || null,
+        avatar: input.avatar || null,
+        bio: input.bio || null
+    }
+});
+
+const deleteInstructorPreset = async (id) => prisma.instructorPreset.delete({
+    where: { id }
+});
+
 
 // COURSES
 const getAdminCourses = async () => {
@@ -969,7 +1129,189 @@ const republishCourse = async (id) => {
     return mapCourseRecord(course);
 };
 
+const archiveCourse = async (id) => {
+    const pastDate = new Date();
+    pastDate.setMinutes(pastDate.getMinutes() - 5);
+    
+    const course = await prisma.course.update({
+        where: { id },
+        data: {
+            isTemporary: true,
+            expiredAt: pastDate
+        },
+        include: courseInclude
+    });
+
+    return mapCourseRecord(course);
+};
+
+const getCourseHistory = async (courseId, filters = {}) => {
+    const { departmentId, tierId, month, year } = filters;
+    
+    const whereClause = {
+        courseId
+    };
+
+    const userWhere = {};
+    if (departmentId) userWhere.departmentId = departmentId;
+    if (tierId) userWhere.tierId = tierId;
+    if (Object.keys(userWhere).length > 0) {
+        whereClause.user = userWhere;
+    }
+
+    if (month && year) {
+        const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+        const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59, 999);
+        whereClause.startedAt = {
+            gte: startDate,
+            lte: endDate
+        };
+    }
+
+    const enrollments = await prisma.userCourse.findMany({
+        where: whereClause,
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    departmentRef: {
+                        select: { name: true }
+                    },
+                    tier: {
+                        select: { name: true }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            startedAt: 'desc'
+        }
+    });
+
+    const userIds = enrollments.map(e => e.user.id);
+    const quizAttemptsContext = await prisma.quizAttempt.findMany({
+        where: {
+            userId: { in: userIds },
+            lesson: { courseId }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+
+    const quizMap = {};
+    quizAttemptsContext.forEach(attempt => {
+        if (!quizMap[attempt.userId]) {
+            quizMap[attempt.userId] = attempt;
+        }
+    });
+
+    return enrollments.map(enrollment => ({
+        id: enrollment.id,
+        user: {
+            id: enrollment.user.id,
+            name: enrollment.user.name,
+            department: enrollment.user.departmentRef?.name || '-',
+            tier: enrollment.user.tier?.name || '-'
+        },
+        status: enrollment.status,
+        progressPercent: enrollment.progressPercent,
+        startedAt: enrollment.startedAt,
+        completedAt: enrollment.completedAt,
+        quizScore: quizMap[enrollment.user.id]?.score ?? null,
+        quizPassed: quizMap[enrollment.user.id]?.status === 'PASSED'
+    }));
+};
+
 const deleteCourse = async (id) => prisma.course.delete({ where: { id } });
+
+// ANNOUNCEMENTS
+const getAdminAnnouncements = async (authUser) => {
+    const actor = await getActorContext(authUser);
+    const announcements = await prisma.announcement.findMany({
+        where: buildAnnouncementWhereForActor(actor),
+        include: announcementInclude,
+        orderBy: [
+            { createdAt: 'desc' }
+        ]
+    });
+
+    return announcements.map(mapAnnouncementRecord);
+};
+
+const createAnnouncement = async (authUser, input) => prisma.$transaction(async (tx) => {
+    const actor = await getActorContext(authUser);
+    const { data, formattedQuestions } = await buildAnnouncementMutationPayload(tx, actor, input);
+
+    const announcement = await tx.announcement.create({
+        data: {
+            ...data,
+            createdById: actor.id,
+            questions: formattedQuestions.length > 0
+                ? {
+                    create: formattedQuestions
+                }
+                : undefined
+        },
+        include: announcementInclude
+    });
+
+    return mapAnnouncementRecord(announcement);
+}, {
+    maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
+    timeout: TRANSACTION_TIMEOUTS.LONG_RUNNING_TIMEOUT
+});
+
+const updateAnnouncement = async (id, authUser, input) => prisma.$transaction(async (tx) => {
+    const actor = await getActorContext(authUser);
+    const existingAnnouncement = await tx.announcement.findFirst({
+        where: buildAnnouncementWhereForActor(actor, { id }),
+        select: { id: true }
+    });
+
+    if (!existingAnnouncement) {
+        throw new Error('Announcement not found');
+    }
+
+    const { data, formattedQuestions } = await buildAnnouncementMutationPayload(tx, actor, input);
+
+    await tx.announcementQuestion.deleteMany({
+        where: { announcementId: id }
+    });
+
+    const announcement = await tx.announcement.update({
+        where: { id },
+        data: {
+            ...data,
+            questions: formattedQuestions.length > 0
+                ? {
+                    create: formattedQuestions
+                }
+                : undefined
+        },
+        include: announcementInclude
+    });
+
+    return mapAnnouncementRecord(announcement);
+}, {
+    maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
+    timeout: TRANSACTION_TIMEOUTS.LONG_RUNNING_TIMEOUT
+});
+
+const deleteAnnouncement = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const announcement = await prisma.announcement.findFirst({
+        where: buildAnnouncementWhereForActor(actor, { id }),
+        select: { id: true }
+    });
+
+    if (!announcement) {
+        throw new Error('Announcement not found');
+    }
+
+    return prisma.announcement.delete({
+        where: { id }
+    });
+};
 
 // CATEGORIES
 const getCategories = async () => {
@@ -1031,6 +1373,15 @@ const republishCategory = async (id) => {
 
     return mapCategoryRecord(category);
 };
+
+const archiveCategory = async (id) => prisma.category.update({
+    where: { id },
+    data: {
+        isTemporary: true,
+        expiredAt: new Date()
+    },
+    include: categoryInclude
+});
 
 const deleteCategory = async (id) => prisma.category.delete({
     where: { id }
@@ -1291,6 +1642,71 @@ const getCourseQuizAttempts = async (courseId) => {
     }));
 };
 
+const archiveAnnouncement = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const where = buildAnnouncementWhereForActor(actor, { id });
+
+    return prisma.announcement.update({
+        where: { id },
+        data: {
+            expiredAt: new Date()
+        }
+    });
+};
+
+const republishAnnouncement = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const where = buildAnnouncementWhereForActor(actor, { id });
+
+    return prisma.announcement.update({
+        where: { id },
+        data: {
+            expiredAt: null
+        }
+    });
+};
+
+const getAnnouncementHistory = async (id, authUser) => {
+    const actor = await getActorContext(authUser);
+    const where = buildAnnouncementWhereForActor(actor, { id });
+
+    const announcement = await prisma.announcement.findFirst({
+        where
+    });
+
+    if (!announcement) {
+        throw new Error('Announcement not found');
+    }
+
+    const views = await prisma.announcementView.findMany({
+        where: { announcementId: id },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    department: true,
+                    departmentRef: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: { viewedAt: 'desc' }
+    });
+
+    return views.map((view) => ({
+        ...view,
+        user: {
+            ...view.user,
+            department: view.user.departmentRef?.name || view.user.department || null
+        }
+    }));
+};
+
 module.exports = {
     getDashboardStats,
     getUsers,
@@ -1307,15 +1723,29 @@ module.exports = {
     updateTier,
     deleteTier,
     reorderTiers,
+    getInstructorPresets,
+    createInstructorPreset,
+    updateInstructorPreset,
+    deleteInstructorPreset,
     getAdminCourses,
     createCourse,
     updateCourse,
     republishCourse,
+    archiveCourse,
+    getCourseHistory,
     deleteCourse,
+    getAdminAnnouncements,
+    createAnnouncement,
+    updateAnnouncement,
+    deleteAnnouncement,
+    archiveAnnouncement,
+    republishAnnouncement,
+    getAnnouncementHistory,
     getCategories,
     createCategory,
     updateCategory,
     republishCategory,
+    archiveCategory,
     deleteCategory,
     reorderCategories,
     getAdminRewards,

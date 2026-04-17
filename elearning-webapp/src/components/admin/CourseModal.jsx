@@ -27,6 +27,7 @@ const CourseModal = ({
   courseForm,
   setCourseForm,
   categories,
+  instructorPresets,
   departments,
   tiers,
   lessons,
@@ -71,7 +72,7 @@ const CourseModal = ({
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 lg:p-8 backdrop-blur-md animate-fade-in overflow-hidden">
-        <div className="card bg-white w-full max-w-6xl h-full overflow-hidden shadow-xl flex flex-col m-auto border border-gray-100">
+        <div className="card bg-white w-full max-w-6xl h-full shadow-xl flex flex-col m-auto border border-gray-100">
           {/* Header & Tabs */}
           <div className="p-4 border-b border-border bg-gray-50 flex justify-between items-center">
             <h3 className="text-xl font-bold">{isEditing ? 'แก้ไขคอร์สเรียน' : 'สร้างคอร์สใหม่'}</h3>
@@ -112,6 +113,7 @@ const CourseModal = ({
                 courseForm={courseForm}
                 setCourseForm={setCourseForm}
                 categories={categories}
+                instructorPresets={instructorPresets}
                 departments={departments}
                 tiers={tiers}
                 onSaveCourse={onSaveCourse}

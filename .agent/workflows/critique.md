@@ -1,9 +1,9 @@
-﻿---
+---
 name: critique
 description: Evaluate design effectiveness from a UX perspective. Assesses visual hierarchy, information architecture, emotional resonance, and overall design quality with actionable feedback.
 ---
 
-Conduct a holistic design critique, evaluating whether the interface actually worksโ€”not just technically, but as a designed experience. Think like a design director giving feedback.
+Conduct a holistic design critique, evaluating whether the interface actually works—not just technically, but as a designed experience. Think like a design director giving feedback.
 
 **First**: Use the frontend-design skill for design principles and anti-patterns.
 
@@ -15,7 +15,7 @@ Evaluate the interface across these dimensions:
 
 **This is the most important check.** Does this look like every other AI-generated interface from 2024-2025?
 
-Review the design against ALL the **DON'T** guidelines in the frontend-design skillโ€”they are the fingerprints of AI-generated work. Check for the AI color palette, gradient text, dark mode with glowing accents, glassmorphism, hero metric layouts, identical card grids, generic fonts, and all other tells.
+Review the design against ALL the **DON'T** guidelines in the frontend-design skill—they are the fingerprints of AI-generated work. Check for the AI color palette, gradient text, dark mode with glowing accents, glassmorphism, hero metric layouts, identical card grids, generic fonts, and all other tells.
 
 **The test**: If you showed this to someone and said "AI made this," would they believe you immediately? If yes, that's the problem.
 
@@ -34,7 +34,7 @@ Review the design against ALL the **DON'T** guidelines in the frontend-design sk
 ### 4. Emotional Resonance
 - What emotion does this interface evoke? Is that intentional?
 - Does it match the brand personality?
-- Does it feel trustworthy, approachable, premium, playfulโ€”whatever it should feel?
+- Does it feel trustworthy, approachable, premium, playful—whatever it should feel?
 - Would the target user feel "this is for me"?
 
 ### 5. Discoverability & Affordance
@@ -59,7 +59,7 @@ Review the design against ALL the **DON'T** guidelines in the frontend-design sk
 - Is color used to communicate, not just decorate?
 - Does the palette feel cohesive?
 - Are accent colors drawing attention to the right things?
-- Does it work for colorblind users? (not just technicallyโ€”does meaning still come through?)
+- Does it work for colorblind users? (not just technically—does meaning still come through?)
 
 ### 9. States & Edge Cases
 - Empty states: Do they guide users toward action, or just say "nothing here"?
@@ -81,7 +81,7 @@ Structure your feedback as a design director would:
 **Start here.** Pass/fail: Does this look AI-generated? List specific tells from the skill's Anti-Patterns section. Be brutally honest.
 
 ### Overall Impression
-A brief gut reactionโ€”what works, what doesn't, and the single biggest opportunity.
+A brief gut reaction—what works, what doesn't, and the single biggest opportunity.
 
 ### What's Working
 Highlight 2-3 things done well. Be specific about why they work.
@@ -105,9 +105,9 @@ Provocative questions that might unlock better solutions:
 - "What would a confident version of this look like?"
 
 **Remember**:
-- Be directโ€”vague feedback wastes everyone's time
-- Be specificโ€”"the submit button" not "some elements"
+- Be direct—vague feedback wastes everyone's time
+- Be specific—"the submit button" not "some elements"
 - Say what's wrong AND why it matters to users
 - Give concrete suggestions, not just "consider exploring..."
-- Prioritize ruthlesslyโ€”if everything is important, nothing is
-- Don't soften criticismโ€”developers need honest feedback to ship great design
+- Prioritize ruthlessly—if everything is important, nothing is
+- Don't soften criticism—developers need honest feedback to ship great design

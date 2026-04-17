@@ -1,4 +1,4 @@
-﻿---
+---
 name: delight
 description: Add moments of joy, personality, and unexpected touches that make interfaces memorable and enjoyable to use. Elevates functional to delightful.
 ---
@@ -41,7 +41,7 @@ Identify where delight would enhance (not distract from) the experience:
    - What's the brand personality? (Playful? Professional? Quirky? Elegant?)
    - Who's the audience? (Tech-savvy? Creative? Corporate?)
    - What's the emotional context? (Accomplishment? Exploration? Frustration?)
-   - What's appropriate? (Banking app โ  gaming app)
+   - What's appropriate? (Banking app ≠ gaming app)
 
 3. **Define delight strategy**:
    - **Subtle sophistication**: Refined micro-interactions (luxury brands)

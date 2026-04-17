@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
+import CustomSelect from '../common/CustomSelect';
 
 const UserModal = ({
   isOpen,
@@ -21,7 +22,7 @@ const UserModal = ({
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
-      <div className="card flex max-h-[95vh] w-full max-w-2xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
+      <div className="card flex max-h-[95vh] w-full max-w-2xl flex-col border border-slate-100 bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div>
             <h3 className="text-xl font-black text-slate-900">
@@ -83,51 +84,37 @@ const UserModal = ({
             </div>
 
             {canEditRole && (
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">สิทธิ์ระบบ</label>
-                <select
-                  className="form-input w-full"
-                  value={formData.role}
-                  onChange={(event) => setFormData({ ...formData, role: event.target.value })}
-                >
-                  <option value="user">User</option>
-                  <option value="manager">Manager</option>
-                </select>
-              </div>
+              <CustomSelect
+                label="สิทธิ์ระบบ"
+                value={formData.role}
+                onChange={(event) => setFormData({ ...formData, role: event.target.value })}
+                options={[
+                  { value: 'user', label: 'User' },
+                  { value: 'manager', label: 'Manager' }
+                ]}
+              />
             )}
 
             <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">แผนก</label>
-                <select
-                  className="form-input w-full"
-                  value={formData.departmentId}
-                  onChange={(event) => setFormData({ ...formData, departmentId: event.target.value })}
-                >
-                  <option value="">ยังไม่ได้กำหนดแผนก</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <CustomSelect
+                label="แผนก"
+                value={formData.departmentId}
+                onChange={(event) => setFormData({ ...formData, departmentId: event.target.value })}
+                options={[
+                  { value: '', label: 'ยังไม่ได้กำหนดแผนก' },
+                  ...departments.map((d) => ({ value: d.id, label: d.name }))
+                ]}
+              />
 
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">ระดับผู้เรียน</label>
-                <select
-                  className="form-input w-full"
-                  value={formData.tierId}
-                  onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
-                >
-                  <option value="">ยังไม่ได้กำหนดระดับ</option>
-                  {tiers.map((tier) => (
-                    <option key={tier.id} value={tier.id}>
-                      {tier.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <CustomSelect
+                label="ระดับผู้เรียน"
+                value={formData.tierId}
+                onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
+                options={[
+                  { value: '', label: 'ยังไม่ได้กำหนดระดับ' },
+                  ...tiers.map((t) => ({ value: t.id, label: t.name }))
+                ]}
+              />
             </div>
 
             <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-700">
