@@ -1322,6 +1322,15 @@ const republishCategory = async (id) => {
     return mapCategoryRecord(category);
 };
 
+const archiveCategory = async (id) => prisma.category.update({
+    where: { id },
+    data: {
+        isTemporary: true,
+        expiredAt: new Date()
+    },
+    include: categoryInclude
+});
+
 const deleteCategory = async (id) => prisma.category.delete({
     where: { id }
 });
@@ -1680,6 +1689,7 @@ module.exports = {
     createCategory,
     updateCategory,
     republishCategory,
+    archiveCategory,
     deleteCategory,
     reorderCategories,
     getAdminRewards,

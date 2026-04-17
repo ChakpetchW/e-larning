@@ -167,6 +167,7 @@ export const adminAPI = {
   createCategory: (data) => api.post('/admin/categories', data),
   updateCategory: (id, data) => api.put(`/admin/categories/${id}`, data),
   republishCategory: (id) => api.put(`/admin/categories/${id}/republish`),
+  archiveCategory: (id) => api.put(`/admin/categories/${id}/archive`),
   deleteCategory: (id) => api.delete(`/admin/categories/${id}`),
   reorderCategories: (data) => api.put('/admin/categories/reorder', data),
 

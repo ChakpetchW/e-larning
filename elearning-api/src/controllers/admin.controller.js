@@ -182,6 +182,11 @@ const republishCategory = asyncHandler(async (req, res) => {
   res.json({ success: true, data: category });
 });
 
+const archiveCategory = asyncHandler(async (req, res) => {
+  const category = await AdminService.archiveCategory(req.params.id);
+  res.json({ success: true, data: category });
+});
+
 const deleteCategory = asyncHandler(async (req, res) => {
   await AdminService.deleteCategory(req.params.id);
   res.json({ success: true, message: 'Category deleted' });
@@ -281,6 +286,7 @@ module.exports = {
   createCategory,
   updateCategory,
   republishCategory,
+  archiveCategory,
   deleteCategory,
   reorderCategories,
   getAdminRewards,

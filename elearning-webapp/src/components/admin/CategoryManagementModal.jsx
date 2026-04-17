@@ -92,9 +92,9 @@ const CategoryManagementModal = ({
 
   const handleDeleteCategory = async (id) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบหมวดหมู่',
-      message: 'ยืนยันการลบหมวดหมู่นี้ใช่หรือไม่?',
-      confirmLabel: 'ลบหมวดหมู่',
+      title: 'ยืนยันการลบหมวดหมู่ถาวร',
+      message: 'ยืนยันการลบหมวดหมู่นี้อย่างถาวรใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้',
+      confirmLabel: 'ลบถาวร',
       variant: 'danger',
     });
     if (!ok) return;
@@ -102,9 +102,29 @@ const CategoryManagementModal = ({
     try {
       await adminAPI.deleteCategory(id);
       onRefresh();
+      toast.success('ลบหมวดหมู่ถาวรเรียบร้อยแล้ว');
     } catch (error) {
       console.error('Delete category error:', error);
       toast.error(error.response?.data?.message || 'ลบหมวดหมู่ไม่สำเร็จ');
+    }
+  };
+
+  const handleArchiveCategory = async (id) => {
+    const ok = await confirm({
+      title: 'ยืนยันการเก็บเข้าคลัง (Archive)',
+      message: 'หมวดหมู่นี้จะหายไปจากหน้ารายการปกติและผู้ใช้ทั่วไปจะไม่เห็น แต่คุณยังสามารถกู้คืนได้จากแถบ Archive',
+      confirmLabel: 'เก็บเข้าคลัง',
+      variant: 'warning',
+    });
+    if (!ok) return;
+
+    try {
+      await adminAPI.archiveCategory(id);
+      onRefresh();
+      toast.success('เก็บหมวดหมู่เข้าคลังเรียบร้อยแล้ว');
+    } catch (error) {
+      console.error('Archive category error:', error);
+      toast.error(error.response?.data?.message || 'เก็บเข้าคลังไม่สำเร็จ');
     }
   };
 
@@ -518,65 +538,82 @@ const CategoryManagementModal = ({
                           )}
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      <div className="flex flex-col rounded-lg border border-slate-100 bg-slate-50 overflow-hidden shadow-sm">
-                        <button
-                          type="button"
-                          disabled={categoryView === ENTITY_VIEW_STATUS.ARCHIVED || index === 0}
-                          onClick={() => handleMoveCategory(index, -1)}
-                          className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all border-b border-slate-100"
-                        >
-                          <ArrowUp size={14} strokeWidth={3} />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={categoryView === ENTITY_VIEW_STATUS.ARCHIVED || index === filteredCategories.length - 1}
-                          onClick={() => handleMoveCategory(index, 1)}
-                          className="p-1 text-slate-400 hover:bg-white hover:text-primary disabled:opacity-30 transition-all"
-                        >
-                          <ArrowDown size={14} strokeWidth={3} />
-                        </button>
-                      </div>
-                      {!isEditing && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingCategoryId(category.id);
-                            setCategoryForm({
-                              name: category.name,
-                              icon: category.icon || 'Grid',
-                              type: category.type || 'KM_COURSE',
-                              order: category.order,
+                    <div className="flex items-center gap-2">
+                      {!category.isArchived && (
+                        <>
+                          <div className="flex flex-col gap-1 mr-2">
+                            <button
+                              type="button"
+                              disabled={index === 0}
+                              onClick={() => handleMoveCategory(index, -1)}
+                              className="rounded-md bg-slate-50 p-1 text-slate-400 transition-all hover:bg-slate-100 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              <ArrowUp size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveCategory(index, 1)}
+                              disabled={index === filteredCategories.length - 1}
+                              className="rounded-md bg-slate-50 p-1 text-slate-400 transition-all hover:bg-slate-100 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              <ArrowDown size={14} />
+                            </button>
+                          </div>
 
-                              visibleToAll: category.visibleToAll ?? true,
-                              visibleDepartmentIds: category.visibleDepartmentIds || [],
-                              visibleTierIds: category.visibleTierIds || [],
-                              isTemporary: Boolean(category.isTemporary),
-                              expiredAt: toLocalInputValue(category.expiredAt),
-                            });
-                          }}
-                          className="rounded-xl bg-slate-50 p-2 text-primary transition-all hover:bg-primary hover:text-white"
-                        >
-                          <Edit2 size={16} />
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCategoryId(category.id);
+                              setCategoryForm({
+                                name: category.name,
+                                icon: category.icon || 'Grid',
+                                type: category.type || 'KM_COURSE',
+                                order: category.order,
+                                visibleToAll: category.visibleToAll ?? true,
+                                visibleDepartmentIds: (category.visibleDepartments || []).map(d => d.id),
+                                visibleTierIds: (category.visibleTiers || []).map(t => t.id),
+                                isTemporary: Boolean(category.isTemporary),
+                                expiredAt: toLocalInputValue(category.expiredAt),
+                              });
+                            }}
+                            className="rounded-xl bg-slate-50 p-2 text-primary transition-all hover:bg-primary hover:text-white"
+                            title="แก้ไขหมวดหมู่"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleArchiveCategory(category.id)}
+                            className="rounded-xl bg-amber-50 p-2 text-amber-500 transition-all hover:bg-amber-500 hover:text-white"
+                            title="เก็บเข้าคลัง (Archive)"
+                          >
+                            <Archive size={16} />
+                          </button>
+                        </>
                       )}
+
                       {category.isArchived && (
-                        <button
-                          type="button"
-                          onClick={() => handleRepublishCategory(category.id)}
-                          className="rounded-xl bg-emerald-50 p-2 text-emerald-600 transition-all hover:bg-emerald-500 hover:text-white"
-                        >
-                          <RotateCcw size={16} />
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleRepublishCategory(category.id)}
+                            className="rounded-xl bg-emerald-50 p-2 text-emerald-600 transition-all hover:bg-emerald-500 hover:text-white"
+                            title="กู้คืนหมวดหมู่"
+                          >
+                            <RotateCcw size={16} />
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCategory(category.id)}
+                            className="rounded-xl bg-rose-50 p-2 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
+                            title="ลบถาวร"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteCategory(category.id)}
-                        className="rounded-xl bg-slate-50 p-2 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
-                      >
-                        <Trash2 size={16} />
-                      </button>
                     </div>
                   </div>
                 );

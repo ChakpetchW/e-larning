@@ -44,6 +44,7 @@ router.get('/categories', verifySuperAdmin, adminController.getCategories);
 router.post('/categories', verifySuperAdmin, adminController.createCategory);
 router.put('/categories/reorder', verifySuperAdmin, adminController.reorderCategories);
 router.put('/categories/:id/republish', verifySuperAdmin, adminController.republishCategory);
+router.put('/categories/:id/archive', verifySuperAdmin, adminController.archiveCategory);
 router.put('/categories/:id', verifySuperAdmin, adminController.updateCategory);
 router.delete('/categories/:id', verifySuperAdmin, adminController.deleteCategory);
 
