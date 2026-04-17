@@ -144,7 +144,7 @@
     @apply border border-slate-200 bg-white/50 backdrop-blur-sm text-slate-600 hover:bg-slate-50 hover:border-slate-300;
   }
   .card {
-    @apply bg-white border outline-none overflow-hidden transition-all;
+    @apply bg-white border outline-none transition-all;
     border-radius: 1.25rem;
     border-color: rgba(226, 232, 240, 0.4); 
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.02);
@@ -155,6 +155,9 @@
     box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.06);
     transform: translateY(-2px);
     border-color: rgba(226, 232, 240, 0.8);
+  }
+  .card-overflow-hidden {
+    @apply overflow-hidden;
   }
   .card-no-lift:hover {
     transform: none !important;

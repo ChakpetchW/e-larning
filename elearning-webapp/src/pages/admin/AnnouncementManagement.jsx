@@ -356,7 +356,7 @@ const AnnouncementManagement = () => {
           ]}
         />
 
-        <div className="card overflow-hidden">
+        <div className="card">
           <div className="flex items-center gap-3 border-b border-border p-4">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />

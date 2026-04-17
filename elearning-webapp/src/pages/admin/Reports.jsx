@@ -1,5 +1,6 @@
 import React from 'react';
 import { Download, Calendar, BarChart2 } from 'lucide-react';
+import CustomSelect from '../../components/common/CustomSelect';
 
 const Reports = () => {
   return (
@@ -13,7 +14,7 @@ const Reports = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Learning Report */}
-        <div className="card p-6 flex flex-col items-start">
+        <div className="card p-6 flex flex-col items-start bg-surface transition-all">
           <div className="p-3 bg-primary-light text-primary rounded-lg mb-4">
             <BarChart2 size={24} />
           </div>
@@ -23,15 +24,18 @@ const Reports = () => {
           </p>
           
           <div className="w-full flex flex-col gap-3">
-            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-md border border-border">
-              <Calendar size={16} className="text-muted" />
-              <select className="bg-transparent text-sm flex-1 outline-none text-muted">
-                <option>เดือนปัจจุบัน (มีนาคม 2026)</option>
-                <option>เดือนที่ผ่านมา (กุมภาพันธ์ 2026)</option>
-                <option>ไตรมาสที่ 1 (2026)</option>
-                <option>ปีนี้ (2026)</option>
-              </select>
-            </div>
+            <CustomSelect
+              size="sm"
+              value="current"
+              onChange={() => {}}
+              options={[
+                { value: 'current', label: 'เดือนปัจจุบัน (มีนาคม 2026)' },
+                { value: 'prev', label: 'เดือนที่ผ่านมา (กุมภาพันธ์ 2026)' },
+                { value: 'q1', label: 'ไตรมาสที่ 1 (2026)' },
+                { value: 'year', label: 'ปีนี้ (2026)' }
+              ]}
+              className="w-full"
+            />
             <button className="btn btn-primary w-full justify-center">
               <Download size={18} /> ดาวน์โหลด CSV (Learning)
             </button>
@@ -39,8 +43,8 @@ const Reports = () => {
         </div>
 
         {/* Redeem Report */}
-        <div className="card p-6 flex flex-col items-start">
-          <div className="p-3 bg-orange-100 text-warning rounded-lg mb-4">
+        <div className="card p-6 flex flex-col items-start bg-surface transition-all">
+          <div className="p-3 bg-orange-100/50 text-warning rounded-lg mb-4">
             <div className="font-bold text-xl leading-none">Pts</div>
           </div>
           <h3 className="text-lg font-bold mb-2">รายงานการแจกและการแลกแต้ม</h3>
@@ -49,14 +53,17 @@ const Reports = () => {
           </p>
           
           <div className="w-full flex flex-col gap-3">
-            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-md border border-border">
-              <Calendar size={16} className="text-muted" />
-              <select className="bg-transparent text-sm flex-1 outline-none text-muted">
-                <option>สัปดาห์นี้</option>
-                <option>เดือนนี้</option>
-                <option>เดือนที่ผ่านมา</option>
-              </select>
-            </div>
+            <CustomSelect
+              size="sm"
+              value="week"
+              onChange={() => {}}
+              options={[
+                { value: 'week', label: 'สัปดาห์นี้' },
+                { value: 'month', label: 'เดือนนี้' },
+                { value: 'prev', label: 'เดือนที่ผ่านมา' }
+              ]}
+              className="w-full"
+            />
             <button className="btn btn-outline w-full justify-center border-warning text-warning hover:bg-orange-50">
               <Download size={18} /> ดาวน์โหลด CSV (Redeem)
             </button>

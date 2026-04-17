@@ -27,7 +27,7 @@ const CourseFilters = ({
         ]}
       />
 
-      <div className="card">
+      <div className="card !overflow-visible">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border p-4">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
