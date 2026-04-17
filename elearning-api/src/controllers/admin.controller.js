@@ -140,6 +140,11 @@ const getAnnouncementHistory = asyncHandler(async (req, res) => {
   res.json({ success: true, data: history });
 });
 
+const deleteAnnouncement = asyncHandler(async (req, res) => {
+  await AdminService.deleteAnnouncement(req.params.id, req.user);
+  res.json({ success: true, message: 'Announcement deleted' });
+});
+
 // CATEGORIES
 const getCategories = asyncHandler(async (req, res) => {
   const categories = await AdminService.getCategories();
@@ -247,6 +252,9 @@ module.exports = {
   updateCourse,
   republishCourse,
   deleteCourse,
+  getAdminAnnouncements,
+  createAnnouncement,
+  updateAnnouncement,
   deleteAnnouncement,
   archiveAnnouncement,
   getAnnouncementHistory,
