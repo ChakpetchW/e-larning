@@ -9,21 +9,21 @@ import {
 const SkillGapRadarChart = ({ data }) => {
   // Map backend types to display names
   const categoryMap = {
-    'KM_COURSE': 'Knowledge & Course Management',
-    'LEARNING_ASSESS': 'Learning Experience & Assessment',
-    'INCENTIVE_REWARD': 'Incentive & Reward System',
-    'TRACKING_ANALYTICS': 'Tracking & Analytics',
-    'GOAL_PATH': 'Goal Setting & Learning Path',
-    'INTERNAL_COMM': 'Internal Communication'
+    'STRAT_BUSINESS': 'Business Acumen / Corporate Knowledge',
+    'STRAT_CORE': 'Core / Soft Skills',
+    'STRAT_FUNCTIONAL': 'Functional Skills',
+    'STRAT_LEADERSHIP': 'Leadership Skills',
+    'STRAT_COMPLIANCE': 'Compliance',
+    'STRAT_DIGITAL': 'Digital / Future Skills'
   };
 
   const allTypes = [
-    'KM_COURSE',
-    'LEARNING_ASSESS',
-    'INCENTIVE_REWARD',
-    'TRACKING_ANALYTICS',
-    'GOAL_PATH',
-    'INTERNAL_COMM'
+    'STRAT_BUSINESS',
+    'STRAT_CORE',
+    'STRAT_FUNCTIONAL',
+    'STRAT_LEADERSHIP',
+    'STRAT_COMPLIANCE',
+    'STRAT_DIGITAL'
   ];
 
   const chartData = allTypes.map(type => {

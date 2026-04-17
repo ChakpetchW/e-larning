@@ -743,17 +743,17 @@ const getDashboardStats = async (authUser) => {
     });
 
     const typeMap = {
-        'KM_COURSE': { name: 'Knowledge & Course Management', value: 0, enrollmentCount: 0, courses: [] },
-        'LEARNING_ASSESS': { name: 'Learning Experience & Assessment', value: 0, enrollmentCount: 0, courses: [] },
-        'INCENTIVE_REWARD': { name: 'Incentive & Reward System', value: 0, enrollmentCount: 0, courses: [] },
-        'TRACKING_ANALYTICS': { name: 'Tracking & Analytics', value: 0, enrollmentCount: 0, courses: [] },
-        'GOAL_PATH': { name: 'Goal Setting & Learning Path', value: 0, enrollmentCount: 0, courses: [] },
-        'INTERNAL_COMM': { name: 'Internal Communication', value: 0, enrollmentCount: 0, courses: [] }
+        'STRAT_BUSINESS': { name: 'Business Acumen / Corporate Knowledge', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_CORE': { name: 'Core / Soft Skills', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_FUNCTIONAL': { name: 'Functional Skills', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_LEADERSHIP': { name: 'Leadership Skills', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_COMPLIANCE': { name: 'Compliance', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_DIGITAL': { name: 'Digital / Future Skills', value: 0, enrollmentCount: 0, courses: [] }
     };
 
     coursesByType.forEach(course => {
-        const typeKey = course.category?.type || 'KM_COURSE';
-        const group = typeMap[typeKey] || typeMap['KM_COURSE'];
+        const typeKey = course.category?.type || 'STRAT_BUSINESS';
+        const group = typeMap[typeKey] || typeMap['STRAT_BUSINESS'];
 
         
         group.value += 1;
