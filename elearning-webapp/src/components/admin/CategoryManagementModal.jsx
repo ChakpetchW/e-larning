@@ -17,7 +17,6 @@ const getDefaultCategoryForm = () => ({
   name: '',
   icon: 'Grid',
   type: 'KM_COURSE',
-
   order: 0,
   visibleToAll: true,
   visibleDepartmentIds: [],
@@ -84,9 +83,10 @@ const CategoryManagementModal = ({
     try {
       await adminAPI.republishCategory(id);
       onRefresh();
+      toast.success('นำหมวดหมู่กลับมาเผยแพร่แล้ว');
     } catch (error) {
       console.error('Republish category error:', error);
-      toast.error(error.response?.data?.message || 'ไม่สามารถนำหมวดหมู่กลับมาเผยแพร่ได้');
+      toast.error(error.response?.data?.message || 'ไม่สามารถนำกลับมาเผยแพร่ได้');
     }
   };
 
@@ -224,7 +224,6 @@ const CategoryManagementModal = ({
                 )}
               </div>
 
-
             <CustomSelect
               label="กลุ่มหลัก (Module)"
               value={categoryForm.type}
@@ -239,12 +238,9 @@ const CategoryManagementModal = ({
               ]}
             />
 
-
-
             <div className="flex flex-col gap-3 md:flex-row md:items-end">
               <div className="flex-1 space-y-1.5">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">ชื่อหมวดหมู่</label>
-
                 <input
                   required
                   type="text"
@@ -259,7 +255,6 @@ const CategoryManagementModal = ({
 
               <div className="w-full md:w-64 space-y-1.5" ref={iconPickerRef}>
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">ไอคอนแสดงผล</label>
-
                 <div className="relative">
                   <button
                     type="button"
@@ -304,7 +299,6 @@ const CategoryManagementModal = ({
                               <span className="text-[10px] font-black uppercase tracking-tighter truncate w-full text-center">
                                 {iconName}
                               </span>
-
                             </button>
                           );
                         })}
@@ -334,7 +328,6 @@ const CategoryManagementModal = ({
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="text-xs font-black uppercase tracking-widest text-amber-900/70">หมวดหมู่ชั่วคราว</p>
-
                       <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                     </div>
                     <p className="mt-1.5 text-sm font-medium leading-relaxed text-amber-900/80">
@@ -407,7 +400,6 @@ const CategoryManagementModal = ({
               <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-3">  
                 <div>
                   <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">แผนก (Department)</p>
-
                   <div className="flex flex-wrap gap-1.5">
                     {departments.map((dept) => {
                       const isSelected = (categoryForm.visibleDepartmentIds || []).includes(dept.id);
@@ -425,7 +417,6 @@ const CategoryManagementModal = ({
                             });
                           }}
                           className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
-
                             isSelected
                               ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
                               : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
@@ -440,7 +431,6 @@ const CategoryManagementModal = ({
 
                 <div>
                   <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">ระดับผู้ใช้งาน (Tier)</p>
-
                   <div className="flex flex-wrap gap-1.5">
                     {tiers.map((tier) => {
                       const isSelected = (categoryForm.visibleTierIds || []).includes(tier.id);
@@ -458,7 +448,6 @@ const CategoryManagementModal = ({
                             });
                           }}
                           className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
-
                             isSelected
                               ? 'bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/30'
                               : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
@@ -506,7 +495,6 @@ const CategoryManagementModal = ({
                                 category.type === 'INTERNAL_COMM' ? 'text-rose-600 bg-rose-50 ring-rose-200' :
                                 'text-slate-500 bg-slate-50 ring-slate-200'
                               }`}>
-
                                 {category.type === 'KM_COURSE' ? 'KM & Course' :
                                  category.type === 'LEARNING_ASSESS' ? 'Exp & Assess' :
                                  category.type === 'INCENTIVE_REWARD' ? 'Incentive' :
@@ -515,7 +503,6 @@ const CategoryManagementModal = ({
                                  category.type === 'INTERNAL_COMM' ? 'Comm' : category.type}
                               </span>
                             )}
-
                           </div>
                         </div>
                         <div className="mt-1 flex flex-wrap gap-1">
@@ -538,6 +525,7 @@ const CategoryManagementModal = ({
                           )}
                         </div>
                       </div>
+                    </div>
                     <div className="flex items-center gap-2">
                       {!category.isArchived && (
                         <>
