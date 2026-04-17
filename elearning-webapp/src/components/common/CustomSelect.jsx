@@ -54,7 +54,7 @@ const CustomSelect = ({
               : 'border-slate-200 hover:border-slate-300'
           } ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50' : 'cursor-pointer'} ${fullWidth ? 'w-full' : ''}`}
         >
-          <span className={`${selectedOption ? 'text-slate-900' : 'text-slate-400'}`}>
+          <span className={`${selectedOption ? 'text-slate-900' : 'text-slate-400'} whitespace-nowrap`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           <ChevronDown 
@@ -92,7 +92,7 @@ const CustomSelect = ({
                             {React.createElement(option.icon, { size: 16 })}
                           </div>
                         )}
-                        <span>{option.label}</span>
+                        <span className="whitespace-nowrap">{option.label}</span>
                       </div>
                       {isSelected && <Check size={16} className="text-white" />}
                     </button>
