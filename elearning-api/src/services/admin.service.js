@@ -793,32 +793,48 @@ const getAdvancedAnalytics = async (authUser) => {
 
     try {
         // 1. Skill Gap Analysis (Mastery by Category Type)
-        // Note: Fetching raw data and aggregating in JS is safer than complex raw SQL in current env.
-        const categories = await prisma.category.findMany({
-            include: {
-                courses: {
-                    include: {
-                        lessons: {
-                            include: {
-                                quizAttempts: isManager 
-                                    ? { where: { user: { departmentId: actor.departmentId } } } 
-                                    : true
-                            }
-                        }
-                    }
+        // Optimization: Use flat fetching instead of deep nesting to prevent timeouts
+        const [categories, quizAttempts] = await Promise.all([
+            prisma.category.findMany({ 
+                select: { id: true, type: true } 
+            }),
+            prisma.quizAttempt.findMany({
+                where: isManager ? { user: { departmentId: actor.departmentId } } : {},
+                select: { 
+                    score: true, 
+                    lesson: { select: { courseId: true } } 
                 }
+            })
+        ]);
+
+        // Map course to category type for fast lookup
+        const categoryRecords = await prisma.category.findMany({
+            include: { courses: { select: { id: true } } }
+        });
+
+        const courseToTypeMap = {};
+        categoryRecords.forEach(cat => {
+            cat.courses.forEach(course => {
+                courseToTypeMap[course.id] = cat.type;
+            });
+        });
+
+        const statsMap = {}; // type -> { totalScore, count }
+        quizAttempts.forEach(attempt => {
+            const type = courseToTypeMap[attempt.lesson?.courseId];
+            if (type) {
+                if (!statsMap[type]) statsMap[type] = { totalScore: 0, count: 0 };
+                statsMap[type].totalScore += attempt.score;
+                statsMap[type].count += 1;
             }
         });
 
-        const skillGapStats = categories.map(cat => {
-            const allAttempts = cat.courses.flatMap(c => c.lessons.flatMap(l => l.quizAttempts));
-            const totalScore = allAttempts.reduce((sum, attempt) => sum + attempt.score, 0);
-            const count = allAttempts.length;
-            return {
-                type: cat.type,
-                average_mastery: count > 0 ? totalScore / count : 0
-            };
-        });
+        const skillGapStats = categories.map(cat => ({
+            type: cat.type,
+            average_mastery: statsMap[cat.type] 
+                ? statsMap[cat.type].totalScore / statsMap[cat.type].count 
+                : 0
+        }));
 
         // 2. Department Benchmarking
         const departments = await prisma.department.findMany({
@@ -918,14 +934,12 @@ const getAdvancedAnalytics = async (authUser) => {
         };
     } catch (error) {
         console.error('Error in getAdvancedAnalytics:', error);
-        // Return hollow structure instead of crashing to keep dashboard alive
         return {
             skillGap: [],
             benchmarking: [],
             roiTrend: [],
             atRisk: []
         };
-    }
     }
 };
 
