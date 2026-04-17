@@ -79,7 +79,7 @@ const LessonPlayer = () => {
     };
 
     fetchLessonData();
-  }, [courseId, lessonId, toast]);
+  }, [courseId, lessonId]);
 
   useEffect(() => {
     if (!shouldScrollToQuizResult || !quizResult || lesson?.type !== 'quiz') return;
