@@ -138,8 +138,7 @@ const AnnouncementModal = ({
                   />
                 </div>
 
-                </div>
-                
+
                 {isFullAdmin && (
                   <div className="md:col-span-2">
                     <label className="mb-2 block text-sm font-bold text-gray-700">กลุ่มเป้าหมาย (Scope)</label>
