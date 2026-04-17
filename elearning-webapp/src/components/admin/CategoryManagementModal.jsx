@@ -202,7 +202,7 @@ const CategoryManagementModal = ({
                   </button>
                 )}
               </div>
-            </div>
+
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">กลุ่มหลัก (Module)</label>
