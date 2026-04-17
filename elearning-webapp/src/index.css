@@ -178,6 +178,13 @@
     @apply rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-bold transition-all;
     @apply outline-none focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 text-slate-900;
   }
+
+  /* Density & Breathing Room Overrides for Desktop */
+  @media (min-width: 1280px) {
+    .grid {
+      gap: 1.75rem; /* Increase default gap for cleaner separation */
+    }
+  }
 }
 
 .rich-text-shell {
@@ -578,4 +585,20 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Smart Scaling for Laptops (1280px+) */
+@media (min-width: 1280px) {
+  html {
+    font-size: 90%;
+  }
+
+  :root {
+    --main-px: 2.25rem;
+  }
+
+  .admin-content-wrapper, .user-main-inner {
+    padding-left: 3.5rem !important;
+    padding-right: 3.5rem !important;
+  }
 }

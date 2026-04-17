@@ -49,9 +49,15 @@ import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
 
 function App() {
-  const currentUser = typeof window !== 'undefined' && localStorage.getItem('user')
-    ? JSON.parse(localStorage.getItem('user'))
-    : null;
+  const getCurrentUser = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const userStr = localStorage.getItem('user');
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (e) {
+      return null;
+    }
+  };
 
   return (
     <LanguageProvider>
@@ -93,7 +99,7 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="courses" element={canEditAdminUsers(currentUser) ? <AdminCourses /> : <Navigate to="/admin/announcements" replace />} />
+            <Route path="courses" element={canEditAdminUsers(getCurrentUser()) ? <AdminCourses /> : <Navigate to="/admin/announcements" replace />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="rewards" element={<AdminRewards />} />

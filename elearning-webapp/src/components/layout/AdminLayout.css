@@ -144,6 +144,12 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .admin-content-wrapper {
+    padding: 2.5rem 4rem; /* More breath on sides and vertical */
+  }
+}
+
 @media (min-width: 1025px) {
   .lg-hidden {
     display: none;
