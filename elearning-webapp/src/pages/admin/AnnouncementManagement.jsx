@@ -36,10 +36,43 @@ const getTypeLabel = (type) => {
   return 'บทความ';
 };
 
-const ActionMenu = ({ announcement, viewMode, onViewHistory, onEdit, onArchive, onDelete, isOpen, onToggle, menuRef }) => {
+const ActionMenu = ({ announcement, viewMode, onViewHistory, onEdit, onArchive, onDelete, isOpen, onToggle }) => {
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.right + window.scrollX,
+      });
+
+      const handleScroll = () => onToggle();
+      const handleClickOutside = (event) => {
+        if (
+          menuRef.current && !menuRef.current.contains(event.target) &&
+          triggerRef.current && !triggerRef.current.contains(event.target)
+        ) {
+          onToggle();
+        }
+      };
+
+      window.addEventListener('scroll', handleScroll, true);
+      document.addEventListener('mousedown', handleClickOutside);
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll, true);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isOpen, onToggle]);
+
   return (
-    <div className="relative" ref={menuRef}>
+    <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={(e) => {
           e.stopPropagation();
@@ -55,69 +88,79 @@ const ActionMenu = ({ announcement, viewMode, onViewHistory, onEdit, onArchive, 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-10 z-[70] w-48 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-          <button
-            type="button"
-            onClick={() => {
-              onViewHistory();
-              onToggle();
+        <ModalPortal isOpen={isOpen} lockScroll={false}>
+          <div 
+            ref={menuRef}
+            className="fixed z-[9999] w-48 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200 origin-top-right"
+            style={{
+              top: `${coords.top + 8}px`,
+              left: `${coords.left - 192}px`,
             }}
-            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-blue-50 hover:text-blue-600 active:scale-98"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-500 group-hover:bg-blue-100 transition-colors">
-              <History size={15} />
-            </div>
-            <span>ประวัติการเข้าอ่าน</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => {
-              onEdit();
-              onToggle();
-            }}
-            className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 hover:text-primary active:scale-98"
-          >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-              <Edit3 size={15} />
-            </div>
-            <span>แก้ไขประกาศ</span>
-          </button>
-
-          {viewMode === ENTITY_VIEW_STATUS.ACTIVE && (
             <button
               type="button"
               onClick={() => {
-                onArchive();
+                onViewHistory();
                 onToggle();
               }}
-              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-amber-50 hover:text-amber-600 active:scale-98"
+              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-blue-50 hover:text-blue-600 active:scale-98"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-500 group-hover:bg-amber-100 transition-colors">
-                <Archive size={15} />
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-500 group-hover:bg-blue-100 transition-colors">
+                <History size={15} />
               </div>
-              <span>เก็บเข้าคลัง</span>
+              <span>ประวัติการเข้าอ่าน</span>
             </button>
-          )}
+            
+            <button
+              type="button"
+              onClick={() => {
+                onEdit();
+                onToggle();
+              }}
+              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 hover:text-primary active:scale-98"
+            >
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                <Edit3 size={15} />
+              </div>
+              <span>แก้ไขประกาศ</span>
+            </button>
 
-          <div className="my-1.5 h-px bg-slate-100/80 mx-2" />
-          
-          <button
-            type="button"
-            onClick={() => {
-              onDelete();
-              onToggle();
-            }}
-            className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-500 transition-all hover:bg-red-50 hover:text-red-600 active:scale-98"
-          >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-500 group-hover:bg-red-100 transition-colors">
-              <Trash2 size={15} />
-            </div>
-            <span>ลบประกาศ</span>
-          </button>
-        </div>
+            {viewMode === ENTITY_VIEW_STATUS.ACTIVE && (
+              <button
+                type="button"
+                onClick={() => {
+                  onArchive();
+                  onToggle();
+                }}
+                className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-600 transition-all hover:bg-amber-50 hover:text-amber-600 active:scale-98"
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-500 group-hover:bg-amber-100 transition-colors">
+                  <Archive size={15} />
+                </div>
+                <span>เก็บเข้าคลัง</span>
+              </button>
+            )}
+
+            <div className="my-1.5 h-px bg-slate-100/80 mx-2" />
+            
+            <button
+              type="button"
+              onClick={() => {
+                onDelete();
+                onToggle();
+              }}
+              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-500 transition-all hover:bg-red-50 hover:text-red-600 active:scale-98"
+            >
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-500 group-hover:bg-red-100 transition-colors">
+                <Trash2 size={15} />
+              </div>
+              <span>ลบประกาศ</span>
+            </button>
+          </div>
+        </ModalPortal>
       )}
-    </div>
+    </>
   );
 };
 
@@ -148,16 +191,6 @@ const AnnouncementManagement = () => {
   const [currentAnnouncementTitle, setCurrentAnnouncementTitle] = useState('');
 
   // Handle click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpenDropdownId(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -544,7 +577,6 @@ const AnnouncementManagement = () => {
                   onEdit={() => openEditModal(announcement)}
                   onArchive={() => handleArchive(announcement)}
                   onDelete={() => handleDelete(announcement)}
-                  menuRef={openDropdownId === announcement.id ? dropdownRef : null}
                 />
               </div>
             </td>
